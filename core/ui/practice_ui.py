@@ -1,0 +1,116 @@
+import streamlit as st
+
+from core.ui.feedback_ui import check_answer, render_feedback, render_working
+from core.ui.scaffold_ui import render_scaffold
+from core.db.tracker import save_practice_attempt
+
+
+def _render_notes(question):
+    if question.notes:
+        with st.expander("📚 Notes"):
+            st.markdown(question.notes)
+
+
+def _render_answer_input(question, suffix=""):
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        answer = st.text_input("Your answer:", key=f"ans_{question.qid}_{suffix}")
+    with col2:
+        st.markdown(f"<br><span style='font-size:1.1em'><b>{question.unit}</b></span>",
+                    unsafe_allow_html=True)
+    return answer
+
+
+# =========================================================
+# Single question (non-scenario)
+# =========================================================
+
+def _render_single(question, user_id, qualification):
+    submitted_key = f"sub_{question.qid}"
+    answer_key    = f"ans_{question.qid}"
+
+    st.markdown(question.question_text)
+    st.write("")
+
+    if not st.session_state.get(submitted_key):
+        _render_notes(question)
+        render_scaffold(question)
+        answer = _render_answer_input(question)
+        if st.button("Submit Answer", key=f"submit_{question.qid}", type="primary"):
+            if answer.strip():
+                st.session_state[submitted_key] = answer
+                result, distractor = check_answer(answer, question)
+                st.session_state[f"result_{question.qid}"] = (result, distractor)
+                if user_id:
+                    save_practice_attempt(user_id, qualification, question.topic,
+                                          question.question_type, result == "correct")
+                st.rerun()
+            else:
+                st.warning("Please enter an answer before submitting.")
+    else:
+        result, distractor = st.session_state.get(f"result_{question.qid}", ("incorrect", None))
+        render_feedback(result, distractor, question, show_working=True)
+
+
+# =========================================================
+# Scenario (multi-part)
+# =========================================================
+
+def _render_scenario(question, user_id, qualification):
+    if question.scenario_context:
+        st.info(question.scenario_context)
+
+    for i, part in enumerate(question.parts):
+        part_submitted_key = f"sub_{question.qid}_part{i}"
+        st.markdown(f"**Part {i + 1}:** {part.question_text}")
+
+        if not st.session_state.get(part_submitted_key):
+            if i == 0 or st.session_state.get(f"sub_{question.qid}_part{i - 1}"):
+                _render_notes(part)
+                render_scaffold(part, suffix=f"part{i}")
+                answer = _render_answer_input(part, suffix=f"part{i}")
+                if st.button(f"Submit Part {i + 1}", key=f"submit_{question.qid}_part{i}", type="primary"):
+                    if answer.strip():
+                        st.session_state[part_submitted_key] = answer
+                        result, distractor = check_answer(answer, part)
+                        st.session_state[f"result_{question.qid}_part{i}"] = (result, distractor)
+                        if user_id:
+                            save_practice_attempt(user_id, qualification, part.topic,
+                                                  part.question_type, result == "correct")
+                        st.rerun()
+                    else:
+                        st.warning("Please enter an answer before submitting.")
+        else:
+            result, distractor = st.session_state.get(
+                f"result_{question.qid}_part{i}", ("incorrect", None))
+            render_feedback(result, distractor, part, show_working=True)
+
+        if i < len(question.parts) - 1:
+            st.divider()
+
+
+# =========================================================
+# Public entry point
+# =========================================================
+
+def render_practice(topic, question_type, qualification, generate_fn, user_id=None):
+    quiz = st.session_state.quiz
+
+    if st.button("Generate Question", type="primary"):
+        q = generate_fn()
+        quiz["current_question"] = q
+        # clear any previous submission state for this slot
+        for key in list(st.session_state.keys()):
+            if key.startswith("sub_") or key.startswith("result_") or key.startswith("ans_") or key.startswith("scaf_"):
+                del st.session_state[key]
+        st.rerun()
+
+    question = quiz.get("current_question")
+    if not question:
+        st.caption("Press **Generate Question** to begin.")
+        return
+
+    if question.is_scenario:
+        _render_scenario(question, user_id, qualification)
+    else:
+        _render_single(question, user_id, qualification)
