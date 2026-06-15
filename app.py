@@ -1,7 +1,7 @@
 import streamlit as st
 
 from core.engine.session_manager import initialise_session, reset_test
-from core.engine.question_factory import generate_question, get_topics, get_question_types
+from core.engine.question_factory import generate_question, get_topics, get_question_types, get_sub_types
 from core.ui.auth_ui import render_auth
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
@@ -120,15 +120,27 @@ question_type  = st.selectbox("Question Type", question_types)
 
 if st.session_state.get("last_question_type") != question_type:
     st.session_state.last_question_type = question_type
+    st.session_state.pop("last_sub_type", None)
     reset_test()
     st.session_state.quiz = {"current_question": None}
+
+sub_types = get_sub_types(qualification, topic, question_type)
+if sub_types:
+    sub_type = st.selectbox("Question Style", sub_types)
+    if st.session_state.get("last_sub_type") != sub_type:
+        st.session_state.last_sub_type = sub_type
+        reset_test()
+        st.session_state.quiz = {"current_question": None}
+else:
+    sub_type = None
+    st.session_state.pop("last_sub_type", None)
 
 st.divider()
 
 # ── Route to practice or test ─────────────────────────────────────────────────
 
 user_id     = user["id"] if user else None
-generate_fn = lambda: generate_question(qualification, topic, question_type)
+generate_fn = lambda: generate_question(qualification, topic, question_type, sub_type=sub_type)
 
 if mode == "Test":
     render_test(topic, question_type, qualification, generate_fn, user_id=user_id)

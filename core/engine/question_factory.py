@@ -1,3 +1,5 @@
+import random
+
 from topics.dynamics.speed_distance_time import generate_sdt
 from topics.dynamics.acceleration        import generate_acceleration
 from topics.dynamics.forces              import generate_forces
@@ -23,7 +25,10 @@ from topics.waves.combined               import generate_waves_combined
 
 from topics.properties.pressure          import generate_pressure
 from topics.properties.gas_laws          import generate_gas_laws
-from topics.properties.heat              import generate_heat
+from topics.properties.heat              import (
+    generate_heat, generate_heat_shc, generate_heat_latent,
+    generate_heat_exam_icemachine,
+)
 
 QUAL_REGISTRY = {
     "National 4": {
@@ -73,7 +78,12 @@ QUAL_REGISTRY = {
         "Properties": {
             "Pressure": generate_pressure,
             "Gas Laws": generate_gas_laws,
-            "Heat":     generate_heat,
+            "Heat": {
+                "Specific Heat Capacity": generate_heat_shc,
+                "Specific Latent Heat":   generate_heat_latent,
+                "Mixed":                  generate_heat,
+                "Exam Style":             generate_heat_exam_icemachine,
+            },
         },
     },
     "Higher": {
@@ -107,7 +117,12 @@ QUAL_REGISTRY = {
         "Properties": {
             "Pressure": generate_pressure,
             "Gas Laws": generate_gas_laws,
-            "Heat":     generate_heat,
+            "Heat": {
+                "Specific Heat Capacity": generate_heat_shc,
+                "Specific Latent Heat":   generate_heat_latent,
+                "Mixed":                  generate_heat,
+                "Exam Style":             generate_heat_exam_icemachine,
+            },
         },
     },
 }
@@ -121,8 +136,19 @@ def get_question_types(qualification, topic):
     return list(QUAL_REGISTRY.get(qualification, {}).get(topic, {}).keys())
 
 
-def generate_question(qualification, topic, question_type):
+def get_sub_types(qualification, topic, question_type):
+    entry = QUAL_REGISTRY.get(qualification, {}).get(topic, {}).get(question_type)
+    if isinstance(entry, dict):
+        return list(entry.keys())
+    return None
+
+
+def generate_question(qualification, topic, question_type, sub_type=None):
     level_map = {"National 4": "N4", "National 5": "N5", "Higher": "Higher"}
     level = level_map.get(qualification, "N5")
-    fn = QUAL_REGISTRY[qualification][topic][question_type]
+    entry = QUAL_REGISTRY[qualification][topic][question_type]
+    if isinstance(entry, dict):
+        fn = entry[sub_type] if sub_type in entry else random.choice(list(entry.values()))
+    else:
+        fn = entry
     return fn(level=level)

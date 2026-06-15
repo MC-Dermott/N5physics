@@ -56,34 +56,47 @@ def _render_single(question, user_id, qualification):
 # Scenario (multi-part)
 # =========================================================
 
+def _render_explain_part(question, part_idx, submitted_key):
+    if st.button("Show Expected Answer", key=f"reveal_{question.qid}_part{part_idx}", type="primary"):
+        st.session_state[submitted_key] = "revealed"
+        st.rerun()
+
+
 def _render_scenario(question, user_id, qualification):
     if question.scenario_context:
         st.info(question.scenario_context)
 
     for i, part in enumerate(question.parts):
         part_submitted_key = f"sub_{question.qid}_part{i}"
+        is_explain = part.metadata.get("type") == "explain"
         st.markdown(f"**Part {i + 1}:** {part.question_text}")
 
         if not st.session_state.get(part_submitted_key):
             if i == 0 or st.session_state.get(f"sub_{question.qid}_part{i - 1}"):
-                _render_notes(part)
-                render_scaffold(part, suffix=f"part{i}")
-                answer = _render_answer_input(part, suffix=f"part{i}")
-                if st.button(f"Submit Part {i + 1}", key=f"submit_{question.qid}_part{i}", type="primary"):
-                    if answer.strip():
-                        st.session_state[part_submitted_key] = answer
-                        result, distractor = check_answer(answer, part)
-                        st.session_state[f"result_{question.qid}_part{i}"] = (result, distractor)
-                        if user_id:
-                            save_practice_attempt(user_id, qualification, part.topic,
-                                                  part.question_type, result == "correct")
-                        st.rerun()
-                    else:
-                        st.warning("Please enter an answer before submitting.")
+                if is_explain:
+                    _render_explain_part(question, i, part_submitted_key)
+                else:
+                    _render_notes(part)
+                    render_scaffold(part, suffix=f"part{i}")
+                    answer = _render_answer_input(part, suffix=f"part{i}")
+                    if st.button(f"Submit Part {i + 1}", key=f"submit_{question.qid}_part{i}", type="primary"):
+                        if answer.strip():
+                            st.session_state[part_submitted_key] = answer
+                            result, distractor = check_answer(answer, part)
+                            st.session_state[f"result_{question.qid}_part{i}"] = (result, distractor)
+                            if user_id:
+                                save_practice_attempt(user_id, qualification, part.topic,
+                                                      part.question_type, result == "correct")
+                            st.rerun()
+                        else:
+                            st.warning("Please enter an answer before submitting.")
         else:
-            result, distractor = st.session_state.get(
-                f"result_{question.qid}_part{i}", ("incorrect", None))
-            render_feedback(result, distractor, part, show_working=True)
+            if is_explain:
+                st.info(part.metadata.get("explain_text", ""))
+            else:
+                result, distractor = st.session_state.get(
+                    f"result_{question.qid}_part{i}", ("incorrect", None))
+                render_feedback(result, distractor, part, show_working=True)
 
         if i < len(question.parts) - 1:
             st.divider()
