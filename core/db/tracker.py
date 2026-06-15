@@ -26,3 +26,18 @@ def save_test_result(user_id: str, qualification: str, topic: str, question_type
         }).execute()
     except Exception:
         pass
+
+
+def save_test_question_attempt(user_id: str, qualification: str, topic: str,
+                                question_type: str, correct: bool, mistake: str | None = None):
+    try:
+        get_supabase().table("test_question_attempts").insert({
+            "user_id": user_id,
+            "qualification": qualification,
+            "topic": topic,
+            "question_type": question_type,
+            "correct": correct,
+            "mistake": mistake,
+        }).execute()
+    except Exception:
+        pass

@@ -151,4 +151,11 @@ def generate_question(qualification, topic, question_type, sub_type=None):
         fn = entry[sub_type] if sub_type in entry else random.choice(list(entry.values()))
     else:
         fn = entry
-    return fn(level=level)
+    q = fn(level=level)
+    if sub_type:
+        q.question_type = sub_type
+        if q.is_scenario:
+            for part in q.parts:
+                if part.metadata.get("type") != "explain":
+                    part.question_type = sub_type
+    return q

@@ -5,6 +5,7 @@ from core.engine.question_factory import generate_question, get_topics, get_ques
 from core.ui.auth_ui import render_auth
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
+from core.ui.reports_ui import render_teacher_report
 
 st.set_page_config(page_title="Physics Practice", layout="centered")
 
@@ -100,12 +101,18 @@ st.divider()
 
 # ── Mode, topic, question type ────────────────────────────────────────────────
 
-mode = st.radio("Mode", ["Practice", "Test"], horizontal=True)
+is_teacher = user and user.get("role") == "teacher"
+_modes = ["Practice", "Test", "Reports"] if is_teacher else ["Practice", "Test"]
+mode = st.radio("Mode", _modes, horizontal=True)
 
 if st.session_state.get("mode") != mode:
     st.session_state.mode = mode
     reset_test()
     st.session_state.quiz = {"current_question": None}
+
+if mode == "Reports":
+    render_teacher_report(qualification)
+    st.stop()
 
 topics = get_topics(qualification)
 topic  = st.selectbox("Topic", topics)
