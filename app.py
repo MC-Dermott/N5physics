@@ -6,6 +6,7 @@ from core.ui.auth_ui import render_auth
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
 from core.ui.reports_ui import render_teacher_report
+from core.data.backgrounds import get_background_videos
 
 st.set_page_config(page_title="Physics Practice", layout="centered")
 
@@ -155,6 +156,17 @@ if sub_types:
 else:
     sub_type = None
     st.session_state.pop("last_sub_type", None)
+
+# ── Background videos (N5 only) ───────────────────────────────────────────────
+
+if qualification == "National 5":
+    videos = get_background_videos(topic, question_type)
+    with st.expander("📺 Background"):
+        if videos:
+            for v in videos:
+                st.markdown(f"- [{v['title']}]({v['url']})")
+        else:
+            st.caption("No background videos added yet for this topic.")
 
 st.divider()
 
