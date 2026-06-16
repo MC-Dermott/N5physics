@@ -11,14 +11,22 @@ def _render_notes(question):
             st.markdown(question.notes)
 
 
+_UNIT_HINT = "Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive."
+
+
 def _render_answer_input(question, suffix=""):
-    col1, col2 = st.columns([4, 1])
-    with col1:
+    if question.unit:
+        col1, col2 = st.columns([3, 2])
+        with col1:
+            answer = st.text_input("Your answer:", key=f"ans_{question.qid}_{suffix}")
+        with col2:
+            unit_input = st.text_input("Units:", key=f"unit_{question.qid}_{suffix}",
+                                       placeholder="e.g. m/s")
+        st.caption(_UNIT_HINT)
+    else:
         answer = st.text_input("Your answer:", key=f"ans_{question.qid}_{suffix}")
-    with col2:
-        st.markdown(f"<br><span style='font-size:1.1em'><b>{question.unit}</b></span>",
-                    unsafe_allow_html=True)
-    return answer
+        unit_input = None
+    return answer, unit_input
 
 
 # =========================================================
@@ -35,11 +43,11 @@ def _render_single(question, user_id, qualification):
     if not st.session_state.get(submitted_key):
         _render_notes(question)
         render_scaffold(question)
-        answer = _render_answer_input(question)
+        answer, unit_input = _render_answer_input(question)
         if st.button("Submit Answer", key=f"submit_{question.qid}", type="primary"):
             if answer.strip():
                 st.session_state[submitted_key] = answer
-                result, distractor = check_answer(answer, question)
+                result, distractor = check_answer(answer, question, unit_input=unit_input)
                 st.session_state[f"result_{question.qid}"] = (result, distractor)
                 if user_id:
                     save_practice_attempt(user_id, qualification, question.topic,
@@ -78,11 +86,11 @@ def _render_scenario(question, user_id, qualification):
                 else:
                     _render_notes(part)
                     render_scaffold(part, suffix=f"part{i}")
-                    answer = _render_answer_input(part, suffix=f"part{i}")
+                    answer, unit_input = _render_answer_input(part, suffix=f"part{i}")
                     if st.button(f"Submit Part {i + 1}", key=f"submit_{question.qid}_part{i}", type="primary"):
                         if answer.strip():
                             st.session_state[part_submitted_key] = answer
-                            result, distractor = check_answer(answer, part)
+                            result, distractor = check_answer(answer, part, unit_input=unit_input)
                             st.session_state[f"result_{question.qid}_part{i}"] = (result, distractor)
                             if user_id:
                                 save_practice_attempt(user_id, qualification, part.topic,

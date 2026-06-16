@@ -61,19 +61,29 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None):
         _render_single_test(test, idx, question)
 
 
+_UNIT_HINT = "Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive."
+
+
 def _render_single_test(test, idx, question):
     st.markdown(question.question_text)
     st.write("")
 
-    col1, col2 = st.columns([4, 1])
-    with col1:
+    if question.unit:
+        col1, col2 = st.columns([3, 2])
+        with col1:
+            answer = st.text_input("Your answer:", key=f"test_ans_{idx}")
+        with col2:
+            unit_input = st.text_input("Units:", key=f"test_unit_{idx}",
+                                       placeholder="e.g. m/s")
+        st.caption(_UNIT_HINT)
+    else:
         answer = st.text_input("Your answer:", key=f"test_ans_{idx}")
-    with col2:
-        st.markdown(f"<br><b>{question.unit}</b>", unsafe_allow_html=True)
+        unit_input = None
 
     if st.button("Submit", key=f"test_submit_{idx}", type="primary"):
-        result, distractor = check_answer(answer, question)
-        test["answers"].append(answer)
+        result, distractor = check_answer(answer, question, unit_input=unit_input)
+        display_answer = f"{answer} {unit_input}".strip() if unit_input else answer
+        test["answers"].append(display_answer)
         test["results"].append(result == "correct")
         test["feedback"].append((result, distractor, question))
         test["index"] += 1
@@ -102,15 +112,22 @@ def _render_scenario_test(test, idx, question):
     st.markdown(f"**Part {part_idx + 1} of {len(scored_parts)}:** {part.question_text}")
     st.write("")
 
-    col1, col2 = st.columns([4, 1])
-    with col1:
+    if part.unit:
+        col1, col2 = st.columns([3, 2])
+        with col1:
+            answer = st.text_input("Your answer:", key=f"test_ans_{idx}_p{part_idx}")
+        with col2:
+            unit_input = st.text_input("Units:", key=f"test_unit_{idx}_p{part_idx}",
+                                       placeholder="e.g. m/s")
+        st.caption(_UNIT_HINT)
+    else:
         answer = st.text_input("Your answer:", key=f"test_ans_{idx}_p{part_idx}")
-    with col2:
-        st.markdown(f"<br><b>{part.unit}</b>", unsafe_allow_html=True)
+        unit_input = None
 
     if st.button("Submit", key=f"test_submit_{idx}_p{part_idx}", type="primary"):
-        result, distractor = check_answer(answer, part)
-        st.session_state[part_answers_key].append((answer, result, distractor, part))
+        result, distractor = check_answer(answer, part, unit_input=unit_input)
+        display_answer = f"{answer} {unit_input}".strip() if unit_input else answer
+        st.session_state[part_answers_key].append((display_answer, result, distractor, part))
 
         if part_idx + 1 < len(scored_parts):
             st.session_state[part_idx_key] += 1
@@ -149,6 +166,16 @@ def _render_summary(test):
 
         if correct:
             st.success(f"**Q{q_num}:** {q_ref.question_text}  \nYour answer: **{answer}** ✅")
+        elif result_type == "wrong_unit":
+            with st.container(border=True):
+                st.warning(
+                    f"**Q{q_num}:** {q_ref.question_text}  \n"
+                    f"Your answer: **{answer}** ⚠️  \n"
+                    f"Correct answer: **{q_ref.correct_answer} {q_ref.unit}** — value correct, unit wrong!"
+                )
+                if q_ref.working:
+                    with st.expander("📖 Worked Solution"):
+                        render_working(q_ref.working)
         else:
             with st.container(border=True):
                 st.error(

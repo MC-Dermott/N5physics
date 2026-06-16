@@ -11,24 +11,32 @@ def _within_tolerance(user_val, target, tolerance=0.02):
         return False
 
 
-def check_answer(user_input, question, tolerance=0.02):
+def _normalize_unit(unit: str) -> str:
+    return unit.strip().lower().replace("²", "^2").replace(" ", "")
+
+
+def check_answer(user_input, question, unit_input=None, tolerance=0.02):
     """
-    Returns ("correct", None), ("distractor", d), or ("incorrect", None).
-    d is the matching distractor dict.
+    Returns ("correct", None), ("distractor", d), ("wrong_unit", None), or ("incorrect", None).
+    If unit_input is provided and question.unit is non-empty, the unit is also checked.
     """
     try:
         user_val = float(str(user_input).replace(",", "").strip())
     except (ValueError, TypeError):
         return "incorrect", None
 
-    if _within_tolerance(user_val, question.correct_answer, tolerance):
-        return "correct", None
+    if not _within_tolerance(user_val, question.correct_answer, tolerance):
+        for d in question.distractors:
+            if _within_tolerance(user_val, d["value"], tolerance):
+                return "distractor", d
+        return "incorrect", None
 
-    for d in question.distractors:
-        if _within_tolerance(user_val, d["value"], tolerance):
-            return "distractor", d
+    # Number is correct — check unit if one is expected
+    if unit_input is not None and question.unit:
+        if _normalize_unit(unit_input) != _normalize_unit(question.unit):
+            return "wrong_unit", None
 
-    return "incorrect", None
+    return "correct", None
 
 
 def render_working(working):
@@ -44,6 +52,11 @@ def render_feedback(result, distractor, question, show_working=True):
     """Render feedback after an answer is submitted."""
     if result == "correct":
         st.success("✅ Correct!")
+    elif result == "wrong_unit":
+        st.warning(
+            f"⚠️ Your value is correct, but the unit is wrong. "
+            f"The answer is **{question.correct_answer} {question.unit}**."
+        )
     elif result == "distractor":
         st.error("❌ Not quite.")
         if distractor.get("mistake"):
@@ -51,12 +64,12 @@ def render_feedback(result, distractor, question, show_working=True):
     else:
         st.error(f"❌ Incorrect. The correct answer is **{question.correct_answer} {question.unit}**.")
 
-    if show_working and result != "correct":
+    if show_working and result not in ("correct", "wrong_unit"):
         working = (distractor or {}).get("working") or question.working
         if working:
             with st.expander("📖 Worked Solution"):
                 render_working(working)
-    elif show_working and result == "correct":
+    elif show_working:
         if question.working:
             with st.expander("📖 Worked Solution"):
                 render_working(question.working)
