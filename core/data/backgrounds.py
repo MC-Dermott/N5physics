@@ -88,7 +88,6 @@ BACKGROUND_VIDEOS = {
     ],
     ("Properties", "Gas Laws"): [
         {"title": "Boyle's Law | WORKED EXAMPLES", "url": "https://www.youtube.com/watch?v=zsmg1VY-gsI"},
-        {"title": "Properties of Matter — full playlist", "url": "https://www.youtube.com/playlist?list=PL4ViYiFUc7GTFOeKyg3-JJCaNEOoeOaOB"},
     ],
     ("Properties", "Heat"): [
         {"title": "Specific Heat Capacity | THEORY", "url": "https://www.youtube.com/watch?v=z1gS1iI65nw"},
