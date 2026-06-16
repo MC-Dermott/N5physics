@@ -44,6 +44,20 @@ if st.session_state.get("show_auth"):
 
 user = st.session_state.get("user")
 
+# ── Teacher reports page ──────────────────────────────────────────────────────
+
+if st.session_state.get("show_reports"):
+    st.title("Physics Practice")
+    col_back, col_corner = st.columns([5, 1])
+    with col_back:
+        if st.button("← Back"):
+            st.session_state.pop("show_reports", None)
+            st.rerun()
+    with col_corner:
+        _auth_button()
+    render_teacher_report(st.session_state.get("qualification", "National 5"))
+    st.stop()
+
 # ── Homepage: level selection ─────────────────────────────────────────────────
 
 if "qualification" not in st.session_state:
@@ -51,6 +65,12 @@ if "qualification" not in st.session_state:
     col_title, col_corner = st.columns([5, 1])
     with col_corner:
         _auth_button()
+
+    if user and user.get("role") == "teacher":
+        if st.button("📊 Class Report", use_container_width=True):
+            st.session_state.show_reports = True
+            st.rerun()
+        st.write("")
 
     st.write("Choose your level to get started.")
     st.write("")
@@ -101,18 +121,12 @@ st.divider()
 
 # ── Mode, topic, question type ────────────────────────────────────────────────
 
-is_teacher = user and user.get("role") == "teacher"
-_modes = ["Practice", "Test", "Reports"] if is_teacher else ["Practice", "Test"]
-mode = st.radio("Mode", _modes, horizontal=True)
+mode = st.radio("Mode", ["Practice", "Test"], horizontal=True)
 
 if st.session_state.get("mode") != mode:
     st.session_state.mode = mode
     reset_test()
     st.session_state.quiz = {"current_question": None}
-
-if mode == "Reports":
-    render_teacher_report(qualification)
-    st.stop()
 
 topics = get_topics(qualification)
 topic  = st.selectbox("Topic", topics)
