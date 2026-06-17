@@ -143,6 +143,11 @@ if st.session_state.get("last_topic") != topic:
     st.session_state.quiz = {"current_question": None}
 
 question_types = get_question_types(qualification, topic)
+
+if not question_types:
+    st.info("No questions available for this topic yet — check back soon!")
+    st.stop()
+
 question_type  = st.selectbox("Question Type", question_types)
 
 if st.session_state.get("last_question_type") != question_type:
