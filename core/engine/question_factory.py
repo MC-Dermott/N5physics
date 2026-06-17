@@ -7,7 +7,8 @@ from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
 from topics.dynamics.projectiles           import generate_projectiles
 from topics.dynamics.vectors               import generate_vectors
-from topics.dynamics.equations_of_motion  import generate_equations_of_motion
+from topics.dynamics.equations_of_motion   import generate_equations_of_motion
+from topics.dynamics.special_relativity    import generate_special_relativity
 
 from topics.electricity.current          import generate_current
 from topics.electricity.ohms_law         import generate_ohms_law
@@ -90,6 +91,7 @@ QUAL_REGISTRY = {
     "Higher": {
         "Our Dynamic Universe": {
             "Equations of Motion": generate_equations_of_motion,
+            "Special Relativity":  generate_special_relativity,
         },
         "Particles and Waves": {
         },
