@@ -48,6 +48,9 @@ CREATE TABLE test_question_attempts (
 
 CREATE INDEX ON test_question_attempts (user_id);
 
+-- Migration: add class_code column (run once if not already present)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS class_code TEXT;
+
 -- Disable RLS so the anon key can read/write all three tracking tables.
 ALTER TABLE users                  DISABLE ROW LEVEL SECURITY;
 ALTER TABLE question_attempts      DISABLE ROW LEVEL SECURITY;

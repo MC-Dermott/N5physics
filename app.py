@@ -2,7 +2,7 @@ import streamlit as st
 
 from core.engine.session_manager import initialise_session, reset_test
 from core.engine.question_factory import generate_question, get_topics, get_question_types, get_sub_types
-from core.ui.auth_ui import render_auth
+from core.ui.auth_ui import render_auth, render_change_password
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
 from core.ui.reports_ui import render_teacher_report
@@ -15,7 +15,7 @@ initialise_session()
 
 def _do_logout():
     for key in ["user", "qualification", "last_qualification",
-                "last_topic", "last_question_type"]:
+                "last_topic", "last_question_type", "show_change_password"]:
         st.session_state.pop(key, None)
     reset_test()
     st.session_state.quiz = {"current_question": None}
@@ -28,22 +28,27 @@ def _auth_button():
         if st.button("Log out", key="logout_corner"):
             _do_logout()
             st.rerun()
-    else:
-        if st.button("Log in / Sign up", key="login_corner"):
-            st.session_state.show_auth = True
+        if st.button("Change password", key="change_pw_corner"):
+            st.session_state.show_change_password = True
             st.rerun()
 
 
-# ── Auth page ────────────────────────────────────────────────────────────────
+user = st.session_state.get("user")
 
-if st.session_state.get("show_auth"):
-    if st.button("← Back"):
-        st.session_state.pop("show_auth", None)
-        st.rerun()
+# ── Login gate ────────────────────────────────────────────────────────────────
+
+if not user:
     render_auth()
     st.stop()
 
-user = st.session_state.get("user")
+# ── Change password page ──────────────────────────────────────────────────────
+
+if st.session_state.get("show_change_password"):
+    if st.button("← Back"):
+        st.session_state.pop("show_change_password", None)
+        st.rerun()
+    render_change_password(user)
+    st.stop()
 
 # ── Teacher reports page ──────────────────────────────────────────────────────
 
