@@ -97,5 +97,21 @@ BACKGROUND_VIDEOS = {
 }
 
 
-def get_background_videos(topic, question_type):
+# Crash Higher uses different unit names — map them to the N5 unit names for video lookup.
+_CRASH_HIGHER_UNIT_MAP = {
+    "Our Dynamic Universe": "Dynamics",
+    "Particles and Waves":  "Waves",
+}
+# Energy lives under Particles and Waves in Crash Higher but its videos are under Dynamics.
+_CRASH_HIGHER_OVERRIDES = {
+    ("Particles and Waves", "Energy"): ("Dynamics", "Energy"),
+}
+
+
+def get_background_videos(topic, question_type, qualification=None):
+    if qualification == "Crash Higher":
+        override = _CRASH_HIGHER_OVERRIDES.get((topic, question_type))
+        if override:
+            return BACKGROUND_VIDEOS.get(override, [])
+        topic = _CRASH_HIGHER_UNIT_MAP.get(topic, topic)
     return BACKGROUND_VIDEOS.get((topic, question_type), [])

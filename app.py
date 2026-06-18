@@ -173,8 +173,8 @@ else:
 
 # ── Background videos (N5 only) ───────────────────────────────────────────────
 
-if qualification == "National 5":
-    videos = get_background_videos(topic, question_type)
+if qualification in ("National 5", "Crash Higher"):
+    videos = get_background_videos(topic, question_type, qualification=qualification)
     with st.expander("📺 Background"):
         if videos:
             for v in videos:
