@@ -81,7 +81,7 @@ if "qualification" not in st.session_state:
     st.write("Choose your level to get started.")
     st.write("")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         if st.button("National 4", use_container_width=True):
             st.session_state.qualification = "National 4"
@@ -93,6 +93,10 @@ if "qualification" not in st.session_state:
     with col3:
         if st.button("Higher", use_container_width=True):
             st.session_state.qualification = "Higher"
+            st.rerun()
+    with col4:
+        if st.button("Crash Higher", use_container_width=True):
+            st.session_state.qualification = "Crash Higher"
             st.rerun()
     st.stop()
 

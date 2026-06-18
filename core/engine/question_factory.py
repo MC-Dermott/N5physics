@@ -98,6 +98,33 @@ QUAL_REGISTRY = {
         "Electricity": {
         },
     },
+    "Crash Higher": {
+        "Our Dynamic Universe": {
+            "Speed, Distance & Time": generate_sdt,
+            "Acceleration":           generate_acceleration,
+            "Forces":                 generate_forces,
+            "Weight":                 generate_weight,
+            "Energy":                 generate_energy,
+            "Projectile Motion":      generate_projectiles,
+            "Vectors":                generate_vectors,
+            "Equations of Motion":    generate_equations_of_motion,
+            "Special Relativity":     generate_special_relativity,
+        },
+        "Particles and Waves": {
+            "Wave Speed":         generate_wave_speed,
+            "Period & Frequency": generate_period_frequency,
+            "Waves Combined":     generate_waves_combined,
+            "Energy":             generate_energy,
+        },
+        "Electricity": {
+            "Current":           generate_current,
+            "Ohm's Law":         generate_ohms_law,
+            "Resistors":         generate_resistors,
+            "Electrical Power":  generate_power,
+            "Potential Divider": generate_potential_divider,
+            "Circuits":          generate_circuits,
+        },
+    },
 }
 
 
