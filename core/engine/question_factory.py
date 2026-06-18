@@ -107,8 +107,6 @@ QUAL_REGISTRY = {
             "Energy":                 generate_energy,
             "Projectile Motion":      generate_projectiles,
             "Vectors":                generate_vectors,
-            "Equations of Motion":    generate_equations_of_motion,
-            "Special Relativity":     generate_special_relativity,
         },
         "Particles and Waves": {
             "Wave Speed":         generate_wave_speed,
