@@ -64,32 +64,63 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None):
 _UNIT_HINT = "Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive."
 
 
+def _check_classification(selected, question):
+    if selected == question.correct_answer:
+        return "correct", None
+    for d in question.distractors:
+        if d["value"] == selected:
+            return "distractor", d
+    return "incorrect", None
+
+
 def _render_single_test(test, idx, question):
     st.markdown(question.question_text)
     st.write("")
 
-    if question.unit:
-        col1, col2 = st.columns([3, 2])
-        with col1:
-            answer = st.text_input("Your answer:", key=f"test_ans_{idx}")
-        with col2:
-            unit_input = st.text_input("Units:", key=f"test_unit_{idx}",
-                                       placeholder="e.g. m/s")
-        st.caption(_UNIT_HINT)
-    else:
-        answer = st.text_input("Your answer:", key=f"test_ans_{idx}")
-        unit_input = None
+    is_classification = question.metadata.get("type") == "classification"
 
-    if st.button("Submit", key=f"test_submit_{idx}", type="primary"):
-        result, distractor = check_answer(answer, question, unit_input=unit_input)
-        display_answer = f"{answer} {unit_input}".strip() if unit_input else answer
-        test["answers"].append(display_answer)
-        test["results"].append(result == "correct")
-        test["feedback"].append((result, distractor, question))
-        test["index"] += 1
-        if test["index"] >= _NUM_QUESTIONS:
-            test["complete"] = True
-        st.rerun()
+    if is_classification:
+        options = question.metadata.get(
+            "options",
+            [question.correct_answer] + [d["value"] for d in question.distractors],
+        )
+        selected = st.radio("Select your answer:", options,
+                            key=f"test_radio_{idx}", index=None)
+        if st.button("Submit", key=f"test_submit_{idx}", type="primary"):
+            if selected is not None:
+                result, distractor = _check_classification(selected, question)
+                test["answers"].append(selected)
+                test["results"].append(result == "correct")
+                test["feedback"].append((result, distractor, question))
+                test["index"] += 1
+                if test["index"] >= _NUM_QUESTIONS:
+                    test["complete"] = True
+                st.rerun()
+            else:
+                st.warning("Please select an answer before submitting.")
+    else:
+        if question.unit:
+            col1, col2 = st.columns([3, 2])
+            with col1:
+                answer = st.text_input("Your answer:", key=f"test_ans_{idx}")
+            with col2:
+                unit_input = st.text_input("Units:", key=f"test_unit_{idx}",
+                                           placeholder="e.g. m/s")
+            st.caption(_UNIT_HINT)
+        else:
+            answer = st.text_input("Your answer:", key=f"test_ans_{idx}")
+            unit_input = None
+
+        if st.button("Submit", key=f"test_submit_{idx}", type="primary"):
+            result, distractor = check_answer(answer, question, unit_input=unit_input)
+            display_answer = f"{answer} {unit_input}".strip() if unit_input else answer
+            test["answers"].append(display_answer)
+            test["results"].append(result == "correct")
+            test["feedback"].append((result, distractor, question))
+            test["index"] += 1
+            if test["index"] >= _NUM_QUESTIONS:
+                test["complete"] = True
+            st.rerun()
 
 
 def _render_scenario_test(test, idx, question):
@@ -164,6 +195,7 @@ def _render_summary(test):
         answer = test["answers"][q_num - 1]
         correct = test["results"][q_num - 1]
 
+        correct_str = f"{q_ref.correct_answer} {q_ref.unit}".strip()
         if correct:
             st.success(f"**Q{q_num}:** {q_ref.question_text}  \nYour answer: **{answer}** ✅")
         elif result_type == "wrong_unit":
@@ -171,7 +203,7 @@ def _render_summary(test):
                 st.warning(
                     f"**Q{q_num}:** {q_ref.question_text}  \n"
                     f"Your answer: **{answer}** ⚠️  \n"
-                    f"Correct answer: **{q_ref.correct_answer} {q_ref.unit}** — value correct, unit wrong!"
+                    f"Correct answer: **{correct_str}** — value correct, unit wrong!"
                 )
                 if q_ref.working:
                     with st.expander("📖 Worked Solution"):
@@ -181,7 +213,7 @@ def _render_summary(test):
                 st.error(
                     f"**Q{q_num}:** {q_ref.question_text}  \n"
                     f"Your answer: **{answer or '(blank)'}** ❌  \n"
-                    f"Correct answer: **{q_ref.correct_answer} {q_ref.unit}**"
+                    f"Correct answer: **{correct_str}**"
                 )
                 if result_type == "distractor" and distractor and distractor.get("mistake"):
                     st.warning(f"Common mistake: {distractor['mistake']}")

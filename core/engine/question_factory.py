@@ -32,6 +32,11 @@ from topics.properties.heat              import (
     generate_heat_exam_icemachine,
 )
 
+from topics.particles_and_waves.standard_model import (
+    generate_standard_model_classification,
+    generate_standard_model_order_of_magnitude,
+)
+
 QUAL_REGISTRY = {
     "National 4": {
         "Dynamics": {
@@ -94,6 +99,10 @@ QUAL_REGISTRY = {
             "Special Relativity":  generate_special_relativity,
         },
         "Particles and Waves": {
+            "Standard Model": {
+                "Particle Classification": generate_standard_model_classification,
+                "Order of Magnitude":     generate_standard_model_order_of_magnitude,
+            },
         },
         "Electricity": {
         },
@@ -113,6 +122,10 @@ QUAL_REGISTRY = {
             "Period & Frequency": generate_period_frequency,
             "Waves Combined":     generate_waves_combined,
             "Energy":             generate_energy,
+            "Standard Model": {
+                "Particle Classification": generate_standard_model_classification,
+                "Order of Magnitude":     generate_standard_model_order_of_magnitude,
+            },
         },
         "Electricity": {
             "Current":           generate_current,

@@ -50,19 +50,24 @@ def render_working(working):
 
 def render_feedback(result, distractor, question, show_working=True):
     """Render feedback after an answer is submitted."""
+    correct_str = f"{question.correct_answer} {question.unit}".strip()
+    is_classification = question.metadata.get("type") == "classification"
+
     if result == "correct":
         st.success("✅ Correct!")
     elif result == "wrong_unit":
         st.warning(
             f"⚠️ Your value is correct, but the unit is wrong. "
-            f"The answer is **{question.correct_answer} {question.unit}**."
+            f"The answer is **{correct_str}**."
         )
     elif result == "distractor":
         st.error("❌ Not quite.")
-        if distractor.get("mistake"):
+        if distractor and distractor.get("mistake"):
             st.warning(f"Common mistake: {distractor['mistake']}")
+        if is_classification:
+            st.info(f"The correct classification is: **{correct_str}**")
     else:
-        st.error(f"❌ Incorrect. The correct answer is **{question.correct_answer} {question.unit}**.")
+        st.error(f"❌ Incorrect. The correct answer is **{correct_str}**.")
 
     if show_working and result not in ("correct", "wrong_unit"):
         working = (distractor or {}).get("working") or question.working

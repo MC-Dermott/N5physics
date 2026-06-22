@@ -33,28 +33,58 @@ def _render_answer_input(question, suffix=""):
 # Single question (non-scenario)
 # =========================================================
 
+def _check_classification(selected, question):
+    if selected == question.correct_answer:
+        return "correct", None
+    for d in question.distractors:
+        if d["value"] == selected:
+            return "distractor", d
+    return "incorrect", None
+
+
 def _render_single(question, user_id, qualification):
     submitted_key = f"sub_{question.qid}"
-    answer_key    = f"ans_{question.qid}"
 
     st.markdown(question.question_text)
     st.write("")
 
+    is_classification = question.metadata.get("type") == "classification"
+
     if not st.session_state.get(submitted_key):
         _render_notes(question)
         render_scaffold(question)
-        answer, unit_input = _render_answer_input(question)
-        if st.button("Submit Answer", key=f"submit_{question.qid}", type="primary"):
-            if answer.strip():
-                st.session_state[submitted_key] = answer
-                result, distractor = check_answer(answer, question, unit_input=unit_input)
-                st.session_state[f"result_{question.qid}"] = (result, distractor)
-                if user_id:
-                    save_practice_attempt(user_id, qualification, question.topic,
-                                          question.question_type, result == "correct")
-                st.rerun()
-            else:
-                st.warning("Please enter an answer before submitting.")
+
+        if is_classification:
+            options = question.metadata.get(
+                "options",
+                [question.correct_answer] + [d["value"] for d in question.distractors],
+            )
+            selected = st.radio("Select your answer:", options,
+                                key=f"radio_{question.qid}", index=None)
+            if st.button("Submit Answer", key=f"submit_{question.qid}", type="primary"):
+                if selected is not None:
+                    st.session_state[submitted_key] = selected
+                    result, distractor = _check_classification(selected, question)
+                    st.session_state[f"result_{question.qid}"] = (result, distractor)
+                    if user_id:
+                        save_practice_attempt(user_id, qualification, question.topic,
+                                              question.question_type, result == "correct")
+                    st.rerun()
+                else:
+                    st.warning("Please select an answer before submitting.")
+        else:
+            answer, unit_input = _render_answer_input(question)
+            if st.button("Submit Answer", key=f"submit_{question.qid}", type="primary"):
+                if answer.strip():
+                    st.session_state[submitted_key] = answer
+                    result, distractor = check_answer(answer, question, unit_input=unit_input)
+                    st.session_state[f"result_{question.qid}"] = (result, distractor)
+                    if user_id:
+                        save_practice_attempt(user_id, qualification, question.topic,
+                                              question.question_type, result == "correct")
+                    st.rerun()
+                else:
+                    st.warning("Please enter an answer before submitting.")
     else:
         result, distractor = st.session_state.get(f"result_{question.qid}", ("incorrect", None))
         render_feedback(result, distractor, question, show_working=True)
