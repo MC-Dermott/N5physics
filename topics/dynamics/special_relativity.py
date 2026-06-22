@@ -1,6 +1,11 @@
 import random
 import math
+import pathlib
 from utils.make_question import make_question
+
+_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "relativity_widget.html"
+).read_text(encoding="utf-8")
 
 _NOTES = """
 ## Special Relativity
@@ -196,4 +201,6 @@ _ALL_GENS = [
 
 
 def generate_special_relativity(level="Higher"):
-    return random.choice(_ALL_GENS)(level=level)
+    q = random.choice(_ALL_GENS)(level=level)
+    q.metadata["widget_html"] = _WIDGET_HTML
+    return q

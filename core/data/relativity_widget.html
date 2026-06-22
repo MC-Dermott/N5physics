@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Special Relativity — Bouncing Ball Clock</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #f5f5f5; display: flex; justify-content: center; padding: 2rem 1rem; }
+  .container { width: 100%; max-width: 700px; }
+  h1 { font-size: 18px; font-weight: 500; margin-bottom: 1.5rem; color: #111; }
+  .cards { display: flex; gap: 12px; margin-bottom: 1rem; }
+  .card { flex: 1; text-align: center; padding: 10px; border-radius: 8px; border: 0.5px solid #ccc; background: #fff; }
+  .card-label { font-size: 12px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+  .card-value { font-size: 22px; font-weight: 500; color: #111; margin-top: 4px; }
+  .slider-row { display: flex; gap: 8px; align-items: center; margin-bottom: 0.75rem; }
+  .slider-row label { font-size: 13px; color: #666; white-space: nowrap; }
+  .slider-row input { flex: 1; }
+  .slider-row span { font-size: 13px; font-weight: 500; min-width: 40px; }
+  canvas { width: 100%; border-radius: 10px; border: 0.5px solid #ccc; cursor: pointer; background: #0a0a1a; display: block; }
+  .hint { font-size: 13px; color: #999; text-align: center; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Special Relativity — Bouncing Ball Clock</h1>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-label">Active frame</div>
+      <div class="card-value" id="frame-name">Planet</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Spacecraft speed</div>
+      <div class="card-value" id="speed-val">0.60c</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Lorentz factor γ</div>
+      <div class="card-value" id="gamma-val">1.25</div>
+    </div>
+  </div>
+
+  <div class="slider-row">
+    <label>Speed (fraction of c)</label>
+    <input type="range" id="speed-slider" min="10" max="95" value="60" step="1" />
+    <span id="slider-out">0.60c</span>
+  </div>
+
+  <canvas id="scene" width="660" height="260"></canvas>
+  <p class="hint" id="hint-text">Click anywhere to switch reference frame</p>
+</div>
+
+<script>
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+const W = 660, H = 260;
+
+let frame = 'planet';
+let beta = 0.60;
+let t = 0;
+
+function gamma(b) { return 1 / Math.sqrt(1 - b * b); }
+
+function drawStars(seed) {
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  let s = seed;
+  for (let i = 0; i < 65; i++) {
+    s = (s * 9301 + 49297) % 233280;
+    const x = (s / 233280) * W;
+    s = (s * 9301 + 49297) % 233280;
+    const y = (s / 233280) * (H * 0.55);
+    ctx.beginPath();
+    ctx.arc(x, y, (s % 3 === 0) ? 1.4 : 0.7, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawPlanet(x, y, r, contracted, label) {
+  const rx = contracted ? r / gamma(beta) : r;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(rx / r, 1);
+  const grad = ctx.createRadialGradient(-r*0.3, -r*0.3, r*0.1, 0, 0, r);
+  grad.addColorStop(0, '#4a9eff');
+  grad.addColorStop(0.6, '#1a5eb8');
+  grad.addColorStop(1, '#0a2d6e');
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(100,180,255,0.4)';
+  ctx.lineWidth = 1.5 * (r / rx);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.arc(-r*0.25, -r*0.25, r*0.35, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, x, y + r + 13);
+}
+
+function drawSpacecraft(x, y, contracted, label) {
+  const restLen = 36, h = 14;
+  const len = contracted ? restLen / gamma(beta) : restLen;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = '#c8d8f0';
+  ctx.beginPath();
+  ctx.moveTo(-len/2, -h/2);
+  ctx.lineTo(len/2 - 4, -h/2);
+  ctx.lineTo(len/2 + 8, 0);
+  ctx.lineTo(len/2 - 4, h/2);
+  ctx.lineTo(-len/2, h/2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(180,210,255,0.5)';
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+  const winW = Math.max(2, 8 * (len / restLen));
+  ctx.fillStyle = '#8ab4e8';
+  ctx.fillRect(-len/2 + 4, -h/2 + 2, winW, h - 4);
+  ctx.fillStyle = 'rgba(150,220,255,0.7)';
+  ctx.beginPath();
+  ctx.arc(-len/2 + 4 + winW + 2, 0, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#e06030';
+  ctx.beginPath();
+  ctx.moveTo(-len/2, -h/4);
+  ctx.lineTo(-len/2 - 10, 0);
+  ctx.lineTo(-len/2, h/4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, 0, h/2 + 13);
+  ctx.restore();
+}
+
+function drawArrow(x, y, vx, label, color) {
+  if (Math.abs(vx) < 2) return;
+  ctx.save();
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + vx, y); ctx.stroke();
+  const d = vx > 0 ? 1 : -1;
+  ctx.beginPath();
+  ctx.moveTo(x + vx, y);
+  ctx.lineTo(x + vx - d*8, y - 5);
+  ctx.lineTo(x + vx - d*8, y + 5);
+  ctx.closePath(); ctx.fill();
+  ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(label, x + vx/2, y - 8);
+  ctx.restore();
+}
+
+function drawBounceClock(anchorX, baseY, phase, color, label) {
+  const bounceH = 52;
+  ctx.strokeStyle = color + '55';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(anchorX - 14, baseY);
+  ctx.lineTo(anchorX + 14, baseY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(anchorX - 12, baseY - bounceH);
+  ctx.lineTo(anchorX + 12, baseY - bounceH);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 4]);
+  ctx.beginPath();
+  ctx.moveTo(anchorX, baseY);
+  ctx.lineTo(anchorX, baseY - bounceH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  const ballY = baseY - bounceH * Math.abs(Math.sin(phase));
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(anchorX, ballY, 5.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = color;
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, anchorX, baseY + 16);
+}
+
+function drawMovingClock(anchorX, baseY, phase, color, label) {
+  const bounceH = 52;
+  ctx.strokeStyle = color + '55';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(anchorX - 14, baseY);
+  ctx.lineTo(anchorX + 14, baseY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(anchorX - 12, baseY - bounceH);
+  ctx.lineTo(anchorX + 12, baseY - bounceH);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 4]);
+  ctx.beginPath();
+  ctx.moveTo(anchorX, baseY);
+  ctx.lineTo(anchorX, baseY - bounceH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  const ballY = baseY - bounceH * Math.abs(Math.sin(phase));
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(anchorX, ballY, 5.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = color;
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, anchorX, baseY + 16);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0a0a1a';
+  ctx.fillRect(0, 0, W, H);
+  drawStars(42);
+
+  const g = gamma(beta);
+  const arrowLen = Math.round(beta * 70);
+  const baseY = H - 40;
+  const speed = 0.038;
+  const restPhase = t * speed;
+  const movingPhase = t * speed / g;
+
+  if (frame === 'planet') {
+    const shipX = ((t * beta * 0.7) % (W + 140)) - 70;
+    const planetX = W / 2;
+
+    drawPlanet(planetX, baseY - 105, 30, false, 'planet (stationary)');
+    drawSpacecraft(shipX, baseY - 140, false, 'spacecraft');
+    drawArrow(shipX + 24, baseY - 140, arrowLen, beta.toFixed(2) + 'c \u2192', 'rgba(100,220,150,0.9)');
+
+    drawBounceClock(planetX, baseY, restPhase, 'rgba(80,160,255,0.95)', 'planet clock');
+    drawMovingClock(shipX, baseY, movingPhase, 'rgba(100,220,150,0.95)', 'craft clock');
+
+    ctx.fillStyle = 'rgba(255,255,255,0.32)';
+    ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('Planet frame: planet stationary, spacecraft moving right.', 8, H - 8);
+
+  } else {
+    const planetX = W/2 + 200 - ((t * beta * 0.7) % (W + 280));
+    const shipX = W / 2;
+
+    drawSpacecraft(shipX, baseY - 140, false, 'spacecraft (stationary)');
+    drawPlanet(planetX, baseY - 105, 30, true, 'planet (contracted)');
+    drawArrow(planetX - 15, baseY - 110, -arrowLen, '\u2190 ' + beta.toFixed(2) + 'c', 'rgba(255,160,80,0.9)');
+
+    drawBounceClock(shipX, baseY, restPhase, 'rgba(100,220,150,0.95)', 'craft clock');
+    drawMovingClock(planetX, baseY, movingPhase, 'rgba(80,160,255,0.95)', 'planet clock');
+
+    ctx.fillStyle = 'rgba(255,255,255,0.32)';
+    ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('Spacecraft frame: spacecraft stationary, planet moving left.', 8, H - 8);
+  }
+}
+
+function updateUI() {
+  const g = gamma(beta);
+  document.getElementById('speed-val').textContent = beta.toFixed(2) + 'c';
+  document.getElementById('gamma-val').textContent = g.toFixed(2);
+  document.getElementById('slider-out').textContent = beta.toFixed(2) + 'c';
+  if (frame === 'planet') {
+    document.getElementById('frame-name').textContent = 'Planet';
+    document.getElementById('hint-text').textContent = "Click anywhere to switch to the spacecraft's reference frame";
+  } else {
+    document.getElementById('frame-name').textContent = 'Spacecraft';
+    document.getElementById('hint-text').textContent = "Click anywhere to switch back to the planet's reference frame";
+  }
+}
+
+canvas.addEventListener('click', () => {
+  frame = frame === 'planet' ? 'spacecraft' : 'planet';
+  updateUI();
+});
+
+document.getElementById('speed-slider').addEventListener('input', (e) => {
+  beta = parseInt(e.target.value) / 100;
+  updateUI();
+});
+
+updateUI();
+(function loop() { t++; draw(); requestAnimationFrame(loop); })();
+</script>
+</body>
+</html>

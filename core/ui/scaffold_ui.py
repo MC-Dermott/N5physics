@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 def _is_correct(user_input, expected, tolerance=0.02):
@@ -13,6 +14,11 @@ def _is_correct(user_input, expected, tolerance=0.02):
 
 
 def render_scaffold(question, suffix=""):
+    widget_html = question.metadata.get("widget_html")
+    if widget_html:
+        with st.expander("🎬 Interactive Visualisation"):
+            components.html(widget_html, height=520)
+
     if not question.scaffold:
         return
     with st.expander("🔍 Step-by-step scaffold"):
