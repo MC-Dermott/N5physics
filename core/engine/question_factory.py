@@ -37,6 +37,17 @@ from topics.particles_and_waves.standard_model import (
     generate_standard_model_order_of_magnitude,
 )
 
+from topics.electricity_and_energy.electrical_power import generate_electrical_power
+from topics.electricity_and_energy.efficiency       import (
+    generate_efficiency,
+    generate_power_efficiency_scenario,
+)
+from topics.electricity_and_energy.knowledge        import (
+    generate_renewable_energy,
+    generate_input_output_devices,
+    generate_electromagnets,
+)
+
 QUAL_REGISTRY = {
     "National 4": {
         "Dynamics": {
@@ -52,6 +63,14 @@ QUAL_REGISTRY = {
         },
         "Properties": {
             "Pressure": generate_pressure,
+        },
+        "Electricity and Energy": {
+            "Electrical Power":   generate_electrical_power,
+            "Efficiency":         generate_efficiency,
+            "Power and Efficiency": generate_power_efficiency_scenario,
+            "Renewable Energy":   generate_renewable_energy,
+            "Input/Output Devices": generate_input_output_devices,
+            "Electromagnets":     generate_electromagnets,
         },
     },
     "National 5": {
