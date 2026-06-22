@@ -6,6 +6,7 @@ from core.ui.auth_ui import render_auth, render_change_password
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
 from core.ui.reports_ui import render_teacher_report
+from core.ui.student_dashboard_ui import render_student_dashboard
 from core.data.backgrounds import get_background_videos
 
 st.set_page_config(page_title="Physics Practice", layout="centered")
@@ -15,7 +16,8 @@ initialise_session()
 
 def _do_logout():
     for key in ["user", "qualification", "last_qualification",
-                "last_topic", "last_question_type", "show_change_password"]:
+                "last_topic", "last_question_type", "show_change_password",
+                "show_dashboard", "show_student_dashboard"]:
         st.session_state.pop(key, None)
     reset_test()
     st.session_state.quiz = {"current_question": None}
@@ -50,18 +52,32 @@ if st.session_state.get("show_change_password"):
     render_change_password(user)
     st.stop()
 
-# ── Teacher reports page ──────────────────────────────────────────────────────
+# ── Teacher dashboard page ────────────────────────────────────────────────────
 
-if st.session_state.get("show_reports"):
+if st.session_state.get("show_dashboard"):
     st.title("Physics Practice")
     col_back, col_corner = st.columns([5, 1])
     with col_back:
         if st.button("← Back"):
-            st.session_state.pop("show_reports", None)
+            st.session_state.pop("show_dashboard", None)
             st.rerun()
     with col_corner:
         _auth_button()
     render_teacher_report(st.session_state.get("qualification", "National 5"))
+    st.stop()
+
+# ── Student progress page ─────────────────────────────────────────────────────
+
+if st.session_state.get("show_student_dashboard"):
+    st.title("Physics Practice")
+    col_back, col_corner = st.columns([5, 1])
+    with col_back:
+        if st.button("← Back"):
+            st.session_state.pop("show_student_dashboard", None)
+            st.rerun()
+    with col_corner:
+        _auth_button()
+    render_student_dashboard(user)
     st.stop()
 
 # ── Homepage: level selection ─────────────────────────────────────────────────
@@ -73,8 +89,14 @@ if "qualification" not in st.session_state:
         _auth_button()
 
     if user and user.get("role") == "teacher":
-        if st.button("📊 Class Report", use_container_width=True):
-            st.session_state.show_reports = True
+        if st.button("📊 Teacher Dashboard", use_container_width=True):
+            st.session_state.show_dashboard = True
+            st.rerun()
+        st.write("")
+
+    if user:
+        if st.button("📈 My Progress", use_container_width=True):
+            st.session_state.show_student_dashboard = True
             st.rerun()
         st.write("")
 
