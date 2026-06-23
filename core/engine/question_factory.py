@@ -10,6 +10,7 @@ from topics.dynamics.vectors               import generate_vectors
 from topics.dynamics.equations_of_motion   import generate_equations_of_motion
 from topics.dynamics.special_relativity    import generate_special_relativity
 from topics.dynamics.gravitation           import generate_orbital_gravitation
+from topics.dynamics.projectile_higher     import generate_projectile_l1, generate_projectile_l2
 
 from topics.electricity.current          import generate_current
 from topics.electricity.ohms_law         import generate_ohms_law
@@ -118,6 +119,10 @@ QUAL_REGISTRY = {
             "Equations of Motion": generate_equations_of_motion,
             "Special Relativity":  generate_special_relativity,
             "Gravitation":         generate_orbital_gravitation,
+            "Projectile Motion": {
+                "Level 1 — Same Height":     generate_projectile_l1,
+                "Level 2 — Different Height": generate_projectile_l2,
+            },
         },
         "Particles and Waves": {
             "Standard Model": {
