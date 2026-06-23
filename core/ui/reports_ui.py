@@ -231,40 +231,46 @@ def render_teacher_report(_qualification=None):
 
     st.divider()
 
-    # ── Assign class code ─────────────────────────────────────────────────────
-    st.subheader("Assign Class Code")
-    assign_name = st.selectbox("Student", [u["username"] for u in all_users], key="assign_select")
-    assign_user = next(u for u in all_users if u["username"] == assign_name)
-    with st.form("assign_class_form"):
-        new_code = st.text_input("Class code", value=assign_user.get("class_code") or "", placeholder="e.g. 5A")
-        if st.form_submit_button("Save", type="primary"):
-            try:
-                code_to_save = new_code.strip().upper() or None
-                get_supabase().table("users").update({"class_code": code_to_save}).eq("id", assign_user["id"]).execute()
-                st.success(f"Class code for **{assign_name}** updated to **{code_to_save or '(none)'}**.")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Update failed: {e}")
+    # ── Student Accounts ──────────────────────────────────────────────────────
+    st.subheader("Student Accounts")
+    account_action = st.radio(
+        "Action",
+        ["Assign Class Code", "Reset Password"],
+        horizontal=True,
+        label_visibility="collapsed",
+        key="student_accounts_action",
+    )
 
-    st.divider()
+    if account_action == "Assign Class Code":
+        assign_name = st.selectbox("Student", [u["username"] for u in all_users], key="assign_select")
+        assign_user = next(u for u in all_users if u["username"] == assign_name)
+        with st.form("assign_class_form"):
+            new_code = st.text_input("Class code", value=assign_user.get("class_code") or "", placeholder="e.g. 5A")
+            if st.form_submit_button("Save", type="primary"):
+                try:
+                    code_to_save = new_code.strip().upper() or None
+                    get_supabase().table("users").update({"class_code": code_to_save}).eq("id", assign_user["id"]).execute()
+                    st.success(f"Class code for **{assign_name}** updated to **{code_to_save or '(none)'}**.")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Update failed: {e}")
 
-    # ── Password reset ────────────────────────────────────────────────────────
-    st.subheader("Reset Student Password")
-    reset_name = st.selectbox("Student", [u["username"] for u in all_users], key="reset_select")
-    with st.form("reset_password_form"):
-        new_pw = st.text_input("New password", type="password")
-        confirm_pw = st.text_input("Confirm new password", type="password")
-        if st.form_submit_button("Reset password", type="primary"):
-            if not new_pw:
-                st.error("Please enter a new password.")
-            elif new_pw != confirm_pw:
-                st.error("Passwords do not match.")
-            elif len(new_pw) < 6:
-                st.error("Password must be at least 6 characters.")
-            else:
-                reset_uid = next(u["id"] for u in all_users if u["username"] == reset_name)
-                err = reset_password(reset_uid, new_pw)
-                if err:
-                    st.error(err)
+    else:
+        reset_name = st.selectbox("Student", [u["username"] for u in all_users], key="reset_select")
+        with st.form("reset_password_form"):
+            new_pw = st.text_input("New password", type="password")
+            confirm_pw = st.text_input("Confirm new password", type="password")
+            if st.form_submit_button("Reset password", type="primary"):
+                if not new_pw:
+                    st.error("Please enter a new password.")
+                elif new_pw != confirm_pw:
+                    st.error("Passwords do not match.")
+                elif len(new_pw) < 6:
+                    st.error("Password must be at least 6 characters.")
                 else:
-                    st.success(f"Password for **{reset_name}** has been reset.")
+                    reset_uid = next(u["id"] for u in all_users if u["username"] == reset_name)
+                    err = reset_password(reset_uid, new_pw)
+                    if err:
+                        st.error(err)
+                    else:
+                        st.success(f"Password for **{reset_name}** has been reset.")
