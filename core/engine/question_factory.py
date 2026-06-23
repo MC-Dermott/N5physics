@@ -50,27 +50,27 @@ from topics.electricity_and_energy.knowledge        import (
 
 QUAL_REGISTRY = {
     "National 4": {
-        "Dynamics": {
+        "Electricity and Energy": {
+            "Electrical Power":     generate_electrical_power,
+            "Efficiency":           generate_efficiency,
+            "Power and Efficiency": generate_power_efficiency_scenario,
+            "Renewable Energy":     generate_renewable_energy,
+            "Input/Output Devices": generate_input_output_devices,
+            "Electromagnets":       generate_electromagnets,
+            "Current":              generate_current,
+            "Ohm's Law":            generate_ohms_law,
+        },
+        "Waves and Radiation": {
+            "Wave Speed": generate_wave_speed,
+            "Dose":       generate_dose,
+            "Half-Life":  generate_half_life,
+            "Activity":   generate_activity,
+        },
+        "Dynamics and Space": {
             "Speed, Distance & Time": generate_sdt,
             "Weight":                 generate_weight,
-        },
-        "Electricity": {
-            "Current":   generate_current,
-            "Ohm's Law": generate_ohms_law,
-        },
-        "Waves": {
-            "Wave Speed": generate_wave_speed,
-        },
-        "Properties": {
-            "Pressure": generate_pressure,
-        },
-        "Electricity and Energy": {
-            "Electrical Power":   generate_electrical_power,
-            "Efficiency":         generate_efficiency,
-            "Power and Efficiency": generate_power_efficiency_scenario,
-            "Renewable Energy":   generate_renewable_energy,
-            "Input/Output Devices": generate_input_output_devices,
-            "Electromagnets":     generate_electromagnets,
+            "Acceleration":           generate_acceleration,
+            "Pressure":               generate_pressure,
         },
     },
     "National 5": {

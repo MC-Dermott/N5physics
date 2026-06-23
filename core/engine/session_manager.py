@@ -13,8 +13,23 @@ def _empty_test():
     }
 
 
+def _empty_assessment():
+    return {
+        "questions": [],
+        "index": 0,
+        "answers": [],
+        "results": [],
+        "feedback": [],
+        "complete": False,
+    }
+
+
 def reset_test():
     st.session_state.test = _empty_test()
+
+
+def reset_assessment():
+    st.session_state.assessment = _empty_assessment()
 
 
 def initialise_session():
@@ -24,6 +39,8 @@ def initialise_session():
         st.session_state.mode = "Practice"
     if "test" not in st.session_state:
         st.session_state.test = _empty_test()
+    if "assessment" not in st.session_state:
+        st.session_state.assessment = _empty_assessment()
     if "submitted" not in st.session_state:
         st.session_state.submitted = False
     if "scenario_part" not in st.session_state:

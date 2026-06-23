@@ -1,10 +1,11 @@
 import streamlit as st
 
-from core.engine.session_manager import initialise_session, reset_test
+from core.engine.session_manager import initialise_session, reset_test, reset_assessment
 from core.engine.question_factory import generate_question, get_topics, get_question_types, get_sub_types
 from core.ui.auth_ui import render_auth, render_change_password
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
+from core.ui.assessment_ui import render_assessment
 from core.ui.reports_ui import render_teacher_report
 from core.ui.student_dashboard_ui import render_student_dashboard
 from core.data.backgrounds import get_background_videos
@@ -20,6 +21,7 @@ def _do_logout():
                 "show_dashboard", "show_student_dashboard"]:
         st.session_state.pop(key, None)
     reset_test()
+    reset_assessment()
     st.session_state.quiz = {"current_question": None}
 
 
@@ -140,6 +142,7 @@ with col_corner:
 if st.button("← Change Level"):
     st.session_state.pop("qualification", None)
     reset_test()
+    reset_assessment()
     st.session_state.quiz = {"current_question": None}
     st.rerun()
 
@@ -147,26 +150,46 @@ if st.button("← Change Level"):
 if st.session_state.get("last_qualification") != qualification:
     st.session_state.last_qualification = qualification
     reset_test()
+    reset_assessment()
     st.session_state.quiz = {"current_question": None}
 
 st.divider()
 
 # ── Mode, topic, question type ────────────────────────────────────────────────
 
-mode = st.radio("Mode", ["Practice", "Test"], horizontal=True)
+if qualification == "National 4":
+    mode_options = ["Practice", "Test", "Practice Assessment"]
+else:
+    mode_options = ["Practice", "Test"]
+
+mode = st.radio("Mode", mode_options, horizontal=True)
 
 if st.session_state.get("mode") != mode:
     st.session_state.mode = mode
     reset_test()
+    reset_assessment()
     st.session_state.quiz = {"current_question": None}
 
+topic_label = "Unit" if qualification == "National 4" else "Topic"
 topics = get_topics(qualification)
-topic  = st.selectbox("Topic", topics)
+topic  = st.selectbox(topic_label, topics)
 
 if st.session_state.get("last_topic") != topic:
     st.session_state.last_topic = topic
     reset_test()
+    reset_assessment()
     st.session_state.quiz = {"current_question": None}
+
+user_id = user["id"] if user else None
+
+# ── Practice Assessment (N4 only) ─────────────────────────────────────────────
+
+if mode == "Practice Assessment":
+    st.divider()
+    render_assessment(topic, qualification, user_id=user_id)
+    st.stop()
+
+# ── Question type selection ───────────────────────────────────────────────────
 
 question_types = get_question_types(qualification, topic)
 
@@ -208,7 +231,6 @@ st.divider()
 
 # ── Route to practice or test ─────────────────────────────────────────────────
 
-user_id     = user["id"] if user else None
 generate_fn = lambda: generate_question(qualification, topic, question_type, sub_type=sub_type)
 
 if mode == "Test":
