@@ -6,7 +6,12 @@ from topics.dynamics.forces                import generate_forces
 from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
 from topics.dynamics.projectiles           import generate_projectiles
-from topics.dynamics.vectors               import generate_vectors
+from topics.dynamics.displacement          import (
+    generate_vectors,
+    generate_displacement_l1,
+    generate_displacement_l2,
+    generate_displacement_l3,
+)
 from topics.dynamics.equations_of_motion   import generate_equations_of_motion
 from topics.dynamics.graphs_of_motion      import generate_graphs_of_motion
 from topics.dynamics.special_relativity    import generate_special_relativity
@@ -84,7 +89,11 @@ QUAL_REGISTRY = {
             "Weight":                 generate_weight,
             "Energy":                 generate_energy,
             "Projectile Motion":      generate_projectiles,
-            "Vectors":                generate_vectors,
+            "Displacement": {
+                "Level 1 — 1D":                     generate_displacement_l1,
+                "Level 2 — Two Displacements (2D)":  generate_displacement_l2,
+                "Level 3 — Multiple Displacements (2D)": generate_displacement_l3,
+            },
         },
         "Electricity": {
             "Current":            generate_current,

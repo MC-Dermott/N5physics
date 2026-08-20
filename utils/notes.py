@@ -449,6 +449,13 @@ $$E_H = mL$$
     "vectors": """
 ## Vectors — Resultant & Bearing
 
+**Distance vs displacement (1D):**
+- **Distance** is a *scalar* — the total length of the path travelled. Direction doesn't matter, so
+  just add up the magnitude of every leg of the journey.
+- **Displacement** is a *vector* — how far and in what direction you end up from the start. Along a
+  single straight line, pick one direction as positive and the opposite as negative, then add the
+  signed values (legs in opposite directions partly cancel out).
+
 **Magnitude of resultant** (Pythagoras):
 $$R = \\sqrt{a^2 + b^2}$$
 

@@ -38,6 +38,12 @@ BACKGROUND_VIDEOS = {
         {"title": "Vector Addition & Resultant Vectors | THEORY", "url": "https://www.youtube.com/watch?v=_6jS_byd79Y"},
         {"title": "Calculation Method (Resultant Vectors) | THEORY", "url": "https://www.youtube.com/watch?v=oONevD8dlAs"},
     ],
+    # "Vectors" renamed to "Displacement" for National 5 (Crash Higher still uses "Vectors" above).
+    ("Dynamics", "Displacement"): [
+        {"title": "Vector & Scalar Quantities | THEORY", "url": "https://www.youtube.com/watch?v=-YokQBWbC-8"},
+        {"title": "Vector Addition & Resultant Vectors | THEORY", "url": "https://www.youtube.com/watch?v=_6jS_byd79Y"},
+        {"title": "Calculation Method (Resultant Vectors) | THEORY", "url": "https://www.youtube.com/watch?v=oONevD8dlAs"},
+    ],
     ("Electricity", "Current"): [
         {"title": "Electrical Current | THEORY", "url": "https://www.youtube.com/watch?v=5Yxrj5IdXtE"},
     ],
