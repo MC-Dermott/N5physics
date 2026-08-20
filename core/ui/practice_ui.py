@@ -2,6 +2,7 @@ import streamlit as st
 
 from core.ui.feedback_ui import check_answer, render_feedback, render_working
 from core.ui.scaffold_ui import render_scaffold
+from core.ui.graph_mcq_ui import render_main_graph, render_option_grid, render_correct_option
 from core.db.tracker import save_practice_attempt
 
 
@@ -48,13 +49,35 @@ def _render_single(question, user_id, qualification):
     st.markdown(question.question_text)
     st.write("")
 
-    is_classification = question.metadata.get("type") == "classification"
+    q_type = question.metadata.get("type")
+    is_classification = q_type == "classification"
+    is_graph_mcq = q_type == "graph_mcq"
+
+    if is_graph_mcq:
+        render_main_graph(question)
+        st.write("")
 
     if not st.session_state.get(submitted_key):
         _render_notes(question)
         render_scaffold(question)
 
-        if is_classification:
+        if is_graph_mcq:
+            render_option_grid(question, key_prefix=f"practice_{question.qid}")
+            labels = question.metadata.get("options", [])
+            selected = st.radio("Select your answer:", labels,
+                                key=f"radio_{question.qid}", index=None, horizontal=True)
+            if st.button("Submit Answer", key=f"submit_{question.qid}", type="primary"):
+                if selected is not None:
+                    st.session_state[submitted_key] = selected
+                    result, distractor = _check_classification(selected, question)
+                    st.session_state[f"result_{question.qid}"] = (result, distractor)
+                    if user_id:
+                        save_practice_attempt(user_id, qualification, question.topic,
+                                              question.question_type, result == "correct")
+                    st.rerun()
+                else:
+                    st.warning("Please select an answer before submitting.")
+        elif is_classification:
             options = question.metadata.get(
                 "options",
                 [question.correct_answer] + [d["value"] for d in question.distractors],
@@ -88,6 +111,8 @@ def _render_single(question, user_id, qualification):
     else:
         result, distractor = st.session_state.get(f"result_{question.qid}", ("incorrect", None))
         render_feedback(result, distractor, question, show_working=True)
+        if is_graph_mcq and result != "correct":
+            render_correct_option(question)
 
 
 # =========================================================

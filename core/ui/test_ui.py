@@ -2,6 +2,7 @@ import streamlit as st
 
 from core.engine.session_manager import reset_test
 from core.ui.feedback_ui import check_answer, render_feedback, render_working
+from core.ui.graph_mcq_ui import render_main_graph, render_option_grid
 
 _NUM_QUESTIONS = 5
 
@@ -77,9 +78,30 @@ def _render_single_test(test, idx, question):
     st.markdown(question.question_text)
     st.write("")
 
-    is_classification = question.metadata.get("type") == "classification"
+    q_type = question.metadata.get("type")
+    is_classification = q_type == "classification"
+    is_graph_mcq = q_type == "graph_mcq"
 
-    if is_classification:
+    if is_graph_mcq:
+        render_main_graph(question, key_suffix=f"_test_{idx}")
+        st.write("")
+        render_option_grid(question, key_prefix=f"test_{idx}")
+        labels = question.metadata.get("options", [])
+        selected = st.radio("Select your answer:", labels,
+                            key=f"test_radio_{idx}", index=None, horizontal=True)
+        if st.button("Submit", key=f"test_submit_{idx}", type="primary"):
+            if selected is not None:
+                result, distractor = _check_classification(selected, question)
+                test["answers"].append(selected)
+                test["results"].append(result == "correct")
+                test["feedback"].append((result, distractor, question))
+                test["index"] += 1
+                if test["index"] >= _NUM_QUESTIONS:
+                    test["complete"] = True
+                st.rerun()
+            else:
+                st.warning("Please select an answer before submitting.")
+    elif is_classification:
         options = question.metadata.get(
             "options",
             [question.correct_answer] + [d["value"] for d in question.distractors],
