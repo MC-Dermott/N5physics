@@ -8,6 +8,37 @@
 # (topic, question_type) key when both exist.
 
 EXAMPLES = {
+    ("Dynamics", "Acceleration", "Change in Speed"): r"""
+**Example:** A car has an acceleration of −4 m/s² for 6 s.
+
+*Calculate the change in speed.*
+
+Rearrange $a = \dfrac{v - u}{t}$ for the change in speed, $v - u$:
+$$v - u = at$$
+$$v - u = (-4) \times 6 = -24\ \mathrm{m/s}$$
+
+The change in speed is **−24 m/s** — the negative sign shows the acceleration is a
+deceleration, so the car's speed decreases by 24 m/s.
+""",
+
+    ("Dynamics", "Acceleration", "Initial & Final Speed"): r"""
+**Example:** A cyclist starts with a speed of 3 m/s and has an acceleration of 2 m/s² for 5 s.
+
+*Calculate the final speed.*
+
+$$v = u + at$$
+$$v = 3 + (2 \times 5) = 13\ \mathrm{m/s}$$
+
+**Example (finding the initial speed):** A runner has an acceleration of −1 m/s² for 4 s and
+reaches a final speed of 4 m/s.
+
+*Calculate the initial speed.*
+
+Rearrange $v = u + at$ for $u$:
+$$u = v - at$$
+$$u = 4 - (-1 \times 4) = 8\ \mathrm{m/s}$$
+""",
+
     ("Dynamics", "Distance and Displacement", "Level 1 — 1D"): r"""
 **Example:** A cyclist travels 15 m east, then 22 m west, then 8 m east.
 

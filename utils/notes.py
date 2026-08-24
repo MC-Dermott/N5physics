@@ -114,6 +114,31 @@ $$1\\ \\text{minute} = 60\\ \\text{s} \\qquad 1\\ \\text{hour} = 3600\\ \\text{s
 > **Important:** One Becquerel = one decay per second. Always convert time to seconds.
 """,
 
+    "acceleration_s3": """
+## Acceleration — $a = \\frac{v - u}{t}$
+
+**Definitions:**
+- Acceleration is the change in speed of an object per second.
+- A **positive** acceleration means the object is speeding up; a **negative** acceleration means
+  it is slowing down (decelerating).
+
+**Key equation:**
+$$a = \\frac{v - u}{t}$$
+
+| Symbol | Quantity | Unit |
+|---|---|---|
+| a | Acceleration | m/s² |
+| u | Initial speed | m/s |
+| v | Final speed | m/s |
+| t | Time | s |
+
+**Rearrangements:**
+$$v - u = at \\qquad v = u + at \\qquad u = v - at$$
+
+> **Important:** The change in speed is $v - u$. If the acceleration is negative, the final
+> speed will be lower than the initial speed.
+""",
+
     "dynamics_newton": """
 ## Newton's Second Law — F = ma
 

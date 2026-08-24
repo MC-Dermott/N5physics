@@ -2,6 +2,7 @@ import random
 
 from topics.dynamics.speed_distance_time   import generate_sdt
 from topics.dynamics.acceleration          import generate_acceleration
+from topics.dynamics.acceleration_s3       import gen_change_in_speed, gen_initial_final_speed
 from topics.dynamics.forces                import generate_forces
 from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
@@ -61,7 +62,10 @@ QUAL_REGISTRY = {
     "S3": {
         "Dynamics": {
             "Speed, Distance & Time": generate_sdt,
-            "Acceleration":           generate_acceleration,
+            "Acceleration": {
+                "Change in Speed":         gen_change_in_speed,
+                "Initial & Final Speed":   gen_initial_final_speed,
+            },
         },
         "Waves": {
             "Wave Speed":         generate_wave_speed,
