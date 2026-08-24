@@ -38,8 +38,8 @@ BACKGROUND_VIDEOS = {
         {"title": "Vector Addition & Resultant Vectors | THEORY", "url": "https://www.youtube.com/watch?v=_6jS_byd79Y"},
         {"title": "Calculation Method (Resultant Vectors) | THEORY", "url": "https://www.youtube.com/watch?v=oONevD8dlAs"},
     ],
-    # "Vectors" renamed to "Displacement" for National 5 (Crash Higher still uses "Vectors" above).
-    ("Dynamics", "Displacement"): [
+    # "Vectors" renamed to "Distance and Displacement" for National 5 (Crash Higher still uses "Vectors" above).
+    ("Dynamics", "Distance and Displacement"): [
         {"title": "Vector & Scalar Quantities | THEORY", "url": "https://www.youtube.com/watch?v=-YokQBWbC-8"},
         {"title": "Vector Addition & Resultant Vectors | THEORY", "url": "https://www.youtube.com/watch?v=_6jS_byd79Y"},
         {"title": "Calculation Method (Resultant Vectors) | THEORY", "url": "https://www.youtube.com/watch?v=oONevD8dlAs"},

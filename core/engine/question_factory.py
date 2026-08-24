@@ -89,7 +89,7 @@ QUAL_REGISTRY = {
             "Weight":                 generate_weight,
             "Energy":                 generate_energy,
             "Projectile Motion":      generate_projectiles,
-            "Displacement": {
+            "Distance and Displacement": {
                 "Level 1 — 1D":                     generate_displacement_l1,
                 "Level 2 — Two Displacements (2D)":  generate_displacement_l2,
                 "Level 3 — Multiple Displacements (2D)": generate_displacement_l3,

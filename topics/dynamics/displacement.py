@@ -187,7 +187,7 @@ def gen_l1_distance(level="N5"):
     ]
     options_data = _dedup(options_data, distance)
     return make_question(question, float(distance), options_data, "m",
-                         notes=NOTES["vectors"], topic="Dynamics", question_type="Displacement", level=level)
+                         notes=NOTES["vectors"], topic="Dynamics", question_type="Distance and Displacement", level=level)
 
 
 def gen_l1_displacement(level="N5"):
@@ -246,7 +246,7 @@ def gen_l1_displacement(level="N5"):
         ]
     options_data = _dedup(options_data, correct)
     return make_question(question, float(correct), options_data, "m",
-                         notes=NOTES["vectors"], topic="Dynamics", question_type="Displacement", level=level)
+                         notes=NOTES["vectors"], topic="Dynamics", question_type="Distance and Displacement", level=level)
 
 
 def generate_displacement_l1(level="N5"):
@@ -330,7 +330,7 @@ def gen_l3_magnitude(level="N5"):
     ]
     options_data = _dedup(options_data, correct)
     return make_question(question, float(correct), options_data, "km",
-                         notes=NOTES["vectors"], topic="Dynamics", question_type="Displacement", level=level)
+                         notes=NOTES["vectors"], topic="Dynamics", question_type="Distance and Displacement", level=level)
 
 
 def gen_l3_bearing(level="N5"):
@@ -391,7 +391,7 @@ def gen_l3_bearing(level="N5"):
         })
     options_data = _dedup(options_data, bearing)
     return make_question(question, float(bearing), options_data, "°",
-                         notes=NOTES["vectors"], topic="Dynamics", question_type="Displacement", level=level)
+                         notes=NOTES["vectors"], topic="Dynamics", question_type="Distance and Displacement", level=level)
 
 
 def generate_displacement_l3(level="N5"):

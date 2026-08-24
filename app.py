@@ -9,6 +9,7 @@ from core.ui.assessment_ui import render_assessment
 from core.ui.reports_ui import render_teacher_report
 from core.ui.student_dashboard_ui import render_student_dashboard
 from core.data.backgrounds import get_background_videos
+from core.data.examples import get_examples
 
 st.set_page_config(page_title="Physics Practice", layout="centered")
 
@@ -226,6 +227,11 @@ if qualification in ("National 5", "Crash Higher"):
                 st.markdown(f"- [{v['title']}]({v['url']})")
         else:
             st.caption("No background videos added yet for this topic.")
+
+example = get_examples(topic, question_type, sub_type=sub_type)
+if example:
+    with st.expander("💡 Example"):
+        st.markdown(example)
 
 st.divider()
 
