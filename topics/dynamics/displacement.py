@@ -20,6 +20,12 @@ def _e_dir(east):
     return "east" if east > 0 else "west"
 
 
+def _two_leg_phrase(east, north):
+    legs = [f"{abs(north)} km {_n_dir(north)}", f"{abs(east)} km {_e_dir(east)}"]
+    random.shuffle(legs)
+    return f"{legs[0]} and {legs[1]}"
+
+
 def gen_find_magnitude(level="N5"):
     east, north = _pick()
     correct = round(math.sqrt(east ** 2 + north ** 2), 2)
@@ -31,7 +37,7 @@ def gen_find_magnitude(level="N5"):
         {"type": "latex", "content": rf"R = {correct}\ \mathrm{{km}}"},
     ]
     question = (
-        f"A boat travels {abs(north)} km {_n_dir(north)} and {abs(east)} km {_e_dir(east)}.\n\n"
+        f"A boat travels {_two_leg_phrase(east, north)}.\n\n"
         f"Calculate the magnitude of the resultant displacement."
     )
     options_data = [
@@ -70,7 +76,7 @@ def gen_find_bearing(level="N5"):
         {"type": "latex", "content": rf"\text{{Bearing}} = {bearing_display}°"},
     ]
     question = (
-        f"A boat travels {abs(north)} km {_n_dir(north)} and {abs(east)} km {_e_dir(east)}.\n\n"
+        f"A boat travels {_two_leg_phrase(east, north)}.\n\n"
         f"Calculate the bearing of the resultant displacement."
     )
 
