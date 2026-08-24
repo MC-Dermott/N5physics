@@ -39,6 +39,32 @@ Both legs are positive (north and east), so the resultant lies in the NE quadran
 $$\text{Bearing} = 037°$$
 """,
 
+    ("Dynamics", "Vectors and Scalars", "Identify Scalar or Vector"): r"""
+**Example:** Which of the following is a vector quantity — mass, energy, or acceleration?
+
+A scalar quantity has magnitude only. A vector quantity has magnitude **and** direction.
+
+- Mass has a size (e.g. 5 kg) but no direction → **scalar**
+- Energy has a size (e.g. 200 J) but no direction → **scalar**
+- Acceleration has a size (e.g. 3 m/s²) **and** a direction (e.g. downwards) → **vector**
+
+The answer is **acceleration**.
+""",
+
+    ("Dynamics", "Vectors and Scalars", "Scalar & Vector Pairs"): r"""
+**Example:** Which of the following contains one scalar quantity and one vector quantity?
+
+| Option | Pair | Both same type? |
+|---|---|---|
+| A | acceleration; displacement | Both vectors ✗ |
+| B | kinetic energy; speed | Both scalars ✗ |
+| C | velocity; weight | Both vectors ✗ |
+| D | potential energy; work done | Both scalars ✗ |
+| E | distance; force | Distance is a scalar, force is a vector ✓ |
+
+The answer is **E — distance; force**, since it is the only option with one of each type.
+""",
+
     ("Dynamics", "Distance and Displacement", "Level 3 — Multiple Displacements (2D)"): r"""
 **Example:** A hiker walks 12 km north, then 9 km east, then 4 km south.
 

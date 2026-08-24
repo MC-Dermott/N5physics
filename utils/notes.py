@@ -474,6 +474,26 @@ $$\\theta = \\tan^{-1}\\left(\\frac{\\text{opposite}}{\\text{adjacent}}\\right)$
 > **Important:** Don't add or subtract components — use Pythagoras. Bearings are measured clockwise from North (000° to 360°).
 """,
 
+    "vectors_scalars": """
+## Vectors and Scalars
+
+**Definitions:**
+- A **scalar** quantity has magnitude (size) only.
+- A **vector** quantity has both magnitude **and direction**.
+
+| Scalar quantities | Vector quantities |
+|---|---|
+| Distance | Displacement |
+| Speed | Velocity |
+| Mass | Force |
+| Energy (kinetic, potential, etc.) | Weight |
+| Work done | Acceleration |
+
+> **Important:** Similar-sounding quantities can be different types — distance (scalar) vs
+> displacement (vector), speed (scalar) vs velocity (vector). Weight is a force, so it is always
+> a vector.
+""",
+
     "projectiles": """
 ## Projectile Motion
 

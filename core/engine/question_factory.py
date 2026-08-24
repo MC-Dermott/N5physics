@@ -12,6 +12,7 @@ from topics.dynamics.displacement          import (
     generate_displacement_l2,
     generate_displacement_l3,
 )
+from topics.dynamics.vectors_scalars       import gen_identify, gen_pairs
 from topics.dynamics.equations_of_motion   import generate_equations_of_motion
 from topics.dynamics.graphs_of_motion      import generate_graphs_of_motion
 from topics.dynamics.special_relativity    import generate_special_relativity
@@ -93,6 +94,10 @@ QUAL_REGISTRY = {
                 "Level 1 — 1D":                     generate_displacement_l1,
                 "Level 2 — Two Displacements (2D)":  generate_displacement_l2,
                 "Level 3 — Multiple Displacements (2D)": generate_displacement_l3,
+            },
+            "Vectors and Scalars": {
+                "Identify Scalar or Vector":  gen_identify,
+                "Scalar & Vector Pairs":      gen_pairs,
             },
         },
         "Electricity": {
