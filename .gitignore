@@ -4,6 +4,7 @@ __pycache__/
 .env
 .streamlit/secrets.toml
 physics_env/
+.venv/
 *.egg-info/
 dist/
 build/

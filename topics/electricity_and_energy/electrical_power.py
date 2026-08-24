@@ -4,6 +4,9 @@ from utils.make_question import make_question
 _NOTES = """
 ## Electrical Power
 
+**Definition:** Power is the rate at which energy is transferred (the energy transferred per unit
+time, per second).
+
 $$P = \\frac{E}{t}$$
 
 | Symbol | Quantity | Unit |

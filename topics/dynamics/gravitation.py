@@ -6,6 +6,11 @@ G = 6.674e-11  # N m² kg⁻²
 _NOTES = """
 ## Gravitation
 
+**Definitions:**
+- Gravitational force is the attractive force between any two masses.
+- Gravitational field strength is the gravitational force exerted per unit mass placed at a point
+  in the field.
+
 **Newton's Law of Universal Gravitation:**
 $$F = \\frac{GMm}{r^2}$$
 

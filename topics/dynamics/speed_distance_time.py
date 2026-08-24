@@ -33,8 +33,8 @@ _CONTEXTS = [
 
 
 def _pick_speed_and_time(level="N5"):
-    v_si = random.choice(_SPEEDS[:6] if level == "N4" else _SPEEDS)
-    mode = random.choice(["s", "s"] if level == "N4" else ["s", "s", "minutes", "hours"])
+    v_si = random.choice(_SPEEDS[:6] if level in ("N4", "S3") else _SPEEDS)
+    mode = random.choice(["s", "s"] if level in ("N4", "S3") else ["s", "s", "minutes", "hours"])
     if mode == "minutes":
         t_min = random.choice([1, 2, 3, 5, 10, 15, 20])
         return v_si, t_min, "minutes", t_min * 60
@@ -126,7 +126,7 @@ def gen_sdt_find_d(level="N5"):
 
 
 def gen_sdt_find_t(level="N5"):
-    v_si = random.choice(_SPEEDS[:6] if level == "N4" else _SPEEDS)
+    v_si = random.choice(_SPEEDS[:6] if level in ("N4", "S3") else _SPEEDS)
     t_si = random.choice([5, 10, 20, 25, 30, 40, 50, 60, 100, 120, 200, 300])
     d_si = v_si * t_si
     d_disp, d_unit = _d_display(d_si)
@@ -166,5 +166,5 @@ _N4_GENS  = [gen_sdt_find_v, gen_sdt_find_d]
 
 
 def generate_sdt(level="N5"):
-    gens = _N4_GENS if level == "N4" else _ALL_GENS
+    gens = _N4_GENS if level in ("N4", "S3") else _ALL_GENS
     return random.choice(gens)(level=level)

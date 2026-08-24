@@ -5,6 +5,9 @@ from core.models.question_model import PhysicsQuestion
 _NOTES = """
 ## Efficiency
 
+**Definition:** Efficiency is the percentage of the input energy that is usefully transferred by
+a device.
+
 $$\\text{Efficiency} = \\frac{\\text{Useful Energy}}{\\text{Input Energy}} \\times 100\\%$$
 
 - **Input energy** = total electrical energy supplied
@@ -18,6 +21,11 @@ $$\\text{Efficiency} = \\frac{160\\,000}{400\\,000} \\times 100\\% = 40\\%$$
 
 _NOTES_COMBINED = """
 ## Electrical Power and Efficiency
+
+**Definitions:**
+- Power is the rate at which energy is transferred (the energy transferred per unit time, per
+  second).
+- Efficiency is the percentage of the input energy that is usefully transferred by a device.
 
 **Power:**
 $$E = P \\times t$$

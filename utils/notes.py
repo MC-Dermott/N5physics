@@ -3,6 +3,8 @@ NOTES = {
     "speed_distance_time": """
 ## Speed, Distance and Time — $d = vt$
 
+**Definition:** Speed is the distance travelled per unit of time.
+
 **Key equation:**
 $$d = vt$$
 
@@ -29,6 +31,9 @@ $$v = \\frac{d}{t} \\qquad t = \\frac{d}{v}$$
     "resistor_combinations": """
 ## Resistor Combinations
 
+**Definition:** The total (equivalent) resistance of a combination of resistors is the single
+resistance that would draw the same current for the same supply voltage.
+
 **Series** (resistors in a single chain):
 $$R_T = R_1 + R_2 + R_3$$
 
@@ -37,6 +42,11 @@ $$\\frac{1}{R_T} = \\frac{1}{R_1} + \\frac{1}{R_2} + \\frac{1}{R_3}$$
 
 For two resistors in parallel this simplifies to:
 $$R_T = \\frac{R_1 \\times R_2}{R_1 + R_2}$$
+
+| Symbol | Quantity | Unit |
+|---|---|---|
+| $R_T$ | Total (equivalent) resistance | Ω (Ohms) |
+| $R_1, R_2, R_3$ | Individual resistances | Ω (Ohms) |
 
 **Mixed circuits — work step by step:**
 1. Identify the pair that is combined first (series or parallel)
@@ -53,6 +63,11 @@ $$R_T = \\frac{R_1 \\times R_2}{R_1 + R_2}$$
 
     "ohms_law": """
 ## Ohm's Law — $V = IR$
+
+**Definitions:**
+- Current is the rate of flow of electric charge per unit time.
+- Voltage (potential difference) is the energy transferred per unit charge.
+- Resistance is a measure of how strongly a component opposes the flow of current.
 
 **Key equation:**
 $$V = IR$$
@@ -79,6 +94,8 @@ $$I = \\frac{V}{R} \\qquad R = \\frac{V}{I}$$
     "radiation_activity": """
 ## Activity — $A = \\frac{N}{t}$
 
+**Definition:** Activity is the number of nuclear decays per unit time (per second).
+
 **Key equation:**
 $$A = \\frac{N}{t}$$
 
@@ -100,6 +117,11 @@ $$1\\ \\text{minute} = 60\\ \\text{s} \\qquad 1\\ \\text{hour} = 3600\\ \\text{s
     "dynamics_newton": """
 ## Newton's Second Law — F = ma
 
+**Definitions:**
+- Force is a push or pull, measured in Newtons, that can change an object's speed, direction of
+  motion, or shape.
+- Acceleration is the change in speed (velocity) per second.
+
 **Key equation:**
 $$F = ma$$
 
@@ -118,6 +140,8 @@ $$a = \\frac{F}{m} \\qquad m = \\frac{F}{a}$$
     "dynamics_weight": """
 ## Weight — W = mg
 
+**Definition:** Weight is the force of gravity acting on an object's mass.
+
 **Key equation:**
 $$W = mg$$
 
@@ -135,6 +159,9 @@ $$m = \\frac{W}{g} \\qquad g = \\frac{W}{m}$$
 
     "energy_gpe": """
 ## Gravitational Potential Energy — $E_p = mgh$
+
+**Definition:** Gravitational potential energy is the energy an object has because of its height
+above a reference level (e.g. the ground).
 
 **Key equation:**
 $$E_p = mgh$$
@@ -155,6 +182,8 @@ $$m = \\frac{E_p}{gh} \\qquad h = \\frac{E_p}{mg}$$
     "energy_ke": """
 ## Kinetic Energy — $E_k = \\frac{1}{2}mv^2$
 
+**Definition:** Kinetic energy is the energy an object has because of its motion.
+
 **Key equation:**
 $$E_k = \\frac{1}{2}mv^2$$
 
@@ -173,6 +202,9 @@ $$m = \\frac{2E_k}{v^2} \\qquad v = \\sqrt{\\frac{2E_k}{m}}$$
     "energy_work": """
 ## Work Done — $E_W = Fd$
 
+**Definition:** Work done is the energy transferred when a force moves an object through a
+distance.
+
 **Key equation:**
 $$E_W = Fd$$
 
@@ -190,6 +222,12 @@ $$F = \\frac{E_W}{d} \\qquad d = \\frac{E_W}{F}$$
 
     "waves_speed": """
 ## Wave Speed — $v = f\\lambda$
+
+**Definitions:**
+- Wave speed is the distance travelled by a wave per unit of time.
+- Frequency is the number of complete waves passing a point per second.
+- Wavelength is the distance from one point on a wave to the identical point on the next wave
+  (e.g. crest to crest).
 
 **Key equation:**
 $$v = f\\lambda$$
@@ -212,6 +250,10 @@ $$f = \\frac{v}{\\lambda} \\qquad \\lambda = \\frac{v}{f}$$
 
     "waves_period": """
 ## Period and Frequency — $T = \\frac{1}{f}$
+
+**Definitions:**
+- Period is the time taken for one complete wave (cycle).
+- Frequency is the number of complete waves (cycles) per second.
 
 **Key equation:**
 $$T = \\frac{1}{f} \\qquad f = \\frac{1}{T}$$
@@ -236,6 +278,9 @@ $$T = \\frac{1}{f} \\qquad f = \\frac{1}{T}$$
     "electricity_current": """
 ## Electric Current — $I = \\frac{Q}{t}$
 
+**Definition:** Current is the rate of flow of electric charge per unit time (charge passing a
+point per second).
+
 **Key equation:**
 $$I = \\frac{Q}{t}$$
 
@@ -253,6 +298,9 @@ $$Q = It \\qquad t = \\frac{Q}{I}$$
 
     "electricity_power": """
 ## Electrical Power
+
+**Definition:** Power is the rate at which energy is transferred (the energy transferred per unit
+time, per second).
 
 **Three forms of the power equation:**
 
@@ -290,6 +338,9 @@ $$I = \\sqrt{\\frac{P}{R}} \\qquad R = \\frac{P}{I^2}$$
     "electricity_power_energy": """
 ## Power from Energy — $P = \\frac{E}{t}$
 
+**Definition:** Power is the rate at which energy is transferred — the energy transferred per
+unit time (per second).
+
 **Key equation:**
 $$P = \\frac{E}{t}$$
 
@@ -317,6 +368,12 @@ $$1\\ \\text{minute} = 60\\ \\text{s} \\qquad 1\\ \\text{hour} = 3600\\ \\text{s
 
     "radiation_doses": """
 ## Radiation Dose Equations
+
+**Definitions:**
+- Absorbed dose is the energy absorbed per unit mass of tissue.
+- Equivalent dose is the absorbed dose adjusted for how harmful the type of radiation is (using
+  the radiation weighting factor).
+- Equivalent dose rate is the equivalent dose received per unit time.
 
 **Absorbed dose:**
 $$D = \\frac{E}{m} \\quad \\text{(unit: Gray, Gy = J/kg)}$$
@@ -353,6 +410,9 @@ $$\\dot{H} = \\frac{H}{t} \\quad \\text{(unit: Sv/h)}$$
     "radiation_half_life": """
 ## Half-Life
 
+**Definition:** Half-life is the time taken for the activity (or the number of undecayed nuclei)
+of a radioactive source to fall to half of its original value.
+
 **Key relationships:**
 
 Number of half-lives:
@@ -379,6 +439,11 @@ $$A = A_0 \\times \\left(\\frac{1}{2}\\right)^n$$
     "gas_laws": """
 ## Gas Laws
 
+**Definitions:**
+- Pressure is the force exerted per unit area.
+- Volume is the amount of space a gas occupies.
+- Temperature (in Kelvin) is a measure of the average kinetic energy of the gas particles.
+
 **Boyle's Law** (constant temperature):
 $$P_1 V_1 = P_2 V_2$$
 
@@ -403,6 +468,8 @@ $$T(K) = T(°C) + 273$$
     "pressure": """
 ## Pressure — $P = \\frac{F}{A}$
 
+**Definition:** Pressure is the force exerted per unit area.
+
 **Key equations:**
 $$P = \\frac{F}{A} \\qquad W = mg$$
 
@@ -423,6 +490,12 @@ $$F = PA \\qquad A = \\frac{F}{P}$$
 
     "heat_shc": """
 ## Specific Heat Capacity & Latent Heat
+
+**Definitions:**
+- Specific heat capacity is the energy needed to raise the temperature of 1 kg of a substance by
+  1°C.
+- Specific latent heat is the energy needed to change the state of 1 kg of a substance without
+  changing its temperature.
 
 **Specific heat capacity (temperature change):**
 $$E_H = mc\\Delta T$$
@@ -449,12 +522,15 @@ $$E_H = mL$$
     "vectors": """
 ## Vectors — Resultant & Bearing
 
+**Definitions:**
+- Distance is the total length of the path travelled — a *scalar*, so direction doesn't matter.
+- Displacement is how far and in what direction an object ends up from its starting point — a
+  *vector*.
+
 **Distance vs displacement (1D):**
-- **Distance** is a *scalar* — the total length of the path travelled. Direction doesn't matter, so
-  just add up the magnitude of every leg of the journey.
-- **Displacement** is a *vector* — how far and in what direction you end up from the start. Along a
-  single straight line, pick one direction as positive and the opposite as negative, then add the
-  signed values (legs in opposite directions partly cancel out).
+- **Distance**: just add up the magnitude of every leg of the journey.
+- **Displacement**: along a single straight line, pick one direction as positive and the opposite
+  as negative, then add the signed values (legs in opposite directions partly cancel out).
 
 **Magnitude of resultant** (Pythagoras):
 $$R = \\sqrt{a^2 + b^2}$$
@@ -497,7 +573,8 @@ $$\\theta = \\tan^{-1}\\left(\\frac{\\text{opposite}}{\\text{adjacent}}\\right)$
     "projectiles": """
 ## Projectile Motion
 
-A projectile has **independent** horizontal and vertical motion.
+**Definition:** A projectile is an object given an initial velocity and then left to move under
+gravity alone — it has **independent** horizontal and vertical motion.
 
 **Horizontal** (constant velocity):
 $$s_H = v_H \\times t$$

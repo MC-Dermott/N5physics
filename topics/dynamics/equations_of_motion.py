@@ -5,6 +5,12 @@ from utils.make_question import make_question
 _NOTES = """
 ## Equations of Motion
 
+**Definitions:**
+- Velocity is the speed of an object in a given direction (displacement per unit of time).
+- Acceleration is the change in velocity per second.
+- Displacement is the distance travelled in a straight line, in a given direction, from the
+  starting point.
+
 $$v = u + at$$
 $$v^2 = u^2 + 2as$$
 $$s = ut + \\frac{1}{2}at^2$$

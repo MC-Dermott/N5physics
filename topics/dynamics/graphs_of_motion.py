@@ -10,15 +10,30 @@ G = 9.8
 _NOTES = """
 ## Graphs of Motion
 
+**Definitions:**
+- Velocity is the speed of an object in a given direction (displacement per unit of time).
+- Acceleration is the change in velocity per second.
+- Displacement is the distance travelled in a straight line, in a given direction, from the
+  starting point.
+
+**Key equation** (constant acceleration):
+$$s = ut + \\tfrac{1}{2}at^2$$
+
+| Symbol | Quantity | Unit |
+|---|---|---|
+| s | Displacement | m |
+| u | Initial velocity | m/s |
+| a | Acceleration | m/s² |
+| t | Time | s |
+
 For motion in a straight line with **constant acceleration**:
 
 - The **gradient** of a velocity–time (v–t) graph gives the **acceleration**.
   A straight-line v–t graph means the acceleration is constant; a horizontal
   v–t graph means the acceleration is zero.
 - The **area under** a v–t graph gives the **displacement**.
-- For constant acceleration, displacement is found by integrating velocity:
-  $$s = ut + \\tfrac{1}{2}at^2$$
-  so a displacement–time (s–t) graph is a **curve** (part of a parabola) wherever
+- For constant acceleration, displacement is found by integrating velocity, so a
+  displacement–time (s–t) graph is a **curve** (part of a parabola) wherever
   the acceleration is non-zero, and a straight line only where the velocity is constant.
 - Because the acceleration is constant within each stage of the motion, the
   acceleration–time (a–t) graph is a **horizontal line** — it only jumps to a new

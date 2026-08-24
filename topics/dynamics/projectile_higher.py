@@ -7,6 +7,10 @@ g = 9.8  # m/s²
 _NOTES_L1 = """
 ## Projectile Motion — Angled Launch (Level 1)
 
+**Definitions:**
+- Velocity is the speed of an object in a given direction (displacement per unit of time).
+- Acceleration is the change in velocity per second.
+
 An object launched at speed **v** at angle **θ** above the horizontal on flat ground.
 
 **Step 1 — Resolve into components:**
@@ -40,6 +44,10 @@ $$R = v_H \\times t_{\\text{total}}$$
 
 _NOTES_L2 = """
 ## Projectile Motion — Horizontal Launch from Height (Level 2)
+
+**Definitions:**
+- Velocity is the speed of an object in a given direction (displacement per unit of time).
+- Acceleration is the change in velocity per second.
 
 An object launched **horizontally** at speed $v_H$ from height $h$.
 

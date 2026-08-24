@@ -58,6 +58,17 @@ from topics.electricity_and_energy.knowledge        import (
 )
 
 QUAL_REGISTRY = {
+    "S3": {
+        "Dynamics": {
+            "Speed, Distance & Time": generate_sdt,
+            "Acceleration":           generate_acceleration,
+        },
+        "Waves": {
+            "Wave Speed":         generate_wave_speed,
+            "Period & Frequency": generate_period_frequency,
+            "Waves Combined":     generate_waves_combined,
+        },
+    },
     "National 4": {
         "Electricity and Energy": {
             "Electrical Power":     generate_electrical_power,
@@ -197,7 +208,7 @@ def get_sub_types(qualification, topic, question_type):
 
 
 def generate_question(qualification, topic, question_type, sub_type=None):
-    level_map = {"National 4": "N4", "National 5": "N5", "Higher": "Higher"}
+    level_map = {"S3": "S3", "National 4": "N4", "National 5": "N5", "Higher": "Higher"}
     level = level_map.get(qualification, "N5")
     entry = QUAL_REGISTRY[qualification][topic][question_type]
     if isinstance(entry, dict):

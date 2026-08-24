@@ -10,6 +10,12 @@ _WIDGET_HTML = (
 _NOTES = """
 ## Special Relativity
 
+**Definitions:**
+- Time dilation is the stretching of the time interval between two events as measured by an
+  observer who sees the clock moving, compared with an observer moving with the clock.
+- Length contraction is the shortening of an object's measured length, along its direction of
+  travel, as observed by someone it is moving relative to.
+
 **Time dilation** — a moving clock runs slow:
 $$t' = \\frac{t}{\\sqrt{1 - \\frac{v^2}{c^2}}}$$
 

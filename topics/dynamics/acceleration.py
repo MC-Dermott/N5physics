@@ -83,5 +83,5 @@ _ALL_GENS = [gen_find_a, gen_find_m, gen_find_f]
 
 
 def generate_acceleration(level="N5"):
-    gens = _N4_GENS if level == "N4" else _ALL_GENS
+    gens = _N4_GENS if level in ("N4", "S3") else _ALL_GENS
     return random.choice(gens)(level=level)

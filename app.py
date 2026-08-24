@@ -106,7 +106,11 @@ if "qualification" not in st.session_state:
     st.write("Choose your level to get started.")
     st.write("")
 
-    col1, col2, col3, col4 = st.columns(4)
+    col0, col1, col2, col3, col4 = st.columns(5)
+    with col0:
+        if st.button("S3", use_container_width=True):
+            st.session_state.qualification = "S3"
+            st.rerun()
     with col1:
         if st.button("National 4", use_container_width=True):
             st.session_state.qualification = "National 4"
