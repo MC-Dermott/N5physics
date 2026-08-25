@@ -39,6 +39,11 @@ $$R = v_H \\times t_{\\text{total}}$$
 | t_total | Total time of flight | s |
 | R | Horizontal range | m |
 
+**Worked Example:** An object is launched at 20 m/s at 30° above the horizontal on flat ground. Calculate the range.
+$$v_H = 20\\cos30° = 17.3\\ \\mathrm{m/s} \\qquad v_V = 20\\sin30° = 10\\ \\mathrm{m/s}$$
+$$t_{\\text{up}} = \\frac{v_V}{g} = \\frac{10}{9.8} = 1.02\\ \\mathrm{s} \\quad\\Rightarrow\\quad t_{\\text{total}} = 2.04\\ \\mathrm{s}$$
+$$R = v_H \\times t_{\\text{total}} = 17.3 \\times 2.04 = 35.3\\ \\mathrm{m}$$
+
 > ⚠️ **Most common mistake:** using $t_{\\text{up}}$ (time to reach the top) instead of $t_{\\text{total}} = 2t_{\\text{up}}$ when calculating the range.
 """
 
@@ -70,6 +75,11 @@ $$v = \\sqrt{v_H^2 + v_y^2}$$
 | t | Time of flight | s |
 | v_y | Vertical velocity at impact | m/s |
 | v | Resultant speed at impact | m/s |
+
+**Worked Example:** An object is launched horizontally at 15 m/s from a height of 20 m. Calculate the resultant speed at impact.
+$$t = \\sqrt{\\frac{2h}{g}} = \\sqrt{\\frac{2 \\times 20}{9.8}} = 2.02\\ \\mathrm{s}$$
+$$v_y = gt = 9.8 \\times 2.02 = 19.8\\ \\mathrm{m/s}$$
+$$v = \\sqrt{v_H^2 + v_y^2} = \\sqrt{15^2 + 19.8^2} = 24.8\\ \\mathrm{m/s}$$
 
 > ⚠️ **Common mistake 1:** using $h = gt^2$ (forgetting the $\\frac{1}{2}$) gives $t = \\sqrt{h/g}$, which is too small by a factor of $\\sqrt{2}$.
 >

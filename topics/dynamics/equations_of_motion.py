@@ -24,6 +24,9 @@ $$s = \\frac{1}{2}(u + v)t$$
 | t | Time | s |
 | s | Displacement | m |
 
+**Worked Example:** A car travelling at 10 m/s accelerates uniformly at 2 m/s² for 5 s. Calculate its final velocity.
+$$v = u + at = 10 + (2 \\times 5) = 20\\ \\mathrm{m/s}$$
+
 > **Important:** These equations only apply when acceleration is **uniform** (constant).
 > A negative acceleration means the object is decelerating (slowing down).
 """

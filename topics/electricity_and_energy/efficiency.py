@@ -38,6 +38,11 @@ $$\\text{Efficiency} = \\frac{\\text{Useful Energy}}{\\text{Input Energy}} \\tim
 | P | Power | W |
 | E | Energy | J |
 | t | Time | s |
+
+**Worked Example:** A 2000 W heater runs for 300 s, supplying 480 000 J of useful heat. Calculate
+the input energy and the efficiency.
+$$E = P \\times t = 2000 \\times 300 = 600\\,000\\ \\mathrm{J}$$
+$$\\text{Efficiency} = \\frac{480\\,000}{600\\,000} \\times 100\\% = 80\\%$$
 """
 
 # E_total values are multiples of 100 000 to guarantee clean E_useful integers.

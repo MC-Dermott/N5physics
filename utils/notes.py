@@ -25,6 +25,9 @@ $$v = \\frac{d}{t} \\qquad t = \\frac{d}{v}$$
 | minutes → s | × 60 |
 | hours → s | × 3600 |
 
+**Worked Example:** A car travels at 15 m/s for 20 s. Calculate the distance travelled.
+$$d = vt = 15 \\times 20 = 300\\ \\mathrm{m}$$
+
 > **Important:** Always convert distance to metres and time to seconds before substituting.
 """,
 
@@ -58,6 +61,9 @@ $$R_T = \\frac{R_1 \\times R_2}{R_1 + R_2}$$
 | $(R_1 + R_2) \\parallel R_3$ | $R_{12} = R_1 + R_2$ | $R_T = \\frac{R_{12} \\times R_3}{R_{12} + R_3}$ |
 | $(R_1 \\parallel R_2) + R_3$ | $R_{12} = \\frac{R_1 R_2}{R_1 + R_2}$ | $R_T = R_{12} + R_3$ |
 
+**Worked Example:** A 4 Ω resistor and a 12 Ω resistor are connected in parallel. Calculate the total resistance.
+$$R_T = \\frac{R_1 \\times R_2}{R_1 + R_2} = \\frac{4 \\times 12}{4 + 12} = \\frac{48}{16} = 3\\ \\Omega$$
+
 > **Important:** In parallel, the total resistance is always **less** than the smallest individual resistor.
 """,
 
@@ -88,6 +94,9 @@ $$I = \\frac{V}{R} \\qquad R = \\frac{V}{I}$$
 | milli | mA, mV | $\\times 10^{-3}$ |
 | kilo | kΩ | $\\times 10^{3}$ |
 
+**Worked Example:** A 6 Ω resistor has a current of 2 A flowing through it. Calculate the voltage across it.
+$$V = IR = 2 \\times 6 = 12\\ \\mathrm{V}$$
+
 > **Important:** Convert mA to A (÷ 1000) and kΩ to Ω (× 1000) before substituting.
 """,
 
@@ -110,6 +119,9 @@ $$N = At \\qquad t = \\frac{N}{A}$$
 
 **Time conversions:**
 $$1\\ \\text{minute} = 60\\ \\text{s} \\qquad 1\\ \\text{hour} = 3600\\ \\text{s}$$
+
+**Worked Example:** A source undergoes 3000 nuclear decays in 60 s. Calculate its activity.
+$$A = \\frac{N}{t} = \\frac{3000}{60} = 50\\ \\mathrm{Bq}$$
 
 > **Important:** One Becquerel = one decay per second. Always convert time to seconds.
 """,
@@ -135,6 +147,9 @@ $$a = \\frac{v - u}{t}$$
 **Rearrangements:**
 $$v - u = at \\qquad v = u + at \\qquad u = v - at$$
 
+**Worked Example:** A car speeds up from 5 m/s to 20 m/s in 5 s. Calculate its acceleration.
+$$a = \\frac{v - u}{t} = \\frac{20 - 5}{5} = 3\\ \\mathrm{m/s^2}$$
+
 > **Important:** The change in speed is $v - u$. If the acceleration is negative, the final
 > speed will be lower than the initial speed.
 """,
@@ -159,6 +174,9 @@ $$F = ma$$
 **Rearrangements:**
 $$a = \\frac{F}{m} \\qquad m = \\frac{F}{a}$$
 
+**Worked Example:** Calculate the force needed to accelerate an 8 kg object at 3 m/s².
+$$F = ma = 8 \\times 3 = 24\\ \\mathrm{N}$$
+
 > **Important:** Use the *resultant* (unbalanced) force — the net force after subtracting friction from driving force.
 """,
 
@@ -178,6 +196,9 @@ $$W = mg$$
 
 **Rearrangements:**
 $$m = \\frac{W}{g} \\qquad g = \\frac{W}{m}$$
+
+**Worked Example:** Calculate the weight of a 5 kg object on Earth ($g = 9.8$ N/kg).
+$$W = mg = 5 \\times 9.8 = 49\\ \\mathrm{N}$$
 
 > **Important:** On Earth, $g = 9.81$ N/kg. Always check which planet/body you are on. Convert grams to kilograms before substituting ($\\div 1000$).
 """,
@@ -201,6 +222,9 @@ $$E_p = mgh$$
 **Rearrangements:**
 $$m = \\frac{E_p}{gh} \\qquad h = \\frac{E_p}{mg}$$
 
+**Worked Example:** A 2 kg object is raised 10 m ($g = 9.8$ N/kg). Calculate the gain in gravitational potential energy.
+$$E_p = mgh = 2 \\times 9.8 \\times 10 = 196\\ \\mathrm{J}$$
+
 > **Important:** Convert grams to kg ($\\div 1000$). Use $g = 9.8$ or $10$ N/kg as given.
 """,
 
@@ -220,6 +244,9 @@ $$E_k = \\frac{1}{2}mv^2$$
 
 **Rearrangements:**
 $$m = \\frac{2E_k}{v^2} \\qquad v = \\sqrt{\\frac{2E_k}{m}}$$
+
+**Worked Example:** A 3 kg ball moves at 4 m/s. Calculate its kinetic energy.
+$$E_k = \\frac{1}{2}mv^2 = \\frac{1}{2} \\times 3 \\times 4^2 = 24\\ \\mathrm{J}$$
 
 > **Important:** Don't forget the $\\frac{1}{2}$ factor. Square root when finding $v$.
 """,
@@ -241,6 +268,9 @@ $$E_W = Fd$$
 
 **Rearrangements:**
 $$F = \\frac{E_W}{d} \\qquad d = \\frac{E_W}{F}$$
+
+**Worked Example:** A 50 N force pushes an object 4 m in the direction of the force. Calculate the work done.
+$$E_W = Fd = 50 \\times 4 = 200\\ \\mathrm{J}$$
 
 > **Important:** The distance must be in the same direction as the force.
 """,
@@ -270,6 +300,9 @@ $$f = \\frac{v}{\\lambda} \\qquad \\lambda = \\frac{v}{f}$$
 - Speed of light (all EM waves): $c = 3 \\times 10^8$ m/s
 - Speed of sound in air: $v \\approx 340$ m/s
 
+**Worked Example:** A wave has a frequency of 50 Hz and a wavelength of 2 m. Calculate its speed.
+$$v = f\\lambda = 50 \\times 2 = 100\\ \\mathrm{m/s}$$
+
 > **Important:** Convert all units to SI before substituting (nm → m, MHz → Hz, etc.).
 """,
 
@@ -297,6 +330,9 @@ $$T = \\frac{1}{f} \\qquad f = \\frac{1}{T}$$
 | milli | ms | $\\times 10^{-3}$ |
 | micro | μs | $\\times 10^{-6}$ |
 
+**Worked Example:** A wave has a frequency of 25 Hz. Calculate its period.
+$$T = \\frac{1}{f} = \\frac{1}{25} = 0.04\\ \\mathrm{s}$$
+
 > **Important:** Period and frequency are reciprocals of each other. Convert to base SI units (Hz, s) before calculating.
 """,
 
@@ -317,6 +353,9 @@ $$I = \\frac{Q}{t}$$
 
 **Rearrangements:**
 $$Q = It \\qquad t = \\frac{Q}{I}$$
+
+**Worked Example:** 12 C of charge flows past a point in 4 s. Calculate the current.
+$$I = \\frac{Q}{t} = \\frac{12}{4} = 3\\ \\mathrm{A}$$
 
 > **Important:** Convert time to seconds before substituting (minutes $\\times 60$).
 """,
@@ -357,6 +396,9 @@ $$I = \\sqrt{\\frac{P}{R}} \\qquad R = \\frac{P}{I^2}$$
 | kilo | kW, kV, kΩ | $\\times 10^{3}$ |
 | mega | MW | $\\times 10^{6}$ |
 
+**Worked Example:** A device operates at 230 V with a current of 4 A. Calculate its power.
+$$P = VI = 230 \\times 4 = 920\\ \\mathrm{W}$$
+
 > **Important:** Convert all values to SI units (W, V, A, Ω) before substituting into equations.
 """,
 
@@ -387,6 +429,9 @@ $$E = Pt \\qquad t = \\frac{E}{P}$$
 
 **Time conversions:**
 $$1\\ \\text{minute} = 60\\ \\text{s} \\qquad 1\\ \\text{hour} = 3600\\ \\text{s}$$
+
+**Worked Example:** A 100 W device runs for 60 s. Calculate the energy it transfers.
+$$E = Pt = 100 \\times 60 = 6000\\ \\mathrm{J}$$
 
 > **Important:** Always convert energy to Joules, time to seconds, and power to Watts before substituting.
 """,
@@ -429,6 +474,9 @@ $$\\dot{H} = \\frac{H}{t} \\quad \\text{(unit: Sv/h)}$$
 | Slow neutrons | 3 |
 | X-rays | 1 |
 
+**Worked Example:** A patient absorbs a dose of 0.5 Gy of alpha particles ($w_R = 20$). Calculate the equivalent dose.
+$$H = D \\times w_R = 0.5 \\times 20 = 10\\ \\mathrm{Sv}$$
+
 > **Important:** Absorbed dose uses Gray (Gy); equivalent dose uses Sievert (Sv). Don't mix them up.
 """,
 
@@ -457,6 +505,10 @@ $$A = A_0 \\times \\left(\\frac{1}{2}\\right)^n$$
 **Activity halving rule:**
 - Each half-life → divide activity by 2
 - Going backwards in time → multiply activity by 2
+
+**Worked Example:** A source has an initial activity of 800 Bq and a half-life of 2 hours. Calculate its activity after 6 hours.
+$$n = \\frac{t}{T_{1/2}} = \\frac{6}{2} = 3 \\text{ half-lives}$$
+$$A = A_0 \\times \\left(\\frac{1}{2}\\right)^n = 800 \\times \\left(\\frac{1}{2}\\right)^3 = 100\\ \\mathrm{Bq}$$
 
 > **Important:** Activity is measured in Becquerels (Bq). The half-life is the time for activity to halve — not fall to zero.
 """,
@@ -487,6 +539,9 @@ $$\\frac{P_1}{T_1} = \\frac{P_2}{T_2}$$
 **Temperature conversion:**
 $$T(K) = T(°C) + 273$$
 
+**Worked Example:** A gas at 100 kPa occupies 2 m³. It is compressed at constant temperature to 1 m³. Calculate the new pressure.
+$$P_1 V_1 = P_2 V_2 \\quad\\Rightarrow\\quad P_2 = \\frac{P_1 V_1}{V_2} = \\frac{100 \\times 2}{1} = 200\\ \\mathrm{kPa}$$
+
 > **Important:** Temperature MUST be in Kelvin for Charles's and Gay-Lussac's laws. Adding 273, not subtracting.
 """,
 
@@ -509,6 +564,9 @@ $$P = \\frac{F}{A} \\qquad W = mg$$
 
 **Rearrangements:**
 $$F = PA \\qquad A = \\frac{F}{P}$$
+
+**Worked Example:** A force of 800 N acts on an area of 2 m². Calculate the pressure.
+$$P = \\frac{F}{A} = \\frac{800}{2} = 400\\ \\mathrm{Pa}$$
 
 > **Important:** The force exerted by a stationary object on the ground equals its weight ($W = mg$). Total contact area = number of tyres × area per tyre.
 """,
@@ -541,6 +599,9 @@ $$E_H = mL$$
 - $L_{fusion} = 334\\,000$ J/kg (melting/freezing)
 - $L_{vaporisation} = 2\\,260\\,000$ J/kg (boiling/condensing)
 
+**Worked Example:** 2 kg of water is heated so its temperature rises by 10°C ($c = 4200$ J/kg°C). Calculate the energy transferred.
+$$E_H = mc\\Delta T = 2 \\times 4200 \\times 10 = 84\\,000\\ \\mathrm{J}$$
+
 > **Important:** $\\Delta T = T_2 - T_1$ (the change, not the final temperature). Convert grams to kg. During a change of state, temperature stays constant.
 """,
 
@@ -572,6 +633,11 @@ $$\\theta = \\tan^{-1}\\left(\\frac{\\text{opposite}}{\\text{adjacent}}\\right)$
 | Q3 | S of W | $180° + \\theta$ |
 | Q4 | S of E | $180° - \\theta$ |
 
+**Worked Example:** A boat travels 3 km east and 4 km north. Calculate the magnitude and bearing of the resultant displacement.
+$$R = \\sqrt{3^2 + 4^2} = \\sqrt{25} = 5\\ \\mathrm{km}$$
+$$\\theta = \\tan^{-1}\\left(\\frac{3}{4}\\right) = 36.9°$$
+Both legs are positive (N and E), so the bearing is $\\theta$: **037°**.
+
 > **Important:** Don't add or subtract components — use Pythagoras. Bearings are measured clockwise from North (000° to 360°).
 """,
 
@@ -589,6 +655,9 @@ $$\\theta = \\tan^{-1}\\left(\\frac{\\text{opposite}}{\\text{adjacent}}\\right)$
 | Mass | Force |
 | Energy (kinetic, potential, etc.) | Weight |
 | Work done | Acceleration |
+
+**Worked Example:** Is mass a scalar or a vector? A 5 kg mass has a size (5 kg) but no direction, so **mass is a scalar**.
+Is velocity a scalar or a vector? "5 m/s north" has both a size (5 m/s) and a direction (north), so **velocity is a vector**.
 
 > **Important:** Similar-sounding quantities can be different types — distance (scalar) vs
 > displacement (vector), speed (scalar) vs velocity (vector). Weight is a force, so it is always
@@ -618,6 +687,10 @@ Height fallen: $\\quad s = \\frac{1}{2}gt^2$
 | $v_v$ | Vertical velocity | m/s |
 | s | Height fallen | m |
 | g | Gravitational acceleration | 9.8 m/s² |
+
+**Worked Example:** An object is launched horizontally at 10 m/s and falls for 2 s ($g = 9.8$ m/s²). Calculate the height fallen and the horizontal range.
+$$s = \\frac{1}{2}gt^2 = \\frac{1}{2} \\times 9.8 \\times 2^2 = 19.6\\ \\mathrm{m}$$
+$$s_H = v_H \\times t = 10 \\times 2 = 20\\ \\mathrm{m}$$
 
 > **Important:** Horizontal speed stays constant throughout. Vertical speed starts at 0 and increases. Use area under v-t graph (triangle) for height: $s = \\frac{1}{2} \\times t \\times v_v$.
 """,

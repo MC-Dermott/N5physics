@@ -36,6 +36,14 @@ Hadrons are made of quarks and feel the strong nuclear force.
 | Tau (τ⁻) | 3.17 × 10⁻²⁷ |
 | Proton (p) | 1.67 × 10⁻²⁷ |
 | Neutron (n) | 1.67 × 10⁻²⁷ |
+
+**Worked Example (classification):** Classify the electron. It has half-integer spin, so it is a
+**fermion**. It does not feel the strong force and is not made of quarks, so it is a **lepton**
+(not a hadron). The electron is a **fermion and lepton**.
+
+**Worked Example (order of magnitude):** The muon has a mass of 1.88 × 10⁻²⁸ kg (order of
+magnitude −28) and the neutron has a mass of 1.67 × 10⁻²⁷ kg (order of magnitude −27). The
+difference in order of magnitude is $|-27 - (-28)| = 1$.
 """
 
 # ── Particle classification ────────────────────────────────────────────────────

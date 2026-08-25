@@ -19,6 +19,9 @@ coal, oil, natural gas, nuclear
 | Hydroelectric | Reliable; can generate on demand | High setup cost; flooding of valley |
 | Wave | Free fuel; no CO₂ emissions | High setup cost; affects marine environment |
 
+**Worked Example:** Is coal renewable or non-renewable? Coal is burned as a fuel and cannot be
+replaced once used up, so **coal is non-renewable**.
+
 ### Input and Output Devices
 
 | Type | Description | Examples |
@@ -28,10 +31,18 @@ coal, oil, natural gas, nuclear
 | Digital output | Operates in two states only | relay, LED |
 | Analogue output | Produces a continuous range | loudspeaker, lamp, motor, buzzer |
 
+**Worked Example:** Is an LDR (light dependent resistor) a digital or analogue input device? An
+LDR's resistance changes smoothly over a continuous range of light levels, so **an LDR is an
+analogue input device**.
+
 ### Electromagnets
 - An electromagnet can be **switched on and off** (a permanent magnet cannot).
 - Used in scrapyards: switched off to **release** the lifted materials.
 - Components needed: **battery + coils of wire + switch**
+
+**Worked Example:** Why is an electromagnet used in a scrapyard crane rather than a permanent
+magnet? Because an electromagnet **can be switched off** to release the lifted scrap metal —
+a permanent magnet cannot be turned off.
 """
 
 

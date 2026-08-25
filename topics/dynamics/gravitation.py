@@ -31,6 +31,10 @@ $$g = \\frac{GM}{r^2} \\qquad \\text{or equivalently} \\qquad g = \\frac{F}{m}$$
 
 > ⚠️ Always convert distances to **metres** before substituting into formulae.
 > 1 km = 1000 m, so multiply km values by 1000.
+
+**Worked Example:** Calculate the gravitational field strength at the surface of a planet with
+mass $M = 5.97 \\times 10^{24}$ kg and radius $R = 6.37 \\times 10^{6}$ m.
+$$g = \\frac{GM}{r^2} = \\frac{6.674 \\times 10^{-11} \\times 5.97 \\times 10^{24}}{(6.37 \\times 10^{6})^2} = 9.8\\ \\mathrm{N/kg}$$
 """
 
 _PLANETS = [

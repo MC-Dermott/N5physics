@@ -41,6 +41,12 @@ For motion in a straight line with **constant acceleration**:
 - The **sign** of the acceleration matches the **sign of the gradient** of the
   v–t graph.
 
+**Worked Example:** A v–t graph rises in a straight line from 0 to 8 m/s over the first 4 s, then
+stays constant at 8 m/s for the next 3 s.
+- Acceleration in the first 4 s = gradient = $\\frac{8 - 0}{4} = 2\\ \\mathrm{m/s^2}$
+- Displacement in the first 4 s = area under the graph (triangle) = $\\frac{1}{2} \\times 4 \\times 8 = 16\\ \\mathrm{m}$
+- Acceleration during the constant-speed phase = 0 m/s² (horizontal line)
+
 > **Common exam trap:** don't assume the s–t and a–t graphs look like copies of the
 > v–t graph. Only the *gradient* (→ a–t) and *area* (→ s–t) relationships matter —
 > always check whether the shape should be straight or curved, and check the sign.

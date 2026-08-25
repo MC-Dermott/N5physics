@@ -31,6 +31,9 @@ $$l' = l\\sqrt{1 - \\frac{v^2}{c^2}}$$
 | v | Speed of the moving object | m/s |
 | c | Speed of light = 3 × 10⁸ m/s | m/s |
 
+**Worked Example:** A spacecraft moves at $v = 0.6c$. An observer on board measures a proper time of 10 s between two events. Calculate the dilated time measured by a stationary observer.
+$$t' = \\frac{t}{\\sqrt{1 - \\frac{v^2}{c^2}}} = \\frac{10}{\\sqrt{1 - 0.6^2}} = \\frac{10}{0.8} = 12.5\\ \\mathrm{s}$$
+
 > **Important:** t' > t (stationary observer measures a longer time).
 > l' < l (stationary observer measures a shorter length).
 > Both formulae use the same factor √(1 − v²/c²).

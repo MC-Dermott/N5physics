@@ -20,6 +20,9 @@ $$P = \\frac{E}{t}$$
 
 **Rearrangements:**
 $$E = P \\times t \\qquad t = \\frac{E}{P}$$
+
+**Worked Example:** A 500 W appliance runs for 120 s. Calculate the energy transferred.
+$$E = P \\times t = 500 \\times 120 = 60\\,000\\ \\mathrm{J}$$
 """
 
 # All powers are multiples of 100 so E = P×t stays a clean integer.
