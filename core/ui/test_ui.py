@@ -165,23 +165,10 @@ def _render_scenario_test(test, idx, question):
     st.markdown(f"**Part {part_idx + 1} of {len(scored_parts)}:** {part.question_text}")
     st.write("")
 
-    if part.unit:
-        col1, col2 = st.columns([3, 2])
-        with col1:
-            answer = st.text_input("Your answer:", key=f"test_ans_{idx}_p{part_idx}")
-        with col2:
-            unit_input = st.text_input("Units:", key=f"test_unit_{idx}_p{part_idx}",
-                                       placeholder="e.g. m/s")
-        st.caption(_UNIT_HINT)
-    else:
-        answer = st.text_input("Your answer:", key=f"test_ans_{idx}_p{part_idx}")
-        unit_input = None
+    is_classification = part.metadata.get("type") == "classification"
 
-    if st.button("Submit", key=f"test_submit_{idx}_p{part_idx}", type="primary"):
-        result, distractor = check_answer(answer, part, unit_input=unit_input)
-        display_answer = f"{answer} {unit_input}".strip() if unit_input else answer
+    def _advance(display_answer, result, distractor, part):
         st.session_state[part_answers_key].append((display_answer, result, distractor, part))
-
         if part_idx + 1 < len(scored_parts):
             st.session_state[part_idx_key] += 1
             st.rerun()
@@ -196,6 +183,34 @@ def _render_scenario_test(test, idx, question):
             del st.session_state[part_idx_key]
             del st.session_state[part_answers_key]
             st.rerun()
+
+    if is_classification:
+        options = part.metadata.get("options", [])
+        selected = st.radio("Select your answer:", options,
+                            key=f"test_radio_{idx}_p{part_idx}", index=None)
+        if st.button("Submit", key=f"test_submit_{idx}_p{part_idx}", type="primary"):
+            if selected is not None:
+                result, distractor = _check_classification(selected, part)
+                _advance(selected, result, distractor, part)
+            else:
+                st.warning("Please select an answer before submitting.")
+    else:
+        if part.unit:
+            col1, col2 = st.columns([3, 2])
+            with col1:
+                answer = st.text_input("Your answer:", key=f"test_ans_{idx}_p{part_idx}")
+            with col2:
+                unit_input = st.text_input("Units:", key=f"test_unit_{idx}_p{part_idx}",
+                                           placeholder="e.g. m/s")
+            st.caption(_UNIT_HINT)
+        else:
+            answer = st.text_input("Your answer:", key=f"test_ans_{idx}_p{part_idx}")
+            unit_input = None
+
+        if st.button("Submit", key=f"test_submit_{idx}_p{part_idx}", type="primary"):
+            result, distractor = check_answer(answer, part, unit_input=unit_input)
+            display_answer = f"{answer} {unit_input}".strip() if unit_input else answer
+            _advance(display_answer, result, distractor, part)
 
 
 def _render_summary(test):

@@ -131,13 +131,31 @@ def _render_scenario(question, user_id, qualification):
 
     for i, part in enumerate(question.parts):
         part_submitted_key = f"sub_{question.qid}_part{i}"
-        is_explain = part.metadata.get("type") == "explain"
+        part_type = part.metadata.get("type")
+        is_explain = part_type == "explain"
+        is_classification = part_type == "classification"
         st.markdown(f"**Part {i + 1}:** {part.question_text}")
 
         if not st.session_state.get(part_submitted_key):
             if i == 0 or st.session_state.get(f"sub_{question.qid}_part{i - 1}"):
                 if is_explain:
                     _render_explain_part(question, i, part_submitted_key)
+                elif is_classification:
+                    _render_notes(part)
+                    options = part.metadata.get("options", [])
+                    selected = st.radio("Select your answer:", options,
+                                        key=f"radio_{question.qid}_part{i}", index=None)
+                    if st.button(f"Submit Part {i + 1}", key=f"submit_{question.qid}_part{i}", type="primary"):
+                        if selected is not None:
+                            st.session_state[part_submitted_key] = selected
+                            result, distractor = _check_classification(selected, part)
+                            st.session_state[f"result_{question.qid}_part{i}"] = (result, distractor)
+                            if user_id:
+                                save_practice_attempt(user_id, qualification, part.topic,
+                                                      part.question_type, result == "correct")
+                            st.rerun()
+                        else:
+                            st.warning("Please select an answer before submitting.")
                 else:
                     _render_notes(part)
                     render_scaffold(part, suffix=f"part{i}")

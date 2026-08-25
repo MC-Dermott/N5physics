@@ -24,6 +24,7 @@ from topics.dynamics.towing                import (
     gen_l2_one_trailer_friction,
     gen_l3_multi_trailer_no_friction,
     gen_l4_multi_trailer_friction,
+    gen_exam_style as gen_towing_exam_style,
 )
 
 from topics.electricity.current          import generate_current
@@ -165,6 +166,7 @@ QUAL_REGISTRY = {
                 "Level 2 — One Trailer, With Friction":      gen_l2_one_trailer_friction,
                 "Level 3 — Multiple Trailers, No Friction":  gen_l3_multi_trailer_no_friction,
                 "Level 4 — Multiple Trailers, With Friction": gen_l4_multi_trailer_friction,
+                "Level 5 — Exam Style":                      gen_towing_exam_style,
             },
         },
         "Particles and Waves": {

@@ -37,29 +37,47 @@ $$T = (m_t \times a) + f_t = (250 \times 2.16) + 100 = 640\ \mathrm{N}$$
 **Example:** A 1000 kg car tows trailer 1 (300 kg) and trailer 2 (200 kg) with a driving force
 of 3000 N and no friction.
 
-*(a) Calculate the acceleration.*
+*(a) Calculate the acceleration of the whole collection (car + both trailers).*
 $$a = \frac{F}{m_c + m_{t1} + m_{t2}} = \frac{3000}{1500} = 2\ \mathrm{m/s^2}$$
 
-*(b) Tension in the tow bar between the car and trailer 1* — this tow bar must pull **both**
-trailers:
-$$T_1 = (m_{t1} + m_{t2}) \times a = (300 + 200) \times 2 = 1000\ \mathrm{N}$$
+*(b) Calculate the tension in the tow bar connecting the car to the trailers.*
 
-*(c) Tension in the tow bar between trailer 1 and trailer 2* — this tow bar only pulls trailer 2:
-$$T_2 = m_{t2} \times a = 200 \times 2 = 400\ \mathrm{N}$$
+Treat the towed vehicles (trailer 1 + trailer 2) as a single group — the tow bar must pull
+**both** of them:
+$$T = (m_{t1} + m_{t2}) \times a = (300 + 200) \times 2 = 1000\ \mathrm{N}$$
 """,
 
     ("Our Dynamic Universe", "Towing", "Level 4 — Multiple Trailers, With Friction"): r"""
 **Example:** A 1000 kg car tows trailer 1 (300 kg) and trailer 2 (200 kg) with a driving force
 of 4000 N. Friction: 200 N on the car, 100 N on trailer 1, 50 N on trailer 2.
 
-*(a) Calculate the acceleration.*
+*(a) Calculate the acceleration of the whole collection (car + both trailers).*
 $$a = \frac{F - f_c - f_{t1} - f_{t2}}{m_c + m_{t1} + m_{t2}} = \frac{4000 - 200 - 100 - 50}{1500} = 2.43\ \mathrm{m/s^2}$$
 
-*(b) Tension between the car and trailer 1* (pulls both trailers, opposed by both their frictions):
-$$T_1 = ((m_{t1} + m_{t2}) \times a) + f_{t1} + f_{t2} = (500 \times 2.43) + 100 + 50 = 1365\ \mathrm{N}$$
+*(b) Calculate the tension in the tow bar connecting the car to the trailers.*
 
-*(c) Tension between trailer 1 and trailer 2* (pulls only trailer 2):
-$$T_2 = (m_{t2} \times a) + f_{t2} = (200 \times 2.43) + 50 = 536\ \mathrm{N}$$
+Treat the towed vehicles (trailer 1 + trailer 2) as a single group, opposed by both their
+friction forces:
+$$T = ((m_{t1} + m_{t2}) \times a) + f_{t1} + f_{t2} = (500 \times 2.43) + 100 + 50 = 1365\ \mathrm{N}$$
+""",
+
+    ("Our Dynamic Universe", "Towing", "Level 5 — Exam Style"): r"""
+**Example:** A bike tows a trailer. Parts (a) and (b) ask you to calculate the acceleration and
+the tension in the tow bar, exactly as in the earlier levels.
+
+**Part (c):** As the speed of the bike and trailer increases, the friction forces on both the
+bike and the trailer increase. The acceleration remains 0.58 m/s². Which statement correctly
+describes what happens to the tension in the tow bar, and why?
+
+- Decreases — the extra friction on the trailer means less tension is needed to keep it moving.
+- Stays the same — since the acceleration doesn't change, none of the individual forces need to change either.
+- Increases — because the driving force from the bike's engine must increase to maintain the same acceleration.
+- **Increases — considering the trailer alone, T − F_friction = m × a. Since the acceleration stays constant, the extra friction must be balanced by extra tension.** ✓
+
+The correct option is the last one: friction opposes the tension, so for the equation
+$T - F_{\text{friction}} = m \times a$ to keep balancing with a fixed right-hand side, T must
+rise to match the extra friction. (The third option is a common trap — it's true of the
+*driving force*, but the question asks specifically about the *tow bar tension*.)
 """,
 
     ("Dynamics", "Acceleration", "Change in Speed"): r"""

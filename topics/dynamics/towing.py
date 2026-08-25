@@ -45,7 +45,7 @@ def _ctx():
 
 # ── Level 1 — one trailer, no friction ──────────────────────────────────────────
 
-def gen_l1_one_trailer_no_friction(level="Higher"):
+def _l1_scenario(level="Higher"):
     obj = _ctx()
     m_c = random.randint(700, 1500)
     m_t = random.randint(200, 800)
@@ -120,6 +120,12 @@ def gen_l1_one_trailer_no_friction(level="Higher"):
         notes=_NOTES,
     )
 
+    meta = {"obj": obj, "a": a, "is_multi": False}
+    return context, part_a, part_b, meta
+
+
+def gen_l1_one_trailer_no_friction(level="Higher"):
+    context, part_a, part_b, _meta = _l1_scenario(level)
     return PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Towing", level=level,
@@ -129,7 +135,7 @@ def gen_l1_one_trailer_no_friction(level="Higher"):
 
 # ── Level 2 — one trailer, with friction ────────────────────────────────────────
 
-def gen_l2_one_trailer_friction(level="Higher"):
+def _l2_scenario(level="Higher"):
     obj = _ctx()
     m_c = random.randint(700, 1500)
     m_t = random.randint(200, 800)
@@ -206,6 +212,12 @@ def gen_l2_one_trailer_friction(level="Higher"):
         notes=_NOTES,
     )
 
+    meta = {"obj": obj, "a": a, "is_multi": False}
+    return context, part_a, part_b, meta
+
+
+def gen_l2_one_trailer_friction(level="Higher"):
+    context, part_a, part_b, _meta = _l2_scenario(level)
     return PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Towing", level=level,
@@ -215,7 +227,7 @@ def gen_l2_one_trailer_friction(level="Higher"):
 
 # ── Level 3 — multiple trailers, no friction ────────────────────────────────────
 
-def gen_l3_multi_trailer_no_friction(level="Higher"):
+def _l3_scenario(level="Higher"):
     obj = _ctx()
     m_c = random.randint(800, 1500)
     m_t1 = random.randint(200, 600)
@@ -224,7 +236,6 @@ def gen_l3_multi_trailer_no_friction(level="Higher"):
     total = m_c + m_t1 + m_t2
     a = round(F / total, 2)
     T1 = round((m_t1 + m_t2) * a, 2)
-    T2 = round(m_t2 * a, 2)
 
     context = (
         f"A {obj} of mass {m_c} kg tows two trailers along a straight, level road: "
@@ -262,15 +273,15 @@ def gen_l3_multi_trailer_no_friction(level="Higher"):
     )
 
     working_b = [
-        {"type": "text",  "content": "Consider trailer 1 AND trailer 2 together — everything "
-                                     "behind this tow bar. The only horizontal force on them "
-                                     "is the tension T₁:"},
-        {"type": "latex", "content": r"T_1 = (m_{t1} + m_{t2})\,a"},
-        {"type": "latex", "content": rf"T_1 = ({m_t1} + {m_t2}) \times {a}"},
-        {"type": "latex", "content": rf"T_1 = {T1}\ \mathrm{{N}}"},
+        {"type": "text",  "content": "Consider the towed vehicles — trailer 1 AND trailer 2 "
+                                     "together — as a single group. The only horizontal force "
+                                     "on this group is the tension T in the tow bar pulling them:"},
+        {"type": "latex", "content": r"T = (m_{t1} + m_{t2})\,a"},
+        {"type": "latex", "content": rf"T = ({m_t1} + {m_t2}) \times {a}"},
+        {"type": "latex", "content": rf"T = {T1}\ \mathrm{{N}}"},
     ]
     part_b = PhysicsQuestion(
-        question_text=f"Calculate the tension in the tow bar connecting the {obj} and trailer 1.",
+        question_text=f"Calculate the tension in the tow bar connecting the {obj} to the trailers.",
         correct_answer=T1, unit="N",
         topic="Our Dynamic Universe", question_type="Towing", level=level,
         working=working_b,
@@ -279,56 +290,34 @@ def gen_l3_multi_trailer_no_friction(level="Higher"):
              "mistake": "This tow bar has to pull BOTH trailers, not just trailer 1. Use the "
                         "combined mass of trailer 1 and trailer 2.",
              "working": working_b},
+            {"value": round(m_t2 * a, 2),
+             "mistake": "This tow bar has to pull BOTH trailers, not just trailer 2. Use the "
+                        "combined mass of trailer 1 and trailer 2.",
+             "working": working_b},
             {"value": round(total * a, 2),
              "mistake": "That's the force needed for the whole system (equal to the driving "
-                        "force), not just the trailers behind this tow bar.",
-             "working": working_b},
-            {"value": float(F),
-             "mistake": f"The tension is not the same as the driving force — some of it also "
-                        f"accelerates the {obj} itself.",
+                        "force), not just the towed vehicles behind this tow bar.",
              "working": working_b},
         ],
         notes=_NOTES,
     )
 
-    working_c = [
-        {"type": "text",  "content": "Consider trailer 2 alone. The only horizontal force on "
-                                     "it is the tension T₂:"},
-        {"type": "latex", "content": r"T_2 = m_{t2}\,a"},
-        {"type": "latex", "content": rf"T_2 = {m_t2} \times {a}"},
-        {"type": "latex", "content": rf"T_2 = {T2}\ \mathrm{{N}}"},
-    ]
-    part_c = PhysicsQuestion(
-        question_text="Calculate the tension in the tow bar connecting trailer 1 and trailer 2.",
-        correct_answer=T2, unit="N",
-        topic="Our Dynamic Universe", question_type="Towing", level=level,
-        working=working_c,
-        distractors=[
-            {"value": T1,
-             "mistake": "That's the tension in the FIRST tow bar (vehicle–trailer 1), which "
-                        "pulls both trailers. This tow bar only has to pull trailer 2.",
-             "working": working_c},
-            {"value": round(m_t1 * a, 2),
-             "mistake": "You used trailer 1's mass instead of trailer 2's. This tow bar only "
-                        "pulls trailer 2 — isolate trailer 2 alone.",
-             "working": working_c},
-            {"value": round(total * a, 2),
-             "mistake": "That's the force for the whole system, not just trailer 2.",
-             "working": working_c},
-        ],
-        notes=_NOTES,
-    )
+    meta = {"obj": obj, "a": a, "is_multi": True}
+    return context, part_a, part_b, meta
 
+
+def gen_l3_multi_trailer_no_friction(level="Higher"):
+    context, part_a, part_b, _meta = _l3_scenario(level)
     return PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Towing", level=level,
-        is_scenario=True, scenario_context=context, parts=[part_a, part_b, part_c],
+        is_scenario=True, scenario_context=context, parts=[part_a, part_b],
     )
 
 
 # ── Level 4 — multiple trailers, with friction ──────────────────────────────────
 
-def gen_l4_multi_trailer_friction(level="Higher"):
+def _l4_scenario(level="Higher"):
     obj = _ctx()
     m_c = random.randint(800, 1500)
     m_t1 = random.randint(200, 600)
@@ -341,7 +330,6 @@ def gen_l4_multi_trailer_friction(level="Higher"):
     net = F - f_c - f_t1 - f_t2
     a = round(net / total, 2)
     T1 = round((m_t1 + m_t2) * a + f_t1 + f_t2, 2)
-    T2 = round(m_t2 * a + f_t2, 2)
 
     context = (
         f"A {obj} of mass {m_c} kg tows two trailers along a straight, level road: "
@@ -380,22 +368,23 @@ def gen_l4_multi_trailer_friction(level="Higher"):
     )
 
     working_b = [
-        {"type": "text",  "content": "Consider trailer 1 AND trailer 2 together. Two forces "
-                                     "act on this combined mass: the tension T₁ (forward) and "
-                                     "both trailers' friction (backward):"},
-        {"type": "latex", "content": r"T_1 - f_{t1} - f_{t2} = (m_{t1} + m_{t2})\,a"},
-        {"type": "latex", "content": r"T_1 = (m_{t1} + m_{t2})\,a + f_{t1} + f_{t2}"},
-        {"type": "latex", "content": rf"T_1 = (({m_t1} + {m_t2}) \times {a}) + {f_t1} + {f_t2} = {T1}\ \mathrm{{N}}"},
+        {"type": "text",  "content": "Consider the towed vehicles — trailer 1 AND trailer 2 "
+                                     "together — as a single group. Two forces act on this "
+                                     "group: the tension T (forward) and both trailers' "
+                                     "friction (backward):"},
+        {"type": "latex", "content": r"T - f_{t1} - f_{t2} = (m_{t1} + m_{t2})\,a"},
+        {"type": "latex", "content": r"T = (m_{t1} + m_{t2})\,a + f_{t1} + f_{t2}"},
+        {"type": "latex", "content": rf"T = (({m_t1} + {m_t2}) \times {a}) + {f_t1} + {f_t2} = {T1}\ \mathrm{{N}}"},
     ]
     part_b = PhysicsQuestion(
-        question_text=f"Calculate the tension in the tow bar connecting the {obj} and trailer 1.",
+        question_text=f"Calculate the tension in the tow bar connecting the {obj} to the trailers.",
         correct_answer=T1, unit="N",
         topic="Our Dynamic Universe", question_type="Towing", level=level,
         working=working_b,
         distractors=[
             {"value": round((m_t1 + m_t2) * a, 2),
              "mistake": "You forgot to add the friction acting on the two trailers: "
-                        "T₁ = (m_t1 + m_t2) × a + f_t1 + f_t2.",
+                        "T = (m_t1 + m_t2) × a + f_t1 + f_t2.",
              "working": working_b},
             {"value": round((m_t1 + m_t2) * a + f_t1, 2),
              "mistake": "You only added trailer 1's friction — trailer 2's friction also acts "
@@ -403,37 +392,97 @@ def gen_l4_multi_trailer_friction(level="Higher"):
              "working": working_b},
             {"value": round(total * a + f_c + f_t1 + f_t2, 2),
              "mistake": "That uses the whole system including the vehicle, not just the "
-                        "trailers behind this tow bar.",
+                        "towed vehicles behind this tow bar.",
              "working": working_b},
         ],
         notes=_NOTES,
     )
 
-    working_c = [
-        {"type": "text",  "content": "Consider trailer 2 alone. Two forces act on it: the "
-                                     "tension T₂ (forward) and its own friction f_t2 (backward):"},
-        {"type": "latex", "content": r"T_2 - f_{t2} = m_{t2}\,a"},
-        {"type": "latex", "content": r"T_2 = m_{t2}\,a + f_{t2}"},
-        {"type": "latex", "content": rf"T_2 = ({m_t2} \times {a}) + {f_t2} = {T2}\ \mathrm{{N}}"},
-    ]
-    part_c = PhysicsQuestion(
-        question_text="Calculate the tension in the tow bar connecting trailer 1 and trailer 2.",
-        correct_answer=T2, unit="N",
+    meta = {"obj": obj, "a": a, "is_multi": True}
+    return context, part_a, part_b, meta
+
+
+def gen_l4_multi_trailer_friction(level="Higher"):
+    context, part_a, part_b, _meta = _l4_scenario(level)
+    return PhysicsQuestion(
+        question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Towing", level=level,
-        working=working_c,
-        distractors=[
-            {"value": round(m_t2 * a, 2),
-             "mistake": "You forgot to add trailer 2's friction: T₂ = (m_t2 × a) + f_t2.",
-             "working": working_c},
-            {"value": T1,
-             "mistake": "That's the tension in the FIRST tow bar, which also has to pull "
-                        "trailer 1. This tow bar only pulls trailer 2.",
-             "working": working_c},
-            {"value": round(m_t1 * a + f_t2, 2),
-             "mistake": "You used trailer 1's mass instead of trailer 2's. Isolate trailer 2 alone.",
-             "working": working_c},
-        ],
-        notes=_NOTES,
+        is_scenario=True, scenario_context=context, parts=[part_a, part_b],
+    )
+
+
+# ── Level 5 — exam style (calculation parts + justify) ──────────────────────────
+
+_SCENARIO_BUILDERS = [_l1_scenario, _l2_scenario, _l3_scenario, _l4_scenario]
+
+
+def gen_exam_style(level="Higher"):
+    builder = random.choice(_SCENARIO_BUILDERS)
+    context, part_a, part_b, meta = builder(level)
+    obj = meta["obj"]
+    a = meta["a"]
+    is_multi = meta["is_multi"]
+
+    trailer_noun = "trailers" if is_multi else "trailer"
+    trailer_the = f"the {trailer_noun}"
+    trailer_desc = "the trailers together" if is_multi else "the trailer alone"
+    friction_desc = "both trailers'" if is_multi else "the trailer's"
+
+    justify_question = (
+        f"As the speed of the {obj} and {trailer_noun} increases, the friction forces on "
+        f"both the {obj} and the {trailer_noun} increase.\n\n"
+        f"The acceleration of the {obj} and {trailer_noun} remains {a} m/s².\n\n"
+        f"Which statement correctly describes what happens to the tension in the tow bar, "
+        f"and why?"
+    )
+
+    correct = (
+        f"Increases — considering {trailer_desc}, T − F_friction = m × a. Since the "
+        f"acceleration stays constant, the extra friction must be balanced by extra tension."
+    )
+    working = [
+        {"type": "text", "content": f"Consider {trailer_desc}. The forces on it are the "
+                                    "tension T (forward) and friction (backward):"},
+        {"type": "latex", "content": r"T - F_{\text{friction}} = m\,a"},
+        {"type": "text", "content": f"The acceleration a is fixed at {a} m/s² and the mass "
+                                    "doesn't change, so the right-hand side (m × a) stays "
+                                    f"constant. If {friction_desc} friction increases, T must "
+                                    "increase by the same amount to keep the equation balanced."},
+    ]
+
+    distractors = [
+        {"value": (f"Decreases — the extra friction on {trailer_the} means less tension is "
+                    "needed to keep it moving."),
+         "mistake": "Friction opposes the tension, so if friction increases, the tow bar "
+                    "must pull *harder*, not softer, to maintain the same acceleration.",
+         "working": working},
+        {"value": ("Stays the same — since the acceleration doesn't change, none of the "
+                    "individual forces need to change either."),
+         "mistake": "Constant acceleration only means the *resultant* (unbalanced) force on "
+                    f"{trailer_the} stays the same. If friction changes, the tension must "
+                    "also change to keep that resultant constant.",
+         "working": working},
+        {"value": ("Increases — because the driving force from the vehicle's engine must "
+                    "increase to maintain the same acceleration."),
+         "mistake": "That's true of the driving force, but the question asks about the "
+                    f"tension in the tow bar specifically. Consider {trailer_desc}: "
+                    "T − F_friction = m × a.",
+         "working": working},
+    ]
+
+    options = [correct] + [d["value"] for d in distractors]
+    random.shuffle(options)
+
+    part_c = PhysicsQuestion(
+        question_text=justify_question,
+        correct_answer=correct,
+        unit="",
+        topic="Our Dynamic Universe",
+        question_type="Towing",
+        level=level,
+        distractors=distractors,
+        working=working,
+        metadata={"type": "classification", "options": options},
     )
 
     return PhysicsQuestion(
