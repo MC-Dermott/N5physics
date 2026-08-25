@@ -8,6 +8,60 @@
 # (topic, question_type) key when both exist.
 
 EXAMPLES = {
+    ("Our Dynamic Universe", "Towing", "Level 1 — One Trailer, No Friction"): r"""
+**Example:** A 1000 kg car tows a single 250 kg trailer with a driving force of 2500 N and no friction.
+
+*(a) Calculate the acceleration.*
+$$a = \frac{F}{m_c + m_t} = \frac{2500}{1000 + 250} = 2\ \mathrm{m/s^2}$$
+
+*(b) Calculate the tension in the tow bar.*
+
+Considering the trailer alone (the only force on it is the tension):
+$$T = m_t \times a = 250 \times 2 = 500\ \mathrm{N}$$
+""",
+
+    ("Our Dynamic Universe", "Towing", "Level 2 — One Trailer, With Friction"): r"""
+**Example:** A 1000 kg car tows a 250 kg trailer with a driving force of 3000 N. Friction acts
+on the car with 200 N and on the trailer with 100 N.
+
+*(a) Calculate the acceleration.*
+$$a = \frac{F - f_c - f_t}{m_c + m_t} = \frac{3000 - 200 - 100}{1250} = 2.16\ \mathrm{m/s^2}$$
+
+*(b) Calculate the tension in the tow bar.*
+
+Considering the trailer alone (tension forward, friction backward):
+$$T = (m_t \times a) + f_t = (250 \times 2.16) + 100 = 640\ \mathrm{N}$$
+""",
+
+    ("Our Dynamic Universe", "Towing", "Level 3 — Multiple Trailers, No Friction"): r"""
+**Example:** A 1000 kg car tows trailer 1 (300 kg) and trailer 2 (200 kg) with a driving force
+of 3000 N and no friction.
+
+*(a) Calculate the acceleration.*
+$$a = \frac{F}{m_c + m_{t1} + m_{t2}} = \frac{3000}{1500} = 2\ \mathrm{m/s^2}$$
+
+*(b) Tension in the tow bar between the car and trailer 1* — this tow bar must pull **both**
+trailers:
+$$T_1 = (m_{t1} + m_{t2}) \times a = (300 + 200) \times 2 = 1000\ \mathrm{N}$$
+
+*(c) Tension in the tow bar between trailer 1 and trailer 2* — this tow bar only pulls trailer 2:
+$$T_2 = m_{t2} \times a = 200 \times 2 = 400\ \mathrm{N}$$
+""",
+
+    ("Our Dynamic Universe", "Towing", "Level 4 — Multiple Trailers, With Friction"): r"""
+**Example:** A 1000 kg car tows trailer 1 (300 kg) and trailer 2 (200 kg) with a driving force
+of 4000 N. Friction: 200 N on the car, 100 N on trailer 1, 50 N on trailer 2.
+
+*(a) Calculate the acceleration.*
+$$a = \frac{F - f_c - f_{t1} - f_{t2}}{m_c + m_{t1} + m_{t2}} = \frac{4000 - 200 - 100 - 50}{1500} = 2.43\ \mathrm{m/s^2}$$
+
+*(b) Tension between the car and trailer 1* (pulls both trailers, opposed by both their frictions):
+$$T_1 = ((m_{t1} + m_{t2}) \times a) + f_{t1} + f_{t2} = (500 \times 2.43) + 100 + 50 = 1365\ \mathrm{N}$$
+
+*(c) Tension between trailer 1 and trailer 2* (pulls only trailer 2):
+$$T_2 = (m_{t2} \times a) + f_{t2} = (200 \times 2.43) + 50 = 536\ \mathrm{N}$$
+""",
+
     ("Dynamics", "Acceleration", "Change in Speed"): r"""
 **Example:** A car has an acceleration of −4 m/s² for 6 s.
 

@@ -19,6 +19,12 @@ from topics.dynamics.graphs_of_motion      import generate_graphs_of_motion
 from topics.dynamics.special_relativity    import generate_special_relativity
 from topics.dynamics.gravitation           import generate_orbital_gravitation
 from topics.dynamics.projectile_higher     import generate_projectile_l1, generate_projectile_l2
+from topics.dynamics.towing                import (
+    gen_l1_one_trailer_no_friction,
+    gen_l2_one_trailer_friction,
+    gen_l3_multi_trailer_no_friction,
+    gen_l4_multi_trailer_friction,
+)
 
 from topics.electricity.current          import generate_current
 from topics.electricity.ohms_law         import generate_ohms_law
@@ -153,6 +159,12 @@ QUAL_REGISTRY = {
             "Projectile Motion": {
                 "Level 1 — Same Height":     generate_projectile_l1,
                 "Level 2 — Different Height": generate_projectile_l2,
+            },
+            "Towing": {
+                "Level 1 — One Trailer, No Friction":        gen_l1_one_trailer_no_friction,
+                "Level 2 — One Trailer, With Friction":      gen_l2_one_trailer_friction,
+                "Level 3 — Multiple Trailers, No Friction":  gen_l3_multi_trailer_no_friction,
+                "Level 4 — Multiple Trailers, With Friction": gen_l4_multi_trailer_friction,
             },
         },
         "Particles and Waves": {
