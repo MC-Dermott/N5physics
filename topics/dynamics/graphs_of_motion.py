@@ -400,3 +400,170 @@ def generate_graphs_of_motion(level="Higher"):
             "option_figures": option_figures,
         },
     )
+
+
+# ── Numeric velocities from an acceleration–time graph ───────────────────────
+
+from utils.make_question import make_question
+
+_AT_CONTEXTS = [
+    "A cyclist", "A car", "A train", "A tractor", "A go-kart",
+]
+
+
+def _at_ctx():
+    return random.choice(_AT_CONTEXTS)
+
+
+def _dedup_at_options(options_data, correct):
+    """Remove distractor entries whose value equals the correct answer or another distractor."""
+    seen = {round(float(correct), 4)}
+    cleaned = []
+    for opt in options_data:
+        key = round(float(opt["value"]), 4)
+        if key not in seen:
+            seen.add(key)
+            cleaned.append(opt)
+        elif opt["mistake"] is None:
+            cleaned.insert(0, opt)
+    if not any(opt["mistake"] is None for opt in cleaned):
+        cleaned.insert(0, {"value": correct, "mistake": None, "working": []})
+    return cleaned
+
+
+def gen_at_final_velocity(level="Higher"):
+    obj = _at_ctx()
+    u = random.randint(2, 15)
+    a = random.choice([-3, -2.5, -2, -1.5, 1.5, 2, 2.5, 3])
+    t = random.choice([2, 3, 4, 5, 6, 8])
+    v = round(u + a * t, 2)
+    while v <= 0:
+        u = random.randint(2, 15)
+        t = random.choice([2, 3, 4, 5, 6, 8])
+        v = round(u + a * t, 2)
+
+    accel_word = "a constant deceleration" if a < 0 else "a constant acceleration"
+    question = (
+        f"{obj} has an initial velocity of {u} m/s. An acceleration–time graph shows "
+        f"{accel_word} of {abs(a)} m/s² for {t} s. Calculate the final velocity."
+    )
+    working = [
+        {"type": "text",  "content": "The change in velocity equals the area under the a-t graph:"},
+        {"type": "latex", "content": r"\Delta v = a \times t"},
+        {"type": "latex", "content": rf"\Delta v = ({a}) \times {t} = {round(a*t, 2)}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": r"v = u + \Delta v"},
+        {"type": "latex", "content": rf"v = {u} + ({round(a*t,2)}) = {v}\ \mathrm{{m/s}}"},
+    ]
+    options_data = [
+        {"value": v, "mistake": None, "working": working},
+        {"value": round(u - a * t, 2),
+         "mistake": "Check the sign of the acceleration — a deceleration reduces velocity, an acceleration increases it.",
+         "working": working},
+        {"value": round(a * t, 2),
+         "mistake": "You forgot to add the initial velocity u. v = u + (a × t).",
+         "working": working},
+        {"value": round(u + a, 2),
+         "mistake": "You need the *area* under the a-t graph (a × t), not just a on its own.",
+         "working": working},
+    ]
+    options_data = _dedup_at_options(options_data, v)
+    return make_question(question, v, options_data, "m/s",
+                         notes=_NOTES, topic="Our Dynamic Universe",
+                         question_type="Graphs of Motion", level=level)
+
+
+def gen_at_initial_velocity(level="Higher"):
+    obj = _at_ctx()
+    v = random.randint(10, 25)
+    a = random.choice([-3, -2.5, -2, -1.5, 1.5, 2, 2.5, 3])
+    t = random.choice([2, 3, 4, 5, 6, 8])
+    u = round(v - a * t, 2)
+    while u <= 0:
+        v = random.randint(10, 25)
+        t = random.choice([2, 3, 4, 5, 6, 8])
+        u = round(v - a * t, 2)
+
+    accel_word = "a constant deceleration" if a < 0 else "a constant acceleration"
+    question = (
+        f"{obj} undergoes {accel_word} of {abs(a)} m/s² for {t} s, shown on an "
+        f"acceleration–time graph, finishing with a velocity of {v} m/s. "
+        f"Calculate its initial velocity."
+    )
+    working = [
+        {"type": "text",  "content": "The change in velocity equals the area under the a-t graph:"},
+        {"type": "latex", "content": r"\Delta v = a \times t"},
+        {"type": "latex", "content": rf"\Delta v = ({a}) \times {t} = {round(a*t, 2)}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": r"u = v - \Delta v"},
+        {"type": "latex", "content": rf"u = {v} - ({round(a*t,2)}) = {u}\ \mathrm{{m/s}}"},
+    ]
+    options_data = [
+        {"value": u, "mistake": None, "working": working},
+        {"value": round(v + a * t, 2),
+         "mistake": "Check the sign — you need to subtract the change in velocity from v to get back to u, not add it.",
+         "working": working},
+        {"value": round(v - a, 2),
+         "mistake": "You need the *area* under the a-t graph (a × t), not just a on its own.",
+         "working": working},
+        {"value": v,
+         "mistake": "This is the final velocity — the initial velocity must be different since the object accelerated.",
+         "working": working},
+    ]
+    options_data = _dedup_at_options(options_data, u)
+    return make_question(question, u, options_data, "m/s",
+                         notes=_NOTES, topic="Our Dynamic Universe",
+                         question_type="Graphs of Motion", level=level)
+
+
+def gen_at_two_stage_velocity(level="Higher"):
+    obj = _at_ctx()
+    u = random.randint(0, 6)
+    a1 = random.choice([1, 1.5, 2])
+    t1 = random.choice([2, 3, 4])
+    a2 = random.choice([2, 2.5, 3, 3.5, 4])
+    t2 = random.choice([2, 3, 4, 5])
+    v_mid = round(u + a1 * t1, 2)
+    v_final = round(v_mid + a2 * t2, 2)
+
+    stage1_desc = f"shows a constant {a1} m/s² for the first {t1} s"
+    question = (
+        f"{obj} starts with a velocity of {u} m/s. An acceleration–time graph "
+        f"{stage1_desc}, then steps up to a constant {a2} m/s² for a further {t2} s. "
+        f"Calculate the velocity at the end of the {t1 + t2} s shown."
+    )
+    working = [
+        {"type": "text",  "content": "Find the change in velocity from each stage of the a-t graph (its area), and add them in turn:"},
+        {"type": "latex", "content": rf"\Delta v_1 = a_1 t_1 = {a1} \times {t1} = {round(a1*t1,2)}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": rf"v_{{\text{{mid}}}} = u + \Delta v_1 = {u} + {round(a1*t1,2)} = {v_mid}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": rf"\Delta v_2 = a_2 t_2 = {a2} \times {t2} = {round(a2*t2,2)}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": rf"v = v_{{\text{{mid}}}} + \Delta v_2 = {v_mid} + {round(a2*t2,2)} = {v_final}\ \mathrm{{m/s}}"},
+    ]
+    options_data = [
+        {"value": v_final, "mistake": None, "working": working},
+        {"value": round(u + a2 * t2, 2),
+         "mistake": f"You left out the change in velocity during the first stage. Even though the acceleration "
+                    f"there is {a1} m/s², it still lasts {t1} s and contributes {round(a1*t1,2)} m/s.",
+         "working": working},
+        {"value": round(u + a1 * (t1 + t2), 2),
+         "mistake": f"You applied the first stage's acceleration ({a1} m/s²) for the whole {t1+t2} s instead "
+                    f"of only the first {t1} s.",
+         "working": working},
+        {"value": round(v_mid, 2),
+         "mistake": f"This is the velocity at the end of the first stage only ({t1} s), not the full "
+                    f"{t1 + t2} s shown on the graph.",
+         "working": working},
+    ]
+    options_data = _dedup_at_options(options_data, v_final)
+    return make_question(question, v_final, options_data, "m/s",
+                         notes=_NOTES, topic="Our Dynamic Universe",
+                         question_type="Graphs of Motion", level=level)
+
+
+_ALL_AT_GRAPH_GENS = [
+    gen_at_final_velocity,
+    gen_at_initial_velocity,
+    gen_at_two_stage_velocity,
+]
+
+
+def generate_at_graph_velocity(level="Higher"):
+    return random.choice(_ALL_AT_GRAPH_GENS)(level=level)

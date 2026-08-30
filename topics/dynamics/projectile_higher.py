@@ -478,3 +478,281 @@ def generate_projectile_l2(level="Higher"):
         scenario_context=context,
         parts=[part_a, part_b, part_c, part_d],
     )
+
+
+# ── Time & Height to Maximum Height ──────────────────────────────────────────
+
+_NOTES_MAXH = """
+## Projectile Motion — Time and Height to Maximum Height
+
+**Definitions:**
+- At the top of its flight, a projectile's vertical velocity is momentarily zero — it has
+  stopped rising but not yet started falling.
+
+An object launched at speed **v** at angle **θ** above the horizontal.
+
+**Vertical component of the launch velocity:**
+$$v_V = v \\sin\\theta$$
+
+**Time to reach maximum height** (vertical velocity decreases to zero under gravity):
+$$v = u + at \;\\Rightarrow\; 0 = v_V - g\\,t_{\\text{up}} \;\\Rightarrow\; t_{\\text{up}} = \\frac{v_V}{g}$$
+
+**Maximum height reached** above the launch point:
+$$h_{\\text{max}} = \\frac{v_V^2}{2g}$$
+
+| Symbol | Quantity | Unit |
+|---|---|---|
+| v | Initial speed | m/s |
+| θ | Launch angle | ° |
+| v_V | Vertical component of launch velocity | m/s |
+| t_up | Time to reach maximum height | s |
+| h_max | Maximum height above the launch point | m |
+
+**Worked Example:** An object is launched at 20 m/s at 30° above the horizontal. Calculate the time and height at which it reaches its maximum height.
+$$v_V = 20\\sin30° = 10\\ \\mathrm{m/s}$$
+$$t_{\\text{up}} = \\frac{v_V}{g} = \\frac{10}{9.8} = 1.02\\ \\mathrm{s}$$
+$$h_{\\text{max}} = \\frac{v_V^2}{2g} = \\frac{10^2}{19.6} = 5.1\\ \\mathrm{m}$$
+
+> ⚠️ **Most common mistake:** using the full initial speed v instead of its vertical
+> component v_V, or forgetting the factor of 2 in the denominator of h_max = v_V² ÷ 2g.
+"""
+
+
+def generate_projectile_max_height(level="Higher"):
+    theta_deg = random.choice(_ANGLES)
+    v         = random.choice(_SPEEDS)
+    theta     = math.radians(theta_deg)
+
+    v_H  = _r2(v * math.cos(theta))
+    v_V  = _r2(v * math.sin(theta))
+    t_up = _r2(v_V / g)
+    h_max = _r2(v_V ** 2 / (2 * g))
+
+    # distractors
+    t_full_v   = _r2(v / g)              # used full speed instead of v_V
+    t_vH       = _r2(v_H / g)            # used horizontal component by mistake
+    h_no_half  = _r2(v_V ** 2 / g)       # forgot the factor of 2
+    h_full_v   = _r2(v ** 2 / (2 * g))   # used full speed instead of v_V
+
+    context = random.choice(_CONTEXTS_L1).format(v=v, theta=theta_deg)
+
+    working_t = [
+        {"type": "text",  "content": "First find the vertical component of the launch velocity:"},
+        {"type": "latex", "content": rf"v_V = v\sin\theta = {v} \times \sin {theta_deg}° = {v_V}\ \mathrm{{m/s}}"},
+        {"type": "text",  "content": "At maximum height, vertical velocity = 0:"},
+        {"type": "latex", "content": r"v = u + at \;\Rightarrow\; 0 = v_V - g\,t_{\text{up}}"},
+        {"type": "latex", "content": rf"t_{{\text{{up}}}} = \frac{{v_V}}{{g}} = \frac{{{v_V}}}{{9.8}} = {t_up}\ \mathrm{{s}}"},
+    ]
+    part_a = PhysicsQuestion(
+        question_text="Calculate the time taken to reach maximum height.",
+        correct_answer=t_up,
+        unit="s",
+        topic="Our Dynamic Universe",
+        question_type="Projectile Motion",
+        level=level,
+        distractors=[
+            {
+                "value": t_full_v,
+                "mistake": (
+                    f"Use the **vertical component** of the launch velocity, not the full speed. "
+                    f"v_V = v sin {theta_deg}° = {v_V} m/s, so t_up = v_V ÷ g = {t_up} s."
+                ),
+                "working": working_t,
+            },
+            {
+                "value": t_vH,
+                "mistake": (
+                    f"That uses the horizontal component. Only the **vertical** component "
+                    f"decreases to zero at maximum height: t_up = v_V ÷ g = {v_V} ÷ 9.8 = {t_up} s."
+                ),
+                "working": working_t,
+            },
+        ],
+        working=working_t,
+        notes=_NOTES_MAXH,
+    )
+
+    working_h = [
+        {"type": "text",  "content": "Using the vertical component of the launch velocity:"},
+        {"type": "latex", "content": r"h_{\text{max}} = \frac{v_V^2}{2g}"},
+        {"type": "latex", "content": rf"h_{{\text{{max}}}} = \frac{{{v_V}^2}}{{2 \times 9.8}}"},
+        {"type": "latex", "content": rf"h_{{\text{{max}}}} = {h_max}\ \mathrm{{m}}"},
+    ]
+    part_b = PhysicsQuestion(
+        question_text="Calculate the maximum height reached above the launch point.",
+        correct_answer=h_max,
+        unit="m",
+        topic="Our Dynamic Universe",
+        question_type="Projectile Motion",
+        level=level,
+        distractors=[
+            {
+                "value": h_no_half,
+                "mistake": (
+                    f"You appear to have left out the factor of 2 in the denominator. "
+                    f"h_max = v_V² ÷ (2g) = {v_V}² ÷ 19.6 = {h_max} m."
+                ),
+                "working": working_h,
+            },
+            {
+                "value": h_full_v,
+                "mistake": (
+                    f"Use the **vertical component** v_V = {v_V} m/s, not the full launch speed. "
+                    f"h_max = v_V² ÷ (2g) = {h_max} m."
+                ),
+                "working": working_h,
+            },
+        ],
+        working=working_h,
+        notes=_NOTES_MAXH,
+    )
+
+    return PhysicsQuestion(
+        question_text="",
+        correct_answer=0,
+        unit="",
+        topic="Our Dynamic Universe",
+        question_type="Projectile Motion",
+        level=level,
+        is_scenario=True,
+        scenario_context=context,
+        parts=[part_a, part_b],
+    )
+
+
+# ── Exam Style — Explain ─────────────────────────────────────────────────────
+
+def _exam_angle_symmetry(level="Higher"):
+    theta_deg = random.choice([20, 25, 30, 35, 40])
+    other_deg = 90 - theta_deg
+    v = random.choice(_SPEEDS)
+
+    context = (
+        f"Two identical balls are launched from the same point on flat ground, both at "
+        f"{v} m/s: one at {theta_deg}° above the horizontal, the other at {other_deg}° "
+        f"above the horizontal. Both land at the same height from which they were launched."
+    )
+    question_text = (
+        "Which statement correctly explains why both balls land the same horizontal "
+        "distance from the launch point, despite being launched at different angles?"
+    )
+    correct = (
+        f"Because {theta_deg}° and {other_deg}° are complementary angles, the horizontal "
+        f"and vertical components of the two launches are swapped between them — this "
+        f"leaves the range R = v_H × t_total unchanged."
+    )
+    working = [
+        {"type": "text", "content": (
+            f"For a launch at angle θ, v_H = v cos θ and v_V = v sin θ. For the complementary "
+            f"angle (90° − θ), these components swap: v_H becomes v sin θ and v_V becomes "
+            f"v cos θ."
+        )},
+        {"type": "latex", "content": r"R = v_H \times t_{\text{total}} = v_H \times \frac{2v_V}{g}"},
+        {"type": "text", "content": (
+            "Swapping v_H and v_V swaps the two factors being multiplied together, so the "
+            "product — and therefore the range — is unchanged."
+        )},
+    ]
+    distractors = [
+        {"value": ("Because both balls have the same initial speed, they must land at the "
+                    "same range regardless of angle."),
+         "mistake": "Initial speed alone doesn't determine range — angle matters too. "
+                    "A ball launched at 10° and one at 80° have the same speed but very "
+                    "different ranges. It is specifically the complementary angles that "
+                    "cause this pair to match.",
+         "working": working},
+        {"value": ("Because the time of flight is the same for both launches, so the range "
+                    "must also be the same."),
+         "mistake": f"The times of flight are actually different for {theta_deg}° and "
+                    f"{other_deg}° — only their combination with the horizontal velocity "
+                    "gives the same product.",
+         "working": working},
+        {"value": ("Because the vertical components of the two launches are equal, so both "
+                    "balls reach the same maximum height and therefore the same range."),
+         "mistake": "The vertical components are not equal (unless θ = 45°) — the two "
+                    "balls actually reach different maximum heights. It is the swap of "
+                    "v_H and v_V between the two angles that keeps the range the same.",
+         "working": working},
+    ]
+    return context, question_text, correct, distractors
+
+
+def _exam_air_resistance(level="Higher"):
+    v = random.choice(_SPEEDS)
+    theta_deg = random.choice(_ANGLES)
+    context = (
+        f"A ball is launched at {v} m/s at {theta_deg}° above the horizontal. The range "
+        f"and maximum height are first calculated assuming no air resistance."
+    )
+    question_text = (
+        "A student says that if air resistance were included instead, the ball would "
+        "travel further and higher than the calculated values. Which statement correctly "
+        "explains the effect of air resistance?"
+    )
+    correct = (
+        "Air resistance acts opposite to the ball's motion, reducing both its horizontal "
+        "velocity and the speed of its vertical motion — so the real range and maximum "
+        "height are both smaller than the calculated (no air resistance) values."
+    )
+    working = [
+        {"type": "text", "content": (
+            "Air resistance is a friction-like force that always opposes the direction "
+            "of motion. It has a horizontal component that continuously slows the "
+            "horizontal velocity (which is otherwise constant), reducing the range. It "
+            "also acts against the vertical motion — reducing the height reached going "
+            "up, and reducing the speed gained coming back down."
+        )},
+    ]
+    distractors = [
+        {"value": ("The student is correct — air resistance pushes the ball forward and "
+                    "upward, increasing both the range and the maximum height."),
+         "mistake": "Air resistance always opposes motion — it cannot push the ball "
+                    "forward or upward. It reduces both the range and the maximum "
+                    "height compared with the idealised (no air resistance) case.",
+         "working": working},
+        {"value": ("Air resistance only affects the vertical motion, so the maximum height "
+                    "decreases but the horizontal range stays the same."),
+         "mistake": "Air resistance has a component opposing the horizontal motion too "
+                    "(since the ball is moving both horizontally and vertically), so the "
+                    "horizontal velocity — and therefore the range — is reduced as well.",
+         "working": working},
+        {"value": ("Air resistance only affects the horizontal motion, so the range "
+                    "decreases but the maximum height stays the same."),
+         "mistake": "Air resistance opposes the ball's actual direction of travel, which "
+                    "has a vertical component throughout the flight, so the maximum "
+                    "height is reduced too, not just the range.",
+         "working": working},
+    ]
+    return context, question_text, correct, distractors
+
+
+def generate_projectile_exam_style(level="Higher"):
+    builder = random.choice([_exam_angle_symmetry, _exam_air_resistance])
+    context, question_text, correct, distractors = builder(level)
+
+    options = [correct] + [d["value"] for d in distractors]
+    random.shuffle(options)
+
+    part = PhysicsQuestion(
+        question_text=question_text,
+        correct_answer=correct,
+        unit="",
+        topic="Our Dynamic Universe",
+        question_type="Projectile Motion",
+        level=level,
+        distractors=distractors,
+        working=distractors[0]["working"],
+        metadata={"type": "classification", "options": options},
+    )
+
+    return PhysicsQuestion(
+        question_text="",
+        correct_answer=0,
+        unit="",
+        topic="Our Dynamic Universe",
+        question_type="Projectile Motion",
+        level=level,
+        is_scenario=True,
+        scenario_context=context,
+        parts=[part],
+    )

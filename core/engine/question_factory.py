@@ -15,16 +15,32 @@ from topics.dynamics.displacement          import (
 )
 from topics.dynamics.vectors_scalars       import gen_identify, gen_pairs
 from topics.dynamics.equations_of_motion   import generate_equations_of_motion
-from topics.dynamics.graphs_of_motion      import generate_graphs_of_motion
+from topics.dynamics.equations_of_motion_vertical import generate_equations_of_motion_vertical
+from topics.dynamics.graphs_of_motion      import generate_graphs_of_motion, generate_at_graph_velocity
 from topics.dynamics.special_relativity    import generate_special_relativity
 from topics.dynamics.gravitation           import generate_orbital_gravitation
-from topics.dynamics.projectile_higher     import generate_projectile_l1, generate_projectile_l2
+from topics.dynamics.projectile_higher     import (
+    generate_projectile_l1,
+    generate_projectile_l2,
+    generate_projectile_max_height,
+    generate_projectile_exam_style,
+)
 from topics.dynamics.towing                import (
     gen_l1_one_trailer_no_friction,
     gen_l2_one_trailer_friction,
     gen_l3_multi_trailer_no_friction,
     gen_l4_multi_trailer_friction,
     gen_exam_style as gen_towing_exam_style,
+)
+from topics.dynamics.resolving_forces_higher import (
+    gen_rf_l1_components,
+    gen_rf_l2_balancing,
+    gen_rf_l3_force_from_accel,
+    gen_rf_l4_weight_on_slope,
+    gen_rf_l5_resultant_no_friction,
+    gen_rf_l6_acceleration_with_friction,
+    gen_rf_l7_unknown_force,
+    gen_rf_l8_explain_angle,
 )
 
 from topics.electricity.current          import generate_current
@@ -153,13 +169,21 @@ QUAL_REGISTRY = {
     },
     "Higher": {
         "Our Dynamic Universe": {
-            "Equations of Motion": generate_equations_of_motion,
-            "Graphs of Motion":    generate_graphs_of_motion,
+            "Equations of Motion": {
+                "Horizontal Motion": generate_equations_of_motion,
+                "Vertical Motion":   generate_equations_of_motion_vertical,
+            },
+            "Graphs of Motion": {
+                "Graph Matching":          generate_graphs_of_motion,
+                "Velocity from a-t Graph": generate_at_graph_velocity,
+            },
             "Special Relativity":  generate_special_relativity,
             "Gravitation":         generate_orbital_gravitation,
             "Projectile Motion": {
-                "Level 1 — Same Height":     generate_projectile_l1,
+                "Level 1 — Same Height":      generate_projectile_l1,
                 "Level 2 — Different Height": generate_projectile_l2,
+                "Time to Maximum Height":     generate_projectile_max_height,
+                "Level 3 — Exam Style":       generate_projectile_exam_style,
             },
             "Towing": {
                 "Level 1 — One Trailer, No Friction":        gen_l1_one_trailer_no_friction,
@@ -167,6 +191,16 @@ QUAL_REGISTRY = {
                 "Level 3 — Multiple Trailers, No Friction":  gen_l3_multi_trailer_no_friction,
                 "Level 4 — Multiple Trailers, With Friction": gen_l4_multi_trailer_friction,
                 "Level 5 — Exam Style":                      gen_towing_exam_style,
+            },
+            "Components of Vectors": {
+                "Level 1 — Finding Components":              gen_rf_l1_components,
+                "Level 2 — Components of a Balancing Force":  gen_rf_l2_balancing,
+                "Level 3 — Force from Acceleration":          gen_rf_l3_force_from_accel,
+                "Level 4 — Weight on a Slope":                gen_rf_l4_weight_on_slope,
+                "Level 5 — Resultant Force, No Friction":     gen_rf_l5_resultant_no_friction,
+                "Level 6 — Acceleration on a Slope":          gen_rf_l6_acceleration_with_friction,
+                "Level 7 — Finding an Unknown Force":         gen_rf_l7_unknown_force,
+                "Level 8 — Explain: Effect of Angle":         gen_rf_l8_explain_angle,
             },
         },
         "Particles and Waves": {
