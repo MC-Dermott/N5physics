@@ -1,6 +1,7 @@
 import random
 import math
 import pathlib
+from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
 
 _WIDGET_HTML = (
@@ -37,6 +38,15 @@ $$t' = \\frac{t}{\\sqrt{1 - \\frac{v^2}{c^2}}} = \\frac{10}{\\sqrt{1 - 0.6^2}} =
 > **Important:** t' > t (stationary observer measures a longer time).
 > l' < l (stationary observer measures a shorter length).
 > Both formulae use the same factor √(1 − v²/c²).
+
+**Before relativity — simple (Newtonian) relative velocity:** at everyday speeds,
+velocities in different frames simply add or subtract.
+
+**Einstein's postulates:**
+1. The laws of physics are the same in all inertial frames of reference (a frame that is
+   not accelerating).
+2. The speed of light in a vacuum is the same for all observers, regardless of the motion
+   of the source or the observer — unlike everyday velocities, speeds do not add to it.
 """
 
 # (v/c fraction, display string, √(1−v²/c²))
@@ -184,6 +194,128 @@ def gen_l_proper(level="Higher"):
                          question_type="Special Relativity", level=level)
 
 
+# ── Simple (Newtonian) relative velocity ─────────────────────────────────────
+
+def gen_relative_velocity(level="Higher"):
+    v1 = random.randint(20, 50)
+    v2 = random.randint(5, v1 - 3)
+    same_direction = random.choice([True, False])
+
+    if same_direction:
+        answer = v1 - v2
+        question = (
+            f"Train A travels at {v1} m/s relative to the ground. Train B travels at {v2} m/s "
+            f"relative to the ground, in the same direction. Calculate the speed of Train A "
+            f"relative to a passenger on Train B."
+        )
+        working = [
+            {"type": "text",  "content": "Both trains move the same way, so subtract the speeds:"},
+            {"type": "latex", "content": rf"v = {v1} - {v2} = {answer}\ \mathrm{{m/s}}"},
+        ]
+        wrong_op = v1 + v2
+        wrong_mistake = "Since both trains travel in the same direction, subtract the speeds, don't add them."
+    else:
+        answer = v1 + v2
+        question = (
+            f"Train A travels at {v1} m/s relative to the ground. Train B travels at {v2} m/s "
+            f"relative to the ground, in the opposite direction. Calculate the speed of Train A "
+            f"relative to a passenger on Train B."
+        )
+        working = [
+            {"type": "text",  "content": "The trains move towards each other, so add the speeds:"},
+            {"type": "latex", "content": rf"v = {v1} + {v2} = {answer}\ \mathrm{{m/s}}"},
+        ]
+        wrong_op = v1 - v2
+        wrong_mistake = "Since the trains travel in opposite directions, add the speeds, don't subtract them."
+
+    options_data = [
+        {"value": float(answer), "mistake": None, "working": working},
+        {"value": float(wrong_op), "mistake": wrong_mistake, "working": working},
+        {"value": float(v1), "mistake": "This ignores Train B's motion entirely — you must combine both speeds.", "working": working},
+    ]
+    options_data = _dedup(options_data, answer)
+    return make_question(question, float(answer), options_data, "m/s",
+                         notes=_NOTES, topic="Our Dynamic Universe",
+                         question_type="Special Relativity", level=level)
+
+
+# ── Einstein's postulates and inertial frames of reference ──────────────────
+
+def gen_inertial_frame(level="Higher"):
+    question_text = "Which of the following best describes an inertial frame of reference?"
+    correct = "A frame of reference that is not accelerating — it is either at rest or moving at a constant velocity."
+    working = [
+        {"type": "text", "content": "An inertial frame is one in which Newton's first law holds: it is at rest or moving with constant velocity, i.e. it is not accelerating."},
+    ]
+    distractors = [
+        {"value": "A frame of reference that is fixed to the surface of the Earth.",
+         "mistake": "An inertial frame doesn't have to be on Earth — any frame moving at constant velocity (or at rest) counts, including a spacecraft in deep space.",
+         "working": working},
+        {"value": "A frame of reference that is accelerating uniformly.",
+         "mistake": "An accelerating frame is a non-inertial frame — an inertial frame must have zero acceleration.",
+         "working": working},
+        {"value": "A frame of reference in which the speed of light is not constant.",
+         "mistake": "The speed of light is constant in every inertial frame, not just some of them — that's Einstein's second postulate.",
+         "working": working},
+    ]
+    options = [correct] + [d["value"] for d in distractors]
+    random.shuffle(options)
+    part = PhysicsQuestion(
+        question_text=question_text, correct_answer=correct, unit="",
+        topic="Our Dynamic Universe", question_type="Special Relativity", level=level,
+        distractors=distractors, working=working,
+        metadata={"type": "classification", "options": options}, notes=_NOTES,
+    )
+    return PhysicsQuestion(
+        question_text="", correct_answer=0, unit="",
+        topic="Our Dynamic Universe", question_type="Special Relativity", level=level,
+        is_scenario=True, scenario_context="", parts=[part],
+    )
+
+
+def gen_postulate_light_speed(level="Higher"):
+    v_frac, v_str, _ = random.choice(_VELOCITIES)
+    ship = _ship()
+    context = (
+        f"{ship} travels at a constant speed of {v_str} relative to a stationary observer on "
+        f"Earth. The spacecraft emits a beam of light in its direction of travel."
+    )
+    question_text = "What speed does the stationary observer on Earth measure for the emitted light beam?"
+    correct = "3.00 × 10⁸ m/s (c) — the same as it would be from a stationary source."
+    working = [
+        {"type": "text", "content": (
+            "Einstein's second postulate states that the speed of light in a vacuum is the "
+            "same for all observers in all inertial frames of reference, regardless of the "
+            "motion of the source. The spacecraft's speed does not add to the speed of the "
+            "light it emits."
+        )},
+    ]
+    distractors = [
+        {"value": f"3.00 × 10⁸ m/s + {v_str.replace('c','')} × (3.00 × 10⁸ m/s), added like an everyday velocity.",
+         "mistake": "Velocities don't add classically at relativistic speeds — the speed of light is invariant for every observer (Einstein's second postulate).",
+         "working": working},
+        {"value": "Less than 3.00 × 10⁸ m/s, since the source is moving towards the observer.",
+         "mistake": "The measured speed of light doesn't depend on the motion of the source — it is always c for every inertial observer.",
+         "working": working},
+        {"value": "It cannot be determined without knowing the observer's own speed.",
+         "mistake": "The observer here is stationary, and even for a moving observer, the speed of light measured is still always c.",
+         "working": working},
+    ]
+    options = [correct] + [d["value"] for d in distractors]
+    random.shuffle(options)
+    part = PhysicsQuestion(
+        question_text=question_text, correct_answer=correct, unit="",
+        topic="Our Dynamic Universe", question_type="Special Relativity", level=level,
+        distractors=distractors, working=working,
+        metadata={"type": "classification", "options": options}, notes=_NOTES,
+    )
+    return PhysicsQuestion(
+        question_text="", correct_answer=0, unit="",
+        topic="Our Dynamic Universe", question_type="Special Relativity", level=level,
+        is_scenario=True, scenario_context=context, parts=[part],
+    )
+
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def _dedup(options_data, correct):
@@ -202,6 +334,9 @@ def _dedup(options_data, correct):
 
 
 _ALL_GENS = [
+    gen_relative_velocity,
+    gen_inertial_frame,
+    gen_postulate_light_speed,
     gen_t_prime,
     gen_t_proper,
     gen_l_prime,

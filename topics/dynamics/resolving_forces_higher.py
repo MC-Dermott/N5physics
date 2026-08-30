@@ -316,31 +316,10 @@ def gen_rf_l4_weight_on_slope(level="Higher"):
         notes=_NOTES,
     )
 
-    working_perp = [
-        {"type": "text",  "content": "The component of weight acting into the slope (perpendicular to it):"},
-        {"type": "latex", "content": r"W_{\perp} = W\cos\theta"},
-        {"type": "latex", "content": rf"W_{{\perp}} = {W} \times \cos {theta_deg}° = {W_perp}\ \mathrm{{N}}"},
-    ]
-    part_c = PhysicsQuestion(
-        question_text="Calculate the component of the weight acting perpendicular to (into) the slope.",
-        correct_answer=W_perp, unit="N",
-        topic="Our Dynamic Universe", question_type="Components of Vectors", level=level,
-        working=working_perp,
-        distractors=[
-            {"value": W_par,
-             "mistake": f"The component *perpendicular* to the slope uses cos θ, not sin θ. W⊥ = W cos {theta_deg}° = {W_perp} N.",
-             "working": working_perp},
-            {"value": W,
-             "mistake": "This is the full weight. It must be resolved using W⊥ = W cos θ.",
-             "working": working_perp},
-        ],
-        notes=_NOTES,
-    )
-
     return PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Components of Vectors", level=level,
-        is_scenario=True, scenario_context=context, parts=[part_a, part_b, part_c],
+        is_scenario=True, scenario_context=context, parts=[part_a, part_b],
     )
 
 
@@ -486,40 +465,39 @@ def _explain_tension(level):
     return context, question_text, correct, distractors
 
 
-def _explain_normal_force(level):
+def _explain_mass_parallel(level):
     obj = _obj()
     context = (
-        f"A {obj} rests on a slope. The angle of the slope is gradually increased, while "
-        f"the mass of the {obj} stays the same."
+        f"Two identical {obj}s are placed on the same slope, at the same angle. One {obj} "
+        f"has twice the mass of the other."
     )
-    question_text = "What happens to the component of the object's weight acting perpendicular to (into) the slope, and why?"
+    question_text = "How does the component of weight acting parallel to the slope compare for the two objects, and why?"
     correct = (
-        "It decreases, because this component is W cos θ, and cos θ decreases as the "
-        "angle θ increases (for angles between 0° and 90°)."
+        "It is twice as large for the heavier object, because W∥ = W sin θ = mg sin θ, and "
+        "for a fixed angle this component is directly proportional to mass."
     )
     working = [
         {"type": "text", "content": (
-            "The perpendicular component of weight is W⊥ = W cos θ. As the slope's angle "
-            "increases towards 90° (vertical), cos θ decreases towards zero, so W⊥ "
-            "decreases — the slope pushes back on the object with less force."
+            "The parallel component of weight is W∥ = mg sin θ. For the same angle θ, W∥ "
+            "is directly proportional to mass m, so doubling the mass doubles W∥."
         )},
     ]
     distractors = [
-        {"value": "It increases, because a steeper slope pushes harder into the object.",
-         "mistake": "It's the opposite — as the slope gets steeper, less of the weight presses into the slope. W⊥ = W cos θ decreases as θ increases.",
+        {"value": "It is the same for both objects, because the angle of the slope hasn't changed.",
+         "mistake": "The angle being the same doesn't mean W∥ is the same — W∥ = mg sin θ also depends on mass, which has doubled.",
          "working": working},
-        {"value": "It stays the same, because the weight of the object is constant.",
-         "mistake": "The weight W is constant, but its *perpendicular component* W cos θ depends on the angle, so it does change as the slope steepens.",
+        {"value": "It is four times as large for the heavier object, since weight depends on mass squared.",
+         "mistake": "Weight is W = mg — mass appears only to the first power, not squared. Doubling m doubles W, and so doubles W∥ = W sin θ too.",
          "working": working},
-        {"value": "It decreases, because the parallel component W sin θ also decreases.",
-         "mistake": "The parallel component actually *increases* as the angle increases (W sin θ), not decreases — only the perpendicular component decreases.",
+        {"value": "It cannot be compared without knowing the coefficient of friction.",
+         "mistake": "Friction doesn't affect the weight component itself — W∥ = mg sin θ depends only on mass and angle.",
          "working": working},
     ]
     return context, question_text, correct, distractors
 
 
 def gen_rf_l8_explain_angle(level="Higher"):
-    builder = random.choice([_explain_tension, _explain_normal_force])
+    builder = random.choice([_explain_tension, _explain_mass_parallel])
     context, question_text, correct, distractors = builder(level)
 
     options = [correct] + [d["value"] for d in distractors]
