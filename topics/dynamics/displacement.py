@@ -501,3 +501,120 @@ def gen_speed_velocity_from_displacement(level="N5"):
     options_data = _dedup(options_data, correct)
     return make_question(question, float(correct), options_data, "m/s",
                          notes=_NOTES_VELOCITY, topic="Dynamics", question_type="Speed and Velocity", level=level)
+
+
+# ── Relative velocity ─────────────────────────────────────────────────────────
+
+_NOTES_RELVEL = """
+## Relative Velocity
+
+**Definition:** the velocity of one object relative to another is the velocity it appears
+to have when observed from that other object.
+
+- For objects moving **along the same line**, simply add or subtract the velocities,
+  taking direction into account (velocities in opposite directions are opposite signs).
+- For objects moving **at an angle to each other**, combine the two velocities using
+  Pythagoras' theorem (and trigonometry for the direction), just as with any two
+  perpendicular vectors.
+
+**Worked Example (same line):** Train A travels at 25 m/s. Train B travels at 18 m/s in
+the same direction. Velocity of A relative to B = 25 − 18 = 7 m/s (in the direction of travel).
+
+**Worked Example (at an angle):** A ship travels at 12 m/s due east. A current flows at
+5 m/s due north. Velocity relative to the seabed = √(12² + 5²) = 13 m/s, at
+tan⁻¹(5 ÷ 12) = 22.6° north of east.
+
+> **Common exam trap:** if the two objects move in *opposite* directions along the same
+> line, their relative velocity is found by *adding* the speeds, not subtracting them.
+"""
+
+_RELVEL_1D_SAME = [
+    ("lorry", "car", "overtaking"), ("cyclist", "runner", "overtaking"),
+    ("tractor", "van", "overtaking"), ("ferry", "speedboat", "overtaking"),
+]
+_RELVEL_1D_OPPOSITE = [
+    ("cyclist", "jogger"), ("rowing boat", "swimmer"), ("train", "cyclist on a path alongside the track"),
+]
+_RELVEL_2D = [
+    ("ship", "current", "east", "north", "flows"),
+    ("aircraft", "crosswind", "north", "east", "blows"),
+    ("motorboat", "tidal current", "west", "south", "flows"),
+]
+
+
+def gen_relvel_1d(level="N5"):
+    same_direction = random.choice([True, False])
+    if same_direction:
+        obj1, obj2, verb = random.choice(_RELVEL_1D_SAME)
+        v1 = random.randint(18, 30)
+        v2 = random.randint(v1 + 4, v1 + 14)
+        answer = v2 - v1
+        question = (
+            f"A {obj1} travels at {v1} m/s. A {obj2} travels at {v2} m/s in the same "
+            f"direction, {verb} the {obj1}. Calculate the velocity of the {obj2} relative "
+            f"to a passenger on the {obj1}."
+        )
+        working = [
+            {"type": "text", "content": "Both travel the same way, so subtract the speeds:"},
+            {"type": "latex", "content": rf"v = {v2} - {v1} = {answer}\ \mathrm{{m/s}}"},
+        ]
+        wrong_op = v1 + v2
+        wrong_mistake = f"Since both the {obj1} and {obj2} travel in the same direction, subtract the speeds, don't add them."
+    else:
+        obj1, obj2 = random.choice(_RELVEL_1D_OPPOSITE)
+        v1 = random.randint(4, 10)
+        v2 = random.randint(1, 6)
+        answer = v1 + v2
+        question = (
+            f"A {obj1} travels at {v1} m/s. A {obj2} travels towards the {obj1} at {v2} m/s. "
+            f"Calculate the velocity of the {obj1} relative to the {obj2}."
+        )
+        working = [
+            {"type": "text", "content": f"Taking the {obj1}'s direction as positive, the {obj2}'s velocity is −{v2} m/s:"},
+            {"type": "latex", "content": rf"v = {v1} - (-{v2}) = {v1} + {v2} = {answer}\ \mathrm{{m/s}}"},
+        ]
+        wrong_op = v1 - v2
+        wrong_mistake = f"Since the {obj1} and {obj2} move towards each other (opposite directions), add the speeds, don't subtract them."
+
+    options_data = [
+        {"value": float(answer), "mistake": None, "working": working},
+        {"value": float(wrong_op), "mistake": wrong_mistake, "working": working},
+    ]
+    options_data = _dedup(options_data, answer)
+    return make_question(question, float(answer), options_data, "m/s",
+                         notes=_NOTES_RELVEL, topic="Dynamics", question_type="Speed and Velocity", level=level)
+
+
+def gen_relvel_2d(level="N5"):
+    obj1, obj2, dir1, dir2, verb = random.choice(_RELVEL_2D)
+    v1 = random.choice([8, 10, 12, 15, 20, 25])
+    v2 = random.choice([3, 4, 5, 6, 8])
+    resultant = round(math.sqrt(v1 ** 2 + v2 ** 2), 1)
+    a1 = "An" if obj1[0] in "aeiou" else "A"
+    a2 = "A" if obj2[0] not in "aeiou" else "An"
+
+    question = (
+        f"{a1} {obj1} travels at {v1} m/s due {dir1}. {a2} {obj2} {verb} at {v2} m/s due {dir2}. "
+        f"Calculate the magnitude of the {obj1}'s resultant velocity relative to the ground."
+    )
+    working = [
+        {"type": "text", "content": "The two velocities are perpendicular, so combine with Pythagoras' theorem:"},
+        {"type": "latex", "content": rf"v = \sqrt{{{v1}^2 + {v2}^2}} = {resultant}\ \mathrm{{m/s}}"},
+    ]
+    options_data = [
+        {"value": resultant, "mistake": None, "working": working},
+        {"value": float(v1 + v2),
+         "mistake": "You added the two velocities directly. Since they're perpendicular, combine them with "
+                    "Pythagoras' theorem instead: v = √(v₁² + v₂²).",
+         "working": working},
+        {"value": float(v1),
+         "mistake": f"That's just the {obj1}'s own velocity — you need to combine it with the {obj2}'s velocity too.",
+         "working": working},
+    ]
+    options_data = _dedup(options_data, resultant)
+    return make_question(question, resultant, options_data, "m/s",
+                         notes=_NOTES_RELVEL, topic="Dynamics", question_type="Speed and Velocity", level=level)
+
+
+def generate_relative_velocity(level="N5"):
+    return random.choice([gen_relvel_1d, gen_relvel_2d])(level=level)
