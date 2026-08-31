@@ -12,6 +12,11 @@ from topics.dynamics.displacement          import (
     generate_displacement_l1,
     generate_displacement_l2,
     generate_displacement_l3,
+    gen_speed_velocity_from_displacement,
+)
+from topics.dynamics.velocity_time_graphs  import (
+    gen_distance_from_area,
+    gen_direction_change,
 )
 from topics.dynamics.vectors_scalars       import gen_identify, gen_pairs
 from topics.dynamics.equations_of_motion   import generate_equations_of_motion
@@ -136,6 +141,11 @@ QUAL_REGISTRY = {
             "Vectors and Scalars": {
                 "Identify Scalar or Vector":  gen_identify,
                 "Scalar & Vector Pairs":      gen_pairs,
+            },
+            "Speed and Velocity": {
+                "From a Compound Displacement": gen_speed_velocity_from_displacement,
+                "v-t Graphs — Distance from Area": gen_distance_from_area,
+                "v-t Graphs — When Does it Change Direction?": gen_direction_change,
             },
         },
         "Electricity": {

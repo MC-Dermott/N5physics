@@ -402,3 +402,102 @@ def gen_l3_bearing(level="N5"):
 
 def generate_displacement_l3(level="N5"):
     return random.choice([gen_l3_magnitude, gen_l3_bearing])(level=level)
+
+
+# ── Speed and velocity from a compound (two-leg) displacement ───────────────
+
+_NOTES_VELOCITY = """
+## Speed and Velocity
+
+**Definitions:**
+- Speed is a scalar: total distance travelled ÷ time taken. Direction doesn't matter.
+- Velocity is a vector: the resultant displacement ÷ time taken. It has both a size
+  and a direction.
+
+$$\\text{speed} = \\frac{\\text{distance}}{\\text{time}} \\qquad \\text{velocity} = \\frac{\\text{displacement}}{\\text{time}}$$
+
+For a journey made of more than one leg, the *distance* is the total length of the
+path travelled (simple addition), but the *displacement* is the straight-line
+distance from start to finish (found with Pythagoras' theorem for two
+perpendicular legs).
+
+**Worked Example:** A hiker walks 400 m north, then 300 m east, taking 50 s.
+- Total distance = 400 + 300 = 700 m, so speed = 700 ÷ 50 = 14 m/s
+- Resultant displacement = √(400² + 300²) = 500 m, so velocity = 500 ÷ 50 = 10 m/s
+
+> **Common exam trap:** speed is always greater than (or equal to) the magnitude of
+> velocity for the same journey, since the straight-line displacement can never be
+> longer than the path actually walked.
+"""
+
+_SV_CONTEXTS = [
+    ("cyclist", "rides"), ("hiker", "walks"), ("delivery drone", "flies"),
+    ("tractor", "drives"), ("runner", "runs"), ("ferry", "sails"),
+]
+
+
+def gen_speed_velocity_from_displacement(level="N5"):
+    ns_mag = random.choice(range(200, 1300, 100))
+    ew_mag = random.choice(range(200, 1300, 100))
+    north = ns_mag if random.choice([True, False]) else -ns_mag
+    east = ew_mag if random.choice([True, False]) else -ew_mag
+    t = random.choice([40, 50, 60, 70, 80, 90, 100, 110, 120])
+
+    total_distance = ns_mag + ew_mag
+    resultant = round(math.sqrt(ns_mag ** 2 + ew_mag ** 2), 1)
+    speed = round(total_distance / t, 2)
+    velocity = round(resultant / t, 2)
+
+    ctx, verb = random.choice(_SV_CONTEXTS)
+    phrase = _two_leg_phrase(east, north).replace(" km ", " m ")
+    ask_speed = random.choice([True, False])
+
+    question = (
+        f"A {ctx} {verb} {phrase}. The journey takes {t} s.\n\n"
+        f"Calculate the {'average speed' if ask_speed else 'magnitude of the average velocity'} "
+        f"of the {ctx}."
+    )
+
+    working_common = [
+        {"type": "text", "content": f"Total distance travelled = {ns_mag} + {ew_mag} = {total_distance} m"},
+        {"type": "latex", "content": rf"\text{{Resultant displacement}} = \sqrt{{{ns_mag}^2 + {ew_mag}^2}} = {resultant}\ \mathrm{{m}}"},
+    ]
+
+    if ask_speed:
+        working = working_common + [
+            {"type": "latex", "content": r"\text{speed} = \frac{\text{distance}}{\text{time}}"},
+            {"type": "latex", "content": rf"\text{{speed}} = \frac{{{total_distance}}}{{{t}}} = {speed}\ \mathrm{{m/s}}"},
+        ]
+        correct = speed
+        options_data = [
+            {"value": correct, "mistake": None, "working": working},
+            {"value": velocity,
+             "mistake": "That's the average velocity (using the resultant displacement). Speed uses the "
+                        "total distance travelled along the path, not the straight-line displacement.",
+             "working": working},
+            {"value": round(max(ns_mag, ew_mag) / t, 2),
+             "mistake": "You only used one leg of the journey. Speed uses the *total* distance travelled — "
+                        "add both legs together first.",
+             "working": working},
+        ]
+    else:
+        working = working_common + [
+            {"type": "latex", "content": r"\text{velocity} = \frac{\text{displacement}}{\text{time}}"},
+            {"type": "latex", "content": rf"\text{{velocity}} = \frac{{{resultant}}}{{{t}}} = {velocity}\ \mathrm{{m/s}}"},
+        ]
+        correct = velocity
+        options_data = [
+            {"value": correct, "mistake": None, "working": working},
+            {"value": speed,
+             "mistake": "That's the average speed (using the total distance travelled). Velocity uses the "
+                        "resultant displacement — combine the two legs with Pythagoras' theorem first.",
+             "working": working},
+            {"value": round(max(ns_mag, ew_mag) / t, 2),
+             "mistake": "You only used one leg of the journey. Velocity uses the resultant displacement of "
+                        "*both* legs — combine them with Pythagoras' theorem first.",
+             "working": working},
+        ]
+
+    options_data = _dedup(options_data, correct)
+    return make_question(question, float(correct), options_data, "m/s",
+                         notes=_NOTES_VELOCITY, topic="Dynamics", question_type="Speed and Velocity", level=level)
