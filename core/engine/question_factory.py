@@ -13,7 +13,7 @@ from topics.dynamics.displacement          import (
     generate_displacement_l2,
     generate_displacement_l3,
     gen_speed_velocity_from_displacement,
-    generate_relative_velocity,
+    generate_resultant_velocity,
 )
 from topics.dynamics.velocity_time_graphs  import (
     gen_which_graph_matches,
@@ -146,7 +146,7 @@ QUAL_REGISTRY = {
             },
             "Speed and Velocity": {
                 "From a Compound Displacement": gen_speed_velocity_from_displacement,
-                "Relative Velocity": generate_relative_velocity,
+                "Resultant Velocity": generate_resultant_velocity,
                 "Which v-t Graph Matches?": gen_which_graph_matches,
                 "v-t Graphs — Distance and Displacement": gen_distance_displacement,
                 "v-t Graphs — Acceleration from an Interval": gen_acceleration_interval,
