@@ -31,8 +31,14 @@ def gen_current(level="N5"):
         {"value": round(t_sec / charge, 2), "summary": "Incorrect.", "mistake": "You divided t by Q instead of Q by t. I = Q ÷ t.", "working": working},
         {"value": conversion_d,     "summary": "Incorrect.", "mistake": "You did not convert the time into seconds.", "working": working},
     ]
+    scaffold = None
+    if use_min:
+        scaffold = [
+            {"question": "What is the time in seconds (convert from minutes)?", "answer": float(t_sec)},
+            {"question": "What is the current I?", "answer": correct},
+        ]
     return make_question(question, correct, options_data, "A", notes=NOTES["electricity_current"],
-                         topic="Electricity", question_type="Current", level=level)
+                         topic="Electricity", question_type="Current", level=level, scaffold=scaffold)
 
 
 def gen_charge(level="N5"):
@@ -63,8 +69,14 @@ def gen_charge(level="N5"):
         {"value": round(t_sec / current, 2),   "summary": "Incorrect.", "mistake": "You rearranged Q = It incorrectly.", "working": working},
         {"value": conversion_d,                "summary": "Incorrect.", "mistake": "You forgot to convert time to seconds.", "working": working},
     ]
+    scaffold = None
+    if use_min:
+        scaffold = [
+            {"question": "What is the time in seconds (convert from minutes)?", "answer": float(t_sec)},
+            {"question": "What is the charge Q?", "answer": correct},
+        ]
     return make_question(question, correct, options_data, "C", notes=NOTES["electricity_current"],
-                         topic="Electricity", question_type="Current", level=level)
+                         topic="Electricity", question_type="Current", level=level, scaffold=scaffold)
 
 
 def gen_time(level="N5"):

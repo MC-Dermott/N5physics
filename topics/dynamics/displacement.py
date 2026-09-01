@@ -46,7 +46,11 @@ def gen_find_magnitude(level="N5"):
         {"value": float(abs(east - north)),       "display": f"{abs(east - north)} km",   "summary": "Incorrect.", "mistake": "You subtracted the components. Use Pythagoras' theorem: R = √(x² + y²).", "working": working},
         {"value": round(east ** 2 + north ** 2, 2), "display": f"{round(east**2 + north**2, 2)} km", "summary": "Incorrect.", "mistake": "You forgot to square root the result. R = √(x² + y²), not x² + y².", "working": working},
     ]
-    return make_question(question, float(correct), options_data, "km",
+    scaffold = [
+        {"question": "What is x² + y² (east² + north²)?", "answer": round(east ** 2 + north ** 2, 2)},
+        {"question": "What is the magnitude of the resultant displacement?", "answer": correct},
+    ]
+    return make_question(question, float(correct), options_data, "km", scaffold=scaffold,
                          notes=NOTES["vectors"], topic="Dynamics", question_type="Vectors", level=level)
 
 
@@ -99,7 +103,11 @@ def gen_find_bearing(level="N5"):
             "working": working,
         })
 
-    return make_question(question, float(bearing), options_data, "°",
+    scaffold = [
+        {"question": "What is θ = tan⁻¹(|east|/|north|)?", "answer": angle},
+        {"question": "What is the bearing (applying the quadrant rule)?", "answer": float(bearing)},
+    ]
+    return make_question(question, float(bearing), options_data, "°", scaffold=scaffold,
                          notes=NOTES["vectors"], topic="Dynamics", question_type="Vectors", level=level)
 
 
@@ -220,6 +228,10 @@ def gen_l1_displacement(level="N5"):
             {"type": "latex", "content": rf"s = {_signed_expr(signed)} = {displacement}\ \mathrm{{m}}"},
             {"type": "text", "content": f"Magnitude = {correct} m."},
         ]
+        scaffold = [
+            {"question": f"What is the signed resultant displacement s (taking {pos} as positive)?", "answer": float(displacement)},
+            {"question": "What is the magnitude of the resultant displacement?", "answer": float(correct)},
+        ]
         options_data = [
             {"value": float(correct), "mistake": None, "working": working},
             {"value": float(distance),
@@ -240,6 +252,7 @@ def gen_l1_displacement(level="N5"):
                                          f"displacements."},
             {"type": "latex", "content": rf"s = {_signed_expr(signed)} = {displacement}\ \mathrm{{m}}"},
         ]
+        scaffold = None
         options_data = [
             {"value": float(correct), "mistake": None, "working": working},
             {"value": float(-correct),
@@ -251,7 +264,7 @@ def gen_l1_displacement(level="N5"):
              "working": working},
         ]
     options_data = _dedup(options_data, correct)
-    return make_question(question, float(correct), options_data, "m",
+    return make_question(question, float(correct), options_data, "m", scaffold=scaffold,
                          notes=NOTES["vectors"], topic="Dynamics", question_type="Distance and Displacement", level=level)
 
 
@@ -335,7 +348,12 @@ def gen_l3_magnitude(level="N5"):
          "working": working},
     ]
     options_data = _dedup(options_data, correct)
-    return make_question(question, float(correct), options_data, "km",
+    scaffold = [
+        {"question": "What is ΣN (the net north displacement)?", "answer": float(north)},
+        {"question": "What is ΣE (the net east displacement)?", "answer": float(east)},
+        {"question": "What is the magnitude of the resultant displacement, R?", "answer": correct},
+    ]
+    return make_question(question, float(correct), options_data, "km", scaffold=scaffold,
                          notes=NOTES["vectors"], topic="Dynamics", question_type="Distance and Displacement", level=level)
 
 
@@ -396,7 +414,11 @@ def gen_l3_bearing(level="N5"):
             "working": working,
         })
     options_data = _dedup(options_data, bearing)
-    return make_question(question, float(bearing), options_data, "°",
+    scaffold = [
+        {"question": "What is θ = tan⁻¹(|ΣE|/|ΣN|)?", "answer": angle},
+        {"question": "What is the bearing (applying the quadrant rule)?", "answer": float(bearing)},
+    ]
+    return make_question(question, float(bearing), options_data, "°", scaffold=scaffold,
                          notes=NOTES["vectors"], topic="Dynamics", question_type="Distance and Displacement", level=level)
 
 

@@ -121,8 +121,16 @@ def gen_vir_find_v(level="N5"):
         {"value": inverted,   "display": fmt_volt(inverted),   "summary": "Incorrect.", "mistake": "You divided R by I. V = I × R.",                         "working": steps},
         {"value": prefix_err, "display": fmt_volt(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,   "working": steps},
     ]
+    scaffold = None
+    if i_unit != "A" or r_unit != "Ω":
+        scaffold = []
+        if i_unit != "A":
+            scaffold.append({"question": "What is the current I in amps?", "answer": i_si})
+        if r_unit != "Ω":
+            scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
+        scaffold.append({"question": "What is the voltage V?", "answer": correct})
     return make_question(question, correct, options_data, "V", notes=NOTES["ohms_law"],
-                         topic="Electricity", question_type="Ohm's Law", level=level)
+                         topic="Electricity", question_type="Ohm's Law", level=level, scaffold=scaffold)
 
 
 def gen_vir_find_i(level="N5"):
@@ -176,8 +184,16 @@ def gen_vir_find_i(level="N5"):
         {"value": inverted,   "display": fmt_amp(inverted),   "summary": "Incorrect.", "mistake": "You divided R by V. I = V ÷ R.",                       "working": steps},
         {"value": prefix_err, "display": fmt_amp(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,   "working": steps},
     ]
+    scaffold = None
+    if v_unit != "V" or r_unit != "Ω":
+        scaffold = []
+        if v_unit != "V":
+            scaffold.append({"question": "What is the voltage V in volts?", "answer": v_si})
+        if r_unit != "Ω":
+            scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
+        scaffold.append({"question": "What is the current I?", "answer": correct})
     return make_question(question, correct, options_data, "A", notes=NOTES["ohms_law"],
-                         topic="Electricity", question_type="Ohm's Law", level=level)
+                         topic="Electricity", question_type="Ohm's Law", level=level, scaffold=scaffold)
 
 
 def gen_vir_find_r(level="N5"):
@@ -231,8 +247,16 @@ def gen_vir_find_r(level="N5"):
         {"value": inverted,   "display": fmt_ohm(inverted),   "summary": "Incorrect.", "mistake": "You divided I by V. R = V ÷ I.",                       "working": steps},
         {"value": prefix_err, "display": fmt_ohm(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,   "working": steps},
     ]
+    scaffold = None
+    if v_unit != "V" or i_unit != "A":
+        scaffold = []
+        if v_unit != "V":
+            scaffold.append({"question": "What is the voltage V in volts?", "answer": v_si})
+        if i_unit != "A":
+            scaffold.append({"question": "What is the current I in amps?", "answer": i_si})
+        scaffold.append({"question": "What is the resistance R?", "answer": correct})
     return make_question(question, correct, options_data, "Ω", notes=NOTES["ohms_law"],
-                         topic="Electricity", question_type="Ohm's Law", level=level)
+                         topic="Electricity", question_type="Ohm's Law", level=level, scaffold=scaffold)
 
 
 _N4_GENS  = [gen_vir_find_v]

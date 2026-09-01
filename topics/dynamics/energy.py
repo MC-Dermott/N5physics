@@ -52,8 +52,12 @@ def gen_gpe(level="N5"):
         {"value": grams_err,                         "display": fmt_J(grams_err),                         "summary": "Incorrect.", "mistake": "You did not convert grams into kilograms.", "working": working},
         {"value": round_sf(mass_kg * gravity + height), "display": fmt_J(round_sf(mass_kg * gravity + height)), "summary": "Incorrect.", "mistake": "You used the equation incorrectly. Ep = m × g × h.", "working": working},
     ]
+    scaffold = [
+        {"question": "What is m × g?", "answer": round_sf(mass_kg * gravity)},
+        {"question": "What is the gravitational potential energy Ep?", "answer": correct},
+    ]
     return make_question(question, correct, options_data, "J", notes=NOTES["energy_gpe"],
-                         topic="Dynamics", question_type="Energy", level=level)
+                         topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
 
 
 def gen_gpe_mass(level="N5"):
@@ -75,8 +79,12 @@ def gen_gpe_mass(level="N5"):
         {"value": round_sf(correct * 1000),             "summary": "Incorrect.", "mistake": "You gave the answer in grams, not kilograms.", "working": working},
         {"value": round_sf(energy / gravity),           "summary": "Incorrect.", "mistake": "You forgot to divide by h as well as g.", "working": working},
     ]
+    scaffold = [
+        {"question": "What is g × h?", "answer": round_sf(gravity * height)},
+        {"question": "What is the mass m?", "answer": correct},
+    ]
     return make_question(question, correct, options_data, "kg", notes=NOTES["energy_gpe"],
-                         topic="Dynamics", question_type="Energy", level=level)
+                         topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
 
 
 def gen_gpe_height(level="N5"):
@@ -99,8 +107,12 @@ def gen_gpe_height(level="N5"):
         {"value": grams_err,                           "summary": "Incorrect.", "mistake": "You did not convert grams into kilograms.", "working": working},
         {"value": round_sf(energy / mass_kg),          "summary": "Incorrect.", "mistake": "You forgot to divide by g as well.", "working": working},
     ]
+    scaffold = [
+        {"question": "What is m × g?", "answer": round_sf(mass_kg * gravity)},
+        {"question": "What is the height h?", "answer": correct},
+    ]
     return make_question(question, correct, options_data, "m", notes=NOTES["energy_gpe"],
-                         topic="Dynamics", question_type="Energy", level=level)
+                         topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
 
 
 # =========================================================
@@ -126,8 +138,12 @@ def gen_ke(level="N5"):
         {"value": grams_err,                 "display": fmt_J(grams_err), "summary": "Incorrect.", "mistake": "You did not convert grams into kilograms.", "working": working},
         {"value": round_sf((2*correct)/v**2),"display": fmt_J(round_sf((2*correct)/v**2)), "summary": "Incorrect.", "mistake": "You rearranged the equation incorrectly.", "working": working},
     ]
+    scaffold = [
+        {"question": "What is v² ?", "answer": v ** 2},
+        {"question": "What is the kinetic energy Ek?", "answer": correct},
+    ]
     return make_question(question, correct, options_data, "J", notes=NOTES["energy_ke"],
-                         topic="Dynamics", question_type="Energy", level=level)
+                         topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
 
 
 def gen_ke_mass(level="N5"):
@@ -148,8 +164,12 @@ def gen_ke_mass(level="N5"):
         {"value": round_sf(correct * 1000),        "summary": "Incorrect.", "mistake": "You gave the answer in grams, not kilograms.", "working": working},
         {"value": round_sf(energy / v**2),         "summary": "Incorrect.", "mistake": "You forgot to multiply by 2. m = 2Ek ÷ v².", "working": working},
     ]
+    scaffold = [
+        {"question": "What is v² ?", "answer": v ** 2},
+        {"question": "What is the mass m?", "answer": correct},
+    ]
     return make_question(question, correct, options_data, "kg", notes=NOTES["energy_ke"],
-                         topic="Dynamics", question_type="Energy", level=level)
+                         topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
 
 
 def gen_ke_velocity(level="N5"):
@@ -171,8 +191,12 @@ def gen_ke_velocity(level="N5"):
         {"value": grams_err,                         "summary": "Incorrect.", "mistake": "You did not convert grams into kilograms.", "working": working},
         {"value": round_sf((energy / mass_kg) ** 0.5),"summary": "Incorrect.", "mistake": "You forgot to multiply by 2 before square rooting. v = √(2Ek ÷ m).", "working": working},
     ]
+    scaffold = [
+        {"question": "What is 2Ek ÷ m?", "answer": round_sf((2 * energy) / mass_kg)},
+        {"question": "What is the velocity v?", "answer": correct},
+    ]
     return make_question(question, correct, options_data, "m/s", notes=NOTES["energy_ke"],
-                         topic="Dynamics", question_type="Energy", level=level)
+                         topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
 
 
 # =========================================================
