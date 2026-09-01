@@ -136,7 +136,11 @@ def gen_parallel_3(level="N5"):
         {"value": d_two_only, "display": fmt_r(d_two_only, unit), "summary": "Incorrect.", "mistake": "You only used two resistors. Include all three in the parallel calculation.",                 "working": working},
         {"value": d_inv_only, "display": fmt_r(d_inv_only, unit), "summary": "Incorrect.", "mistake": "You forgot to take the final reciprocal. RT = 1 ÷ (1/R1 + 1/R2 + 1/R3).",                  "working": working},
     ]
-    return make_question(question, correct, options_data, unit, notes=NOTES["resistor_combinations"],
+    scaffold = [
+        {"question": "What is 1/R1 + 1/R2 + 1/R3?", "answer": round_sf(1/r1 + 1/r2 + 1/r3)},
+        {"question": "What is the total resistance RT?", "answer": correct},
+    ]
+    return make_question(question, correct, options_data, unit, scaffold=scaffold, notes=NOTES["resistor_combinations"],
                          topic="Electricity", question_type="Resistors", level=level)
 
 

@@ -164,8 +164,16 @@ def gen_pvi_find_p(level="N5"):
         {"value": wrong_order, "display": fmt_power(wrong_order), "summary": "Incorrect.", "mistake": "You divided I by V. P = V × I.",                         "working": steps},
         {"value": prefix_err,  "display": fmt_power(prefix_err),  "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = None
+    if v_unit != "V" or i_unit != "A":
+        scaffold = []
+        if v_unit != "V":
+            scaffold.append({"question": "What is the voltage V in volts?", "answer": v_si})
+        if i_unit != "A":
+            scaffold.append({"question": "What is the current I in amps?", "answer": i_si})
+        scaffold.append({"question": "What is the power P?", "answer": correct})
     return make_question(question, correct, options_data, "W", notes=NOTES["electricity_power"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 def gen_pvi_find_v(level="N5"):
@@ -204,8 +212,16 @@ def gen_pvi_find_v(level="N5"):
         {"value": inverted,   "display": fmt_volt(inverted),   "summary": "Incorrect.", "mistake": "You divided I by P instead of P by I. V = P ÷ I.",             "working": steps},
         {"value": prefix_err, "display": fmt_volt(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = None
+    if p_unit != "W" or i_unit != "A":
+        scaffold = []
+        if p_unit != "W":
+            scaffold.append({"question": "What is the power P in watts?", "answer": p_si})
+        if i_unit != "A":
+            scaffold.append({"question": "What is the current I in amps?", "answer": i_si})
+        scaffold.append({"question": "What is the voltage V?", "answer": correct})
     return make_question(question, correct, options_data, "V", notes=NOTES["electricity_power"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 def gen_pvi_find_i(level="N5"):
@@ -244,8 +260,16 @@ def gen_pvi_find_i(level="N5"):
         {"value": inverted,   "display": fmt_amp(inverted),   "summary": "Incorrect.", "mistake": "You divided V by P instead of P by V. I = P ÷ V.",             "working": steps},
         {"value": prefix_err, "display": fmt_amp(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = None
+    if p_unit != "W" or v_unit != "V":
+        scaffold = []
+        if p_unit != "W":
+            scaffold.append({"question": "What is the power P in watts?", "answer": p_si})
+        if v_unit != "V":
+            scaffold.append({"question": "What is the voltage V in volts?", "answer": v_si})
+        scaffold.append({"question": "What is the current I?", "answer": correct})
     return make_question(question, correct, options_data, "A", notes=NOTES["electricity_power"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 # ─── P = V²/R ─────────────────────────────────────────────
@@ -288,8 +312,15 @@ def gen_pv2r_find_p(level="N5"):
         {"value": multiply,  "display": fmt_power(multiply),  "summary": "Incorrect.", "mistake": "You multiplied V² × R instead of dividing. P = V² ÷ R.",        "working": steps},
         {"value": prefix_err,"display": fmt_power(prefix_err),"summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = []
+    if v_unit != "V":
+        scaffold.append({"question": "What is the voltage V in volts?", "answer": v_si})
+    if r_unit != "Ω":
+        scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
+    scaffold.append({"question": "What is V²?", "answer": round_sf(v_si ** 2)})
+    scaffold.append({"question": "What is the power P?", "answer": correct})
     return make_question(question, correct, options_data, "W", notes=NOTES["electricity_power"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 def gen_pv2r_find_v(level="N5"):
@@ -329,8 +360,15 @@ def gen_pv2r_find_v(level="N5"):
         {"value": wrong_div,  "display": fmt_volt(wrong_div),  "summary": "Incorrect.", "mistake": "You divided P by R under the root. V = √(P × R), not √(P ÷ R).",    "working": steps},
         {"value": prefix_err, "display": fmt_volt(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = []
+    if p_unit != "W":
+        scaffold.append({"question": "What is the power P in watts?", "answer": p_si})
+    if r_unit != "Ω":
+        scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
+    scaffold.append({"question": "What is P × R?", "answer": round_sf(p_si * r_si)})
+    scaffold.append({"question": "What is the voltage V?", "answer": correct})
     return make_question(question, correct, options_data, "V", notes=NOTES["electricity_power"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 def gen_pv2r_find_r(level="N5"):
@@ -370,8 +408,15 @@ def gen_pv2r_find_r(level="N5"):
         {"value": no_square,  "display": fmt_ohm(no_square),  "summary": "Incorrect.", "mistake": "You forgot to square V. R = V² ÷ P, not V ÷ P.",           "working": steps},
         {"value": prefix_err, "display": fmt_ohm(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = []
+    if v_unit != "V":
+        scaffold.append({"question": "What is the voltage V in volts?", "answer": v_si})
+    if p_unit != "W":
+        scaffold.append({"question": "What is the power P in watts?", "answer": p_si})
+    scaffold.append({"question": "What is V²?", "answer": round_sf(v_si ** 2)})
+    scaffold.append({"question": "What is the resistance R?", "answer": correct})
     return make_question(question, correct, options_data, "Ω", notes=NOTES["electricity_power"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 # ─── P = I²R ──────────────────────────────────────────────
@@ -414,8 +459,15 @@ def gen_pi2r_find_p(level="N5"):
         {"value": divided,    "display": fmt_power(divided),    "summary": "Incorrect.", "mistake": "You divided I² by R instead of multiplying. P = I² × R.",        "working": steps},
         {"value": prefix_err, "display": fmt_power(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = []
+    if i_unit != "A":
+        scaffold.append({"question": "What is the current I in amps?", "answer": i_si})
+    if r_unit != "Ω":
+        scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
+    scaffold.append({"question": "What is I²?", "answer": round_sf(i_si ** 2)})
+    scaffold.append({"question": "What is the power P?", "answer": correct})
     return make_question(question, correct, options_data, "W", notes=NOTES["electricity_power"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 def gen_pi2r_find_i(level="N5"):
@@ -455,8 +507,15 @@ def gen_pi2r_find_i(level="N5"):
         {"value": multiply,   "display": fmt_amp(multiply),   "summary": "Incorrect.", "mistake": "You multiplied P × R instead of dividing. I = √(P ÷ R).",         "working": steps},
         {"value": prefix_err, "display": fmt_amp(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = []
+    if p_unit != "W":
+        scaffold.append({"question": "What is the power P in watts?", "answer": p_si})
+    if r_unit != "Ω":
+        scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
+    scaffold.append({"question": "What is P ÷ R?", "answer": round_sf(p_si / r_si)})
+    scaffold.append({"question": "What is the current I?", "answer": correct})
     return make_question(question, correct, options_data, "A", notes=NOTES["electricity_power"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 def gen_pi2r_find_r(level="N5"):
@@ -497,8 +556,15 @@ def gen_pi2r_find_r(level="N5"):
         {"value": no_square,  "display": fmt_ohm(no_square),  "summary": "Incorrect.", "mistake": "You forgot to square I. R = P ÷ I², not P ÷ I.",            "working": steps},
         {"value": prefix_err, "display": fmt_ohm(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = []
+    if p_unit != "W":
+        scaffold.append({"question": "What is the power P in watts?", "answer": p_si})
+    if i_unit != "A":
+        scaffold.append({"question": "What is the current I in amps?", "answer": i_si})
+    scaffold.append({"question": "What is I²?", "answer": round_sf(i_si ** 2)})
+    scaffold.append({"question": "What is the resistance R?", "answer": correct})
     return make_question(question, correct, options_data, "Ω", notes=NOTES["electricity_power"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 # ─── P = E/t ──────────────────────────────────────────────
@@ -540,8 +606,16 @@ def gen_pet_find_p(level="N5"):
         {"value": inverted,   "display": fmt_power(inverted),   "summary": "Incorrect.", "mistake": "You divided t by E instead of E by t. P = E ÷ t.",         "working": steps},
         {"value": prefix_err, "display": fmt_power(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = None
+    if e_unit != "J" or t_unit != "s":
+        scaffold = []
+        if e_unit != "J":
+            scaffold.append({"question": "What is the energy E in joules?", "answer": e_si})
+        if t_unit != "s":
+            scaffold.append({"question": "What is the time t in seconds?", "answer": t_si})
+        scaffold.append({"question": "What is the power P?", "answer": correct})
     return make_question(question, correct, options_data, "W", notes=NOTES["electricity_power_energy"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 def gen_pet_find_e(level="N5"):
@@ -581,8 +655,16 @@ def gen_pet_find_e(level="N5"):
         {"value": inverted,   "display": fmt_energy(inverted),   "summary": "Incorrect.", "mistake": "You divided t by P. E = P × t.",                           "working": steps},
         {"value": prefix_err, "display": fmt_energy(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = None
+    if p_unit != "W" or t_unit != "s":
+        scaffold = []
+        if p_unit != "W":
+            scaffold.append({"question": "What is the power P in watts?", "answer": p_si})
+        if t_unit != "s":
+            scaffold.append({"question": "What is the time t in seconds?", "answer": t_si})
+        scaffold.append({"question": "What is the energy E?", "answer": correct})
     return make_question(question, correct, options_data, "J", notes=NOTES["electricity_power_energy"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 def gen_pet_find_t(level="N5"):
@@ -622,8 +704,16 @@ def gen_pet_find_t(level="N5"):
         {"value": inverted,   "display": f"{inverted} s",   "summary": "Incorrect.", "mistake": "You divided P by E instead of E by P. t = E ÷ P.",         "working": steps},
         {"value": prefix_err, "display": f"{prefix_err} s", "summary": "Incorrect.", "mistake": prefix_msg,  "working": steps},
     ]
+    scaffold = None
+    if e_unit != "J" or p_unit != "W":
+        scaffold = []
+        if e_unit != "J":
+            scaffold.append({"question": "What is the energy E in joules?", "answer": e_si})
+        if p_unit != "W":
+            scaffold.append({"question": "What is the power P in watts?", "answer": p_si})
+        scaffold.append({"question": "What is the time t?", "answer": correct})
     return make_question(question, correct, options_data, "s", notes=NOTES["electricity_power_energy"],
-                         topic="Electricity", question_type="Power", level=level)
+                         topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
 
 
 _N4_GENS  = [gen_pvi_find_p]
