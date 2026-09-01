@@ -73,8 +73,14 @@ def gen_act_find_a(level="N5"):
         {"value": inverted,   "display": fmt_activity(inverted),   "summary": "Incorrect.", "mistake": "You divided t by N instead of N by t. A = N ÷ t.",       "working": steps},
         {"value": prefix_err, "display": fmt_activity(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg, "working": steps},
     ]
+    scaffold = None
+    if t_unit != "s":
+        scaffold = [
+            {"question": "What is the time in seconds?", "answer": float(t_si)},
+            {"question": "What is the activity A?", "answer": correct},
+        ]
     return make_question(question, correct, options_data, "Bq", notes=NOTES["radiation_activity"],
-                         topic="Radiation", question_type="Activity", level=level)
+                         topic="Radiation", question_type="Activity", level=level, scaffold=scaffold)
 
 
 def gen_act_find_n(level="N5"):
@@ -114,8 +120,14 @@ def gen_act_find_n(level="N5"):
         {"value": inverted,   "display": f"{round_sf(inverted)}",  "summary": "Incorrect.", "mistake": "You divided t by A. N = A × t.",                        "working": steps},
         {"value": prefix_err, "display": f"{round_sf(prefix_err)}","summary": "Incorrect.", "mistake": prefix_msg, "working": steps},
     ]
+    scaffold = None
+    if t_unit != "s":
+        scaffold = [
+            {"question": "What is the time in seconds?", "answer": float(t_si)},
+            {"question": "What is the number of decays N?", "answer": correct},
+        ]
     return make_question(question, correct, options_data, "decays", notes=NOTES["radiation_activity"],
-                         topic="Radiation", question_type="Activity", level=level)
+                         topic="Radiation", question_type="Activity", level=level, scaffold=scaffold)
 
 
 def gen_act_find_t(level="N5"):

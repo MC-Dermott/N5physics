@@ -88,8 +88,14 @@ def gen_find_D(level="N5"):
         {"value": round_sf(E),         "display": f"{round_sf(E)} J",  "summary": "Incorrect.", "mistake": f"You gave the energy absorbed, not the absorbed dose. D = E ÷ m = {round_sf(E)} ÷ {mass_kg} = {correct} Gy.", "working": working},
         {"value": float(content_val),  "display": f"{content_val} Gy", "summary": "Incorrect.", "mistake": content_msg, "working": working},
     ]
+    scaffold = None
+    if is_grams:
+        scaffold = [
+            {"question": "What is the mass in kg?", "answer": mass_kg},
+            {"question": "What is the absorbed dose D?", "answer": correct},
+        ]
     return make_question(question, float(correct), options_data, "Gy",
-                         notes=NOTES["radiation_doses"], topic="Radiation", question_type="Dose", level=level)
+                         notes=NOTES["radiation_doses"], topic="Radiation", question_type="Dose", level=level, scaffold=scaffold)
 
 
 def gen_find_H(level="N5"):
@@ -238,8 +244,14 @@ def gen_find_E(level="N5"):
         {"value": float(div_err),     "display": f"{div_err} J",    "summary": "Incorrect.", "mistake": "You divided D by m instead of multiplying. E = D × m.", "working": working},
         {"value": float(content_val), "display": f"{content_val} J","summary": "Incorrect.", "mistake": content_msg, "working": working},
     ]
+    scaffold = None
+    if is_grams:
+        scaffold = [
+            {"question": "What is the mass in kg?", "answer": mass_kg},
+            {"question": "What is the energy absorbed E?", "answer": correct},
+        ]
     return make_question(question, float(correct), options_data, "J",
-                         notes=NOTES["radiation_doses"], topic="Radiation", question_type="Dose", level=level)
+                         notes=NOTES["radiation_doses"], topic="Radiation", question_type="Dose", level=level, scaffold=scaffold)
 
 
 _ALL_GENS = [gen_find_D, gen_find_H, gen_find_dose_rate, gen_find_H_from_rate, gen_find_D_from_H, gen_find_E]
