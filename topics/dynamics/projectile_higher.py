@@ -246,6 +246,10 @@ def generate_projectile_l1(level="Higher"):
         ],
         working=working_t,
         notes=_NOTES_L1,
+        scaffold=[
+            {"prompt": "What is the time to reach maximum height, t_up?", "answer": t_up},
+            {"prompt": "What is the total time of flight, t_total?", "answer": t_total},
+        ],
     )
 
     # ── Part (d): horizontal range ────────────────────────────────────────────
@@ -352,6 +356,10 @@ def generate_projectile_l2(level="Higher"):
         ],
         working=working_t,
         notes=_NOTES_L2,
+        scaffold=[
+            {"prompt": "What is 2h/g (t²)?", "answer": two_h_over_g},
+            {"prompt": "What is the time of flight t?", "answer": t},
+        ],
     )
 
     # ── Part (b): horizontal range ────────────────────────────────────────────
@@ -465,6 +473,10 @@ def generate_projectile_l2(level="Higher"):
         ],
         working=working_v,
         notes=_NOTES_L2,
+        scaffold=[
+            {"prompt": "What is v_H² + v_y²?", "answer": vH2pvy2},
+            {"prompt": "What is the resultant speed v?", "answer": v_result},
+        ],
     )
 
     return PhysicsQuestion(
@@ -570,6 +582,10 @@ def generate_projectile_max_height(level="Higher"):
         ],
         working=working_t,
         notes=_NOTES_MAXH,
+        scaffold=[
+            {"prompt": "What is v_V (the vertical component of the launch velocity)?", "answer": v_V},
+            {"prompt": "What is the time to reach maximum height, t_up?", "answer": t_up},
+        ],
     )
 
     working_h = [
@@ -605,6 +621,10 @@ def generate_projectile_max_height(level="Higher"):
         ],
         working=working_h,
         notes=_NOTES_MAXH,
+        scaffold=[
+            {"prompt": "What is v_V² ?", "answer": round(v_V ** 2, 2)},
+            {"prompt": "What is the maximum height h_max?", "answer": h_max},
+        ],
     )
 
     return PhysicsQuestion(

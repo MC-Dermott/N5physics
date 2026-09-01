@@ -77,9 +77,13 @@ def gen_drop_time_from_height(level="Higher"):
          "mistake": "Check your rearrangement of s = ½gt² for t — don't double the square root itself.",
          "working": working},
     ]
+    scaffold = [
+        {"question": "What is 2s/g?", "answer": _r2(2 * s / G)},
+        {"question": "What is the time taken t?", "answer": t},
+    ]
     return make_question(question, t, options_data, "s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_drop_velocity_from_height(level="Higher"):
@@ -106,9 +110,13 @@ def gen_drop_velocity_from_height(level="Higher"):
          "mistake": "You appear to have left out the factor of 2. The correct equation is v² = 2gs, so v = √(2gs).",
          "working": working},
     ]
+    scaffold = [
+        {"question": "What is 2gs (v²)?", "answer": _r2(2 * G * s)},
+        {"question": "What is the velocity v?", "answer": v},
+    ]
     return make_question(question, v, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_drop_height_from_time(level="Higher"):
@@ -135,9 +143,13 @@ def gen_drop_height_from_time(level="Higher"):
          "mistake": "Check your formula — s = ½gt² needs t squared, not just t.",
          "working": working},
     ]
+    scaffold = [
+        {"question": "What is t²?", "answer": _r2(t ** 2)},
+        {"question": "What is the height s?", "answer": s},
+    ]
     return make_question(question, s, options_data, "m",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 # ── Thrown upward: v = u − gt, v² = u² − 2gs ─────────────────────────────────
@@ -195,9 +207,13 @@ def gen_throw_max_height(level="Higher"):
          "mistake": "That rearranges the equation for a velocity, not a height. h = u² ÷ (2g).",
          "working": working},
     ]
+    scaffold = [
+        {"question": "What is u²?", "answer": u ** 2},
+        {"question": "What is the maximum height h?", "answer": h},
+    ]
     return make_question(question, h, options_data, "m",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_throw_initial_velocity_from_height(level="Higher"):
@@ -224,9 +240,13 @@ def gen_throw_initial_velocity_from_height(level="Higher"):
          "mistake": "That computes gh, not u. Rearranging v² = u² − 2gh with v = 0 gives u = √(2gh).",
          "working": working},
     ]
+    scaffold = [
+        {"question": "What is 2gh (u²)?", "answer": _r2(2 * G * h)},
+        {"question": "What is the initial velocity u?", "answer": u},
+    ]
     return make_question(question, u, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_throw_initial_velocity_from_total_time(level="Higher"):
@@ -257,9 +277,13 @@ def gen_throw_initial_velocity_from_total_time(level="Higher"):
          "mistake": "You should multiply by g, not divide. u = g × (T ÷ 2).",
          "working": working},
     ]
+    scaffold = [
+        {"question": "What is the time to reach maximum height, t_up (= T/2)?", "answer": _r2(T / 2)},
+        {"question": "What is the initial velocity u?", "answer": u},
+    ]
     return make_question(question, u, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 _ALL_VERTICAL_GENS = [

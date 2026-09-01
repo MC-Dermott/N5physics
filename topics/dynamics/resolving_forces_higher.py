@@ -254,6 +254,10 @@ def _l3_vertical(level):
              "working": working_T},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is ma (the extra force needed for the acceleration)?", "answer": round(m * a, 2)},
+            {"prompt": "What is the tension T?", "answer": T},
+        ],
     )
 
     return PhysicsQuestion(
@@ -351,9 +355,13 @@ def gen_rf_l5_resultant_no_friction(level="Higher"):
          "mistake": "This is the full weight, not its component along the slope.",
          "working": working},
     ]
+    scaffold = [
+        {"question": "What is the weight W (= mg)?", "answer": W},
+        {"question": "What is the resultant force along the slope?", "answer": resultant},
+    ]
     return make_question(question, resultant, options_data, "N",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Components of Vectors", level=level)
+                         question_type="Components of Vectors", level=level, scaffold=scaffold)
 
 
 # ── Level 6 — Acceleration of a Block on a Slope, With Friction ──────────────
@@ -389,9 +397,13 @@ def gen_rf_l6_acceleration_with_friction(level="Higher"):
          "mistake": "You forgot to subtract the friction force before dividing by mass.",
          "working": working},
     ]
+    scaffold = [
+        {"question": "What is the resultant force along the slope (W∥ − friction)?", "answer": resultant},
+        {"question": "What is the acceleration a?", "answer": a},
+    ]
     return make_question(question, a, options_data, "m/s²",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Components of Vectors", level=level)
+                         question_type="Components of Vectors", level=level, scaffold=scaffold)
 
 
 # ── Level 7 — Finding an Unknown Force ───────────────────────────────────────
@@ -425,9 +437,13 @@ def gen_rf_l7_unknown_force(level="Higher"):
          "mistake": "You forgot to subtract ma. friction = W∥ − ma.",
          "working": working},
     ]
+    scaffold = [
+        {"question": "What is W∥ (= W sinθ)?", "answer": _r1(W_par)},
+        {"question": "What is the friction force?", "answer": friction},
+    ]
     return make_question(question, friction, options_data, "N",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Components of Vectors", level=level)
+                         question_type="Components of Vectors", level=level, scaffold=scaffold)
 
 
 # ── Level 8 — Explain: Effect of Angle ────────────────────────────────────────

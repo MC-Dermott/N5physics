@@ -169,6 +169,10 @@ def generate_orbital_gravitation(level="Higher"):
         ],
         working=working_a,
         notes=_NOTES,
+        scaffold=[
+            {"prompt": f"What is the orbital radius r, measured from the centre of {name} (r = R + h)?", "answer": r},
+            {"prompt": "What is the gravitational force F?", "answer": F},
+        ],
     )
 
     # ── Part (b): gravitational field strength ─────────────────────────────────
@@ -201,6 +205,10 @@ def generate_orbital_gravitation(level="Higher"):
         ],
         working=working_b,
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is r² (the orbital radius squared)?", "answer": _r3(r ** 2)},
+            {"prompt": "What is the gravitational field strength g?", "answer": g},
+        ],
     )
 
     return PhysicsQuestion(

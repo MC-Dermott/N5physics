@@ -467,9 +467,13 @@ def gen_at_final_velocity(level="Higher"):
          "working": working},
     ]
     options_data = _dedup_at_options(options_data, v)
+    scaffold = [
+        {"question": "What is the change in velocity, Δv (= a × t)?", "answer": round(a * t, 2)},
+        {"question": "What is the final velocity v?", "answer": v},
+    ]
     return make_question(question, v, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Graphs of Motion", level=level)
+                         question_type="Graphs of Motion", level=level, scaffold=scaffold)
 
 
 def gen_at_initial_velocity(level="Higher"):
@@ -509,9 +513,13 @@ def gen_at_initial_velocity(level="Higher"):
          "working": working},
     ]
     options_data = _dedup_at_options(options_data, u)
+    scaffold = [
+        {"question": "What is the change in velocity, Δv (= a × t)?", "answer": round(a * t, 2)},
+        {"question": "What is the initial velocity u?", "answer": u},
+    ]
     return make_question(question, u, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Graphs of Motion", level=level)
+                         question_type="Graphs of Motion", level=level, scaffold=scaffold)
 
 
 def gen_at_two_stage_velocity(level="Higher"):
@@ -553,9 +561,13 @@ def gen_at_two_stage_velocity(level="Higher"):
          "working": working},
     ]
     options_data = _dedup_at_options(options_data, v_final)
+    scaffold = [
+        {"question": "What is the velocity at the end of the first stage, v_mid?", "answer": v_mid},
+        {"question": "What is the final velocity v?", "answer": v_final},
+    ]
     return make_question(question, v_final, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Graphs of Motion", level=level)
+                         question_type="Graphs of Motion", level=level, scaffold=scaffold)
 
 
 _ALL_AT_GRAPH_GENS = [

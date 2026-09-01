@@ -474,6 +474,11 @@ def gen_order_of_magnitude(level="Higher"):
         question_type="Standard Model",
         level=level,
         metadata={"type": "order_of_magnitude"},
+        scaffold=[
+            {"prompt": f"What is the order of magnitude (power of 10) of the {pair['particle_a']} mass?", "answer": pair["exp_a"]},
+            {"prompt": f"What is the order of magnitude of the {pair['particle_b']} mass?", "answer": pair["exp_b"]},
+            {"prompt": "What is the difference between these two orders of magnitude?", "answer": diff},
+        ],
     )
 
 

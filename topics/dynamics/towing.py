@@ -181,6 +181,10 @@ def _l2_scenario(level="Higher"):
              "working": working_a},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is the unbalanced force (F − f_c − f_t)?", "answer": net},
+            {"prompt": "What is the acceleration a?", "answer": a},
+        ],
     )
 
     working_b = [
@@ -210,6 +214,10 @@ def _l2_scenario(level="Higher"):
              "working": working_b},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is m_t × a?", "answer": round(m_t * a, 2)},
+            {"prompt": "What is the tension T?", "answer": T},
+        ],
     )
 
     meta = {"obj": obj, "a": a, "is_multi": False}
@@ -300,6 +308,10 @@ def _l3_scenario(level="Higher"):
              "working": working_b},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is the combined mass of trailer 1 and trailer 2?", "answer": m_t1 + m_t2},
+            {"prompt": "What is the tension T in the tow bar?", "answer": T1},
+        ],
     )
 
     meta = {"obj": obj, "a": a, "is_multi": True}
@@ -365,6 +377,10 @@ def _l4_scenario(level="Higher"):
              "working": working_a},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is the unbalanced force (F − f_c − f_t1 − f_t2)?", "answer": net},
+            {"prompt": "What is the acceleration a?", "answer": a},
+        ],
     )
 
     working_b = [
@@ -396,6 +412,10 @@ def _l4_scenario(level="Higher"):
              "working": working_b},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is (m_t1 + m_t2) × a?", "answer": round((m_t1 + m_t2) * a, 2)},
+            {"prompt": "What is the tension T?", "answer": T1},
+        ],
     )
 
     meta = {"obj": obj, "a": a, "is_multi": True}

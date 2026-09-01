@@ -97,9 +97,13 @@ def gen_t_prime(level="Higher"):
         {"value": t,                    "mistake": "You must apply the time dilation formula — the Earth observer measures a longer time than the astronaut.", "working": working},
     ]
     options_data = _dedup(options_data, t_prime)
+    scaffold = [
+        {"question": "What is √(1 − v²/c²)?", "answer": lor},
+        {"question": "What is the dilated time t′ measured by the Earth observer?", "answer": t_prime},
+    ]
     return make_question(question, t_prime, options_data, "s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Special Relativity", level=level)
+                         question_type="Special Relativity", level=level, scaffold=scaffold)
 
 
 def gen_t_proper(level="Higher"):
@@ -127,9 +131,13 @@ def gen_t_proper(level="Higher"):
         {"value": t_prime,                  "mistake": "The astronaut's clock runs slow — their time is shorter than the Earth observer's time.", "working": working},
     ]
     options_data = _dedup(options_data, t)
+    scaffold = [
+        {"question": "What is √(1 − v²/c²)?", "answer": lor},
+        {"question": "What is the proper time t shown on the astronaut's clock?", "answer": t},
+    ]
     return make_question(question, t, options_data, "s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Special Relativity", level=level)
+                         question_type="Special Relativity", level=level, scaffold=scaffold)
 
 
 # ── Length contraction: l' = l × √(1 − v²/c²) ────────────────────────────────
@@ -160,9 +168,13 @@ def gen_l_prime(level="Higher"):
         {"value": l,                    "mistake": "You must apply the length contraction formula — the Earth observer measures a shorter length.", "working": working},
     ]
     options_data = _dedup(options_data, l_prime)
+    scaffold = [
+        {"question": "What is √(1 − v²/c²)?", "answer": lor},
+        {"question": "What is the contracted length l′ measured by the Earth observer?", "answer": l_prime},
+    ]
     return make_question(question, l_prime, options_data, "m",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Special Relativity", level=level)
+                         question_type="Special Relativity", level=level, scaffold=scaffold)
 
 
 def gen_l_proper(level="Higher"):
@@ -189,9 +201,13 @@ def gen_l_proper(level="Higher"):
         {"value": l_prime,                  "mistake": "The proper length is always longer than the contracted length — divide l' by √(1−v²/c²).", "working": working},
     ]
     options_data = _dedup(options_data, l)
+    scaffold = [
+        {"question": "What is √(1 − v²/c²)?", "answer": lor},
+        {"question": "What is the proper length l of the spacecraft?", "answer": l},
+    ]
     return make_question(question, l, options_data, "m",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Special Relativity", level=level)
+                         question_type="Special Relativity", level=level, scaffold=scaffold)
 
 
 # ── Simple (Newtonian) relative velocity ─────────────────────────────────────

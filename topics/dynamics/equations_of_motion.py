@@ -84,9 +84,13 @@ def gen_v_from_uat(level="Higher"):
     ]
     # remove duplicates
     options_data = _dedup(options_data, v)
+    scaffold = [
+        {"question": "What is at (the change in velocity)?", "answer": round(a * t, 2)},
+        {"question": "What is the final velocity v?", "answer": v},
+    ]
     return make_question(question, v, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_u_from_vat(level="Higher"):
@@ -119,9 +123,13 @@ def gen_u_from_vat(level="Higher"):
         {"value": v / t,           "mistake": "You divided v by t — use v = u + at and rearrange for u.", "working": working},
     ]
     options_data = _dedup(options_data, u)
+    scaffold = [
+        {"question": "What is at?", "answer": round(a * t, 2)},
+        {"question": "What is the initial velocity u?", "answer": u},
+    ]
     return make_question(question, u, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_a_from_vut(level="Higher"):
@@ -154,9 +162,13 @@ def gen_a_from_vut(level="Higher"):
         {"value": round(v / t, 2),          "mistake": "Use a = (v − u)/t — you must subtract the initial velocity.", "working": working},
     ]
     options_data = _dedup(options_data, a)
+    scaffold = [
+        {"question": "What is v − u (the change in velocity)?", "answer": round(v - u, 2)},
+        {"question": "What is the acceleration a?", "answer": a},
+    ]
     return make_question(question, a, options_data, "m/s²",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_t_from_vua(level="Higher"):
@@ -189,9 +201,13 @@ def gen_t_from_vua(level="Higher"):
         {"value": round(v / a, 2),          "mistake": "Use t = (v − u)/a — you must subtract u.", "working": working},
     ]
     options_data = _dedup(options_data, t)
+    scaffold = [
+        {"question": "What is v − u (the change in velocity)?", "answer": round(v - u, 2)},
+        {"question": "What is the time t?", "answer": t},
+    ]
     return make_question(question, t, options_data, "s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 # ── v² = u² + 2as ─────────────────────────────────────────────────────────────
@@ -222,9 +238,13 @@ def gen_v_from_uas(level="Higher"):
         {"value": u + 2*a*s,                      "mistake": "You must take the square root of (u² + 2as) to find v.", "working": working},
     ]
     options_data = _dedup(options_data, v)
+    scaffold = [
+        {"question": "What is v² (u² + 2as)?", "answer": v2},
+        {"question": "What is the final velocity v?", "answer": v},
+    ]
     return make_question(question, v, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_s_from_vua_sq(level="Higher"):
@@ -259,9 +279,13 @@ def gen_s_from_vua_sq(level="Higher"):
         {"value": round((v*v + u*u) / (2*a), 2),  "mistake": "Subtract u² from v² — don't add them.", "working": working},
     ]
     options_data = _dedup(options_data, s)
+    scaffold = [
+        {"question": "What is v² − u²?", "answer": round(v*v - u*u, 2)},
+        {"question": "What is the distance s?", "answer": s},
+    ]
     return make_question(question, s, options_data, "m",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_a_from_vus(level="Higher"):
@@ -290,9 +314,13 @@ def gen_a_from_vus(level="Higher"):
         {"value": round((v2 + u*u) / (2*s), 2),    "mistake": "Subtract u² from v² — don't add them.", "working": working},
     ]
     options_data = _dedup(options_data, a)
+    scaffold = [
+        {"question": "What is v² − u²?", "answer": round(v2 - u*u, 2)},
+        {"question": "What is the acceleration a?", "answer": a},
+    ]
     return make_question(question, a, options_data, "m/s²",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 # ── s = ut + ½at² ─────────────────────────────────────────────────────────────
@@ -332,9 +360,14 @@ def gen_s_from_uat_sq(level="Higher"):
         {"value": forgot_accel,"mistake": "You only used ut — don't forget the ½at² term.", "working": working},
     ]
     options_data = _dedup(options_data, s)
+    scaffold = [
+        {"question": "What is ut?", "answer": round(u*t, 2)},
+        {"question": "What is ½at²?", "answer": round(0.5*a*t*t, 2)},
+        {"question": "What is the distance s (their sum)?", "answer": s},
+    ]
     return make_question(question, s, options_data, "m",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_a_from_sut_sq(level="Higher"):
@@ -361,9 +394,13 @@ def gen_a_from_sut_sq(level="Higher"):
         {"value": round(2*(s - u*t) / t, 2),       "mistake": "Divide by t² (not just t): a = 2(s − ut) / t².", "working": working},
     ]
     options_data = _dedup(options_data, a)
+    scaffold = [
+        {"question": "What is s − ut?", "answer": round(s - u*t, 2)},
+        {"question": "What is the acceleration a?", "answer": a},
+    ]
     return make_question(question, a, options_data, "m/s²",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_u_from_sat_sq(level="Higher"):
@@ -391,9 +428,13 @@ def gen_u_from_sat_sq(level="Higher"):
         {"value": round((s + 0.5*a*t*t) / t, 2),  "mistake": "Subtract ½at² from s — don't add it.", "working": working},
     ]
     options_data = _dedup(options_data, u)
+    scaffold = [
+        {"question": "What is ½at²?", "answer": round(0.5*a*t*t, 2)},
+        {"question": "What is the initial velocity u?", "answer": u},
+    ]
     return make_question(question, u, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 # ── s = ½(u + v)t ─────────────────────────────────────────────────────────────
@@ -425,9 +466,13 @@ def gen_s_from_uvt(level="Higher"):
         {"value": round(0.5*v*t, 2),   "mistake": "You need both u and v: s = ½(u + v)t, not just ½vt.", "working": working},
     ]
     options_data = _dedup(options_data, s)
+    scaffold = [
+        {"question": "What is u + v?", "answer": u + v},
+        {"question": "What is the distance s?", "answer": s},
+    ]
     return make_question(question, s, options_data, "m",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_t_from_uvs(level="Higher"):
@@ -458,9 +503,13 @@ def gen_t_from_uvs(level="Higher"):
         {"value": round(2*s / (u*v), 2),    "mistake": "Add u and v (don't multiply): t = 2s / (u + v).", "working": working},
     ]
     options_data = _dedup(options_data, t)
+    scaffold = [
+        {"question": "What is u + v?", "answer": u + v},
+        {"question": "What is the time t?", "answer": t},
+    ]
     return make_question(question, t, options_data, "s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 def gen_u_from_svt(level="Higher"):
@@ -488,9 +537,13 @@ def gen_u_from_svt(level="Higher"):
         {"value": round(2*s / (t + v), 2),    "mistake": "Rearrange correctly: multiply both sides by 2/t first, then subtract v.", "working": working},
     ]
     options_data = _dedup(options_data, u)
+    scaffold = [
+        {"question": "What is 2s/t?", "answer": round(2*s/t, 2)},
+        {"question": "What is the initial velocity u?", "answer": u},
+    ]
     return make_question(question, u, options_data, "m/s",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Equations of Motion", level=level)
+                         question_type="Equations of Motion", level=level, scaffold=scaffold)
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
