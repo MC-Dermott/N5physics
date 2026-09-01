@@ -121,8 +121,14 @@ def make_find_T(level="N5"):
         {"value": sq_val,   "display": f"{fmt_val(sq_val)} {T_unit}", "summary": "Incorrect.", "mistake": "Check your equation. T = 1 ÷ f.", "working": steps},
         {**extra, "working": steps},
     ]
+    scaffold = None
+    if f_unit != "Hz":
+        scaffold = [
+            {"question": "What is the frequency in Hz?", "answer": f_Hz},
+            {"question": "What is the period T?", "answer": T_disp},
+        ]
     return make_question(question, T_disp, options_data, T_unit, notes=NOTES["waves_period"],
-                         topic="Waves", question_type="Period & Frequency", level=level)
+                         topic="Waves", question_type="Period & Frequency", level=level, scaffold=scaffold)
 
 
 def make_find_f(level="N5"):
@@ -161,8 +167,14 @@ def make_find_f(level="N5"):
         {"value": round_sf(f_Hz / 10), "display": f"{fmt_val(round_sf(f_Hz / 10))} Hz",
          "summary": "Incorrect.", "mistake": "Check your arithmetic — your answer is 10× too small.", "working": steps},
     ]
+    scaffold = None
+    if T_unit != "s":
+        scaffold = [
+            {"question": "What is the period in seconds?", "answer": T_s},
+            {"question": "What is the frequency f?", "answer": f_Hz},
+        ]
     return make_question(question, f_Hz, options_data, f_unit, notes=NOTES["waves_period"],
-                         topic="Waves", question_type="Period & Frequency", level=level)
+                         topic="Waves", question_type="Period & Frequency", level=level, scaffold=scaffold)
 
 
 def make_find_f_from_count(level="N5"):
@@ -192,8 +204,14 @@ def make_find_f_from_count(level="N5"):
         {"value": inverted,  "display": f"{fmt_val(inverted)} Hz", "summary": "Incorrect.", "mistake": "You divided t by N instead of N by t. f = N ÷ t.", "working": steps},
         {"value": no_conv,   "display": f"{fmt_val(no_conv)} Hz",  "summary": "Incorrect.", "mistake": no_conv_msg, "working": steps},
     ]
+    scaffold = None
+    if t_unit != "s":
+        scaffold = [
+            {"question": "What is the time in seconds?", "answer": float(t_si)},
+            {"question": "What is the frequency f?", "answer": correct_f},
+        ]
     return make_question(question, correct_f, options_data, "Hz", notes=NOTES["waves_period"],
-                         topic="Waves", question_type="Period & Frequency", level=level)
+                         topic="Waves", question_type="Period & Frequency", level=level, scaffold=scaffold)
 
 
 def make_find_N(level="N5"):
@@ -229,8 +247,16 @@ def make_find_N(level="N5"):
         {"value": inverted, "display": str(inverted),     "summary": "Incorrect.", "mistake": "You divided t by f. N = f × t.", "working": steps},
         {"value": no_conv,  "display": str(no_conv),      "summary": "Incorrect.", "mistake": no_conv_msg, "working": steps},
     ]
+    scaffold = None
+    if f_unit != "Hz" or t_unit != "s":
+        scaffold = []
+        if f_unit != "Hz":
+            scaffold.append({"question": "What is the frequency in Hz?", "answer": f})
+        if t_unit != "s":
+            scaffold.append({"question": "What is the time in seconds?", "answer": float(t_si)})
+        scaffold.append({"question": "What is the number of waves N?", "answer": correct})
     return make_question(question, correct, options_data, "waves", notes=NOTES["waves_period"],
-                         topic="Waves", question_type="Period & Frequency", level=level)
+                         topic="Waves", question_type="Period & Frequency", level=level, scaffold=scaffold)
 
 
 _ALL_GENS = [make_find_T, make_find_f, make_find_f_from_count, make_find_N]

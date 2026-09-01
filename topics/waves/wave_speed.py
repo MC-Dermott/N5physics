@@ -113,8 +113,12 @@ def make_find_f_em(level="N5"):
         {"value": wrong_v,   "display": f"{fmt_val(wrong_v)} Hz",   "summary": "Incorrect.", "mistake": "You used v = 340 m/s (speed of sound). All EM waves travel at 3 × 10⁸ m/s.", "working": steps},
         {"value": mult_err,  "display": f"{fmt_val(mult_err)} Hz",  "summary": "Incorrect.", "mistake": "You multiplied v × λ instead of dividing. f = v ÷ λ.", "working": steps},
     ]
+    scaffold = [
+        {"question": "What is the wavelength in metres?", "answer": lam_m},
+        {"question": "What is the frequency f?", "answer": correct_f},
+    ]
     return make_question(question, correct_f, options_data, "Hz", notes=NOTES["waves_speed"],
-                         topic="Waves", question_type="Wave Speed", level=level)
+                         topic="Waves", question_type="Wave Speed", level=level, scaffold=scaffold)
 
 
 def make_find_lam_em(level="N5"):
@@ -141,8 +145,12 @@ def make_find_lam_em(level="N5"):
         {"value": wrong_v,     "display": f"{fmt_val(wrong_v)} m",     "summary": "Incorrect.", "mistake": "You used v = 340 m/s (speed of sound). All EM waves travel at 3 × 10⁸ m/s.", "working": steps},
         {"value": mult_err,    "display": f"{fmt_val(mult_err)} m",    "summary": "Incorrect.", "mistake": "You multiplied v × f instead of dividing. λ = v ÷ f.", "working": steps},
     ]
+    scaffold = [
+        {"question": "What is the frequency in Hz?", "answer": f_Hz},
+        {"question": "What is the wavelength λ?", "answer": correct_lam},
+    ]
     return make_question(question, correct_lam, options_data, "m", notes=NOTES["waves_speed"],
-                         topic="Waves", question_type="Wave Speed", level=level)
+                         topic="Waves", question_type="Wave Speed", level=level, scaffold=scaffold)
 
 
 def make_find_v_sound(level="N5"):
@@ -172,8 +180,14 @@ def make_find_v_sound(level="N5"):
          "mistake": (f"You used λ = {lam_disp} without converting to metres. {lam_disp} {lam_unit} = {lam_m} m." if lam_unit != "m" else "You divided λ by f instead of multiplying. v = f × λ."), "working": steps},
         {"value": round_sf(f_Hz + lam_m), "display": f"{round_sf(f_Hz + lam_m)} m/s", "summary": "Incorrect.", "mistake": "You added f and λ instead of multiplying. v = f × λ.", "working": steps},
     ]
+    scaffold = None
+    if lam_unit != "m":
+        scaffold = [
+            {"question": "What is the wavelength in metres?", "answer": lam_m},
+            {"question": "What is the wave speed v?", "answer": correct_v},
+        ]
     return make_question(question, correct_v, options_data, "m/s", notes=NOTES["waves_speed"],
-                         topic="Waves", question_type="Wave Speed", level=level)
+                         topic="Waves", question_type="Wave Speed", level=level, scaffold=scaffold)
 
 
 def make_find_f_sound(level="N5"):
@@ -201,8 +215,14 @@ def make_find_f_sound(level="N5"):
         {"value": mult_f,    "display": f"{fmt_val(mult_f)} Hz",    "summary": "Incorrect.", "mistake": "You multiplied v × λ instead of dividing. f = v ÷ λ.", "working": steps},
         {"value": no_conv,   "display": f"{fmt_val(no_conv)} Hz",   "summary": "Incorrect.", "mistake": no_conv_msg, "working": steps},
     ]
+    scaffold = None
+    if lam_unit != "m":
+        scaffold = [
+            {"question": "What is the wavelength in metres?", "answer": lam_m},
+            {"question": "What is the frequency f?", "answer": correct_f},
+        ]
     return make_question(question, correct_f, options_data, "Hz", notes=NOTES["waves_speed"],
-                         topic="Waves", question_type="Wave Speed", level=level)
+                         topic="Waves", question_type="Wave Speed", level=level, scaffold=scaffold)
 
 
 def make_find_lam_sound(level="N5"):
@@ -229,8 +249,14 @@ def make_find_lam_sound(level="N5"):
         {"value": mult_lam,    "display": f"{fmt_val(mult_lam)} m",    "summary": "Incorrect.", "mistake": "You multiplied v × f instead of dividing. λ = v ÷ f.", "working": steps},
         {"value": no_conv,     "display": f"{fmt_val(no_conv)} m",     "summary": "Incorrect.", "mistake": no_conv_msg, "working": steps},
     ]
+    scaffold = None
+    if f_unit != "Hz":
+        scaffold = [
+            {"question": "What is the frequency in Hz?", "answer": f_Hz},
+            {"question": "What is the wavelength λ?", "answer": correct_lam},
+        ]
     return make_question(question, correct_lam, options_data, "m", notes=NOTES["waves_speed"],
-                         topic="Waves", question_type="Wave Speed", level=level)
+                         topic="Waves", question_type="Wave Speed", level=level, scaffold=scaffold)
 
 
 _N4_GENS  = [make_find_v_sound, make_find_f_sound, make_find_lam_sound]
