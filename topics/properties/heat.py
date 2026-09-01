@@ -119,8 +119,14 @@ def gen_latent_find_q(level="N5"):
             {"value": float(kj_err_Q),  "display": fmt_J(kj_err_Q),  "summary": "Incorrect.", "mistake": f"You divided the latent heat by 1000 before substituting. Use the value directly: L = {L:,} J/kg.", "working": working},
             {"value": float(both_L_Q),  "display": fmt_J(both_L_Q),  "summary": "Incorrect.", "mistake": f"You added both latent heat values together. Only the {cfg['L_name']} applies to this change of state.", "working": working},
         ]
+    scaffold = None
+    if is_grams:
+        scaffold = [
+            {"question": "What is the mass in kg?", "answer": mass_kg},
+            {"question": "What is the energy transferred?", "answer": float(correct_Q)},
+        ]
     return make_question(question, float(correct_Q), options_data, "J",
-                         notes=NOTES["heat_shc"], topic="Properties", question_type="Heat", level=level)
+                         notes=NOTES["heat_shc"], topic="Properties", question_type="Heat", level=level, scaffold=scaffold)
 
 
 def gen_latent_find_m(level="N5"):
@@ -232,7 +238,11 @@ def gen_shc_find_m(level="N5"):
         {"value": float(forgot_dt),    "display": f"{forgot_dt} kg",    "summary": "Incorrect.", "mistake": f"You divided E_H by c only, forgetting to divide by ΔT = {dt} °C. m = E_H ÷ (c × ΔT).", "working": working},
         {"value": float(swap_dt_error), "display": f"{swap_dt_error} kg", "summary": "Incorrect.", "mistake": "You multiplied by ΔT instead of dividing by it. m = E_H ÷ (c × ΔT).", "working": working},
     ]
-    return make_question(question, float(correct_m), options_data, "kg",
+    scaffold = [
+        {"question": "What is c × ΔT?", "answer": round_sf(C_WATER * dt)},
+        {"question": "What is the mass m?", "answer": float(correct_m)},
+    ]
+    return make_question(question, float(correct_m), options_data, "kg", scaffold=scaffold,
                          notes=NOTES["heat_shc"], topic="Properties", question_type="Heat", level=level)
 
 
@@ -279,7 +289,11 @@ def gen_shc_find_dt(level="N5"):
             "mistake": f"You multiplied the mass by 1000 before substituting. The mass is already in kg: {mass_kg} kg.",
             "working": working,
         })
-    return make_question(question, float(correct_dt), options_data, "°C",
+    scaffold = [
+        {"question": "What is m × c?", "answer": round_sf(mass_kg * C_WATER)},
+        {"question": "What is the temperature change ΔT?", "answer": float(correct_dt)},
+    ]
+    return make_question(question, float(correct_dt), options_data, "°C", scaffold=scaffold,
                          notes=NOTES["heat_shc"], topic="Properties", question_type="Heat", level=level)
 
 
@@ -349,10 +363,17 @@ def generate_heat_exam_icemachine(level="N5"):
                        "display": fmt_J(_shc_q(mass_g, T1 + 5)), "summary": "Incorrect.",
                        "mistake": f"ΔT = {T1} − 0 = {T1} °C (the water cools to 0 °C, not below).", "working": shc_working})
 
+    shc_scaffold = None
+    if is_grams:
+        shc_scaffold = [
+            {"question": "What is the mass in kg?", "answer": mass_kg},
+            {"question": "What is the energy removed?", "answer": float(Q_shc)},
+        ]
     part_i = make_question(
         "Calculate the energy removed from the water to reduce its temperature to 0 °C.",
         float(Q_shc), opts_i, "J",
         notes=NOTES["heat_shc"], topic="Properties", question_type="Heat", level=level,
+        scaffold=shc_scaffold,
     )
 
     # ── Part (ii): P = E/t — find time ───────────────────────────────────────

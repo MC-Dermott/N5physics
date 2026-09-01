@@ -87,7 +87,15 @@ def gen_sdt_find_v(level="N5"):
         {"value": inverted,   "display": fmt_speed(inverted),   "summary": "Incorrect.", "mistake": "You divided t by d instead of d by t. v = d ÷ t.",     "working": steps},
         {"value": prefix_err, "display": fmt_speed(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg, "working": steps},
     ]
-    return make_question(question, correct, options_data, "m/s", scaffold=[], notes=NOTES["speed_distance_time"],
+    scaffold = None
+    if d_unit == "km" or t_unit != "s":
+        scaffold = []
+        if d_unit == "km":
+            scaffold.append({"question": "What is the distance in metres?", "answer": float(d_si)})
+        if t_unit != "s":
+            scaffold.append({"question": "What is the time in seconds?", "answer": float(t_si)})
+        scaffold.append({"question": "What is the average speed v?", "answer": correct})
+    return make_question(question, correct, options_data, "m/s", scaffold=scaffold, notes=NOTES["speed_distance_time"],
                          topic="Dynamics", question_type="Speed, Distance and Time", level=level)
 
 
@@ -121,7 +129,13 @@ def gen_sdt_find_d(level="N5"):
         {"value": inverted,   "display": fmt_dist(inverted),   "summary": "Incorrect.", "mistake": "You divided t by v. d = v × t.",                       "working": steps},
         {"value": prefix_err, "display": fmt_dist(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg, "working": steps},
     ]
-    return make_question(question, correct, options_data, "m", scaffold=[], notes=NOTES["speed_distance_time"],
+    scaffold = None
+    if t_unit != "s":
+        scaffold = [
+            {"question": "What is the time in seconds?", "answer": float(t_si)},
+            {"question": "What is the distance d?", "answer": correct},
+        ]
+    return make_question(question, correct, options_data, "m", scaffold=scaffold, notes=NOTES["speed_distance_time"],
                          topic="Dynamics", question_type="Speed, Distance and Time", level=level)
 
 
@@ -157,7 +171,13 @@ def gen_sdt_find_t(level="N5"):
         {"value": inverted,   "display": fmt_time_s(inverted),   "summary": "Incorrect.", "mistake": "You divided v by d instead of d by v. t = d ÷ v.",     "working": steps},
         {"value": prefix_err, "display": fmt_time_s(prefix_err), "summary": "Incorrect.", "mistake": prefix_msg, "working": steps},
     ]
-    return make_question(question, correct, options_data, "s", scaffold=[], notes=NOTES["speed_distance_time"],
+    scaffold = None
+    if d_unit == "km":
+        scaffold = [
+            {"question": "What is the distance in metres?", "answer": float(d_si)},
+            {"question": "What is the time taken t?", "answer": correct},
+        ]
+    return make_question(question, correct, options_data, "s", scaffold=scaffold, notes=NOTES["speed_distance_time"],
                          topic="Dynamics", question_type="Speed, Distance and Time", level=level)
 
 
