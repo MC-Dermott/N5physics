@@ -190,7 +190,12 @@ def gen_distance_displacement(level="N5"):
              "working": working},
         ]
         options_data = _dedup(options_data, total)
-        return make_question(question, total, options_data, "m",
+        scaffold = [
+            {"question": "What is the area of stage 1 (the rectangle)?", "answer": area1},
+            {"question": "What is the area of stage 2?", "answer": area2},
+            {"question": "What is the total distance travelled?", "answer": total},
+        ]
+        return make_question(question, total, options_data, "m", scaffold=scaffold,
                              notes=_NOTES, topic="Dynamics", question_type="Speed and Velocity", level=level)
 
     # --- reversal case: two-part scenario (distance, then displacement) ---
@@ -234,6 +239,11 @@ def gen_distance_displacement(level="N5"):
              "working": working_dist},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is the forward (positive) area under the graph?", "answer": round(pos_area, 2)},
+            {"prompt": "What is the magnitude of the reverse (negative) area?", "answer": round(neg_area, 2)},
+            {"prompt": "What is the total distance travelled?", "answer": distance},
+        ],
     )
 
     working_disp = working + [
@@ -255,6 +265,11 @@ def gen_distance_displacement(level="N5"):
              "working": working_disp},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is the forward (positive) area under the graph?", "answer": round(pos_area, 2)},
+            {"prompt": "What is the magnitude of the reverse (negative) area?", "answer": round(neg_area, 2)},
+            {"prompt": "What is the total displacement (forward area minus reverse area)?", "answer": displacement},
+        ],
     )
 
     return PhysicsQuestion(
@@ -320,7 +335,12 @@ def gen_acceleration_interval(level="N5"):
          "working": working},
     ]
     options_data = _dedup(options_data, a_answer)
-    return make_question(question, a_answer, options_data, "m/s²",
+    scaffold = [
+        {"question": f"What is the velocity at t = {t_start} s?", "answer": v_start},
+        {"question": f"What is the velocity at t = {t_end} s?", "answer": v_end},
+        {"question": "What is the acceleration?", "answer": a_answer},
+    ]
+    return make_question(question, a_answer, options_data, "m/s²", scaffold=scaffold,
                          notes=_NOTES, topic="Dynamics", question_type="Speed and Velocity", level=level)
 
 

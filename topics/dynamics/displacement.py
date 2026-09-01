@@ -469,6 +469,10 @@ def gen_speed_velocity_from_displacement(level="N5"):
             {"type": "latex", "content": rf"\text{{speed}} = \frac{{{total_distance}}}{{{t}}} = {speed}\ \mathrm{{m/s}}"},
         ]
         correct = speed
+        scaffold = [
+            {"question": "What is the total distance travelled (both legs added together)?", "answer": total_distance},
+            {"question": "What is the average speed?", "answer": speed},
+        ]
         options_data = [
             {"value": correct, "mistake": None, "working": working},
             {"value": velocity,
@@ -486,6 +490,10 @@ def gen_speed_velocity_from_displacement(level="N5"):
             {"type": "latex", "content": rf"\text{{velocity}} = \frac{{{resultant}}}{{{t}}} = {velocity}\ \mathrm{{m/s}}"},
         ]
         correct = velocity
+        scaffold = [
+            {"question": "What is the magnitude of the resultant displacement (combine the two legs with Pythagoras' theorem)?", "answer": resultant},
+            {"question": "What is the magnitude of the average velocity?", "answer": velocity},
+        ]
         options_data = [
             {"value": correct, "mistake": None, "working": working},
             {"value": speed,
@@ -499,7 +507,7 @@ def gen_speed_velocity_from_displacement(level="N5"):
         ]
 
     options_data = _dedup(options_data, correct)
-    return make_question(question, float(correct), options_data, "m/s",
+    return make_question(question, float(correct), options_data, "m/s", scaffold=scaffold,
                          notes=_NOTES_VELOCITY, topic="Dynamics", question_type="Speed and Velocity", level=level)
 
 
@@ -624,7 +632,12 @@ def gen_resultant_velocity_2d(level="N5"):
          "working": working},
     ]
     options_data = _dedup(options_data, resultant)
-    return make_question(question, resultant, options_data, "m/s",
+    sum_of_squares = v1 ** 2 + v2 ** 2
+    scaffold = [
+        {"question": "What is v₁² + v₂² (the sum of the two velocities squared)?", "answer": sum_of_squares},
+        {"question": "What is the magnitude of the resultant velocity (the square root of that sum)?", "answer": resultant},
+    ]
+    return make_question(question, resultant, options_data, "m/s", scaffold=scaffold,
                          notes=_NOTES_RESVEL, topic="Dynamics", question_type="Speed and Velocity", level=level)
 
 
