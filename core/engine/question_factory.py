@@ -58,6 +58,17 @@ from topics.dynamics.momentum_impulse      import (
     gen_impulse_graph,
     gen_elastic_inelastic,
 )
+from topics.dynamics.energy_work_power_higher import (
+    generate_work_done as generate_work_done_higher,
+    generate_gpe as generate_gpe_higher,
+    generate_ke as generate_ke_higher,
+    generate_power as generate_power_higher,
+    gen_energy_freefall_speed,
+    gen_energy_max_height,
+    gen_energy_friction_force,
+    gen_energy_lift_power,
+    gen_energy_engine_power,
+)
 
 from topics.electricity.current          import generate_current
 from topics.electricity.ohms_law         import generate_ohms_law
@@ -233,6 +244,17 @@ QUAL_REGISTRY = {
                 "Impulse":                      generate_impulse_basic,
                 "Impulse from a Force-Time Graph": gen_impulse_graph,
                 "Elastic and Inelastic Collisions": gen_elastic_inelastic,
+            },
+            "Energy, Work and Power": {
+                "Work Done":                   generate_work_done_higher,
+                "Gravitational Potential Energy": generate_gpe_higher,
+                "Kinetic Energy":               generate_ke_higher,
+                "Power":                        generate_power_higher,
+                "Conservation — Free-Fall Speed": gen_energy_freefall_speed,
+                "Conservation — Maximum Height": gen_energy_max_height,
+                "Conservation — Frictional Force": gen_energy_friction_force,
+                "Conservation — Useful Power":  gen_energy_lift_power,
+                "Conservation — Engine Power":  gen_energy_engine_power,
             },
         },
         "Particles and Waves": {
