@@ -49,6 +49,15 @@ from topics.dynamics.resolving_forces_higher import (
     gen_rf_l7_unknown_force,
     gen_rf_l8_explain_angle,
 )
+from topics.dynamics.momentum_impulse      import (
+    generate_momentum_basic,
+    gen_stick_together,
+    gen_separate,
+    gen_explosion,
+    generate_impulse_basic,
+    gen_impulse_graph,
+    gen_elastic_inelastic,
+)
 
 from topics.electricity.current          import generate_current
 from topics.electricity.ohms_law         import generate_ohms_law
@@ -215,6 +224,15 @@ QUAL_REGISTRY = {
                 "Level 6 — Acceleration on a Slope":          gen_rf_l6_acceleration_with_friction,
                 "Level 7 — Finding an Unknown Force":         gen_rf_l7_unknown_force,
                 "Level 8 — Explain: Effect of Angle":         gen_rf_l8_explain_angle,
+            },
+            "Momentum and Impulse": {
+                "Momentum":                    generate_momentum_basic,
+                "Collisions — Stick Together":  gen_stick_together,
+                "Collisions — Separate":        gen_separate,
+                "Explosions and Recoil":        gen_explosion,
+                "Impulse":                      generate_impulse_basic,
+                "Impulse from a Force-Time Graph": gen_impulse_graph,
+                "Elastic and Inelastic Collisions": gen_elastic_inelastic,
             },
         },
         "Particles and Waves": {
