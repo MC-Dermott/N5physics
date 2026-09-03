@@ -398,14 +398,19 @@ def _l3_vertical_inverse(level):
                              question_type="Components of Vectors", level=level)
 
 
-def gen_rf_l3_force_from_accel(level="Higher"):
+def _l3_force_from_accel(level="Higher"):
     return random.choice([_l3_horizontal_find_F, _l3_horizontal_find_a,
                            _l3_vertical_given_a, _l3_vertical_inverse])(level)
 
 
-# ── Level 4 — Weight on a Slope ──────────────────────────────────────────────
+def gen_rf_l2_balancing_and_accel(level="Higher"):
+    """Section 2 — balancing forces, and force from acceleration (horizontal/vertical)."""
+    return random.choice([gen_rf_l2_balancing, _l3_force_from_accel])(level)
 
-def gen_rf_l4_weight_on_slope(level="Higher"):
+
+# ── Level 3 — Weight on a Slope ───────────────────────────────────────────────
+
+def gen_rf_l3_weight_on_slope(level="Higher"):
     m = random.randint(5, 50)
     theta_deg = random.choice(_ANGLES)
     theta = math.radians(theta_deg)
@@ -700,11 +705,20 @@ def _l7_find_mass(level):
     )
 
 
-def gen_rf_l7_find_angle(level="Higher"):
+def _l7_find_angle(level="Higher"):
     return random.choice([_l7_direct, _l7_dynamic, _l7_dynamic, _l7_find_mass])(level)
 
 
-# ── Level 8 — Sliding Up a Slope With Friction ────────────────────────────────
+def gen_rf_l4_slope_dynamics(level="Higher"):
+    """Section 4 — acceleration, friction (unknown force), or angle on a slope (sliding down)."""
+    return random.choice([
+        gen_rf_l5_acceleration_with_friction,
+        gen_rf_l6_unknown_force,
+        _l7_find_angle,
+    ])(level)
+
+
+# ── Level 5 — Sliding Up a Slope With Friction ────────────────────────────────
 
 def gen_rf_l8_up_slope_deceleration(level="Higher"):
     m = random.randint(10, 45)
@@ -883,7 +897,16 @@ def gen_rf_l8_up_slope_find_angle_or_mass(level="Higher"):
                              question_type="Components of Vectors", level=level)
 
 
-# ── Level 9 — Explain: Effect of Angle ────────────────────────────────────────
+def gen_rf_l5_up_slope(level="Higher"):
+    """Section 5 — object sliding up a slope with friction (deceleration, friction, or angle/mass)."""
+    return random.choice([
+        gen_rf_l8_up_slope_deceleration,
+        gen_rf_l8_up_slope_find_friction,
+        gen_rf_l8_up_slope_find_angle_or_mass,
+    ])(level)
+
+
+# ── Level 6 — Explain: Effect of Angle ────────────────────────────────────────
 
 def _explain_tension(level):
     obj = _obj()
@@ -1072,7 +1095,7 @@ def _explain_weight_constant(level):
     return context, question_text, correct, distractors
 
 
-def gen_rf_l9_explain_angle(level="Higher"):
+def gen_rf_l6_explain_angle(level="Higher"):
     builder = random.choice([
         _explain_tension, _explain_mass_parallel, _explain_wpar_increases,
         _explain_vertical_tension, _explain_accel_decreases, _explain_weight_constant,
