@@ -6,10 +6,19 @@ from core.ui.graph_mcq_ui import render_main_graph, render_option_grid, render_c
 from core.db.tracker import save_practice_attempt
 
 
-def _render_notes(question):
+def _render_notes(question, label="📚 Notes"):
     if question.notes:
-        with st.expander("📚 Notes"):
+        with st.expander(label):
             st.markdown(question.notes)
+
+
+def _general_notes(question):
+    """Notes shared by (most of) a scenario's parts — shown once, above the whole
+    question, rather than repeated above every part."""
+    notes_list = [p.notes for p in question.parts if p.notes]
+    if not notes_list:
+        return ""
+    return max(set(notes_list), key=notes_list.count)
 
 
 _UNIT_HINT = "Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive."
@@ -46,6 +55,9 @@ def _check_classification(selected, question):
 def _render_single(question, user_id, qualification):
     submitted_key = f"sub_{question.qid}"
 
+    if not st.session_state.get(submitted_key):
+        _render_notes(question)
+
     st.markdown(question.question_text)
     st.write("")
 
@@ -58,7 +70,6 @@ def _render_single(question, user_id, qualification):
         st.write("")
 
     if not st.session_state.get(submitted_key):
-        _render_notes(question)
         render_scaffold(question)
 
         if is_graph_mcq:
@@ -126,6 +137,11 @@ def _render_explain_part(question, part_idx, submitted_key):
 
 
 def _render_scenario(question, user_id, qualification):
+    general_notes = _general_notes(question)
+    if general_notes:
+        with st.expander("📚 Notes"):
+            st.markdown(general_notes)
+
     if question.scenario_context:
         st.info(question.scenario_context)
 
@@ -134,14 +150,24 @@ def _render_scenario(question, user_id, qualification):
         part_type = part.metadata.get("type")
         is_explain = part_type == "explain"
         is_classification = part_type == "classification"
+
+        unlocked = i == 0 or st.session_state.get(f"sub_{question.qid}_part{i - 1}")
+        not_submitted = not st.session_state.get(part_submitted_key)
+
+        # Only show a part's own notes if they add something the general notes
+        # above didn't already cover — never repeat the same content twice.
+        if not_submitted and unlocked and not is_explain:
+            extra_notes = part.notes if part.notes and part.notes != general_notes else ""
+            if extra_notes:
+                _render_notes(part, label="📎 Additional notes for this part")
+
         st.markdown(f"**Part {i + 1}:** {part.question_text}")
 
-        if not st.session_state.get(part_submitted_key):
-            if i == 0 or st.session_state.get(f"sub_{question.qid}_part{i - 1}"):
+        if not_submitted:
+            if unlocked:
                 if is_explain:
                     _render_explain_part(question, i, part_submitted_key)
                 elif is_classification:
-                    _render_notes(part)
                     options = part.metadata.get("options", [])
                     selected = st.radio("Select your answer:", options,
                                         key=f"radio_{question.qid}_part{i}", index=None)
@@ -157,7 +183,6 @@ def _render_scenario(question, user_id, qualification):
                         else:
                             st.warning("Please select an answer before submitting.")
                 else:
-                    _render_notes(part)
                     render_scaffold(part, suffix=f"part{i}")
                     answer, unit_input = _render_answer_input(part, suffix=f"part{i}")
                     if st.button(f"Submit Part {i + 1}", key=f"submit_{question.qid}_part{i}", type="primary"):
