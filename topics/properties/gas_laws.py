@@ -32,12 +32,17 @@ def gen_boyles(level="N5"):
                 break
 
     wrong_flip = int(v1 * p2 / p1)
+    p1v1 = p1 * v1
 
     working = [
         {"type": "latex", "content": r"P_1V_1=P_2V_2"},
         {"type": "latex", "content": rf"{p1} \times {v1} = {p2} \times V_2"},
         {"type": "latex", "content": rf"V_2 = \frac{{{p1} \times {v1}}}{{{p2}}}"},
         {"type": "latex", "content": rf"V_2 = {v2}\ \mathrm{{{unit}}}"},
+    ]
+    scaffold = [
+        {"question": "What is P₁ × V₁?", "answer": float(p1v1)},
+        {"question": "What is the new volume V₂?", "answer": float(v2), "unit": unit},
     ]
     question = (
         f"A gas has a volume of {v1} {unit} at a pressure of {p1} kPa. "
@@ -50,7 +55,7 @@ def gen_boyles(level="N5"):
         {"value": float(p1),      "display": f"{p1} kPa",         "summary": "Incorrect.", "mistake": "You gave the original pressure, not the new volume. Use P₁V₁ = P₂V₂ and solve for V₂.", "working": working},
         {"value": float(v1),      "display": f"{v1} {unit}",      "summary": "Incorrect.", "mistake": "The volume changes when pressure changes. Apply P₁V₁ = P₂V₂ to find the new volume.", "working": working},
     ]
-    return make_question(question, float(v2), options_data, unit,
+    return make_question(question, float(v2), options_data, unit, scaffold=scaffold,
                          notes=NOTES["gas_laws"], topic="Properties", question_type="Gas Laws", level=level)
 
 

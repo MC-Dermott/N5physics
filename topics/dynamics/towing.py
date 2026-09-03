@@ -85,6 +85,10 @@ def _l1_scenario(level="Higher"):
              "working": working_a},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is the total mass (m_c + m_t)?", "answer": float(total)},
+            {"prompt": "What is the acceleration a?", "answer": a},
+        ],
     )
 
     working_b = [
@@ -278,6 +282,10 @@ def _l3_scenario(level="Higher"):
              "working": working_a},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is the total mass (m_c + m_t1 + m_t2)?", "answer": float(total)},
+            {"prompt": "What is the acceleration a?", "answer": a},
+        ],
     )
 
     working_b = [
@@ -503,6 +511,7 @@ def gen_exam_style(level="Higher"):
         distractors=distractors,
         working=working,
         metadata={"type": "classification", "options": options},
+        notes=_NOTES,
     )
 
     return PhysicsQuestion(

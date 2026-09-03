@@ -363,12 +363,11 @@ def generate_heat_exam_icemachine(level="N5"):
                        "display": fmt_J(_shc_q(mass_g, T1 + 5)), "summary": "Incorrect.",
                        "mistake": f"ΔT = {T1} − 0 = {T1} °C (the water cools to 0 °C, not below).", "working": shc_working})
 
-    shc_scaffold = None
+    shc_scaffold = []
     if is_grams:
-        shc_scaffold = [
-            {"question": "What is the mass in kg?", "answer": mass_kg},
-            {"question": "What is the energy removed?", "answer": float(Q_shc)},
-        ]
+        shc_scaffold.append({"question": "What is the mass in kg?", "answer": mass_kg})
+    shc_scaffold.append({"question": "What is the temperature change ΔT?", "answer": float(T1), "unit": "°C"})
+    shc_scaffold.append({"question": "What is the energy removed?", "answer": float(Q_shc)})
     part_i = make_question(
         "Calculate the energy removed from the water to reduce its temperature to 0 °C.",
         float(Q_shc), opts_i, "J",
@@ -427,6 +426,7 @@ def generate_heat_exam_icemachine(level="N5"):
                 "than calculated. This means more time is needed."
             ),
         },
+        notes=NOTES["heat_shc"],
     )
 
     # ── Part (iv): Latent heat — find mass ───────────────────────────────────

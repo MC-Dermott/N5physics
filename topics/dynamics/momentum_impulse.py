@@ -435,6 +435,10 @@ def gen_impulse_graph(level="Higher"):
              "working": working_b},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": "What is the impulse given to the ball (area under the graph)?", "answer": impulse},
+            {"prompt": "What is the velocity of the ball?", "answer": v},
+        ],
     )
 
     return PhysicsQuestion(

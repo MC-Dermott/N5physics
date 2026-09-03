@@ -98,7 +98,11 @@ def gen_series_3(level="N5"):
         {"value": d_two_par,  "display": fmt_r(d_two_par, unit),  "summary": "Incorrect.", "mistake": "You combined two resistors in parallel — all three are in series here.",      "working": working},
         {"value": d_only_two, "display": fmt_r(d_only_two, unit), "summary": "Incorrect.", "mistake": "You only added two resistors. Don't forget to include all three.",            "working": working},
     ]
-    return make_question(question, correct, options_data, unit, notes=NOTES["resistor_combinations"],
+    scaffold = [
+        {"question": "What is R1 + R2?", "answer": round_sf(r1 + r2)},
+        {"question": "What is the total resistance RT?", "answer": correct},
+    ]
+    return make_question(question, correct, options_data, unit, scaffold=scaffold, notes=NOTES["resistor_combinations"],
                          topic="Electricity", question_type="Resistors", level=level)
 
 

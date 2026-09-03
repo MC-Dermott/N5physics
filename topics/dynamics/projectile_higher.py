@@ -763,6 +763,7 @@ def generate_projectile_exam_style(level="Higher"):
         distractors=distractors,
         working=distractors[0]["working"],
         metadata={"type": "classification", "options": options},
+        notes=_NOTES_L1,
     )
 
     return PhysicsQuestion(

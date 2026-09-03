@@ -53,7 +53,13 @@ def gen_weight(level="N5"):
         {"value": round_sf(mass_kg / gravity),       "summary": "Incorrect.", "mistake": "You divided by g instead of multiplying. W = m × g.", "working": working},
         {"value": grams_error,                       "summary": "Incorrect.", "mistake": "You did not convert grams into kilograms before calculating.", "working": working},
     ]
-    return make_question(question, correct, options_data, "N",
+    scaffold = None
+    if is_g:
+        scaffold = [
+            {"question": "What is the mass in kilograms?", "answer": round_sf(mass_kg)},
+            {"question": "What is the weight W?", "answer": correct},
+        ]
+    return make_question(question, correct, options_data, "N", scaffold=scaffold,
                          notes=NOTES["dynamics_weight"], topic="Dynamics", question_type="Weight", level=level)
 
 
@@ -102,7 +108,13 @@ def gen_gravity(level="N5"):
         {"value": grams_error,                    "summary": "Incorrect.", "mistake": "You did not convert grams into kilograms before calculating.", "working": working},
         {"value": wrong_g,                        "summary": "Incorrect.", "mistake": "You selected a g value from memory rather than calculating it.", "working": working},
     ]
-    return make_question(question, correct, options_data, "N/kg",
+    scaffold = None
+    if is_g:
+        scaffold = [
+            {"question": "What is the mass in kilograms?", "answer": round_sf(mass_kg)},
+            {"question": "What is the gravitational field strength g?", "answer": correct},
+        ]
+    return make_question(question, correct, options_data, "N/kg", scaffold=scaffold,
                          notes=NOTES["dynamics_weight"], topic="Dynamics", question_type="Weight", level=level)
 
 

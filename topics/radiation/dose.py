@@ -124,7 +124,11 @@ def gen_find_H(level="N5"):
         {"value": float(div_err),   "display": f"{div_err} Sv",      "summary": "Incorrect.", "mistake": f"You divided D by w_R instead of multiplying. H = D × w_R.", "working": working},
         {"value": float(wrong_wR_val), "display": f"{wrong_wR_val} Sv", "summary": "Incorrect.", "mistake": f"You used the wrong radiation weighting factor. For {rad['name']}, w_R = {w_R}.", "working": working},
     ]
-    return make_question(question, float(correct), options_data, "Sv",
+    scaffold = [
+        {"question": f"What is the radiation weighting factor w_R for {rad['name']} (read from the table)?", "answer": float(w_R)},
+        {"question": "What is the equivalent dose H?", "answer": float(correct)},
+    ]
+    return make_question(question, float(correct), options_data, "Sv", scaffold=scaffold,
                          notes=NOTES["radiation_doses"], topic="Radiation", question_type="Dose", level=level)
 
 
@@ -205,7 +209,11 @@ def gen_find_D_from_H(level="N5"):
         {"value": float(mult_err),   "display": f"{mult_err} Gy",   "summary": "Incorrect.", "mistake": "You multiplied H × w_R instead of dividing. D = H ÷ w_R.", "working": working},
         {"value": float(wrong_D_val), "display": f"{wrong_D_val} Gy", "summary": "Incorrect.", "mistake": f"You used the wrong radiation weighting factor. For {rad['name']}, w_R = {w_R}.", "working": working},
     ]
-    return make_question(question, float(correct), options_data, "Gy",
+    scaffold = [
+        {"question": f"What is the radiation weighting factor w_R for {rad['name']} (read from the table)?", "answer": float(w_R)},
+        {"question": "What is the absorbed dose D?", "answer": float(correct)},
+    ]
+    return make_question(question, float(correct), options_data, "Gy", scaffold=scaffold,
                          notes=NOTES["radiation_doses"], topic="Radiation", question_type="Dose", level=level)
 
 

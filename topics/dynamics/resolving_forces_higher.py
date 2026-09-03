@@ -82,6 +82,10 @@ def gen_rf_l1_components(level="Higher"):
              "working": working_x},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": f"What is cos {theta_deg}°, to 3 decimal places?", "answer": round(math.cos(theta), 3)},
+            {"prompt": "What is the horizontal component Fx?", "answer": Fx},
+        ],
     )
 
     working_y = [
@@ -103,6 +107,10 @@ def gen_rf_l1_components(level="Higher"):
              "working": working_y},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": f"What is sin {theta_deg}°, to 3 decimal places?", "answer": round(math.sin(theta), 3)},
+            {"prompt": "What is the vertical component Fy?", "answer": Fy},
+        ],
     )
 
     return PhysicsQuestion(
@@ -147,6 +155,10 @@ def gen_rf_l2_balancing(level="Higher"):
              "working": working_T},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": f"What is cos {theta_deg}°, to 3 decimal places?", "answer": round(math.cos(theta), 3)},
+            {"prompt": "What is the tension T in Rope B?", "answer": T},
+        ],
     )
 
     working_Ty = [
@@ -168,6 +180,10 @@ def gen_rf_l2_balancing(level="Higher"):
              "working": working_Ty},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": f"What is sin {theta_deg}°, to 3 decimal places?", "answer": round(math.sin(theta), 3)},
+            {"prompt": "What is the vertical component of the tension?", "answer": Ty},
+        ],
     )
 
     return PhysicsQuestion(
@@ -318,6 +334,10 @@ def gen_rf_l4_weight_on_slope(level="Higher"):
              "working": working_par},
         ],
         notes=_NOTES,
+        scaffold=[
+            {"prompt": f"What is sin {theta_deg}°, to 3 decimal places?", "answer": round(math.sin(theta), 3)},
+            {"prompt": "What is the component of weight parallel to the slope?", "answer": W_par},
+        ],
     )
 
     return PhysicsQuestion(
@@ -528,6 +548,7 @@ def gen_rf_l8_explain_angle(level="Higher"):
         level=level,
         distractors=distractors,
         working=distractors[0]["working"],
+        notes=_NOTES,
         metadata={"type": "classification", "options": options},
     )
 
