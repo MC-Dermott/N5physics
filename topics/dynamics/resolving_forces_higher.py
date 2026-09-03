@@ -1,9 +1,20 @@
 import random
 import math
+import pathlib
 from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
 
 G = 9.8  # m/s²
+
+_SLOPE_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "slope_forces_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_slope_widget(question):
+    question.metadata["widget_html"] = _SLOPE_WIDGET_HTML
+    question.metadata["widget_height"] = 900
+    return question
 
 _NOTES = """
 ## Components of Vectors — Resolving Forces
@@ -461,11 +472,11 @@ def gen_rf_l3_weight_on_slope(level="Higher"):
         ],
     )
 
-    return PhysicsQuestion(
+    return _with_slope_widget(PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Components of Vectors", level=level,
         is_scenario=True, scenario_context=context, parts=[part_a, part_b],
-    )
+    ))
 
 
 # ── Level 5 — Acceleration on a Slope, With Friction (sliding down) ──────────
@@ -711,11 +722,12 @@ def _l7_find_angle(level="Higher"):
 
 def gen_rf_l4_slope_dynamics(level="Higher"):
     """Section 4 — acceleration, friction (unknown force), or angle on a slope (sliding down)."""
-    return random.choice([
+    q = random.choice([
         gen_rf_l5_acceleration_with_friction,
         gen_rf_l6_unknown_force,
         _l7_find_angle,
     ])(level)
+    return _with_slope_widget(q)
 
 
 # ── Level 5 — Sliding Up a Slope With Friction ────────────────────────────────
@@ -899,11 +911,12 @@ def gen_rf_l8_up_slope_find_angle_or_mass(level="Higher"):
 
 def gen_rf_l5_up_slope(level="Higher"):
     """Section 5 — object sliding up a slope with friction (deceleration, friction, or angle/mass)."""
-    return random.choice([
+    q = random.choice([
         gen_rf_l8_up_slope_deceleration,
         gen_rf_l8_up_slope_find_friction,
         gen_rf_l8_up_slope_find_angle_or_mass,
     ])(level)
+    return _with_slope_widget(q)
 
 
 # ── Level 6 — Explain: Effect of Angle ────────────────────────────────────────
@@ -1118,8 +1131,8 @@ def gen_rf_l6_explain_angle(level="Higher"):
         metadata={"type": "classification", "options": options},
     )
 
-    return PhysicsQuestion(
+    return _with_slope_widget(PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Components of Vectors", level=level,
         is_scenario=True, scenario_context=context, parts=[part],
-    )
+    ))

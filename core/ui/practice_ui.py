@@ -1,7 +1,7 @@
 import streamlit as st
 
 from core.ui.feedback_ui import check_answer, render_feedback, render_working
-from core.ui.scaffold_ui import render_scaffold
+from core.ui.scaffold_ui import render_scaffold, render_widget
 from core.ui.graph_mcq_ui import render_main_graph, render_option_grid, render_correct_option
 from core.db.tracker import save_practice_attempt
 
@@ -144,6 +144,8 @@ def _render_scenario(question, user_id, qualification):
 
     if question.scenario_context:
         st.info(question.scenario_context)
+
+    render_widget(question)
 
     for i, part in enumerate(question.parts):
         part_submitted_key = f"sub_{question.qid}_part{i}"

@@ -13,11 +13,16 @@ def _is_correct(user_input, expected, tolerance=0.02):
         return str(user_input).strip().lower() == str(expected).strip().lower()
 
 
-def render_scaffold(question, suffix=""):
+def render_widget(question):
     widget_html = question.metadata.get("widget_html")
     if widget_html:
+        height = question.metadata.get("widget_height", 520)
         with st.expander("🎬 Interactive Visualisation"):
-            components.html(widget_html, height=520)
+            components.html(widget_html, height=height, scrolling=True)
+
+
+def render_scaffold(question, suffix=""):
+    render_widget(question)
 
     if not question.scaffold:
         return

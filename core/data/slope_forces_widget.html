@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forces on a slope</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F2EA;
+    --grid:#DAD6C7;
+    --ink:#232323;
+    --ink-soft:#5B5A52;
+    --panel:#FBFAF5;
+    --line:#CFCBBA;
+    --weight:#B23A2F;
+    --normal:#2455A4;
+    --friction:#3E7A3F;
+    --net:#7A4E9E;
+    --applied:#B5750E;
+    --wood:#C9A876;
+    --wood-dark:#9C7B4C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'IBM Plex Sans', Arial, sans-serif;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/32px 32px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/32px 32px,
+      var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    padding:28px;
+  }
+  .wrap{
+    max-width:1520px;
+    margin:0 auto;
+  }
+  header{
+    margin-bottom:20px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:14px;
+  }
+  h1{
+    font-size:22px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  header p{
+    margin:0;
+    font-size:13px;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .layout{
+    display:grid;
+    grid-template-columns:300px 1fr;
+    gap:20px;
+    align-items:start;
+  }
+  @media (max-width:820px){
+    .layout{grid-template-columns:1fr;}
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:18px 18px 20px;
+  }
+  .panel h2{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .control{margin-bottom:18px;}
+  .control:last-child{margin-bottom:0;}
+  .control-label{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:14px;
+    margin-bottom:6px;
+  }
+  .control-label span:last-child{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  input[type=range]{
+    -webkit-appearance:none;
+    width:100%;
+    height:4px;
+    background:var(--line);
+    outline:none;
+    border-radius:2px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:16px;
+    height:16px;
+    background:var(--ink);
+    border-radius:50%;
+    cursor:pointer;
+    border:2px solid var(--panel);
+    box-shadow:0 0 0 1px var(--ink);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px;
+    height:16px;
+    background:var(--ink);
+    border-radius:50%;
+    cursor:pointer;
+    border:2px solid var(--panel);
+    box-shadow:0 0 0 1px var(--ink);
+  }
+  input[type=range]:focus-visible::-webkit-slider-thumb{
+    box-shadow:0 0 0 3px rgba(36,85,164,0.4);
+  }
+  .segmented{
+    display:flex;
+    border:1px solid var(--ink);
+  }
+  .segmented button{
+    flex:1;
+    padding:8px 6px;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:13px;
+    background:var(--panel);
+    border:none;
+    border-left:1px solid var(--ink);
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .segmented button:first-child{border-left:none;}
+  .segmented button.active{
+    background:var(--ink);
+    color:var(--panel);
+  }
+  .segmented button:focus-visible{outline:2px solid var(--normal); outline-offset:-2px;}
+  .btn-row{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .btn{
+    flex:1;
+    padding:8px 10px;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:13px;
+    background:var(--panel);
+    border:1px solid var(--ink);
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .btn:hover{background:var(--grid);}
+  .btn:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+    background:var(--panel);
+  }
+  .btn:focus-visible{outline:2px solid var(--normal); outline-offset:2px;}
+  .toggle-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:14px;
+  }
+  .switch{
+    position:relative;
+    width:40px;
+    height:22px;
+    flex-shrink:0;
+  }
+  .switch input{
+    opacity:0;
+    width:0;
+    height:0;
+    position:absolute;
+  }
+  .switch .track{
+    position:absolute;
+    inset:0;
+    background:var(--line);
+    border:1px solid var(--ink);
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .switch .track::before{
+    content:"";
+    position:absolute;
+    width:14px;
+    height:14px;
+    left:3px;
+    top:3px;
+    background:var(--panel);
+    border:1px solid var(--ink);
+    transition:transform .15s;
+  }
+  .switch input:checked + .track{background:var(--friction);}
+  .switch input:checked + .track::before{transform:translateX(18px);}
+  .switch input:focus-visible + .track{outline:2px solid var(--normal); outline-offset:2px;}
+  .sub-row{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px dashed var(--line);
+  }
+  .sub-row.hidden{display:none;}
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:16px;
+  }
+  .checkbox-row input{width:15px;height:15px;accent-color:var(--net);}
+
+  .diagram-box{
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:6px;
+  }
+  svg{display:block;width:100%;height:auto;}
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px 22px;
+    padding:12px 16px;
+    border-top:1px solid var(--line);
+    font-size:12.5px;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .legend-item{display:flex;align-items:center;gap:7px;}
+  .swatch{width:16px;height:3px;border-radius:2px;}
+
+  .readout{
+    margin-top:16px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:16px 18px;
+  }
+  .readout h2{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .readout-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+    gap:12px 20px;
+  }
+  .stat{
+    border-left:3px solid var(--line);
+    padding:2px 0 2px 10px;
+  }
+  .stat.w{border-color:var(--weight);}
+  .stat.n{border-color:var(--normal);}
+  .stat.f{border-color:var(--friction);}
+  .stat.applied{border-color:var(--applied);}
+  .stat.net{border-color:var(--net);}
+  .stat-label{
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .stat-value{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:17px;
+    font-weight:500;
+  }
+  .verdict{
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px dashed var(--line);
+    font-size:14px;
+    line-height:1.5;
+  }
+  .verdict strong{font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Forces on a slope</h1>
+    <p>g = 9.8 m/s&sup2;</p>
+  </header>
+
+  <div class="layout">
+    <div class="panel">
+      <h2>Set the scenario</h2>
+
+      <div class="control">
+        <div class="control-label"><span>Slope angle</span><span id="angleOut">30&deg;</span></div>
+        <input type="range" id="angle" min="0" max="65" value="30" step="1">
+      </div>
+
+      <div class="control">
+        <div class="control-label"><span>Mass</span><span id="massOut">2.0 kg</span></div>
+        <input type="range" id="mass" min="0.5" max="10" value="2" step="0.5">
+      </div>
+
+      <div class="control">
+        <div class="control-label"><span>Type of motion</span></div>
+        <div class="segmented" role="group" aria-label="Type of motion">
+          <button id="dirStill" type="button">Stationary</button>
+          <button id="dirUp" type="button">Moving up</button>
+          <button id="dirDown" type="button" class="active">Moving down</button>
+        </div>
+        <div class="btn-row">
+          <button id="pauseBtn" type="button" class="btn">Pause</button>
+          <button id="resetBtn" type="button" class="btn">Reset</button>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="toggle-row">
+          <span>Friction</span>
+          <label class="switch">
+            <input type="checkbox" id="frictionToggle" checked>
+            <span class="track" aria-hidden="true"></span>
+          </label>
+        </div>
+        <div class="sub-row" id="muRow">
+          <div class="control-label"><span>Coefficient of friction, &mu;</span><span id="muOut">0.30</span></div>
+          <input type="range" id="mu" min="0.05" max="0.9" value="0.3" step="0.05">
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="toggle-row">
+          <span>Applied force (opposes friction)</span>
+          <label class="switch">
+            <input type="checkbox" id="appliedToggle">
+            <span class="track" aria-hidden="true"></span>
+          </label>
+        </div>
+        <div class="sub-row hidden" id="appliedRow">
+          <div class="control-label"><span>Force magnitude</span><span id="appliedOut">20 N</span></div>
+          <input type="range" id="appliedMag" min="0" max="60" value="20" step="1">
+        </div>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="showWeight" checked>
+        <label for="showWeight">Show weight (mg)</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="showComponents">
+        <label for="showComponents">Show weight components (&parallel; and &perp; to slope)</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="showNet" checked>
+        <label for="showNet">Show resultant (net) force</label>
+      </div>
+    </div>
+
+    <div>
+      <div class="diagram-box">
+        <svg id="scene" viewBox="0 0 760 650" role="img" aria-labelledby="svgTitle svgDesc">
+          <title id="svgTitle">Diagram of a block on a slope</title>
+          <desc id="svgDesc">A block rests on an inclined slope with arrows showing the weight, normal force, friction force and resultant force acting on it, scaled to their size in newtons.</desc>
+          <defs>
+            <marker id="arrowWeight" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M1 1L9 5L1 9Z" fill="var(--weight)"/>
+            </marker>
+            <marker id="arrowNormal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M1 1L9 5L1 9Z" fill="var(--normal)"/>
+            </marker>
+            <marker id="arrowFriction" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M1 1L9 5L1 9Z" fill="var(--friction)"/>
+            </marker>
+            <marker id="arrowNet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M1 1L9 5L1 9Z" fill="var(--net)"/>
+            </marker>
+            <marker id="arrowWeightComp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M1 1L9 5L1 9Z" fill="var(--weight)"/>
+            </marker>
+            <marker id="arrowApplied" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M1 1L9 5L1 9Z" fill="var(--applied)"/>
+            </marker>
+          </defs>
+
+          <g id="groundHatch"></g>
+          <polygon id="incline" points="" fill="#EDE8D8" stroke="var(--ink)" stroke-width="1.5"/>
+          <path id="angleArc" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
+          <text id="angleLabel" font-family="IBM Plex Mono, monospace" font-size="13" fill="var(--ink-soft)"></text>
+
+          <g id="block"></g>
+
+          <g id="forces"></g>
+        </svg>
+        <div class="legend">
+          <div class="legend-item"><span class="swatch" style="background:var(--weight)"></span>Weight, <em>mg</em></div>
+          <div class="legend-item"><span class="swatch" style="background:var(--normal)"></span>Normal force, <em>N</em></div>
+          <div class="legend-item"><span class="swatch" style="background:var(--friction)"></span>Friction, <em>f</em></div>
+          <div class="legend-item"><span class="swatch" style="background:var(--applied)"></span>Applied force, <em>P</em></div>
+          <div class="legend-item"><span class="swatch" style="background:var(--net);border-top:2px dashed var(--net); background:transparent; height:0;"></span>Resultant force</div>
+        </div>
+      </div>
+
+      <div class="readout">
+        <h2>Values</h2>
+        <div class="readout-grid">
+          <div class="stat w">
+            <div class="stat-label">Weight (mg)</div>
+            <div class="stat-value" id="valW">0 N</div>
+          </div>
+          <div class="stat n">
+            <div class="stat-label">Normal force</div>
+            <div class="stat-value" id="valN">0 N</div>
+          </div>
+          <div class="stat f">
+            <div class="stat-label">Friction force</div>
+            <div class="stat-value" id="valF">0 N</div>
+          </div>
+          <div class="stat applied">
+            <div class="stat-label">Applied force</div>
+            <div class="stat-value" id="valApplied">0 N</div>
+          </div>
+          <div class="stat net">
+            <div class="stat-label">Net force along slope</div>
+            <div class="stat-value" id="valNet">0 N</div>
+          </div>
+        </div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var G = 9.8;
+
+  var state = {
+    angle: 30,
+    mass: 2,
+    direction: 'down',
+    frictionOn: true,
+    mu: 0.3,
+    showNet: true,
+    showComponents: false,
+    showWeight: true,
+    appliedOn: false,
+    appliedMag: 20,
+    trackT: 0.85,
+    trackV: -0.12,
+    paused: false,
+    stopped: false
+  };
+
+  var angleSlider = document.getElementById('angle');
+  var massSlider = document.getElementById('mass');
+  var muSlider = document.getElementById('mu');
+  var frictionToggle = document.getElementById('frictionToggle');
+  var showNetBox = document.getElementById('showNet');
+  var showComponentsBox = document.getElementById('showComponents');
+  var showWeightBox = document.getElementById('showWeight');
+  var dirUpBtn = document.getElementById('dirUp');
+  var dirDownBtn = document.getElementById('dirDown');
+  var dirStillBtn = document.getElementById('dirStill');
+  var muRow = document.getElementById('muRow');
+  var pauseBtn = document.getElementById('pauseBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var appliedToggle = document.getElementById('appliedToggle');
+  var appliedRow = document.getElementById('appliedRow');
+  var appliedMagSlider = document.getElementById('appliedMag');
+
+  angleSlider.addEventListener('input', function(){
+    state.angle = parseFloat(angleSlider.value);
+    render();
+  });
+  massSlider.addEventListener('input', function(){
+    state.mass = parseFloat(massSlider.value);
+    render();
+  });
+  muSlider.addEventListener('input', function(){
+    state.mu = parseFloat(muSlider.value);
+    render();
+  });
+  frictionToggle.addEventListener('change', function(){
+    state.frictionOn = frictionToggle.checked;
+    muRow.classList.toggle('hidden', !state.frictionOn);
+    render();
+  });
+  showNetBox.addEventListener('change', function(){
+    state.showNet = showNetBox.checked;
+    render();
+  });
+  showComponentsBox.addEventListener('change', function(){
+    state.showComponents = showComponentsBox.checked;
+    render();
+  });
+  showWeightBox.addEventListener('change', function(){
+    state.showWeight = showWeightBox.checked;
+    render();
+  });
+  appliedToggle.addEventListener('change', function(){
+    state.appliedOn = appliedToggle.checked;
+    appliedRow.classList.toggle('hidden', !state.appliedOn);
+    render();
+  });
+  appliedMagSlider.addEventListener('input', function(){
+    state.appliedMag = parseFloat(appliedMagSlider.value);
+    document.getElementById('appliedOut').textContent = state.appliedMag + ' N';
+    render();
+  });
+  var TRACK_MIN = 0.12, TRACK_MAX = 0.88;
+  var START_SPEED = 0.12;
+
+  function startOfTrack(dir){
+    if (dir === 'stationary') return { t: 0.5, v: 0 };
+    if (dir === 'up') return { t: TRACK_MIN, v: START_SPEED };
+    return { t: TRACK_MAX, v: -START_SPEED };
+  }
+
+  function setDirection(dir){
+    state.direction = dir;
+    dirStillBtn.classList.toggle('active', dir === 'stationary');
+    dirUpBtn.classList.toggle('active', dir === 'up');
+    dirDownBtn.classList.toggle('active', dir === 'down');
+    var start = startOfTrack(dir);
+    state.trackT = start.t;
+    state.trackV = start.v;
+    state.stopped = false;
+    state.paused = false;
+    pauseBtn.textContent = 'Pause';
+    render();
+  }
+  dirStillBtn.addEventListener('click', function(){ setDirection('stationary'); });
+  dirUpBtn.addEventListener('click', function(){ setDirection('up'); });
+  dirDownBtn.addEventListener('click', function(){ setDirection('down'); });
+
+  pauseBtn.addEventListener('click', function(){
+    state.paused = !state.paused;
+    pauseBtn.textContent = state.paused ? 'Resume' : 'Pause';
+  });
+  resetBtn.addEventListener('click', function(){
+    var start = startOfTrack(state.direction);
+    state.trackT = start.t;
+    state.trackV = start.v;
+    state.stopped = false;
+    state.paused = false;
+    pauseBtn.textContent = 'Pause';
+    render();
+  });
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs){
+    var e = document.createElementNS(svgNS, tag);
+    for (var k in attrs){ e.setAttribute(k, attrs[k]); }
+    return e;
+  }
+
+  var originX = 110, originY = 430, L = 420;
+  var MAX_ARROW_PX = 175;
+  var maxWeight = 10 * G;
+  var scale = MAX_ARROW_PX / maxWeight;
+
+  function round1(n){ return Math.round(n * 10) / 10; }
+
+  function computePhysics(){
+    var theta = state.angle * Math.PI / 180;
+    var cos = Math.cos(theta), sin = Math.sin(theta);
+    var W = state.mass * G;
+    var N = W * cos;
+    var Wpar = W * sin;
+    var f, netAlong;
+    var P = state.appliedOn ? state.appliedMag : 0;
+    if (state.direction === 'stationary'){
+      f = state.frictionOn ? Math.min(Wpar, state.mu * N) : 0;
+      netAlong = -Wpar + f - P;
+    } else if (state.direction === 'up'){
+      f = state.frictionOn ? state.mu * N : 0;
+      netAlong = -Wpar - f + P;
+    } else {
+      f = state.frictionOn ? state.mu * N : 0;
+      netAlong = -Wpar + f - P;
+    }
+    return { theta: theta, cos: cos, sin: sin, W: W, N: N, Wpar: Wpar, f: f, P: P, netAlong: netAlong };
+  }
+
+  function render(){
+    var theta = state.angle * Math.PI / 180;
+    var cos = Math.cos(theta), sin = Math.sin(theta);
+
+    var top = { x: originX + L * cos, y: originY - L * sin };
+    var bottomRight = { x: originX + L * cos, y: originY };
+
+    document.getElementById('incline').setAttribute('points',
+      originX + ',' + originY + ' ' + top.x + ',' + top.y + ' ' + bottomRight.x + ',' + bottomRight.y
+    );
+
+    var hatch = document.getElementById('groundHatch');
+    hatch.innerHTML = '';
+    var groundLine = el('line', {x1: originX - 40, y1: originY, x2: bottomRight.x + 20, y2: originY, stroke:'var(--ink)', 'stroke-width':1.5});
+    hatch.appendChild(groundLine);
+    for (var gx = originX - 36; gx < bottomRight.x + 16; gx += 14){
+      hatch.appendChild(el('line', {x1: gx, y1: originY, x2: gx - 10, y2: originY + 12, stroke:'var(--ink-soft)', 'stroke-width':1}));
+    }
+
+    var arcR = 46;
+    var arcPath = 'M ' + (originX + arcR) + ' ' + originY + ' A ' + arcR + ' ' + arcR + ' 0 0 0 ' + (originX + arcR*cos) + ' ' + (originY - arcR*sin);
+    document.getElementById('angleArc').setAttribute('d', arcPath);
+    var angleLabel = document.getElementById('angleLabel');
+    var labelR = arcR + 22;
+    var labelAngle = theta / 2;
+    angleLabel.setAttribute('x', originX + labelR * Math.cos(labelAngle));
+    angleLabel.setAttribute('y', originY - labelR * Math.sin(labelAngle) + 4);
+    angleLabel.textContent = state.angle + '\u00B0';
+
+    var slopeDir = { x: cos, y: -sin };
+    var normalDir = { x: -sin, y: -cos };
+
+    var t = state.trackT;
+    var anchor = { x: originX + t * (top.x - originX), y: originY + t * (top.y - originY) };
+    var blockSize = 54;
+    var blockCenter = {
+      x: anchor.x + normalDir.x * (blockSize / 2),
+      y: anchor.y + normalDir.y * (blockSize / 2)
+    };
+    var rotDeg = -state.angle;
+
+    var blockGroup = document.getElementById('block');
+    blockGroup.innerHTML = '';
+    var blockG = el('g', {transform: 'translate(' + blockCenter.x + ',' + blockCenter.y + ') rotate(' + rotDeg + ')'});
+    blockG.appendChild(el('rect', {
+      x: -blockSize/2, y: -blockSize/2, width: blockSize, height: blockSize,
+      fill: 'var(--wood)', stroke: 'var(--wood-dark)', 'stroke-width': 2, rx: 3
+    }));
+    blockG.appendChild(el('line', {x1:-blockSize/2+8, y1:-blockSize/2+8, x2:blockSize/2-8, y2:blockSize/2-8, stroke:'var(--wood-dark)', 'stroke-width':1, opacity:0.4}));
+    blockG.appendChild(el('line', {x1:blockSize/2-8, y1:-blockSize/2+8, x2:-blockSize/2+8, y2:blockSize/2-8, stroke:'var(--wood-dark)', 'stroke-width':1, opacity:0.4}));
+    blockGroup.appendChild(blockG);
+
+    var phys = computePhysics();
+    var W = phys.W, N = phys.N, Wpar = phys.Wpar, f = phys.f, P = phys.P, netAlong = phys.netAlong;
+
+    var forces = document.getElementById('forces');
+    forces.innerHTML = '';
+
+    function arrow(dir, magnitude, color, markerId, label, labelOffsetSign, opts){
+      opts = opts || {};
+      var len = magnitude * scale;
+      if (len < 1) return;
+      var x2 = blockCenter.x + dir.x * len;
+      var y2 = blockCenter.y + dir.y * len;
+      var lineAttrs = {
+        x1: blockCenter.x, y1: blockCenter.y, x2: x2, y2: y2,
+        stroke: color, 'stroke-width': opts.strokeWidth || 3, 'marker-end': 'url(#' + markerId + ')'
+      };
+      if (opts.dashed){
+        lineAttrs['stroke-dasharray'] = '2 5';
+        lineAttrs['stroke-linecap'] = 'round';
+      }
+      forces.appendChild(el('line', lineAttrs));
+      var perp = { x: -dir.y, y: dir.x };
+      var labelDist = 14;
+      var lx = x2 + dir.x * labelDist + perp.x * labelDist * (labelOffsetSign || 1);
+      var ly = y2 + dir.y * labelDist + perp.y * labelDist * (labelOffsetSign || 1);
+      var t = el('text', {
+        x: lx, y: ly, fill: color, 'font-family': 'IBM Plex Mono, monospace',
+        'font-size': opts.fontSize || 13, 'font-weight': 500, 'text-anchor': 'middle', 'dominant-baseline': 'central'
+      });
+      t.textContent = label;
+      forces.appendChild(t);
+    }
+
+    var weightColor = getComputedColor('--weight');
+
+    if (state.showWeight){
+      if (state.showComponents){
+        arrow({x:0,y:1}, W, weightColor, 'arrowWeightComp', 'mg', 1, {dashed:true, strokeWidth:2, fontSize:12});
+      } else {
+        arrow({x:0,y:1}, W, weightColor, 'arrowWeight', round1(W) + ' N', 1);
+      }
+    }
+    if (state.showComponents){
+      var downhill = {x:-slopeDir.x, y:-slopeDir.y};
+      var intoSlope = {x:-normalDir.x, y:-normalDir.y};
+      arrow(downhill, Wpar, weightColor, 'arrowWeight', 'mg sin\u03B8 (\u2225)', -1);
+      arrow(intoSlope, N, weightColor, 'arrowWeight', 'mg cos\u03B8 (\u22A5)', 1);
+    }
+
+    arrow(normalDir, N, getComputedColor('--normal'), 'arrowNormal', round1(N) + ' N', 1);
+    var fDir = state.direction === 'up' ? {x:-slopeDir.x, y:-slopeDir.y} : slopeDir;
+    if (state.frictionOn && f > 0.05){
+      arrow(fDir, f, getComputedColor('--friction'), 'arrowFriction', round1(f) + ' N', -1);
+    }
+    if (state.appliedOn && P > 0.05){
+      var appliedDir = {x:-fDir.x, y:-fDir.y};
+      arrow(appliedDir, P, getComputedColor('--applied'), 'arrowApplied', round1(P) + ' N', 1);
+    }
+    if (state.showNet && Math.abs(netAlong) > 0.05){
+      var netDir = netAlong > 0 ? slopeDir : {x:-slopeDir.x, y:-slopeDir.y};
+      var lenNet = Math.abs(netAlong) * scale;
+      var nx2 = blockCenter.x + netDir.x * lenNet;
+      var ny2 = blockCenter.y + netDir.y * lenNet;
+      forces.appendChild(el('line', {
+        x1: blockCenter.x, y1: blockCenter.y, x2: nx2, y2: ny2,
+        stroke: getComputedColor('--net'), 'stroke-width': 3, 'stroke-dasharray': '2 5',
+        'stroke-linecap': 'round', 'marker-end': 'url(#arrowNet)'
+      }));
+    }
+
+    document.getElementById('angleOut').textContent = state.angle + '\u00B0';
+    document.getElementById('massOut').textContent = state.mass.toFixed(1) + ' kg';
+    document.getElementById('muOut').textContent = state.mu.toFixed(2);
+    document.getElementById('valW').textContent = round1(W) + ' N';
+    document.getElementById('valN').textContent = round1(N) + ' N';
+    document.getElementById('valF').textContent = round1(f) + ' N';
+    document.getElementById('valApplied').textContent = (state.appliedOn ? round1(P) : 0) + ' N';
+    document.getElementById('valNet').textContent = round1(netAlong) + ' N' + (Math.abs(netAlong) < 0.05 ? ' (balanced)' : (netAlong > 0 ? ' (up-slope)' : ' (down-slope)'));
+
+    var verdict = document.getElementById('verdict');
+    var netSign = netAlong > 0.05 ? 1 : (netAlong < -0.05 ? -1 : 0);
+
+    if (state.direction === 'stationary'){
+      if (netSign === 0){
+        verdict.innerHTML = 'The block is <strong>stationary</strong> and stays at rest: friction exactly balances the component of gravity along the slope.';
+      } else {
+        verdict.innerHTML = 'The block is set as <strong>stationary</strong>, but the forces along the slope are not balanced (net force ' + round1(Math.abs(netAlong)) + ' N down-slope). In reality it would begin to slide down &mdash; try increasing friction or reducing the angle.';
+      }
+    } else {
+      var motionWord = state.direction === 'up' ? 'up' : 'down';
+      var motionSign = state.direction === 'up' ? 1 : -1;
+      var behaviour;
+      if (netSign === 0){
+        behaviour = 'moving at a constant velocity';
+      } else if (netSign === motionSign){
+        behaviour = 'speeding up';
+      } else {
+        behaviour = 'slowing down';
+      }
+      verdict.innerHTML = 'The block is moving <strong>' + motionWord + ' the slope</strong> and is <strong>' + behaviour + '</strong>, since the net force along the slope is ' + round1(Math.abs(netAlong)) + ' N ' + (netSign === 0 ? '' : (netSign > 0 ? 'up-slope' : 'down-slope')) + '.';
+    }
+  }
+
+  function getComputedColor(varName){
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  }
+
+  var lastFrameTime = null;
+  var TRACK_LENGTH_METRES = 2.5;
+
+  function tick(timestamp){
+    if (!state.paused && !state.stopped && state.direction !== 'stationary'){
+      if (lastFrameTime === null) lastFrameTime = timestamp;
+      var dt = Math.min((timestamp - lastFrameTime) / 1000, 0.05);
+      lastFrameTime = timestamp;
+
+      var phys = computePhysics();
+      var aReal = phys.netAlong / state.mass;
+      var aTrack = aReal / TRACK_LENGTH_METRES;
+
+      state.trackV += aTrack * dt;
+      state.trackT += state.trackV * dt;
+
+      if (state.direction === 'up'){
+        if (state.trackV <= 0){
+          state.trackV = 0;
+          state.stopped = true;
+        } else if (state.trackT >= TRACK_MAX){
+          state.trackT = TRACK_MAX;
+          state.trackV = 0;
+          state.stopped = true;
+        }
+      } else {
+        if (state.trackV >= 0){
+          state.trackV = 0;
+          state.stopped = true;
+        } else if (state.trackT <= TRACK_MIN){
+          state.trackT = TRACK_MIN;
+          state.trackV = 0;
+          state.stopped = true;
+        }
+      }
+      render();
+    } else {
+      lastFrameTime = null;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  render();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
