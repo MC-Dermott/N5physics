@@ -1,8 +1,19 @@
 import random
+import pathlib
 from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
 
 _G = 9.8
+
+_LIFT_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "effective_weight_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_lift_widget(question):
+    question.metadata["widget_html"] = _LIFT_WIDGET_HTML
+    question.metadata["widget_height"] = 700
+    return question
 
 _NOTES = """
 ## Effective Weight
@@ -293,9 +304,9 @@ def gen_ew_uniform_accel_scenario(level="Higher"):
 
 
 def generate_effective_weight_lifts(level="Higher"):
-    return random.choice([
+    return _with_lift_widget(random.choice([
         gen_ew_find_reading, gen_ew_find_acceleration, gen_ew_find_mass, gen_ew_uniform_accel_scenario,
-    ])(level=level)
+    ])(level=level))
 
 
 # ── Section 1: Lifts at constant speed ───────────────────────────────────────
@@ -330,11 +341,11 @@ def gen_ew_constant_velocity(level="Higher"):
         ],
         notes=_NOTES,
     )
-    return PhysicsQuestion(
+    return _with_lift_widget(PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Effective Weight", level=level,
         is_scenario=True, scenario_context=context, parts=[part_a, part_b],
-    )
+    ))
 
 
 # ── Section 2: Apparent weight beyond lifts ──────────────────────────────────

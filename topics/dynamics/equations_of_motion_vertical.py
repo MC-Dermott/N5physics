@@ -1,7 +1,18 @@
 import random
+import pathlib
 from utils.make_question import make_question
 
 G = 9.8  # m/s²
+
+_SUVAT_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "suvat_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_suvat_widget(question):
+    question.metadata["widget_html"] = _SUVAT_WIDGET_HTML
+    question.metadata["widget_height"] = 900
+    return question
 
 _NOTES = """
 ## Equations of Motion — Vertical Motion
@@ -298,4 +309,4 @@ _ALL_VERTICAL_GENS = [
 
 
 def generate_equations_of_motion_vertical(level="Higher"):
-    return random.choice(_ALL_VERTICAL_GENS)(level=level)
+    return _with_suvat_widget(random.choice(_ALL_VERTICAL_GENS)(level=level))

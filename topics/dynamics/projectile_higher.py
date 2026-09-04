@@ -1,8 +1,19 @@
 import random
 import math
+import pathlib
 from core.models.question_model import PhysicsQuestion
 
 g = 9.8  # m/s²
+
+_SUVAT_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "suvat_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_suvat_widget(question):
+    question.metadata["widget_html"] = _SUVAT_WIDGET_HTML
+    question.metadata["widget_height"] = 900
+    return question
 
 _NOTES_L1 = """
 ## Projectile Motion — Angled Launch (Level 1)
@@ -289,7 +300,7 @@ def generate_projectile_l1(level="Higher"):
         notes=_NOTES_L1,
     )
 
-    return PhysicsQuestion(
+    return _with_suvat_widget(PhysicsQuestion(
         question_text="",
         correct_answer=0,
         unit="",
@@ -299,7 +310,7 @@ def generate_projectile_l1(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part_a, part_b, part_c, part_d],
-    )
+    ))
 
 
 # ── Level 2 — Horizontal launch from height (asymmetric) ─────────────────────
@@ -479,7 +490,7 @@ def generate_projectile_l2(level="Higher"):
         ],
     )
 
-    return PhysicsQuestion(
+    return _with_suvat_widget(PhysicsQuestion(
         question_text="",
         correct_answer=0,
         unit="",
@@ -489,7 +500,7 @@ def generate_projectile_l2(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part_a, part_b, part_c, part_d],
-    )
+    ))
 
 
 # ── Time & Height to Maximum Height ──────────────────────────────────────────
@@ -627,7 +638,7 @@ def generate_projectile_max_height(level="Higher"):
         ],
     )
 
-    return PhysicsQuestion(
+    return _with_suvat_widget(PhysicsQuestion(
         question_text="",
         correct_answer=0,
         unit="",
@@ -637,7 +648,7 @@ def generate_projectile_max_height(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part_a, part_b],
-    )
+    ))
 
 
 # ── Exam Style — Explain ─────────────────────────────────────────────────────
@@ -766,7 +777,7 @@ def generate_projectile_exam_style(level="Higher"):
         notes=_NOTES_L1,
     )
 
-    return PhysicsQuestion(
+    return _with_suvat_widget(PhysicsQuestion(
         question_text="",
         correct_answer=0,
         unit="",
@@ -776,4 +787,4 @@ def generate_projectile_exam_style(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part],
-    )
+    ))

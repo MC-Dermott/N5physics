@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Effective Weight in a Lift — Simulator</title>
+<style>
+  :root{
+    --page-bg: #EEF1F6;
+    --ink: #1B2436;
+    --ink-soft: #56607A;
+
+    --panel-bg: #1B2436;
+    --panel-bg-2: #232E45;
+    --panel-line: #3A4560;
+    --panel-text: #EDEFF3;
+    --panel-text-soft: #98A2BC;
+
+    --brass: #C9A24B;
+    --brass-soft: #E4C784;
+    --teal: #2BB3A3;
+    --teal-soft: #7FDCCF;
+    --coral: #E2572B;
+    --coral-soft: #F0906F;
+
+    --shaft: #33415C;
+    --shaft-line: #46557A;
+    --car-top: #E3E7ED;
+    --car-bot: #B9C0CC;
+    --car-trim: #7B8497;
+
+    --radius-panel: 14px;
+    --radius-ctrl: 10px;
+
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0;
+    padding: 0;
+    background: var(--page-bg);
+    color: var(--ink);
+    font-family: var(--sans);
+  }
+
+  .app{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+  }
+
+  header.masthead{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  header.masthead h1{
+    font-size: 22px;
+    letter-spacing: 0.01em;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  header.masthead p{
+    margin: 4px 0 0;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  .rule-note{
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    background: #E1E6EF;
+    border: 1px solid #CCD3E0;
+    border-radius: 999px;
+    padding: 7px 14px;
+    white-space: nowrap;
+  }
+
+  .layout{
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  @media (max-width: 780px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Stage ---------- */
+
+  .stage{
+    background: linear-gradient(180deg, #DCE1EA 0%, #C7CEDC 100%);
+    border-radius: var(--radius-panel);
+    border: 1px solid #C2C9D8;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    min-height: 520px;
+  }
+
+  .stage svg{
+    width: 100%;
+    height: auto;
+    display: block;
+    flex: 1;
+  }
+
+  .stage-footer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding: 0 4px;
+  }
+
+  .motion-caption{
+    font-size: 13.5px;
+    color: var(--ink-soft);
+  }
+
+  .motion-caption strong{
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .play-btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--panel-bg);
+    color: var(--panel-text);
+    border: none;
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-family: var(--sans);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .play-btn:hover{ background: var(--panel-bg-2); }
+  .play-btn:focus-visible{ outline: 2px solid var(--teal); outline-offset: 2px; }
+
+  /* ---------- Dashboard ---------- */
+
+  .dashboard{
+    background: var(--panel-bg);
+    color: var(--panel-text);
+    border-radius: var(--radius-panel);
+    padding: 20px 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .dash-title{
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    color: var(--panel-text-soft);
+    font-weight: 600;
+  }
+
+  .readout{
+    background: #10141F;
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius-ctrl);
+    padding: 14px 16px;
+  }
+
+  .readout .label{
+    font-size: 12px;
+    color: var(--panel-text-soft);
+    margin-bottom: 4px;
+  }
+
+  .readout .value{
+    font-family: var(--mono);
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--teal-soft);
+    line-height: 1.1;
+  }
+
+  .readout .value small{
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--panel-text-soft);
+    margin-left: 4px;
+  }
+
+  .readout .delta{
+    margin-top: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+  .delta.up{ background: rgba(43,179,163,0.16); color: var(--teal-soft); }
+  .delta.down{ background: rgba(226,87,43,0.16); color: var(--coral-soft); }
+  .delta.same{ background: rgba(154,162,188,0.16); color: var(--panel-text-soft); }
+
+  .subreadouts{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .mini{
+    background: var(--panel-bg-2);
+    border-radius: var(--radius-ctrl);
+    padding: 10px 12px;
+  }
+  .mini .label{ font-size: 11px; color: var(--panel-text-soft); }
+  .mini .value{
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .mini.weight .value{ color: var(--coral-soft); }
+  .mini.accel .value{ color: var(--brass-soft); }
+
+  hr.divider{
+    border: none;
+    border-top: 1px solid var(--panel-line);
+    margin: 2px 0;
+  }
+
+  .control-block{ display: flex; flex-direction: column; gap: 8px; }
+
+  .control-block .ctrl-label{
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--panel-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .control-block .ctrl-label .val{
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--brass-soft);
+    font-size: 12.5px;
+  }
+
+  .segmented{
+    display: flex;
+    background: var(--panel-bg-2);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 3px;
+  }
+
+  .segmented button{
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--panel-text-soft);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 6px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .segmented button.active{
+    background: var(--teal);
+    color: #0A1620;
+  }
+
+  .segmented button:hover:not(.active){ color: var(--panel-text); }
+  .segmented button:focus-visible{ outline: 2px solid var(--teal-soft); outline-offset: 2px; }
+
+  input[type="range"]{
+    width: 100%;
+    accent-color: var(--brass);
+    height: 20px;
+  }
+  input[type="range"]:disabled{ opacity: 0.35; }
+  input[type="range"]:focus-visible{ outline: 2px solid var(--brass-soft); outline-offset: 3px; }
+
+  .toggle-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .switch{
+    position: relative;
+    width: 42px;
+    height: 24px;
+    flex: none;
+  }
+  .switch input{
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .slider-pill{
+    position: absolute;
+    inset: 0;
+    background: var(--panel-line);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .slider-pill::before{
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    background: var(--panel-text);
+    border-radius: 50%;
+    transition: transform 0.15s ease;
+  }
+  .switch input:checked + .slider-pill{ background: var(--teal); }
+  .switch input:checked + .slider-pill::before{ transform: translateX(18px); background: #0A1620; }
+  .switch input:focus-visible + .slider-pill{ outline: 2px solid var(--teal-soft); outline-offset: 2px; }
+
+  .g-note{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--panel-text-soft);
+    text-align: right;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .car-group{ transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="masthead">
+    <div>
+      <h1>Effective Weight in a Lift</h1>
+      <p>Newton's second law applied to a person standing on scales in an accelerating lift.</p>
+    </div>
+    <div class="rule-note">↑ accel &rarr; effective weight increases &nbsp;·&nbsp; ↓ accel &rarr; effective weight decreases</div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ================= STAGE ================= -->
+    <section class="stage">
+      <svg viewBox="0 0 560 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of a lift shaft with a person standing on scales inside the lift car">
+        <defs>
+          <marker id="arrowCoral" markerWidth="9" markerHeight="9" refX="4" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="var(--coral)"></path>
+          </marker>
+          <marker id="arrowTeal" markerWidth="9" markerHeight="9" refX="4" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="var(--teal)"></path>
+          </marker>
+          <linearGradient id="carGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#E9ECF1"></stop>
+            <stop offset="100%" stop-color="#B9C0CC"></stop>
+          </linearGradient>
+          <linearGradient id="shaftGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3A4968"></stop>
+            <stop offset="100%" stop-color="#2A3550"></stop>
+          </linearGradient>
+        </defs>
+
+        <!-- shaft -->
+        <rect x="150" y="40" width="180" height="480" rx="6" fill="url(#shaftGrad)"></rect>
+        <rect x="150" y="40" width="180" height="480" rx="6" fill="none" stroke="#20283C" stroke-width="3"></rect>
+
+        <!-- floor guide lines -->
+        <g stroke="#57648A" stroke-width="1" stroke-dasharray="2 6">
+          <line x1="150" y1="115" x2="330" y2="115"></line>
+          <line x1="150" y1="190" x2="330" y2="190"></line>
+          <line x1="150" y1="265" x2="330" y2="265"></line>
+          <line x1="150" y1="340" x2="330" y2="340"></line>
+          <line x1="150" y1="415" x2="330" y2="415"></line>
+        </g>
+        <g font-family="var(--mono)" font-size="11" fill="#7E8AB0">
+          <text x="336" y="118">5</text>
+          <text x="336" y="193">4</text>
+          <text x="336" y="268">3</text>
+          <text x="336" y="343">2</text>
+          <text x="336" y="418">1</text>
+        </g>
+
+        <!-- rails -->
+        <rect x="160" y="40" width="4" height="480" fill="#5A6890"></rect>
+        <rect x="316" y="40" width="4" height="480" fill="#5A6890"></rect>
+
+        <!-- lift car (position set by JS) -->
+        <g id="carGroup" class="car-group">
+          <rect x="168" y="0" width="144" height="118" rx="8" fill="url(#carGrad)" stroke="var(--car-trim)" stroke-width="2"></rect>
+          <!-- cabin cross-brace / doors -->
+          <line x1="240" y1="6" x2="240" y2="112" stroke="var(--car-trim)" stroke-width="1.5"></line>
+          <rect x="172" y="4" width="336" height="0" fill="none"></rect>
+
+          <!-- scale -->
+          <rect x="218" y="94" width="44" height="9" rx="2" fill="#8A93A8" stroke="#5C6479" stroke-width="1"></rect>
+
+          <!-- person pictogram -->
+          <g id="person">
+            <circle cx="240" cy="55" r="9" fill="var(--panel-bg)"></circle>
+            <path d="M240,66 C226,66 222,80 222,94 L228,94 L231,80 L233,94 L247,94 L249,80 L252,94 L258,94 C258,80 254,66 240,66 Z" fill="var(--panel-bg)"></path>
+          </g>
+
+          <!-- force arrows -->
+          <g id="arrows">
+            <line id="weightArrow" x1="240" y1="60" x2="240" y2="60" stroke="var(--coral)" stroke-width="3.4" marker-end="url(#arrowCoral)"></line>
+            <text id="weightLabel" x="252" y="60" font-family="var(--mono)" font-size="12.5" font-weight="700" fill="var(--coral)"></text>
+
+            <line id="readingArrow" x1="196" y1="94" x2="196" y2="94" stroke="var(--teal)" stroke-width="3.4" marker-end="url(#arrowTeal)"></line>
+            <text id="readingLabel" x="140" y="94" font-family="var(--mono)" font-size="12.5" font-weight="700" fill="var(--teal)" text-anchor="end"></text>
+          </g>
+        </g>
+      </svg>
+
+      <div class="stage-footer">
+        <div class="motion-caption" id="motionCaption">Moving upwards, speeding up</div>
+        <button class="play-btn" id="playBtn" type="button" aria-pressed="true">
+          <span id="playIcon">&#10074;&#10074;</span>
+          <span id="playLabel">Pause</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= DASHBOARD ================= -->
+    <aside class="dashboard">
+
+      <div>
+        <div class="dash-title">DASHBOARD</div>
+      </div>
+
+      <div class="readout">
+        <div class="label">Scale reading (effective weight)</div>
+        <div class="value" id="readingValue">0<small>N</small></div>
+        <div class="delta same" id="deltaBadge">= unchanged</div>
+      </div>
+
+      <div class="subreadouts">
+        <div class="mini weight">
+          <div class="label">True weight (mg)</div>
+          <div class="value" id="weightValue">0 N</div>
+        </div>
+        <div class="mini accel">
+          <div class="label">Acceleration</div>
+          <div class="value" id="accelValueMini">0.0 m/s²</div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="control-block">
+        <div class="ctrl-label">Mode</div>
+        <div class="segmented" id="modeSeg">
+          <button type="button" data-mode="manual" class="active">Manual control</button>
+          <button type="button" data-mode="real">Real-life journey</button>
+        </div>
+      </div>
+
+      <div class="control-block">
+        <div class="ctrl-label" id="directionCtrlLabel">Direction of travel</div>
+        <div class="segmented" id="directionSeg">
+          <button type="button" data-dir="1" class="active">&uarr; Upwards</button>
+          <button type="button" data-dir="-1">&darr; Downwards</button>
+        </div>
+      </div>
+
+      <div class="control-block" id="motionControlBlock">
+        <div class="ctrl-label">Motion</div>
+        <div class="segmented" id="motionSeg">
+          <button type="button" data-motion="speeding" class="active">Speeding up</button>
+          <button type="button" data-motion="constant">Constant speed</button>
+          <button type="button" data-motion="slowing">Slowing down</button>
+        </div>
+      </div>
+
+      <div class="control-block" id="journeyControlBlock" style="display:none;">
+        <div class="ctrl-label">Journey</div>
+        <button class="play-btn" id="startJourneyBtn" type="button" style="width:100%; justify-content:center;">
+          <span>&#9654;</span>
+          <span id="startJourneyLabel">Start journey</span>
+        </button>
+      </div>
+
+      <div class="control-block">
+        <div class="ctrl-label">Rate of change of speed <span class="val" id="accelLabel">2.0 m/s²</span></div>
+        <input type="range" id="accelSlider" min="0" max="4" step="0.1" value="2.0">
+      </div>
+
+      <div class="control-block">
+        <div class="ctrl-label">Mass of person <span class="val" id="massLabel">70 kg</span></div>
+        <input type="range" id="massSlider" min="40" max="100" step="1" value="70">
+      </div>
+
+      <hr class="divider">
+
+      <div class="toggle-row">
+        <span>Show force arrows</span>
+        <label class="switch">
+          <input type="checkbox" id="arrowsToggle" checked>
+          <span class="slider-pill"></span>
+        </label>
+      </div>
+
+      <div class="g-note">g = 9.8 N/kg</div>
+
+    </aside>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var g = 9.8;
+
+  var state = {
+    mode: "manual",         // manual | real
+    direction: 1,          // 1 = up, -1 = down
+    motion: "speeding",    // speeding | constant | slowing (manual mode)
+    phase: "speeding",     // speeding | constant | slowing (real-life mode, auto)
+    journeyDone: false,    // real-life mode: has the current trip finished?
+    accel: 2.0,
+    mass: 70,
+    showArrows: true,
+    playing: true,
+    progress: 0             // 0..1 along the shaft, in the chosen direction
+  };
+
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion) state.playing = false;
+
+  // ---------- DOM refs ----------
+  var carGroup = document.getElementById("carGroup");
+  var weightArrow = document.getElementById("weightArrow");
+  var weightLabel = document.getElementById("weightLabel");
+  var readingArrow = document.getElementById("readingArrow");
+  var readingLabel = document.getElementById("readingLabel");
+  var arrowsGroup = document.getElementById("arrows");
+
+  var readingValueEl = document.getElementById("readingValue");
+  var weightValueEl = document.getElementById("weightValue");
+  var accelValueMiniEl = document.getElementById("accelValueMini");
+  var deltaBadge = document.getElementById("deltaBadge");
+  var motionCaption = document.getElementById("motionCaption");
+
+  var directionSeg = document.getElementById("directionSeg");
+  var directionCtrlLabel = document.getElementById("directionCtrlLabel");
+  var modeSeg = document.getElementById("modeSeg");
+  var motionControlBlock = document.getElementById("motionControlBlock");
+  var journeyControlBlock = document.getElementById("journeyControlBlock");
+  var startJourneyBtn = document.getElementById("startJourneyBtn");
+  var motionSeg = document.getElementById("motionSeg");
+  var accelSlider = document.getElementById("accelSlider");
+  var accelLabel = document.getElementById("accelLabel");
+  var massSlider = document.getElementById("massSlider");
+  var massLabel = document.getElementById("massLabel");
+  var arrowsToggle = document.getElementById("arrowsToggle");
+  var playBtn = document.getElementById("playBtn");
+  var playLabel = document.getElementById("playLabel");
+  var playIcon = document.getElementById("playIcon");
+
+  function getEffectiveMotion(){
+    if (state.mode === "manual") return state.motion;
+    return state.journeyDone ? "constant" : state.phase;
+  }
+
+  // ---------- Physics ----------
+  function computePhysics(){
+    var motion = getEffectiveMotion();
+    var aUp;
+    if (motion === "constant"){
+      aUp = 0;
+    } else if (motion === "speeding"){
+      aUp = state.direction * state.accel;
+    } else { // slowing
+      aUp = -state.direction * state.accel;
+    }
+    var W = state.mass * g;
+    var R = state.mass * (g + aUp);
+    return { aUp: aUp, W: W, R: R };
+  }
+
+  function motionSentence(){
+    var dirWord = state.direction === 1 ? "upwards" : "downwards";
+    if (state.mode === "real" && state.journeyDone){
+      return "Arrived \u2014 lift at rest";
+    }
+    var motion = getEffectiveMotion();
+    var moveWord = motion === "constant" ? "at constant speed" :
+                   motion === "speeding" ? "and speeding up" : "and slowing down";
+    return "Moving " + dirWord + " " + moveWord;
+  }
+
+  function updateReadouts(){
+    var p = computePhysics();
+    var motion = getEffectiveMotion();
+    readingValueEl.innerHTML = p.R.toFixed(1) + "<small>N</small>";
+    weightValueEl.textContent = p.W.toFixed(1) + " N";
+    accelValueMiniEl.textContent = (motion === "constant" ? "0.0" : state.accel.toFixed(1)) + " m/s²";
+
+    var diff = p.R - p.W;
+    if (Math.abs(diff) < 0.05){
+      deltaBadge.className = "delta same";
+      deltaBadge.textContent = "= unchanged";
+    } else if (diff > 0){
+      deltaBadge.className = "delta up";
+      deltaBadge.textContent = "&#8593; increased by " + diff.toFixed(1) + " N";
+      deltaBadge.innerHTML = "&uarr; increased by " + diff.toFixed(1) + " N";
+    } else {
+      deltaBadge.className = "delta down";
+      deltaBadge.innerHTML = "&darr; decreased by " + Math.abs(diff).toFixed(1) + " N";
+    }
+
+    motionCaption.textContent = motionSentence();
+
+    // arrows
+    var k = 0.065; // px per newton
+    var maxLen = 130;
+
+    var wLen = Math.min(p.W * k, maxLen);
+    weightArrow.setAttribute("y2", 60 + wLen);
+    weightLabel.setAttribute("y", 60 + wLen / 2 + 4);
+    weightLabel.textContent = "W = " + p.W.toFixed(0) + " N";
+
+    var rLen = Math.min(p.R * k, maxLen);
+    readingArrow.setAttribute("y1", 94);
+    readingArrow.setAttribute("y2", 94 - rLen);
+    readingLabel.setAttribute("y", 94 - rLen / 2 + 4);
+    readingLabel.textContent = "R = " + p.R.toFixed(0) + " N";
+
+    arrowsGroup.style.display = state.showArrows ? "" : "none";
+  }
+
+  // ---------- Controls ----------
+  function setActiveSeg(container, attr, value){
+    var btns = container.querySelectorAll("button");
+    for (var i = 0; i < btns.length; i++){
+      var b = btns[i];
+      if (b.getAttribute(attr) === String(value)) b.classList.add("active");
+      else b.classList.remove("active");
+    }
+  }
+
+  directionSeg.addEventListener("click", function(e){
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    state.direction = parseInt(btn.getAttribute("data-dir"), 10);
+    setActiveSeg(directionSeg, "data-dir", state.direction);
+    if (state.mode === "real"){
+      state.progress = 0;
+      state.journeyDone = false;
+      state.phase = "speeding";
+      resumeIfPaused();
+    }
+    updateReadouts();
+  });
+
+  modeSeg.addEventListener("click", function(e){
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    state.mode = btn.getAttribute("data-mode");
+    setActiveSeg(modeSeg, "data-mode", state.mode);
+
+    motionControlBlock.style.display = state.mode === "manual" ? "" : "none";
+    journeyControlBlock.style.display = state.mode === "real" ? "" : "none";
+    directionCtrlLabel.textContent = state.mode === "real" ? "Journey direction" : "Direction of travel";
+
+    state.progress = 0;
+    state.journeyDone = false;
+    state.phase = "speeding";
+    carGroup.style.opacity = "1";
+
+    if (state.mode === "real") resumeIfPaused();
+
+    updateReadouts();
+  });
+
+  startJourneyBtn.addEventListener("click", function(){
+    state.progress = 0;
+    state.journeyDone = false;
+    state.phase = "speeding";
+    resumeIfPaused();
+    updateReadouts();
+  });
+
+  function resumeIfPaused(){
+    if (!state.playing){
+      state.playing = true;
+      playBtn.setAttribute("aria-pressed", "true");
+      playLabel.textContent = "Pause";
+      playIcon.innerHTML = "&#10074;&#10074;";
+    }
+    lastTime = null;
+  }
+
+  motionSeg.addEventListener("click", function(e){
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    state.motion = btn.getAttribute("data-motion");
+    setActiveSeg(motionSeg, "data-motion", state.motion);
+    accelSlider.disabled = (state.mode === "manual" && state.motion === "constant");
+    updateReadouts();
+  });
+
+  accelSlider.addEventListener("input", function(){
+    state.accel = parseFloat(accelSlider.value);
+    accelLabel.textContent = state.accel.toFixed(1) + " m/s²";
+    updateReadouts();
+  });
+
+  massSlider.addEventListener("input", function(){
+    state.mass = parseFloat(massSlider.value);
+    massLabel.textContent = state.mass.toFixed(0) + " kg";
+    updateReadouts();
+  });
+
+  arrowsToggle.addEventListener("change", function(){
+    state.showArrows = arrowsToggle.checked;
+    updateReadouts();
+  });
+
+  playBtn.addEventListener("click", function(){
+    state.playing = !state.playing;
+    playBtn.setAttribute("aria-pressed", state.playing ? "true" : "false");
+    playLabel.textContent = state.playing ? "Pause" : "Play";
+    playIcon.innerHTML = state.playing ? "&#10074;&#10074;" : "&#9654;";
+    if (state.playing) lastTime = null;
+  });
+
+  // ---------- Animation ----------
+  var topLimit = 44;     // car y at top of shaft
+  var bottomLimit = 402;  // car y at bottom of shaft
+  var travelRange = bottomLimit - topLimit;
+  var baseDuration = 15;  // seconds for one slow manual-mode traversal
+  var realDuration = 17;  // seconds for one real-life journey (accelerate/cruise/decelerate)
+
+  var lastTime = null;
+
+  function speedFactor(p){
+    // manual mode -- gentle qualitative cue only, not a literal kinematic model
+    if (state.motion === "speeding") return 0.55 + p;      // 0.55x -> 1.55x
+    if (state.motion === "slowing") return 1.55 - p;       // 1.55x -> 0.55x
+    return 1.0;
+  }
+
+  function realSpeedFactor(p){
+    // real-life mode -- trapezoid profile: accelerate, cruise, decelerate
+    if (p < 0.3) return (p / 0.3) * 1.3 + 0.05;
+    if (p < 0.7) return 1.35;
+    return Math.max(((1 - p) / 0.3) * 1.35, 0.05);
+  }
+
+  function fadeResetCar(){
+    carGroup.style.transition = "opacity 0.25s ease";
+    carGroup.style.opacity = "0";
+    setTimeout(function(){
+      carGroup.style.transition = "opacity 0.25s ease";
+      carGroup.style.opacity = "1";
+    }, 260);
+  }
+
+  function frame(t){
+    if (!state.playing){
+      lastTime = null;
+      requestAnimationFrame(frame);
+      return;
+    }
+    if (lastTime === null) lastTime = t;
+    var dt = Math.min((t - lastTime) / 1000, 0.1);
+    lastTime = t;
+
+    if (state.mode === "manual"){
+      var rate = (1 / baseDuration) * speedFactor(state.progress);
+      state.progress += rate * dt;
+      if (state.progress >= 1){
+        state.progress = 0;
+        fadeResetCar();
+      }
+    } else if (!state.journeyDone){
+      var rate2 = (1 / realDuration) * realSpeedFactor(state.progress);
+      state.progress += rate2 * dt;
+
+      if (state.progress < 0.3) state.phase = "speeding";
+      else if (state.progress < 0.7) state.phase = "constant";
+      else state.phase = "slowing";
+
+      if (state.progress >= 1){
+        state.progress = 1;
+        state.journeyDone = true;
+      }
+    }
+
+    var y;
+    if (state.direction === 1){
+      y = bottomLimit - state.progress * travelRange;
+    } else {
+      y = topLimit + state.progress * travelRange;
+    }
+    carGroup.setAttribute("transform", "translate(0," + y.toFixed(1) + ")");
+
+    updateReadouts();
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- init ----------
+  accelSlider.disabled = (state.mode === "manual" && state.motion === "constant");
+  updateReadouts();
+  requestAnimationFrame(frame);
+
+})();
+</script>
+
+</body>
+</html>
