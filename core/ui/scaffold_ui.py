@@ -22,8 +22,6 @@ def render_widget(question):
 
 
 def render_scaffold(question, suffix=""):
-    render_widget(question)
-
     if not question.scaffold:
         return
     with st.expander("🔍 Step-by-step scaffold"):

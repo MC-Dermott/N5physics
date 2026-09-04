@@ -57,6 +57,7 @@ def _render_single(question, user_id, qualification):
 
     if not st.session_state.get(submitted_key):
         _render_notes(question)
+        render_widget(question)
 
     st.markdown(question.question_text)
     st.write("")
@@ -142,10 +143,10 @@ def _render_scenario(question, user_id, qualification):
         with st.expander("📚 Notes"):
             st.markdown(general_notes)
 
+    render_widget(question)
+
     if question.scenario_context:
         st.info(question.scenario_context)
-
-    render_widget(question)
 
     for i, part in enumerate(question.parts):
         part_submitted_key = f"sub_{question.qid}_part{i}"
