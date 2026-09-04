@@ -67,6 +67,12 @@ from topics.dynamics.energy_work_power_higher import (
     gen_energy_lift_power,
     gen_energy_engine_power,
 )
+from topics.dynamics.effective_weight_higher import (
+    generate_effective_weight_lifts,
+    gen_ew_constant_velocity,
+    generate_effective_weight_beyond_lifts,
+    gen_ew_explain_freefall,
+)
 
 from topics.electricity.current          import generate_current
 from topics.electricity.ohms_law         import generate_ohms_law
@@ -251,6 +257,12 @@ QUAL_REGISTRY = {
                 "Conservation — Frictional Force": gen_energy_friction_force,
                 "Conservation — Useful Power":  gen_energy_lift_power,
                 "Conservation — Engine Power":  gen_energy_engine_power,
+            },
+            "Effective Weight": {
+                "Lifts":                         generate_effective_weight_lifts,
+                "Lifts — Constant Velocity":      gen_ew_constant_velocity,
+                "Beyond Lifts":                   generate_effective_weight_beyond_lifts,
+                "Beyond Lifts — Explain Free Fall": gen_ew_explain_freefall,
             },
         },
         "Particles and Waves": {
