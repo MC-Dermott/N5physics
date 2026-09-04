@@ -647,7 +647,7 @@ def _l3_vertical_given_a(level):
         working=working_T,
         distractors=distractors_T,
         notes=_NOTES,
-        scaffold=None if mode == "constant" else [
+        scaffold=[] if mode == "constant" else [
             {"prompt": "What is ma (the extra force needed for the acceleration)?", "answer": round(m * a, 2)},
             {"prompt": "What is the tension T?", "answer": T},
         ],
@@ -924,7 +924,7 @@ def _l7_dynamic(level):
         a_text = "the block slides down at a constant speed"
     else:
         a = random.choice([0.5, 0.8, 1.0, 1.2, 1.5, 2.0])
-        ma = m * a
+        ma = _r1(m * a)
         W_par = round(ma + friction, 1)
         a_text = f"accelerating at {a} m/s²"
 
@@ -939,19 +939,32 @@ def _l7_dynamic(level):
         f"acting on the {obj} is {friction} N. Calculate the angle of the slope."
     )
     if constant_speed:
-        rule = "Constant speed means the forces along the slope are balanced, so W∥ = friction:"
-        wpar_latex = rf"W_{{\parallel}} = \text{{friction}} = {friction}\ \mathrm{{N}}"
+        working = [
+            {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
+            {"type": "text",  "content": "Constant speed means the forces along the slope are balanced, so W∥ = friction:"},
+            {"type": "latex", "content": rf"W_{{\parallel}} = \text{{friction}} = {friction}\ \mathrm{{N}}"},
+            {"type": "latex", "content": rf"\sin\theta = \dfrac{{W_{{\parallel}}}}{{W}} = \dfrac{{{W_par}}}{{{W}}} = {sin_theta}"},
+            {"type": "latex", "content": rf"\theta = \sin^{{-1}}({sin_theta}) = {theta_calc}°"},
+        ]
+        scaffold = [
+            {"question": "What is W∥, the component of weight parallel to the slope?", "answer": W_par},
+            {"question": "What is the angle θ?", "answer": theta_calc},
+        ]
     else:
-        rule = "Rearranging Resultant = W∥ − friction, with resultant = ma, gives the parallel component of weight:"
-        wpar_latex = rf"W_{{\parallel}} = ma + \text{{friction}} = {W_par}\ \mathrm{{N}}"
+        working = [
+            {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
+            {"type": "latex", "content": rf"\text{{Resultant}} = ma = {m} \times {a} = {ma}\ \mathrm{{N}}"},
+            {"type": "text",  "content": "Rearranging Resultant = W∥ − friction gives the parallel component of weight:"},
+            {"type": "latex", "content": rf"W_{{\parallel}} = \text{{Resultant}} + \text{{friction}} = {ma} + {friction} = {W_par}\ \mathrm{{N}}"},
+            {"type": "latex", "content": rf"\sin\theta = \dfrac{{W_{{\parallel}}}}{{W}} = \dfrac{{{W_par}}}{{{W}}} = {sin_theta}"},
+            {"type": "latex", "content": rf"\theta = \sin^{{-1}}({sin_theta}) = {theta_calc}°"},
+        ]
+        scaffold = [
+            {"question": "What is the resultant (unbalanced) force along the slope (= ma)?", "answer": ma},
+            {"question": "What is W∥, the component of weight parallel to the slope?", "answer": W_par},
+            {"question": "What is the angle θ?", "answer": theta_calc},
+        ]
 
-    working = [
-        {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
-        {"type": "text",  "content": rule},
-        {"type": "latex", "content": wpar_latex},
-        {"type": "latex", "content": rf"\sin\theta = \dfrac{{W_{{\parallel}}}}{{W}} = \dfrac{{{W_par}}}{{{W}}} = {sin_theta}"},
-        {"type": "latex", "content": rf"\theta = \sin^{{-1}}({sin_theta}) = {theta_calc}°"},
-    ]
     options_data = [
         {"value": theta_calc, "mistake": None, "working": working},
         {"value": _r1(math.degrees(math.acos(sin_theta))),
@@ -960,10 +973,6 @@ def _l7_dynamic(level):
         {"value": _r1(math.degrees(math.asin(min(friction / W, 0.999)))),
          "mistake": "This uses only the friction force. First find W∥, the parallel component of weight, then use sin θ = W∥ ÷ W.",
          "working": working},
-    ]
-    scaffold = [
-        {"question": "What is W∥, the component of weight parallel to the slope?", "answer": W_par},
-        {"question": "What is the angle θ?", "answer": theta_calc},
     ]
     return make_question(question, theta_calc, options_data, "°",
                          notes=_NOTES, topic="Our Dynamic Universe",
@@ -1186,6 +1195,7 @@ def gen_rf_l8_up_slope_find_angle_or_mass(level="Higher"):
              "working": working},
         ]
         scaffold = [
+            {"question": "What is the resultant (unbalanced) force along the slope (= ma)?", "answer": _r1(ma)},
             {"question": "What is W∥ (= ma − friction)?", "answer": W_par},
             {"question": "What is the angle θ?", "answer": theta_calc},
         ]
@@ -1301,6 +1311,10 @@ def gen_rf_l8_const_force_find_force(level="Higher"):
             {"type": "latex", "content": rf"F = {_r1(W_par)} + {friction} = {F}\ \mathrm{{N}}"},
         ]
         wrong_mistake = f"At constant speed the resultant force is zero, so F must exactly balance W∥ + friction, not just one of them: F = {F} N."
+        scaffold = [
+            {"question": "What is W∥ (= W sinθ)?", "answer": _r1(W_par)},
+            {"question": "What is F (= W∥ + friction)?", "answer": F},
+        ]
     else:
         a = random.choice([0.5, 0.8, 1.0, 1.2, 1.5, 2.0, 2.5])
         ma = m * a
@@ -1319,6 +1333,11 @@ def gen_rf_l8_const_force_find_force(level="Higher"):
             {"type": "latex", "content": rf"F = {_r1(ma)} + {_r1(W_par)} + {friction} = {F}\ \mathrm{{N}}"},
         ]
         wrong_mistake = f"F must overcome W∥ and friction *and* provide the resultant force for the acceleration — all three add together: F = {F} N."
+        scaffold = [
+            {"question": "What is the resultant (unbalanced) force needed for this acceleration (= ma)?", "answer": _r1(ma)},
+            {"question": "What is W∥ (= W sinθ)?", "answer": _r1(W_par)},
+            {"question": "What is F (= Resultant + W∥ + friction)?", "answer": F},
+        ]
 
     options_data = [
         {"value": F, "mistake": None, "working": working},
@@ -1328,7 +1347,7 @@ def gen_rf_l8_const_force_find_force(level="Higher"):
     ]
     return make_question(question, F, options_data, "N",
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Components of Vectors", level=level)
+                         question_type="Components of Vectors", level=level, scaffold=scaffold)
 
 
 def gen_rf_l8_const_force_find_friction(level="Higher"):
