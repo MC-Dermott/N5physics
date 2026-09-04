@@ -3,6 +3,7 @@ import random
 from topics.dynamics.speed_distance_time   import generate_sdt
 from topics.dynamics.acceleration          import generate_acceleration
 from topics.dynamics.acceleration_s3       import gen_change_in_speed, gen_initial_final_speed
+from topics.dynamics.instantaneous_speed_s3 import gen_instantaneous_speed, gen_average_speed_light_gate
 from topics.dynamics.forces                import generate_forces
 from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
@@ -119,6 +120,10 @@ QUAL_REGISTRY = {
             "Acceleration": {
                 "Change in Speed":         gen_change_in_speed,
                 "Initial & Final Speed":   gen_initial_final_speed,
+            },
+            "Instantaneous Speed": {
+                "Instantaneous Speed at a Point": gen_instantaneous_speed,
+                "Average Speed Over the Run":     gen_average_speed_light_gate,
             },
         },
         "Waves": {

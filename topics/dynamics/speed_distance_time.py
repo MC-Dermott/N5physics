@@ -34,7 +34,12 @@ _CONTEXTS = [
 
 def _pick_speed_and_time(level="N5"):
     v_si = random.choice(_SPEEDS[:6] if level in ("N4", "S3") else _SPEEDS)
-    mode = random.choice(["s", "s"] if level in ("N4", "S3") else ["s", "s", "minutes", "hours"])
+    if level == "S3":
+        mode = random.choice(["s", "s", "minutes"])
+    elif level == "N4":
+        mode = "s"
+    else:
+        mode = random.choice(["s", "s", "minutes", "hours"])
     if mode == "minutes":
         t_min = random.choice([1, 2, 3, 5, 10, 15, 20])
         return v_si, t_min, "minutes", t_min * 60
@@ -181,10 +186,83 @@ def gen_sdt_find_t(level="N5"):
                          topic="Dynamics", question_type="Speed, Distance and Time", level=level)
 
 
+# ── Direct speed-unit conversion (km/h <-> m/s), no d/t calculation ────────────
+
+_KMH_VALUES = [18, 36, 54, 72, 90, 108, 45, 63, 32, 27, 63, 15]
+_MS_VALUES  = [5, 10, 15, 20, 25, 30, 28, 12, 18, 22, 8, 33]
+
+
+def gen_speed_unit_conversion(level="S3"):
+    direction = random.choice(["kmh_to_ms", "ms_to_kmh"])
+
+    if direction == "kmh_to_ms":
+        v_kmh = random.choice(_KMH_VALUES)
+        correct = round_sf(v_kmh / 3.6)
+        backwards = round_sf(v_kmh * 3.6)
+        unconverted = float(v_kmh)
+        wrong_factor = round_sf(v_kmh / 1000)
+
+        steps = [
+            {"type": "text",  "content": "Convert km/h to m/s (÷ 3.6, i.e. × 1000 ÷ 3600):"},
+            {"type": "latex", "content": rf"v = {v_kmh} \times 1000 \div 3600"},
+            {"type": "latex", "content": rf"v = {correct}\ \mathrm{{m/s}}"},
+        ]
+        question = f"A vehicle travels at {v_kmh} km/h.\n\nConvert this speed to m/s, giving your answer to 3 s.f. if needed."
+        options_data = [
+            {"value": correct, "display": f"{correct:g} m/s", "mistake": None, "working": steps},
+            {"value": backwards, "display": f"{backwards:g} m/s",
+             "mistake": "You multiplied by 3.6 instead of dividing — that converts m/s to km/h, not the other way round.",
+             "working": steps},
+            {"value": unconverted, "display": f"{unconverted:g} m/s",
+             "mistake": "You need to actually convert the units — km/h and m/s are not the same size.",
+             "working": steps},
+            {"value": wrong_factor, "display": f"{wrong_factor:g} m/s",
+             "mistake": "You divided by 1000 only. The full conversion is × 1000 ÷ 3600, i.e. ÷ 3.6.",
+             "working": steps},
+        ]
+        unit_out = "m/s"
+    else:
+        v_ms = random.choice(_MS_VALUES)
+        correct = round_sf(v_ms * 3.6)
+        backwards = round_sf(v_ms / 3.6)
+        unconverted = float(v_ms)
+        wrong_factor = round_sf(v_ms * 1000)
+
+        steps = [
+            {"type": "text",  "content": "Convert m/s to km/h (× 3.6, i.e. × 3600 ÷ 1000):"},
+            {"type": "latex", "content": rf"v = {v_ms} \times 3600 \div 1000"},
+            {"type": "latex", "content": rf"v = {correct}\ \mathrm{{km/h}}"},
+        ]
+        question = f"A vehicle travels at {v_ms} m/s.\n\nConvert this speed to km/h, giving your answer to 3 s.f. if needed."
+        options_data = [
+            {"value": correct, "display": f"{correct:g} km/h", "mistake": None, "working": steps},
+            {"value": backwards, "display": f"{backwards:g} km/h",
+             "mistake": "You divided by 3.6 instead of multiplying — that converts km/h to m/s, not the other way round.",
+             "working": steps},
+            {"value": unconverted, "display": f"{unconverted:g} km/h",
+             "mistake": "You need to actually convert the units — km/h and m/s are not the same size.",
+             "working": steps},
+            {"value": wrong_factor, "display": f"{wrong_factor:g} km/h",
+             "mistake": "You multiplied by 1000 only. The full conversion is × 3600 ÷ 1000, i.e. × 3.6.",
+             "working": steps},
+        ]
+        unit_out = "km/h"
+
+    return make_question(question, correct, options_data, unit_out, scaffold=None,
+                         notes=NOTES["speed_distance_time"], topic="Dynamics",
+                         question_type="Speed, Distance and Time", level=level)
+
+
 _ALL_GENS = [gen_sdt_find_v, gen_sdt_find_d, gen_sdt_find_t]
 _N4_GENS  = [gen_sdt_find_v, gen_sdt_find_d]
+_S3_GENS  = [gen_sdt_find_v, gen_sdt_find_d, gen_sdt_find_t, gen_speed_unit_conversion]
 
 
 def generate_sdt(level="N5"):
-    gens = _N4_GENS if level in ("N4", "S3") else _ALL_GENS
+    if level == "S3":
+        gens = _S3_GENS
+    elif level == "N4":
+        gens = _N4_GENS
+    else:
+        gens = _ALL_GENS
     return random.choice(gens)(level=level)

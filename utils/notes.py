@@ -126,6 +126,37 @@ $$A = \\frac{N}{t} = \\frac{3000}{60} = 50\\ \\mathrm{Bq}$$
 > **Important:** One Becquerel = one decay per second. Always convert time to seconds.
 """,
 
+    "instantaneous_speed_s3": """
+## Instantaneous Speed — using a light gate
+
+**Definitions:**
+- **Average speed** is the total distance travelled divided by the total time taken — it tells you
+  nothing about the speed at any one moment.
+- **Instantaneous speed** is the speed of an object at one exact point/moment in time.
+
+**Same equation as average speed, applied over a very short distance:**
+$$v = \\frac{d}{t}$$
+
+A light gate measures instantaneous speed by timing how long a small interrupt card (or the object
+itself, e.g. a ball bearing) takes to block the beam. Because this width and time are so small, the
+speed barely changes while it passes through — so $d \\div t$ over the *gate* width and *gate* time
+gives a close approximation to the speed at that exact point.
+
+| Symbol | Quantity | Unit |
+|---|---|---|
+| d | Card/object width (**convert to metres**) | m |
+| t | Light gate blocking time | s |
+| v | Instantaneous speed | m/s |
+
+**Worked Example:** A 6.0 cm wide card blocks a light gate beam for 0.12 s.
+$$v = \\frac{d}{t} = \\frac{0.06}{0.12} = 0.5\\ \\mathrm{m/s}$$
+
+> **Important:** Never use the total release-to-gate distance/time to find the instantaneous speed —
+> that only gives the *average* speed over the whole run. If the object is accelerating (e.g. rolling
+> down a slope), the instantaneous speed at the gate will be different from the average speed. Always
+> convert the card/object width from cm/mm to metres before dividing.
+""",
+
     "acceleration_s3": """
 ## Acceleration — $a = \\frac{v - u}{t}$
 
