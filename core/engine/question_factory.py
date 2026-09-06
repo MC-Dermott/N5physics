@@ -4,6 +4,11 @@ from topics.dynamics.speed_distance_time   import generate_sdt
 from topics.dynamics.acceleration          import generate_acceleration
 from topics.dynamics.acceleration_s3       import gen_change_in_speed, gen_initial_final_speed
 from topics.dynamics.instantaneous_speed_s3 import gen_instantaneous_speed, gen_average_speed_light_gate
+from topics.dynamics.vt_graph_distance_s3   import (
+    gen_vt_distance_simple,
+    gen_vt_distance_trapezium,
+    gen_vt_distance_compound,
+)
 from topics.dynamics.forces                import generate_forces
 from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
@@ -124,6 +129,11 @@ QUAL_REGISTRY = {
             "Instantaneous Speed": {
                 "Instantaneous Speed at a Point": gen_instantaneous_speed,
                 "Average Speed Over the Run":     gen_average_speed_light_gate,
+            },
+            "V-T Graphs": {
+                "Distance — Simple Shapes":    gen_vt_distance_simple,
+                "Distance — Trapezium Shapes": gen_vt_distance_trapezium,
+                "Distance — Compound Graphs":  gen_vt_distance_compound,
             },
         },
         "Waves": {

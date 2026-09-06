@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Acceleration Simulator</title>
+<style>
+  :root{
+    --navy:#0f2540;
+    --sea:#1f3864;
+    --sea-light:#3a5a8c;
+    --teal:#2f8f8a;
+    --sand:#e9e2d0;
+    --sand-deep:#d8cdae;
+    --ink:#122031;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    padding:0;
+    background:var(--sand);
+    color:var(--ink);
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 24px 40px;
+  }
+  h1{
+    font-size:22px;
+    letter-spacing:0.02em;
+    margin:0 0 2px;
+    color:var(--navy);
+    font-weight:700;
+  }
+  .subtitle{
+    font-size:13px;
+    color:var(--sea-light);
+    margin:0 0 22px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+  }
+
+  .panel{
+    background:var(--white);
+    border-radius:10px;
+    border:1px solid var(--sand-deep);
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+
+  .control{
+    margin-bottom:18px;
+  }
+  .control:last-child{margin-bottom:0;}
+  .control-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:8px;
+  }
+  .control-label{
+    font-size:14px;
+    font-weight:600;
+    color:var(--navy);
+  }
+  .control-value{
+    font-size:15px;
+    font-weight:700;
+    color:var(--teal);
+    font-variant-numeric: tabular-nums;
+  }
+  input[type=range]{
+    -webkit-appearance:none;
+    width:100%;
+    height:6px;
+    border-radius:4px;
+    background:var(--sand-deep);
+    outline:none;
+    margin:0;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:var(--sea);
+    border:3px solid var(--white);
+    box-shadow:0 0 0 1px var(--sea);
+    cursor:pointer;
+    margin-top:-7px;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:var(--sea);
+    border:3px solid var(--white);
+    box-shadow:0 0 0 1px var(--sea);
+    cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:6px;
+    border-radius:4px;
+  }
+
+  .btn-row{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+    flex-wrap:wrap;
+  }
+  button{
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:700;
+    letter-spacing:0.02em;
+    padding:9px 16px;
+    border-radius:7px;
+    border:none;
+    cursor:pointer;
+    transition:opacity 0.15s ease;
+  }
+  button:active{opacity:0.8;}
+  .btn-primary{
+    background:var(--teal);
+    color:var(--white);
+  }
+  .btn-secondary{
+    background:var(--sand);
+    color:var(--navy);
+    border:1px solid var(--sand-deep);
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--sea-light);
+    border:1px solid var(--sand-deep);
+    margin-left:auto;
+  }
+
+  .readout{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    background:var(--navy);
+    border-radius:10px;
+    padding:18px 22px;
+    color:var(--white);
+    margin-bottom:18px;
+  }
+  .readout .big{
+    font-size:38px;
+    font-weight:800;
+    font-variant-numeric: tabular-nums;
+    line-height:1;
+    min-width:100px;
+  }
+  .readout .unit{
+    font-size:16px;
+    font-weight:600;
+    opacity:0.75;
+    margin-left:4px;
+  }
+  .readout .desc{
+    font-size:13px;
+    line-height:1.5;
+    opacity:0.85;
+    flex:1;
+  }
+  .readout .desc b{
+    color:var(--teal);
+  }
+
+  /* track */
+  .track-outer{
+    position:relative;
+    padding-top:6px;
+  }
+  .track-line{
+    position:relative;
+    height:64px;
+    border-radius:8px;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 38px, var(--sand-deep) 38px 42px);
+    background-color:#f6f2e8;
+    border:1px solid var(--sand-deep);
+    overflow:hidden;
+  }
+  .track-flag{
+    position:absolute;
+    right:0;
+    top:0;
+    bottom:0;
+    width:3px;
+    background:var(--sea);
+  }
+  .track-flag::after{
+    content:"finish";
+    position:absolute;
+    top:-2px;
+    right:4px;
+    font-size:9.5px;
+    font-weight:700;
+    color:var(--sea-light);
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+  }
+  .track-box{
+    position:absolute;
+    top:14px;
+    width:44px;
+    height:36px;
+    background:var(--teal);
+    border-radius:6px;
+    box-shadow:0 3px 6px rgba(15,37,64,0.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:11px;
+    font-weight:800;
+    will-change:left;
+  }
+  .track-box::after{
+    content:"";
+    position:absolute;
+    right:100%;
+    top:50%;
+    width:16px;
+    height:2px;
+    background:linear-gradient(90deg, transparent, var(--teal));
+    opacity:0.5;
+  }
+  .track-caption{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--sea-light);
+    margin-top:6px;
+    font-weight:600;
+    letter-spacing:0.02em;
+  }
+
+  .graph-panel{
+    display:none;
+    margin-top:14px;
+  }
+  .graph-panel.open{
+    display:block;
+  }
+  .track-svg{
+    width:100%;
+    height:auto;
+    display:block;
+  }
+  .graph-caption{
+    font-size:11px;
+    color:var(--sea-light);
+    text-align:right;
+    margin-top:4px;
+    font-weight:600;
+    letter-spacing:0.02em;
+  }
+
+  footer{
+    font-size:11.5px;
+    color:var(--sea-light);
+    text-align:center;
+    margin-top:6px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Acceleration Simulator</h1>
+  <p class="subtitle">Speed from rest &middot; v = a &times; t</p>
+
+  <div class="panel">
+    <div class="control">
+      <div class="control-head">
+        <span class="control-label">Acceleration</span>
+        <span class="control-value" id="aVal">2.0 m/s&sup2;</span>
+      </div>
+      <input type="range" id="aSlider" min="0.5" max="6" step="0.1" value="2">
+    </div>
+
+    <div class="control">
+      <div class="control-head">
+        <span class="control-label">Point in the journey (time)</span>
+        <span class="control-value" id="tVal">4.0 s</span>
+      </div>
+      <input type="range" id="tSlider" min="0" max="20" step="0.1" value="4">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="playBtn">&#9654; Play journey</button>
+      <button class="btn-secondary" id="resetBtn">Reset</button>
+      <button class="btn-ghost" id="graphBtn">Show speed&ndash;time graph</button>
+    </div>
+  </div>
+
+  <div class="readout">
+    <div>
+      <span class="big" id="speedVal">8.0</span><span class="unit">m/s</span>
+    </div>
+    <div class="desc">Speed after <b id="descT">4.0 s</b> at <b id="descA">2.0 m/s&sup2;</b> acceleration, starting from rest.</div>
+  </div>
+
+  <div class="panel">
+    <div class="track-outer">
+      <div class="track-line">
+        <div class="track-flag"></div>
+        <div class="track-box" id="trackBox">&#9658;</div>
+      </div>
+      <div class="track-caption">
+        <span>start (t = 0 s)</span>
+        <span>journey up to t = 20 s</span>
+      </div>
+    </div>
+
+    <div class="graph-panel" id="graphPanel">
+      <svg class="track-svg" id="graphSvg" viewBox="0 0 700 300"></svg>
+      <div class="graph-caption">speed&ndash;time graph</div>
+    </div>
+  </div>
+
+  <footer>Drag the sliders to inspect any point, or press Play to watch the object speed up.</footer>
+</div>
+
+<script>
+(function(){
+  const aSlider = document.getElementById('aSlider');
+  const tSlider = document.getElementById('tSlider');
+  const aVal = document.getElementById('aVal');
+  const tVal = document.getElementById('tVal');
+  const speedVal = document.getElementById('speedVal');
+  const descT = document.getElementById('descT');
+  const descA = document.getElementById('descA');
+  const svg = document.getElementById('graphSvg');
+  const trackBox = document.getElementById('trackBox');
+  const trackLine = document.querySelector('.track-line');
+  const playBtn = document.getElementById('playBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const graphBtn = document.getElementById('graphBtn');
+  const graphPanel = document.getElementById('graphPanel');
+
+  const T_MAX = 20;       // fixed x-axis / journey range (s)
+  const A_MAX = 6;        // matches slider max
+  const REF_DIST = 0.5 * A_MAX * T_MAX * T_MAX; // reference distance for track scaling (m)
+  const BOX_W = 44;
+
+  const PAD_L = 56, PAD_R = 24, PAD_T = 20, PAD_B = 40;
+  const W = 700, H = 300;
+  const plotW = W - PAD_L - PAD_R;
+  const plotH = H - PAD_T - PAD_B;
+
+  let playing = false;
+  let rafId = null;
+  const REAL_DURATION = 6000; // ms — fixed real-time length of the "Play" animation
+
+  function fmt(n){
+    return (Math.round(n * 10) / 10).toFixed(1);
+  }
+
+  function distanceAt(a, t){
+    return 0.5 * a * t * t;
+  }
+
+  function positionBox(a, t){
+    const trackW = trackLine.clientWidth;
+    const usableW = trackW - BOX_W - 6;
+    const s = distanceAt(a, t);
+    const frac = Math.min(1, s / REF_DIST);
+    const left = 3 + frac * usableW;
+    trackBox.style.left = left + 'px';
+  }
+
+  function renderGraph(a, t){
+    const v = a * t;
+    const vMaxLine = a * T_MAX;
+    const yMax = Math.max(5, Math.ceil((vMaxLine * 1.15) / 5) * 5);
+
+    function x(tt){ return PAD_L + (tt / T_MAX) * plotW; }
+    function y(vv){ return PAD_T + plotH - (vv / yMax) * plotH; }
+
+    let p = [];
+    p.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#ffffff"/>');
+
+    const ySteps = 5;
+    for(let i=0;i<=ySteps;i++){
+      const gv = (yMax/ySteps)*i;
+      const gy = y(gv);
+      p.push('<line x1="'+PAD_L+'" y1="'+gy+'" x2="'+(W-PAD_R)+'" y2="'+gy+'" stroke="#e9e2d0" stroke-width="1"/>');
+      p.push('<text x="'+(PAD_L-10)+'" y="'+(gy+4)+'" font-size="11" fill="#3a5a8c" text-anchor="end" font-family="Segoe UI, Arial, sans-serif">'+Math.round(gv)+'</text>');
+    }
+
+    const xSteps = 10;
+    for(let i=0;i<=xSteps;i++){
+      const gt = (T_MAX/xSteps)*i;
+      const gx = x(gt);
+      p.push('<line x1="'+gx+'" y1="'+PAD_T+'" x2="'+gx+'" y2="'+(H-PAD_B)+'" stroke="#f2ece0" stroke-width="1"/>');
+      if(i % 2 === 0){
+        p.push('<text x="'+gx+'" y="'+(H-PAD_B+18)+'" font-size="11" fill="#3a5a8c" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif">'+Math.round(gt)+'</text>');
+      }
+    }
+
+    p.push('<line x1="'+PAD_L+'" y1="'+PAD_T+'" x2="'+PAD_L+'" y2="'+(H-PAD_B)+'" stroke="#0f2540" stroke-width="1.5"/>');
+    p.push('<line x1="'+PAD_L+'" y1="'+(H-PAD_B)+'" x2="'+(W-PAD_R)+'" y2="'+(H-PAD_B)+'" stroke="#0f2540" stroke-width="1.5"/>');
+
+    p.push('<text x="'+(PAD_L + plotW/2)+'" y="'+(H-6)+'" font-size="12" fill="#0f2540" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="600">time (s)</text>');
+    p.push('<text x="16" y="'+(PAD_T + plotH/2)+'" font-size="12" fill="#0f2540" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="600" transform="rotate(-90 16 '+(PAD_T + plotH/2)+')">speed (m/s)</text>');
+
+    const x0 = x(0), y0 = y(0);
+    const x1 = x(T_MAX), y1 = y(vMaxLine);
+    p.push('<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y1+'" stroke="#2f8f8a" stroke-width="3" stroke-linecap="round"/>');
+
+    const mx = x(t), my = y(v);
+    p.push('<line x1="'+mx+'" y1="'+my+'" x2="'+mx+'" y2="'+(H-PAD_B)+'" stroke="#1f3864" stroke-width="1" stroke-dasharray="4 3"/>');
+    p.push('<line x1="'+PAD_L+'" y1="'+my+'" x2="'+mx+'" y2="'+my+'" stroke="#1f3864" stroke-width="1" stroke-dasharray="4 3"/>');
+    p.push('<circle cx="'+mx+'" cy="'+my+'" r="6.5" fill="#1f3864" stroke="#ffffff" stroke-width="2"/>');
+
+    svg.setAttribute('viewBox', '0 0 '+W+' '+H);
+    svg.innerHTML = p.join('');
+  }
+
+  function render(){
+    const a = parseFloat(aSlider.value);
+    const t = parseFloat(tSlider.value);
+    const v = a * t;
+
+    aVal.textContent = fmt(a) + ' m/s\u00B2';
+    tVal.textContent = fmt(t) + ' s';
+    speedVal.textContent = fmt(v);
+    descT.textContent = fmt(t) + ' s';
+    descA.textContent = fmt(a) + ' m/s\u00B2';
+
+    positionBox(a, t);
+    if(graphPanel.classList.contains('open')){
+      renderGraph(a, t);
+    }
+  }
+
+  function stopPlaying(){
+    playing = false;
+    if(rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    playBtn.innerHTML = '&#9654; Play journey';
+  }
+
+  function play(){
+    if(playing){ stopPlaying(); return; }
+    playing = true;
+    playBtn.innerHTML = '&#10074;&#10074; Pause';
+    const startReal = performance.now();
+
+    function step(now){
+      if(!playing) return;
+      const elapsed = now - startReal;
+      let simT = (elapsed / REAL_DURATION) * T_MAX;
+      if(simT >= T_MAX){
+        simT = T_MAX;
+        tSlider.value = simT;
+        render();
+        stopPlaying();
+        return;
+      }
+      tSlider.value = simT;
+      render();
+      rafId = requestAnimationFrame(step);
+    }
+    rafId = requestAnimationFrame(step);
+  }
+
+  aSlider.addEventListener('input', function(){ stopPlaying(); render(); });
+  tSlider.addEventListener('input', function(){ stopPlaying(); render(); });
+  playBtn.addEventListener('click', play);
+  resetBtn.addEventListener('click', function(){
+    stopPlaying();
+    tSlider.value = 0;
+    render();
+  });
+  graphBtn.addEventListener('click', function(){
+    const open = graphPanel.classList.toggle('open');
+    graphBtn.textContent = open ? 'Hide speed\u2013time graph' : 'Show speed\u2013time graph';
+    if(open) render();
+  });
+
+  window.addEventListener('resize', render);
+
+  render();
+})();
+</script>
+</body>
+</html>

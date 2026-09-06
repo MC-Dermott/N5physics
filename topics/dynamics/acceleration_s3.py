@@ -1,6 +1,17 @@
 import random
+import pathlib
 from utils.make_question import make_question
 from utils.notes import NOTES
+
+_ACCELERATION_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "acceleration_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_acceleration_widget(question):
+    question.metadata["widget_html"] = _ACCELERATION_WIDGET_HTML
+    return question
+
 
 _CONTEXTS = ["car", "cyclist", "runner", "train", "bus", "skateboarder", "motorbike"]
 
@@ -56,9 +67,9 @@ def gen_change_in_speed(level="S3"):
          "working": working},
     ]
     options_data = _dedup(options_data, correct)
-    return make_question(question, correct, options_data, "m/s",
+    return _with_acceleration_widget(make_question(question, correct, options_data, "m/s",
                          notes=NOTES["acceleration_s3"], topic="Dynamics",
-                         question_type="Acceleration", level=level)
+                         question_type="Acceleration", level=level))
 
 
 # ── Level 2 — initial or final speed (v = u + at) ───────────────────────────────
@@ -123,6 +134,6 @@ def gen_initial_final_speed(level="S3"):
         ]
 
     options_data = _dedup(options_data, correct)
-    return make_question(question, correct, options_data, "m/s",
+    return _with_acceleration_widget(make_question(question, correct, options_data, "m/s",
                          notes=NOTES["acceleration_s3"], topic="Dynamics",
-                         question_type="Acceleration", level=level)
+                         question_type="Acceleration", level=level))

@@ -126,6 +126,38 @@ $$A = \\frac{N}{t} = \\frac{3000}{60} = 50\\ \\mathrm{Bq}$$
 > **Important:** One Becquerel = one decay per second. Always convert time to seconds.
 """,
 
+    "vt_graph_distance_s3": """
+## Distance from Speed-Time Graphs
+
+**Warning:** the speed on these graphs keeps changing, so you **cannot** calculate distance
+using distance = speed × time directly. Instead, use the fact that:
+$$\\text{distance travelled} = \\text{area between the line and the time-axis}$$
+
+This area is usually a rectangle, a triangle, or a shape made up of several rectangles and
+triangles added together.
+
+$$\\text{Area of rectangle} = \\text{length} \\times \\text{width} \\qquad
+\\text{Area of triangle} = \\tfrac{1}{2} \\times \\text{base} \\times \\text{height}$$
+
+**Worked Example (simple triangle):** A(0, 0), B(4, 8) — speeding up from rest.
+$$\\text{distance} = \\tfrac{1}{2} \\times 4 \\times 8 = 16\\ \\mathrm{m}$$
+
+**Worked Example (trapezium):** A(0, 4), B(6, 12).
+- Rectangle: base = 6, height = 4 → 6 × 4 = 24
+- Triangle: base = 6, height = 12 − 4 = 8 → ½ × 6 × 8 = 24
+$$\\text{distance} = 24 + 24 = 48\\ \\mathrm{m}$$
+
+**Worked Example (compound):** A(0, 0), B(3, 12), C(7, 12), D(10, 0).
+- Triangle AB = ½ × 3 × 12 = 18
+- Rectangle BC = 4 × 12 = 48
+- Triangle CD = ½ × 3 × 12 = 18
+$$\\text{distance} = 18 + 48 + 18 = 84\\ \\mathrm{m}$$
+
+> **Important:** If the graph doesn't start at t = 0, always use the *time interval* between
+> the two points (e.g. B's time minus A's time) as the base — not just the end time on its own.
+> Split any compound shape into rectangles and triangles first, then add every section together.
+""",
+
     "instantaneous_speed_s3": """
 ## Instantaneous Speed — using a light gate
 
