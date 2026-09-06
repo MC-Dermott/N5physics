@@ -66,7 +66,7 @@ def _render_single(question, user_id, qualification):
     is_classification = q_type == "classification"
     is_graph_mcq = q_type == "graph_mcq"
 
-    if is_graph_mcq:
+    if question.metadata.get("main_figure") is not None:
         render_main_graph(question)
         st.write("")
 

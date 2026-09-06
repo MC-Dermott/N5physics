@@ -82,9 +82,11 @@ def _render_single_test(test, idx, question):
     is_classification = q_type == "classification"
     is_graph_mcq = q_type == "graph_mcq"
 
-    if is_graph_mcq:
+    if question.metadata.get("main_figure") is not None:
         render_main_graph(question, key_suffix=f"_test_{idx}")
         st.write("")
+
+    if is_graph_mcq:
         render_option_grid(question, key_prefix=f"test_{idx}")
         labels = question.metadata.get("options", [])
         selected = st.radio("Select your answer:", labels,
