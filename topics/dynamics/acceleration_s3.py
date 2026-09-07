@@ -72,16 +72,94 @@ def gen_change_in_speed(level="S3"):
                          question_type="Acceleration", level=level))
 
 
+# ── Level 1b — calculating acceleration itself (a = (v - u) / t) ────────────────
+
+def gen_calculate_acceleration(level="S3"):
+    obj = random.choice(_CONTEXTS)
+    a_true = random.choice(_ACCELS)
+    t = random.randint(2, 10)
+    if a_true >= 0:
+        u = random.randint(1, 15)
+    else:
+        # keep v = u + a_true*t non-negative: u must be at least |a_true|*t
+        u = random.randint(abs(a_true) * t, abs(a_true) * t + 15)
+    v = u + a_true * t
+    correct = a_true
+
+    question = (
+        f"A {obj} changes speed from {u} m/s to {v} m/s in {t} s.\n\n"
+        f"Calculate its acceleration."
+    )
+    working = [
+        {"type": "text",  "content": "Use a = (v − u) ÷ t:"},
+        {"type": "latex", "content": r"a = \frac{v - u}{t}"},
+        {"type": "latex", "content": rf"a = \frac{{{v} - {u}}}{{{t}}}"},
+        {"type": "latex", "content": rf"a = {correct}\ \mathrm{{m/s^2}}"},
+    ]
+    options_data = [
+        {"value": correct, "mistake": None, "working": working},
+        {"value": -correct,
+         "mistake": "You calculated (u − v) ÷ t instead of (v − u) ÷ t — check which speed comes first.",
+         "working": working},
+        {"value": v - u,
+         "mistake": "You found the change in speed (v − u) but forgot to divide by the time.",
+         "working": working},
+        {"value": round(v / t, 2),
+         "mistake": "Use a = (v − u) ÷ t — divide the change in speed by time, not just v by t.",
+         "working": working},
+    ]
+    options_data = _dedup(options_data, correct)
+    return _with_acceleration_widget(make_question(question, correct, options_data, "m/s²",
+                         notes=NOTES["acceleration_s3"], topic="Dynamics",
+                         question_type="Acceleration", level=level))
+
+
+# ── Level 1c — calculating time from a and Δv (t = Δv / a) ──────────────────────
+
+def gen_calculate_time(level="S3"):
+    obj = random.choice(_CONTEXTS)
+    a = random.choice([1.5, 2, 2.5, 3, 4, 5, 6])
+    t_true = random.randint(2, 10)
+    delta_v = round(a * t_true, 2)
+    correct = t_true
+
+    question = (
+        f"A {obj} accelerates at {a} m/s². Its speed changes by {delta_v} m/s.\n\n"
+        f"Calculate how long this takes."
+    )
+    working = [
+        {"type": "text",  "content": "Rearrange a = Δv ÷ t for t:"},
+        {"type": "latex", "content": r"t = \frac{\Delta v}{a}"},
+        {"type": "latex", "content": rf"t = \frac{{{delta_v}}}{{{a}}}"},
+        {"type": "latex", "content": rf"t = {correct}\ \mathrm{{s}}"},
+    ]
+    options_data = [
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round(delta_v * a, 2),
+         "mistake": "You multiplied Δv by a instead of dividing. t = Δv ÷ a.",
+         "working": working},
+        {"value": round(a / delta_v, 4) if delta_v else 0,
+         "mistake": "You divided a by Δv instead of Δv by a. t = Δv ÷ a.",
+         "working": working},
+    ]
+    options_data = _dedup(options_data, correct)
+    return _with_acceleration_widget(make_question(question, correct, options_data, "s",
+                         notes=NOTES["acceleration_s3"], topic="Dynamics",
+                         question_type="Acceleration", level=level))
+
+
 # ── Level 2 — initial or final speed (v = u + at) ───────────────────────────────
 
 def gen_initial_final_speed(level="S3"):
     a = random.choice(_ACCELS)
-    t = random.randint(2, 10)
-    u = random.randint(0, 30)
-    v = round(u + a * t, 2)
-    while v < 0:
+    if a >= 0:
+        t = random.randint(2, 10)
         u = random.randint(0, 30)
-        v = round(u + a * t, 2)
+    else:
+        # keep v = u + a*t non-negative: cap t so that even u = 30 can cover it
+        t = random.randint(2, max(2, min(10, 30 // abs(a))))
+        u = random.randint(abs(a) * t, 30)
+    v = round(u + a * t, 2)
     obj = random.choice(_CONTEXTS)
 
     if random.choice([True, False]):

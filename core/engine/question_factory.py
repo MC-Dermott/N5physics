@@ -2,7 +2,12 @@ import random
 
 from topics.dynamics.speed_distance_time   import generate_sdt
 from topics.dynamics.acceleration          import generate_acceleration
-from topics.dynamics.acceleration_s3       import gen_change_in_speed, gen_initial_final_speed
+from topics.dynamics.acceleration_s3       import (
+    gen_change_in_speed,
+    gen_initial_final_speed,
+    gen_calculate_acceleration,
+    gen_calculate_time,
+)
 from topics.dynamics.instantaneous_speed_s3 import gen_instantaneous_speed, gen_average_speed_light_gate
 from topics.dynamics.vt_graph_distance_s3   import (
     gen_vt_distance_simple,
@@ -123,8 +128,10 @@ QUAL_REGISTRY = {
         "Dynamics": {
             "Speed, Distance & Time": generate_sdt,
             "Acceleration": {
-                "Change in Speed":         gen_change_in_speed,
-                "Initial & Final Speed":   gen_initial_final_speed,
+                "Calculating Acceleration": gen_calculate_acceleration,
+                "Calculating Time":         gen_calculate_time,
+                "Change in Speed":          gen_change_in_speed,
+                "Initial & Final Speed":    gen_initial_final_speed,
             },
             "Instantaneous Speed": {
                 "Instantaneous Speed at a Point": gen_instantaneous_speed,
