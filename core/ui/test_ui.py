@@ -167,7 +167,9 @@ def _render_scenario_test(test, idx, question):
     st.markdown(f"**Part {part_idx + 1} of {len(scored_parts)}:** {part.question_text}")
     st.write("")
 
-    is_classification = part.metadata.get("type") == "classification"
+    part_type = part.metadata.get("type")
+    is_graph_mcq = part_type == "graph_mcq"
+    is_classification = part_type == "classification" or is_graph_mcq
 
     def _advance(display_answer, result, distractor, part):
         st.session_state[part_answers_key].append((display_answer, result, distractor, part))
@@ -187,9 +189,15 @@ def _render_scenario_test(test, idx, question):
             st.rerun()
 
     if is_classification:
+        if is_graph_mcq:
+            if part.metadata.get("main_figure") is not None:
+                render_main_graph(part, key_suffix=f"_test_{idx}_p{part_idx}")
+                st.write("")
+            render_option_grid(part, key_prefix=f"test_{idx}_p{part_idx}")
         options = part.metadata.get("options", [])
         selected = st.radio("Select your answer:", options,
-                            key=f"test_radio_{idx}_p{part_idx}", index=None)
+                            key=f"test_radio_{idx}_p{part_idx}", index=None,
+                            horizontal=is_graph_mcq)
         if st.button("Submit", key=f"test_submit_{idx}_p{part_idx}", type="primary"):
             if selected is not None:
                 result, distractor = _check_classification(selected, part)

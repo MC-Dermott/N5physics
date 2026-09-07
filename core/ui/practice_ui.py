@@ -152,7 +152,8 @@ def _render_scenario(question, user_id, qualification):
         part_submitted_key = f"sub_{question.qid}_part{i}"
         part_type = part.metadata.get("type")
         is_explain = part_type == "explain"
-        is_classification = part_type == "classification"
+        is_graph_mcq = part_type == "graph_mcq"
+        is_classification = part_type == "classification" or is_graph_mcq
 
         unlocked = i == 0 or st.session_state.get(f"sub_{question.qid}_part{i - 1}")
         not_submitted = not st.session_state.get(part_submitted_key)
@@ -171,9 +172,15 @@ def _render_scenario(question, user_id, qualification):
                 if is_explain:
                     _render_explain_part(question, i, part_submitted_key)
                 elif is_classification:
+                    if is_graph_mcq:
+                        if part.metadata.get("main_figure") is not None:
+                            render_main_graph(part, key_suffix=f"_part{i}")
+                            st.write("")
+                        render_option_grid(part, key_prefix=f"practice_{question.qid}_part{i}")
                     options = part.metadata.get("options", [])
                     selected = st.radio("Select your answer:", options,
-                                        key=f"radio_{question.qid}_part{i}", index=None)
+                                        key=f"radio_{question.qid}_part{i}", index=None,
+                                        horizontal=is_graph_mcq)
                     if st.button(f"Submit Part {i + 1}", key=f"submit_{question.qid}_part{i}", type="primary"):
                         if selected is not None:
                             st.session_state[part_submitted_key] = selected
@@ -206,6 +213,8 @@ def _render_scenario(question, user_id, qualification):
                 result, distractor = st.session_state.get(
                     f"result_{question.qid}_part{i}", ("incorrect", None))
                 render_feedback(result, distractor, part, show_working=True)
+                if is_graph_mcq and result != "correct":
+                    render_correct_option(part, key_suffix=f"_part{i}")
 
         if i < len(question.parts) - 1:
             st.divider()
