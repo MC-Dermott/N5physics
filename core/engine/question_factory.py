@@ -186,9 +186,11 @@ QUAL_REGISTRY = {
             "Speed and Velocity": {
                 "From a Compound Displacement": gen_speed_velocity_from_displacement,
                 "Resultant Velocity": generate_resultant_velocity,
-                "Which v-t Graph Matches?": gen_which_graph_matches,
-                "v-t Graphs — Distance and Displacement": gen_distance_displacement,
-                "v-t Graphs — Acceleration from an Interval": gen_acceleration_interval,
+            },
+            "Velocity-Time Graphs": {
+                "Which Graph Matches?": gen_which_graph_matches,
+                "Distance and Displacement": gen_distance_displacement,
+                "Acceleration from an Interval": gen_acceleration_interval,
             },
         },
         "Electricity": {

@@ -167,8 +167,8 @@ def render_teacher_report(_qualification=None):
                 .round(0).astype(int).astype(str) + "%"
             )
             summary = summary.rename(columns={
-                "qualification": "Qual", "topic": "Topic",
-                "question_type": "Question type", "attempts": "Attempts",
+                "qualification": "Qual", "topic": "Unit",
+                "question_type": "Topic", "attempts": "Attempts",
             }).drop(columns=["correct"])
             st.dataframe(summary, use_container_width=True, hide_index=True)
         else:
@@ -181,9 +181,9 @@ def render_teacher_report(_qualification=None):
             tdf["Score"] = tdf["score"].astype(str) + " / " + tdf["total"].astype(str)
             tdf["Date"] = pd.to_datetime(tdf["taken_at"]).dt.strftime("%d %b %Y %H:%M")
             tdf = tdf.rename(columns={
-                "qualification": "Qual", "topic": "Topic",
-                "question_type": "Question type",
-            })[["Date", "Qual", "Topic", "Question type", "Score"]]
+                "qualification": "Qual", "topic": "Unit",
+                "question_type": "Topic",
+            })[["Date", "Qual", "Unit", "Topic", "Score"]]
             st.dataframe(tdf, use_container_width=True, hide_index=True)
         else:
             st.info("No tests taken yet.")
@@ -214,8 +214,8 @@ def render_teacher_report(_qualification=None):
         if mc:
             mrows = [
                 {
-                    "Topic": t,
-                    "Question Type": qt,
+                    "Unit": t,
+                    "Topic": qt,
                     "Mistake": m,
                     "Times made": s["times"],
                     "Students affected": len(s["students"]),

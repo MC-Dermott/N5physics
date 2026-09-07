@@ -134,14 +134,14 @@ def gen_which_graph_matches(level="N5"):
 
     part = PhysicsQuestion(
         question_text=question_text, correct_answer=correct_label, unit="",
-        topic="Dynamics", question_type="Speed and Velocity", level=level,
+        topic="Dynamics", question_type="Velocity-Time Graphs", level=level,
         distractors=distractors, working=working,
         metadata={"type": "graph_mcq", "options": labels, "option_figures": option_figures},
         notes=_NOTES,
     )
     return PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
-        topic="Dynamics", question_type="Speed and Velocity", level=level,
+        topic="Dynamics", question_type="Velocity-Time Graphs", level=level,
         is_scenario=True, scenario_context="", parts=[part],
     )
 
@@ -196,7 +196,7 @@ def gen_distance_displacement(level="N5"):
             {"question": "What is the total distance travelled?", "answer": total},
         ]
         return make_question(question, total, options_data, "m", scaffold=scaffold,
-                             notes=_NOTES, topic="Dynamics", question_type="Speed and Velocity", level=level)
+                             notes=_NOTES, topic="Dynamics", question_type="Velocity-Time Graphs", level=level)
 
     # --- reversal case: two-part scenario (distance, then displacement) ---
     v0 = random.choice([4, 5, 6, 8])
@@ -226,7 +226,7 @@ def gen_distance_displacement(level="N5"):
     part_a = PhysicsQuestion(
         question_text="Calculate the total distance travelled.",
         correct_answer=distance, unit="m",
-        topic="Dynamics", question_type="Speed and Velocity", level=level,
+        topic="Dynamics", question_type="Velocity-Time Graphs", level=level,
         working=working_dist,
         distractors=[
             {"value": abs(displacement),
@@ -252,7 +252,7 @@ def gen_distance_displacement(level="N5"):
     part_b = PhysicsQuestion(
         question_text="Calculate the total displacement.",
         correct_answer=displacement, unit="m",
-        topic="Dynamics", question_type="Speed and Velocity", level=level,
+        topic="Dynamics", question_type="Velocity-Time Graphs", level=level,
         working=working_disp,
         distractors=[
             {"value": distance,
@@ -274,7 +274,7 @@ def gen_distance_displacement(level="N5"):
 
     return PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
-        topic="Dynamics", question_type="Speed and Velocity", level=level,
+        topic="Dynamics", question_type="Velocity-Time Graphs", level=level,
         is_scenario=True, scenario_context=context, parts=[part_a, part_b],
     )
 
@@ -341,7 +341,7 @@ def gen_acceleration_interval(level="N5"):
         {"question": "What is the acceleration?", "answer": a_answer},
     ]
     return make_question(question, a_answer, options_data, "m/s²", scaffold=scaffold,
-                         notes=_NOTES, topic="Dynamics", question_type="Speed and Velocity", level=level)
+                         notes=_NOTES, topic="Dynamics", question_type="Velocity-Time Graphs", level=level)
 
 
 _ALL_GENS = [

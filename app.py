@@ -175,9 +175,8 @@ if st.session_state.get("mode") != mode:
     reset_assessment()
     st.session_state.quiz = {"current_question": None}
 
-topic_label = "Unit" if qualification == "National 4" else "Topic"
 topics = get_topics(qualification)
-topic  = st.selectbox(topic_label, topics)
+topic  = st.selectbox("Unit", topics)
 
 if st.session_state.get("last_topic") != topic:
     st.session_state.last_topic = topic
@@ -199,10 +198,10 @@ if mode == "Practice Assessment":
 question_types = get_question_types(qualification, topic)
 
 if not question_types:
-    st.info("No questions available for this topic yet — check back soon!")
+    st.info("No questions available for this unit yet — check back soon!")
     st.stop()
 
-question_type  = st.selectbox("Question Type", question_types)
+question_type  = st.selectbox("Topic", question_types)
 
 if st.session_state.get("last_question_type") != question_type:
     st.session_state.last_question_type = question_type
