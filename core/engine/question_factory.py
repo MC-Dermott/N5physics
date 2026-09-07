@@ -19,6 +19,11 @@ from topics.dynamics.weight_calculations_s3 import (
     gen_weight_find_mass,
     gen_weight_same_mass,
 )
+from topics.dynamics.unbalanced_forces_s3   import (
+    gen_horizontal_unbalanced_force,
+    gen_vertical_unbalanced_force,
+    gen_vertical_acceleration,
+)
 from topics.dynamics.forces                import generate_forces
 from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
@@ -151,6 +156,11 @@ QUAL_REGISTRY = {
                 "Calculate Weight": gen_weight_forward,
                 "Calculate Mass":   gen_weight_find_mass,
                 "Mass on a Different Planet": gen_weight_same_mass,
+            },
+            "Unbalanced Forces": {
+                "Horizontal (driving vs friction)": gen_horizontal_unbalanced_force,
+                "Vertical — Unbalanced Force (with weight)": gen_vertical_unbalanced_force,
+                "Vertical — Acceleration (with weight)":     gen_vertical_acceleration,
             },
         },
         "Waves": {

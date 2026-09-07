@@ -3,6 +3,22 @@ from utils.make_question import make_question
 from utils.notes import NOTES
 
 
+def _dedup(options_data, correct):
+    """Remove distractor entries whose value equals the correct answer or another distractor."""
+    seen = {round(float(correct), 4)}
+    cleaned = []
+    for opt in options_data:
+        key = round(float(opt["value"]), 4)
+        if key not in seen:
+            seen.add(key)
+            cleaned.append(opt)
+        elif opt["mistake"] is None:
+            cleaned.insert(0, opt)
+    if not any(opt["mistake"] is None for opt in cleaned):
+        cleaned.insert(0, {"value": correct, "mistake": None, "working": []})
+    return cleaned
+
+
 def _friction_working(mass, driving_force, accel, answer):
     resultant = mass * accel
     return [
@@ -64,6 +80,7 @@ def gen_missing_friction(level="N5"):
         {"value": driving_force + resultant,     "summary": "Incorrect.", "mistake": "You added the unbalanced force and driving force. Friction = driving force − unbalanced force.", "working": working},
         {"value": abs(resultant - driving_force),"summary": "Incorrect.", "mistake": "Check the direction of subtraction. Friction = driving force − unbalanced force.", "working": working},
     ]
+    options_data = _dedup(options_data, correct)
     return make_question(question, correct, options_data, "N",
                          scaffold=[
                              {"question": "Calculate the unbalanced force.", "answer": resultant, "unit": "N"},
@@ -89,6 +106,7 @@ def gen_missing_driving(level="N5"):
         {"value": abs(friction_force - resultant), "summary": "Incorrect.", "mistake": "You subtracted instead of adding. Driving force = unbalanced force + friction.", "working": working},
         {"value": friction_force,               "summary": "Incorrect.", "mistake": "This is only the friction, not the driving force.", "working": working},
     ]
+    options_data = _dedup(options_data, correct)
     return make_question(question, correct, options_data, "N",
                          scaffold=[
                              {"question": "Calculate the unbalanced force.", "answer": resultant, "unit": "N"},
@@ -114,6 +132,7 @@ def gen_missing_acceleration(level="N5"):
         {"value": round(friction_force / mass, 2),      "summary": "Incorrect.", "mistake": "Remember to work out the unbalanced force first before dividing by mass.", "working": working},
         {"value": round((driving_force + friction_force) / mass, 2), "summary": "Incorrect.", "mistake": "The unbalanced force is the DIFFERENCE between driving force and friction, not the sum.", "working": working},
     ]
+    options_data = _dedup(options_data, correct)
     return make_question(question, correct, options_data, "m/s²",
                          scaffold=[
                              {"question": "Calculate the unbalanced force.", "answer": resultant, "unit": "N"},

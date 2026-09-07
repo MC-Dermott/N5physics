@@ -158,6 +158,30 @@ $$\\text{distance} = 18 + 48 + 18 = 84\\ \\mathrm{m}$$
 > Split any compound shape into rectangles and triangles first, then add every section together.
 """,
 
+    "unbalanced_forces_s3": """
+## Unbalanced (Resultant) Forces
+
+**Definition:** When forces on an object don't cancel out, there's an **unbalanced
+(resultant) force** — this causes the object to accelerate. If the forces are balanced,
+the object moves at a constant velocity (or stays at rest) — Newton's First Law.
+
+**Key equations:**
+$$F_{\\text{unbalanced}} = F_{\\text{applied}} - F_{\\text{opposing}} \\qquad F = ma$$
+
+For an object launching or lifting **vertically**, the opposing force is its own weight:
+$$F_{\\text{unbalanced}} = F_{\\text{applied}} - W \\qquad \\text{where } W = mg$$
+
+**Worked Example:** A 500 kg rocket's engines produce 6000 N of thrust.
+$$W = mg = 500 \\times 9.8 = 4900\\ \\mathrm{N}$$
+$$F_{\\text{unbalanced}} = 6000 - 4900 = 1100\\ \\mathrm{N}$$
+$$a = \\frac{F_{\\text{unbalanced}}}{m} = \\frac{1100}{500} = 2.2\\ \\mathrm{m/s^2}$$
+
+> **Important:** Always find the weight first (using the object's mass) before you can
+> find the unbalanced force — the applied force alone is not the answer. If the applied
+> force and weight are equal, the unbalanced force is zero and the object does not
+> accelerate.
+""",
+
     "weight_calculations_s3": """
 ## Weight Calculations — $W = mg$
 
