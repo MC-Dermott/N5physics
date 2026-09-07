@@ -1,10 +1,24 @@
+import time
+from pathlib import Path
+
 import streamlit as st
+import streamlit.components.v1 as components
 
 from core.engine.session_manager import reset_test
 from core.ui.feedback_ui import check_answer, render_feedback, render_working
 from core.ui.graph_mcq_ui import render_main_graph, render_option_grid
 
 _NUM_QUESTIONS = 5
+
+_GAME_HTML_PATH = Path(__file__).parent / "assets" / "geometry_dash.html"
+_game_html_cache = None
+
+
+def _load_game_html():
+    global _game_html_cache
+    if _game_html_cache is None:
+        _game_html_cache = _GAME_HTML_PATH.read_text(encoding="utf-8")
+    return _game_html_cache
 
 
 def render_test(topic, question_type, qualification, generate_fn, user_id=None):
@@ -44,6 +58,8 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None):
                     user_id, qualification, q.topic, q.question_type, correct, mistake
                 )
             test["saved"] = True
+        if sum(test["results"]) == _NUM_QUESTIONS and "game_unlock_time" not in test:
+            test["game_unlock_time"] = time.time()
         _render_summary(test)
         if st.button("Start New Test", type="primary"):
             reset_test()
@@ -223,6 +239,43 @@ def _render_scenario_test(test, idx, question):
             _advance(display_answer, result, distractor, part)
 
 
+def _render_game_reward(test):
+    """5/5 unlocks a 60-second play of the bespoke Geometry Dash reward game."""
+    remaining = max(0, 60 - int(time.time() - test.get("game_unlock_time", time.time())))
+    if remaining <= 0:
+        st.info("Time's up! Start a new test to keep practising.")
+        return
+
+    timer_block = f"""
+        <div id="n5-timer-text" style="font-family:sans-serif;text-align:center;color:#eaeaea;margin:6px 0 0;">
+            ⏱ Game available for <span id="n5-secs">{remaining}</span> seconds
+        </div>
+        <script>
+        (function() {{
+            var s = {remaining};
+            var secsEl = document.getElementById('n5-secs');
+            var timerText = document.getElementById('n5-timer-text');
+            var wrap = document.getElementById('wrap');
+            var iv = setInterval(function() {{
+                s--;
+                if (secsEl) secsEl.textContent = s;
+                if (s <= 0) {{
+                    clearInterval(iv);
+                    if (window.n5StopGame) window.n5StopGame();
+                    wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;' +
+                        'min-height:380px;background:rgba(10,10,20,0.97);color:#fff;font-family:sans-serif;' +
+                        'font-size:1.1em;text-align:center;border-radius:8px;padding:20px;">' +
+                        "Time's up! Pick another set of questions to play again." + '</div>';
+                    timerText.style.display = 'none';
+                }}
+            }}, 1000);
+        }})();
+        </script>
+    </body>"""
+    game_page = _load_game_html().replace("</body>", timer_block)
+    components.html(game_page, height=460, scrolling=False)
+
+
 def _render_summary(test):
     score = sum(test["results"])
     total = len(test["results"])
@@ -230,6 +283,7 @@ def _render_summary(test):
     st.markdown(f"## Result: {score} / {total}")
     if score == total:
         st.success("Perfect score! Excellent work!")
+        _render_game_reward(test)
     elif score >= total * 0.6:
         st.info(f"Good effort — {score} out of {total} correct.")
     else:
