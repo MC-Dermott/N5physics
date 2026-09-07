@@ -158,6 +158,34 @@ $$\\text{distance} = 18 + 48 + 18 = 84\\ \\mathrm{m}$$
 > Split any compound shape into rectangles and triangles first, then add every section together.
 """,
 
+    "weight_calculations_s3": """
+## Weight Calculations — $W = mg$
+
+**Definitions:**
+- **Mass** is the amount of matter in an object, measured in kg. It does **not** change
+  with location.
+- **Weight** is the force of gravity on an object, measured in N. It **does** change with
+  location, because it depends on $g$ (gravitational field strength), which is different
+  on every planet.
+
+**Key equation:**
+$$W = mg$$
+
+| Symbol | Quantity | Unit |
+|---|---|---|
+| W | Weight | N |
+| m | Mass | kg |
+| g | Gravitational field strength | N/kg |
+
+**Rearrangement:** $$m = \\frac{W}{g}$$
+
+**Worked Example:** An object has a mass of 10 kg on Earth (g = 9.8 N/kg).
+$$W = mg = 10 \\times 9.8 = 98\\ \\mathrm{N}$$
+
+> **Important:** An object's *mass* is the same on every planet — only its *weight*
+> changes, because $g$ is different. Never assume mass changes when the location changes.
+""",
+
     "instantaneous_speed_s3": """
 ## Instantaneous Speed — using a light gate
 

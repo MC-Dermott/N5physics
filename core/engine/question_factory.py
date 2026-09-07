@@ -14,6 +14,11 @@ from topics.dynamics.vt_graph_distance_s3   import (
     gen_vt_distance_trapezium,
     gen_vt_distance_compound,
 )
+from topics.dynamics.weight_calculations_s3 import (
+    gen_weight_forward,
+    gen_weight_find_mass,
+    gen_weight_same_mass,
+)
 from topics.dynamics.forces                import generate_forces
 from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
@@ -141,6 +146,11 @@ QUAL_REGISTRY = {
                 "Distance — Simple Shapes":    gen_vt_distance_simple,
                 "Distance — Trapezium Shapes": gen_vt_distance_trapezium,
                 "Distance — Compound Graphs":  gen_vt_distance_compound,
+            },
+            "Weight Calculations": {
+                "Calculate Weight": gen_weight_forward,
+                "Calculate Mass":   gen_weight_find_mass,
+                "Mass on a Different Planet": gen_weight_same_mass,
             },
         },
         "Waves": {
