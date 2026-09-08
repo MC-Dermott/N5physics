@@ -25,14 +25,6 @@ $$E_k = \\frac{1}{2}mv^2$$
 | t | Time | s |
 | $E_k$ | Kinetic energy | J |
 
-**Worked Example (collision, objects separate):** A trolley of mass 0.50 kg moving at
-1.5 m/s (right, positive) collides with a trolley of mass 0.30 kg moving at 1.0 m/s to the
-left. After the collision the first trolley rebounds at 0.30 m/s to the left. Calculate the
-velocity of the second trolley.
-$$m_1u_1 + m_2u_2 = m_1v_1 + m_2v_2$$
-$$(0.50 \\times 1.5) + (0.30 \\times -1.0) = (0.50 \\times -0.30) + (0.30 \\times v_2)$$
-$$0.75 - 0.30 = -0.15 + 0.30v_2 \\implies v_2 = 2.0\\ \\mathrm{m/s}$$
-
 > **Important:** Total momentum before a collision or explosion always equals total
 > momentum after, provided no external forces act. Always state which direction is positive
 > before substituting — a velocity in the opposite direction must be entered as negative.

@@ -28,12 +28,6 @@ $$T = m_{\\text{behind}} \\times a + F_{\\text{friction (behind)}}$$
 > **Important:** The acceleration is always the same for every part of the system (they move
 > together). But the tension in each tow bar is different — it only has to accelerate the
 > mass **behind** it, not the whole system.
-
-**Worked Example:** A 1000 kg car tows a single 250 kg trailer with a driving force of 2500 N
-and no friction.
-$$a = \\frac{F}{m_{\\text{total}}} = \\frac{2500}{1000 + 250} = 2\\ \\mathrm{m/s^2}$$
-Considering the trailer alone (only the tension T acts on it):
-$$T = m_{\\text{trailer}} \\times a = 250 \\times 2 = 500\\ \\mathrm{N}$$
 """
 
 _CONTEXTS = ["car", "jeep", "tractor", "van", "4x4"]

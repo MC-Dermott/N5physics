@@ -18,18 +18,6 @@ _NOTES = """
   *instantly* at each bounce — the graph jumps straight from a negative to a smaller
   positive velocity, without passing smoothly through zero.
 
-**Worked Example (distance & displacement):** A car accelerates from rest to 8 m/s over
-4 s, then brakes and reverses, reaching −4 m/s after a further 4 s.
-- Stage 1 (triangle) = ½ × 4 × 8 = 16 m
-- Stage 2 crosses zero at t = 6.67 s: forward part ≈ ½ × 2.67 × 8 = 10.7 m; reverse part ≈
-  ½ × 1.33 × 4 = 2.7 m
-- Distance ≈ 16 + 10.7 + 2.7 = 29.3 m          Displacement ≈ 16 + 10.7 − 2.7 = 24.0 m
-
-**Worked Example (acceleration over an interval):** A graph shows a vehicle's velocity
-rising steadily from 0 to 20 m/s over the first 10 s. Between t = 2 s and t = 8 s:
-at t = 2 s, v = 4 m/s; at t = 8 s, v = 16 m/s.
-$$a = \\frac{16 - 4}{8 - 2} = 2\\ \\mathrm{m/s^2}$$
-
 > **Common exam trap:** distance is the *area*, not a single velocity value read off
 > the graph — always check whether the shape under the line is a rectangle, triangle,
 > or trapezium, and whether any part of it lies below the time axis.

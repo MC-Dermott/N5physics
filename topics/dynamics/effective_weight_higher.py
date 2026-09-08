@@ -36,16 +36,6 @@ object is *speeding up* or *slowing down*:
 - Speeding up while moving up, or slowing down while moving down → acceleration is **upwards**.
 - Speeding up while moving down, or slowing down while moving up → acceleration is **downwards**.
 
-**Worked Example:** A person of mass 70 kg stands on bathroom scales inside a lift. The lift
-is moving upwards but slowing down at a rate of 1.5 m/s². Calculate the reading R on the
-scales.
-
-The lift moves upwards but is slowing down, so its acceleration acts downwards — the reading
-R is less than the weight W.
-$$mg - R = ma$$
-$$(70 \\times 9.8) - R = 70 \\times 1.5$$
-$$R = 686 - 105 = 581\\ \\mathrm{N}$$
-
 > **Important:** The same physics applies beyond lifts — a crane cable's tension, a rocket's
 > thrust, or the force a drone's platform exerts on a parcel all follow the same F = ma / W = mg
 > reasoning. In true free fall, the only force acting is gravity, so a supporting force reads 0 N.

@@ -443,10 +443,6 @@ path travelled (simple addition), but the *displacement* is the straight-line
 distance from start to finish (found with Pythagoras' theorem for two
 perpendicular legs).
 
-**Worked Example:** A hiker walks 400 m north, then 300 m east, taking 50 s.
-- Total distance = 400 + 300 = 700 m, so speed = 700 ÷ 50 = 14 m/s
-- Resultant displacement = √(400² + 300²) = 500 m, so velocity = 500 ÷ 50 = 10 m/s
-
 > **Common exam trap:** speed is always greater than (or equal to) the magnitude of
 > velocity for the same journey, since the straight-line displacement can never be
 > longer than the path actually walked.
@@ -546,13 +542,6 @@ velocity is the vector sum (resultant) of the two.
   into account (opposite directions are opposite signs).
 - For velocities **at an angle to each other**, combine them using Pythagoras' theorem
   (and trigonometry for the direction), just as with any two perpendicular vectors.
-
-**Worked Example (same line):** A train travels at 25 m/s. A passenger walks towards the
-front of the train at 1.5 m/s. Resultant velocity = 25 + 1.5 = 26.5 m/s.
-
-**Worked Example (at an angle):** A boat's engine gives it 3.0 m/s directly across a
-river. The current flows at 4.0 m/s along the river. Resultant velocity =
-√(3.0² + 4.0²) = 5.0 m/s, at tan⁻¹(4.0 ÷ 3.0) = 53.1° from straight across.
 
 > **Common exam trap:** if the two velocities act in *opposite* directions along the same
 > line, they're found by *subtracting* one from the other, not adding them.

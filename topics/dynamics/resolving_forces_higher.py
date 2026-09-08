@@ -355,10 +355,6 @@ the object.
 | Fx, W∥ | Component parallel to the reference direction | N |
 | Fy, W⊥ | Component perpendicular to the reference direction | N |
 
-**Worked Example:** A force of 50 N acts at 40° above the horizontal. Resolve it into
-horizontal and vertical components.
-$$F_x = 50\\cos40° = 38.3\\ \\mathrm{N} \\qquad F_y = 50\\sin40° = 32.1\\ \\mathrm{N}$$
-
 ![Resolving a force into components](data:image/png;base64,%%COMPONENTS_DIAGRAM%%)
 
 > **Important:** Always check which angle is given — the angle to the horizontal, or the

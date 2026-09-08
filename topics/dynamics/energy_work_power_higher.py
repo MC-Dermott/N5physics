@@ -32,12 +32,6 @@ $$P = \\frac{E}{t}$$
 | E | Energy transferred | J |
 | t | Time | s |
 
-**Worked Example (conservation of energy):** A skateboarder of mass 55 kg starts from rest
-at the top of a ramp of height 2.0 m. She reaches 5.5 m/s at the bottom, having travelled
-8.0 m along the ramp. Calculate the average frictional force acting on her.
-$$E_p = mgh = 55 \\times 9.8 \\times 2.0 = 1078\\ \\mathrm{J} \\qquad E_k = \\tfrac{1}{2}mv^2 = \\tfrac{1}{2} \\times 55 \\times 5.5^2 = 832\\ \\mathrm{J}$$
-$$\\text{energy lost} = 1078 - 832 = 246\\ \\mathrm{J} \\qquad E_W = Fd \\implies 246 = F \\times 8.0 \\implies F = 31\\ \\mathrm{N}$$
-
 > **Important:** In a conservation-of-energy problem, energy converts from one form to
 > another. Any energy that "goes missing" between two points has been lost, usually to
 > friction, and that lost energy equals the work done against the resistive force. At

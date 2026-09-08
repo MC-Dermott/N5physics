@@ -32,9 +32,6 @@ $$v = u + at \\qquad v^2 = u^2 + 2as \\qquad s = ut + \\frac{1}{2}at^2 \\qquad s
 | t | Time | s |
 | s | Height / displacement | m |
 
-**Worked Example:** A stone is dropped from rest from a bridge and takes 3.0 s to reach the water. Calculate the height of the bridge above the water.
-$$s = ut + \\frac{1}{2}at^2 = 0 + \\frac{1}{2}\\times 9.8\\times 3.0^2 = 44.1\\ \\mathrm{m}$$
-
 > **Important:** Pick a positive direction and stick to it throughout a calculation. If
 > upward is positive, g is −9.8 m/s² for the whole flight — whether the object is rising,
 > momentarily at rest, or falling.
