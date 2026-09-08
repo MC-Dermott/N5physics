@@ -6,6 +6,7 @@ from core.ui.auth_ui import render_auth, render_change_password
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
 from core.ui.assessment_ui import render_assessment
+from core.ui.past_paper_ui import render_past_papers
 from core.ui.reports_ui import render_teacher_report
 from core.ui.student_dashboard_ui import render_student_dashboard
 from core.data.backgrounds import get_background_videos
@@ -165,7 +166,7 @@ st.divider()
 if qualification == "National 4":
     mode_options = ["Practice", "Test", "Practice Assessment"]
 else:
-    mode_options = ["Practice", "Test"]
+    mode_options = ["Practice", "Test", "Past Paper Questions"]
 
 mode = st.radio("Mode", mode_options, horizontal=True)
 
@@ -174,6 +175,8 @@ if st.session_state.get("mode") != mode:
     reset_test()
     reset_assessment()
     st.session_state.quiz = {"current_question": None}
+    st.session_state.pop("past_paper_current", None)
+    st.session_state.pop("past_paper_revealed", None)
 
 topics = get_topics(qualification)
 topic  = st.selectbox("Unit", topics)
@@ -183,6 +186,8 @@ if st.session_state.get("last_topic") != topic:
     reset_test()
     reset_assessment()
     st.session_state.quiz = {"current_question": None}
+    st.session_state.pop("past_paper_current", None)
+    st.session_state.pop("past_paper_revealed", None)
 
 user_id = user["id"] if user else None
 
@@ -208,6 +213,13 @@ if st.session_state.get("last_question_type") != question_type:
     st.session_state.pop("last_sub_type", None)
     reset_test()
     st.session_state.quiz = {"current_question": None}
+    st.session_state.pop("past_paper_current", None)
+    st.session_state.pop("past_paper_revealed", None)
+
+if mode == "Past Paper Questions":
+    st.divider()
+    render_past_papers(topic, question_type)
+    st.stop()
 
 sub_types = get_sub_types(qualification, topic, question_type)
 if sub_types:
