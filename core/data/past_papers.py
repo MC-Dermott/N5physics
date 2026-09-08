@@ -20,60 +20,79 @@
 #
 # Image paths are relative to core/data/past_paper_assets/.
 
-_TOPIC = ("Our Dynamic Universe", "Special Relativity")
-_DIR = "special_relativity"
+def _mcq(dir_, year, paper, qnum, page, answer):
+    return {"year": year, "paper": paper, "qnum": qnum, "kind": "mcq",
+            "question_images": [f"{dir_}/{page}.png"], "answer_text": answer}
+
+
+def _extended(dir_, year, paper, qnum, pages, answer_pages):
+    return {"year": year, "paper": paper, "qnum": qnum, "kind": "extended",
+            "question_images": [f"{dir_}/{p}.png" for p in pages],
+            "answer_images": [f"{dir_}/{p}.png" for p in answer_pages]}
+
+
+_SPECIAL_RELATIVITY_DIR = "special_relativity"
+
+_SPECIAL_RELATIVITY = [
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2015", "P1", "7", "2015_P1_q7", "C"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2017", "P1", "4", "2017_P1_q4", "B"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2018", "P1", "6", "2018_P1_q6", "C"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2018", "P1", "7", "2018_P1_q7", "D"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "SPQ", "P1", "9", "SPQ_P1_q9", "C"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2019", "P1", "8", "2019_P1_q8", "C"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2020", "P1", "9", "2020_P1_q9", "C"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2020", "P1", "10", "2020_P1_q10", "B"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2022", "P1", "7", "2022_P1_q7", "C"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2023", "P1", "7", "2023_P1_q7", "D"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2024", "P1", "7", "2024_P1_q7", "D"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2024", "P1", "8", "2024_P1_q8", "C"),
+    _mcq(_SPECIAL_RELATIVITY_DIR, "2025", "P1", "8", "2025_P1_q8", "B"),
+
+    _extended(_SPECIAL_RELATIVITY_DIR, "2016", "P2", "4",
+              ["2016_P2_q4_1", "2016_P2_q4_2"], ["2016_P2_q4_answer"]),
+    _extended(_SPECIAL_RELATIVITY_DIR, "2017", "P2", "7",
+              ["2017_P2_q7_1", "2017_P2_q7_2"], ["2017_P2_q7_answer"]),
+    _extended(_SPECIAL_RELATIVITY_DIR, "SPQ", "P2", "4",
+              ["SPQ_P2_q4_1", "SPQ_P2_q4_2"], ["SPQ_P2_q4_answer"]),
+    _extended(_SPECIAL_RELATIVITY_DIR, "2019", "P2", "7",
+              ["2019_P2_q7_1", "2019_P2_q7_2", "2019_P2_q7_3"], ["2019_P2_q7_answer"]),
+    _extended(_SPECIAL_RELATIVITY_DIR, "2020", "P2", "7",
+              ["2020_P2_q7_1", "2020_P2_q7_2", "2020_P2_q7_3"], ["2020_P2_q7_answer"]),
+    _extended(_SPECIAL_RELATIVITY_DIR, "2023", "P2", "4",
+              ["2023_P2_q4_1", "2023_P2_q4_2"], ["2023_P2_q4_answer"]),
+    _extended(_SPECIAL_RELATIVITY_DIR, "2025", "P2", "4",
+              ["2025_P2_q4_1", "2025_P2_q4_2"], ["2025_P2_q4_answer"]),
+]
+
+_GRAVITATION_DIR = "gravitation"
+
+_GRAVITATION = [
+    _mcq(_GRAVITATION_DIR, "2016", "P1", "5", "2016_P1_q5", "C"),
+    _mcq(_GRAVITATION_DIR, "2018", "P1", "5", "2018_P1_q5", "A"),
+    _mcq(_GRAVITATION_DIR, "SPQ", "P1", "8", "SPQ_P1_q8", "B"),
+    _mcq(_GRAVITATION_DIR, "2020", "P1", "8", "2020_P1_q8", "D"),
+    _mcq(_GRAVITATION_DIR, "2023", "P1", "6", "2023_P1_q6", "A"),
+    _mcq(_GRAVITATION_DIR, "2025", "P1", "25", "2025_P1_q25", "C"),
+
+    _extended(_GRAVITATION_DIR, "2015", "P2", "3",
+              ["2015_P2_q3"], ["2015_P2_q3_answer"]),
+    _extended(_GRAVITATION_DIR, "2017", "P2", "5",
+              ["2017_P2_q5_1", "2017_P2_q5_2"], ["2017_P2_q5_answer"]),
+    _extended(_GRAVITATION_DIR, "2019", "P2", "4",
+              ["2019_P2_q4_1", "2019_P2_q4_2"], ["2019_P2_q4_answer"]),
+    _extended(_GRAVITATION_DIR, "2022", "P2", "5",
+              ["2022_P2_q5_1", "2022_P2_q5_2", "2022_P2_q5_3", "2022_P2_q5_4"],
+              ["2022_P2_q5_answer"]),
+    _extended(_GRAVITATION_DIR, "2024", "P2", "4",
+              ["2024_P2_q4_1", "2024_P2_q4_2", "2024_P2_q4_3"], ["2024_P2_q4_answer"]),
+    _extended(_GRAVITATION_DIR, "2025", "P2", "5",
+              ["2025_P2_q5_1", "2025_P2_q5_2", "2025_P2_q5_3", "2025_P2_q5_4"],
+              ["2025_P2_q5_answer_1", "2025_P2_q5_answer_2"]),
+]
 
 PAST_PAPERS = {
-    _TOPIC: [
-        {"year": "2015", "paper": "P1", "qnum": "7", "kind": "mcq",
-         "question_images": [f"{_DIR}/2015_P1_q7.png"], "answer_text": "C"},
-        {"year": "2017", "paper": "P1", "qnum": "4", "kind": "mcq",
-         "question_images": [f"{_DIR}/2017_P1_q4.png"], "answer_text": "B"},
-        {"year": "2018", "paper": "P1", "qnum": "6", "kind": "mcq",
-         "question_images": [f"{_DIR}/2018_P1_q6.png"], "answer_text": "C"},
-        {"year": "2018", "paper": "P1", "qnum": "7", "kind": "mcq",
-         "question_images": [f"{_DIR}/2018_P1_q7.png"], "answer_text": "D"},
-        {"year": "SPQ", "paper": "P1", "qnum": "9", "kind": "mcq",
-         "question_images": [f"{_DIR}/SPQ_P1_q9.png"], "answer_text": "C"},
-        {"year": "2019", "paper": "P1", "qnum": "8", "kind": "mcq",
-         "question_images": [f"{_DIR}/2019_P1_q8.png"], "answer_text": "C"},
-        {"year": "2020", "paper": "P1", "qnum": "9", "kind": "mcq",
-         "question_images": [f"{_DIR}/2020_P1_q9.png"], "answer_text": "C"},
-        {"year": "2020", "paper": "P1", "qnum": "10", "kind": "mcq",
-         "question_images": [f"{_DIR}/2020_P1_q10.png"], "answer_text": "B"},
-        {"year": "2022", "paper": "P1", "qnum": "7", "kind": "mcq",
-         "question_images": [f"{_DIR}/2022_P1_q7.png"], "answer_text": "C"},
-        {"year": "2023", "paper": "P1", "qnum": "7", "kind": "mcq",
-         "question_images": [f"{_DIR}/2023_P1_q7.png"], "answer_text": "D"},
-        {"year": "2024", "paper": "P1", "qnum": "7", "kind": "mcq",
-         "question_images": [f"{_DIR}/2024_P1_q7.png"], "answer_text": "D"},
-        {"year": "2024", "paper": "P1", "qnum": "8", "kind": "mcq",
-         "question_images": [f"{_DIR}/2024_P1_q8.png"], "answer_text": "C"},
-        {"year": "2025", "paper": "P1", "qnum": "8", "kind": "mcq",
-         "question_images": [f"{_DIR}/2025_P1_q8.png"], "answer_text": "B"},
-
-        {"year": "2016", "paper": "P2", "qnum": "4", "kind": "extended",
-         "question_images": [f"{_DIR}/2016_P2_q4_1.png", f"{_DIR}/2016_P2_q4_2.png"],
-         "answer_images": [f"{_DIR}/2016_P2_q4_answer.png"]},
-        {"year": "2017", "paper": "P2", "qnum": "7", "kind": "extended",
-         "question_images": [f"{_DIR}/2017_P2_q7_1.png", f"{_DIR}/2017_P2_q7_2.png"],
-         "answer_images": [f"{_DIR}/2017_P2_q7_answer.png"]},
-        {"year": "SPQ", "paper": "P2", "qnum": "4", "kind": "extended",
-         "question_images": [f"{_DIR}/SPQ_P2_q4_1.png", f"{_DIR}/SPQ_P2_q4_2.png"],
-         "answer_images": [f"{_DIR}/SPQ_P2_q4_answer.png"]},
-        {"year": "2019", "paper": "P2", "qnum": "7", "kind": "extended",
-         "question_images": [f"{_DIR}/2019_P2_q7_1.png", f"{_DIR}/2019_P2_q7_2.png", f"{_DIR}/2019_P2_q7_3.png"],
-         "answer_images": [f"{_DIR}/2019_P2_q7_answer.png"]},
-        {"year": "2020", "paper": "P2", "qnum": "7", "kind": "extended",
-         "question_images": [f"{_DIR}/2020_P2_q7_1.png", f"{_DIR}/2020_P2_q7_2.png", f"{_DIR}/2020_P2_q7_3.png"],
-         "answer_images": [f"{_DIR}/2020_P2_q7_answer.png"]},
-        {"year": "2023", "paper": "P2", "qnum": "4", "kind": "extended",
-         "question_images": [f"{_DIR}/2023_P2_q4_1.png", f"{_DIR}/2023_P2_q4_2.png"],
-         "answer_images": [f"{_DIR}/2023_P2_q4_answer.png"]},
-        {"year": "2025", "paper": "P2", "qnum": "4", "kind": "extended",
-         "question_images": [f"{_DIR}/2025_P2_q4_1.png", f"{_DIR}/2025_P2_q4_2.png"],
-         "answer_images": [f"{_DIR}/2025_P2_q4_answer.png"]},
-    ],
+    ("Our Dynamic Universe", "Special Relativity"): _SPECIAL_RELATIVITY,
+    ("Our Dynamic Universe", "Gravitation"): _GRAVITATION,
 }
 
 
