@@ -229,6 +229,30 @@ _ENERGY_WORK_POWER = [
               ["2016_P2_q2_answer_1", "2016_P2_q2_answer_2"]),
 ]
 
+_COMPONENTS_OF_VECTORS_DIR = "components_of_vectors"
+
+_COMPONENTS_OF_VECTORS = [
+    _mcq(_COMPONENTS_OF_VECTORS_DIR, "2015", "P1", "3", "2015_P1_q3", "A"),
+    _mcq(_COMPONENTS_OF_VECTORS_DIR, "2017", "P1", "2", "2017_P1_q2", "B"),
+    _mcq(_COMPONENTS_OF_VECTORS_DIR, "2022", "P1", "3", "2022_P1_q3", "B"),
+    _mcq(_COMPONENTS_OF_VECTORS_DIR, "2025", "P1", "4", "2025_P1_q4", "D"),
+
+    _extended(_COMPONENTS_OF_VECTORS_DIR, "2019", "P2", "2",
+              ["2019_P2_q2_1", "2019_P2_q2_2"], ["2019_P2_q2_answer"]),
+]
+
+_PROJECTILE_MOTION_DIR = "projectile_motion"
+
+_PROJECTILE_MOTION = [
+    _mcq(_PROJECTILE_MOTION_DIR, "2024", "P1", "4", "2024_P1_q4", "A"),
+
+    _extended(_PROJECTILE_MOTION_DIR, "2015", "P2", "1",
+              ["2015_P2_q1_1", "2015_P2_q1_2", "2015_P2_q1_3"],
+              ["2015_P2_q1_answer_1", "2015_P2_q1_answer_2"]),
+    _extended(_PROJECTILE_MOTION_DIR, "2020", "P2", "1",
+              ["2020_P2_q1_1", "2020_P2_q1_2"], ["2020_P2_q1_answer"]),
+]
+
 PAST_PAPERS = {
     ("Our Dynamic Universe", "Special Relativity"): _SPECIAL_RELATIVITY,
     ("Our Dynamic Universe", "Gravitation"): _GRAVITATION,
@@ -239,6 +263,8 @@ PAST_PAPERS = {
     ("Our Dynamic Universe", "Graphs of Motion"): _GRAPHS_OF_MOTION,
     ("Our Dynamic Universe", "Towing"): _TOWING,
     ("Our Dynamic Universe", "Effective Weight"): _EFFECTIVE_WEIGHT,
+    ("Our Dynamic Universe", "Components of Vectors"): _COMPONENTS_OF_VECTORS,
+    ("Our Dynamic Universe", "Projectile Motion"): _PROJECTILE_MOTION,
 }
 
 
