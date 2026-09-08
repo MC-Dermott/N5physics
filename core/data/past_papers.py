@@ -193,6 +193,22 @@ _GRAPHS_OF_MOTION = [
               ["2019_P2_q1_answer_1", "2019_P2_q1_answer_2", "2019_P2_q1_answer_3"]),
 ]
 
+_TOWING_DIR = "towing"
+
+_TOWING = [
+    _mcq(_TOWING_DIR, "2015", "P1", "5", "2015_P1_q5", "C"),
+    _mcq(_TOWING_DIR, "2018", "P1", "3", "2018_P1_q3", "A"),
+    _mcq(_TOWING_DIR, "2019", "P1", "5", "2019_P1_q5", "B"),
+    _mcq(_TOWING_DIR, "2022", "P1", "4", "2022_P1_q4", "E"),
+
+    _extended(_TOWING_DIR, "2020", "P2", "2",
+              ["2020_P2_q2"], ["2020_P2_q2_answer"]),
+    _extended(_TOWING_DIR, "2023", "P2", "2",
+              ["2023_P2_q2_1", "2023_P2_q2_2"], ["2023_P2_q2_answer"]),
+    _extended(_TOWING_DIR, "2024", "P2", "2",
+              ["2024_P2_q2_1", "2024_P2_q2_2", "2024_P2_q2_3"], ["2024_P2_q2_answer"]),
+]
+
 PAST_PAPERS = {
     ("Our Dynamic Universe", "Special Relativity"): _SPECIAL_RELATIVITY,
     ("Our Dynamic Universe", "Gravitation"): _GRAVITATION,
@@ -200,6 +216,7 @@ PAST_PAPERS = {
     ("Our Dynamic Universe", "Momentum and Impulse"): _MOMENTUM_IMPULSE,
     ("Our Dynamic Universe", "Equations of Motion"): _EQUATIONS_OF_MOTION,
     ("Our Dynamic Universe", "Graphs of Motion"): _GRAPHS_OF_MOTION,
+    ("Our Dynamic Universe", "Towing"): _TOWING,
 }
 
 
