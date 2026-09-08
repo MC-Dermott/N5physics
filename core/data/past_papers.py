@@ -114,10 +114,43 @@ _STANDARD_MODEL = [
               ["2025_P2_q6_answer_1", "2025_P2_q6_answer_2"]),
 ]
 
+_MOMENTUM_IMPULSE_DIR = "momentum_impulse"
+
+_MOMENTUM_IMPULSE = [
+    _mcq(_MOMENTUM_IMPULSE_DIR, "2016", "P1", "4", "2016_P1_q4", "C"),
+    _mcq(_MOMENTUM_IMPULSE_DIR, "2019", "P1", "6", "2019_P1_q6", "E"),
+    _mcq(_MOMENTUM_IMPULSE_DIR, "SPQ", "P1", "5", "SPQ_P1_q5", "C"),
+    _mcq(_MOMENTUM_IMPULSE_DIR, "SPQ", "P1", "6", "SPQ_P1_q6", "C"),
+    _mcq(_MOMENTUM_IMPULSE_DIR, "2023", "P1", "3", "2023_P1_q3", "B"),
+    _mcq(_MOMENTUM_IMPULSE_DIR, "2025", "P1", "7", "2025_P1_q7", "B"),
+
+    _extended(_MOMENTUM_IMPULSE_DIR, "2016", "P2", "3",
+              ["2016_P2_q3_1", "2016_P2_q3_2"], ["2016_P2_q3_answer"]),
+    _extended(_MOMENTUM_IMPULSE_DIR, "2017", "P2", "2",
+              ["2017_P2_q2_1", "2017_P2_q2_2"], ["2017_P2_q2_answer"]),
+    _extended(_MOMENTUM_IMPULSE_DIR, "2018", "P2", "3",
+              ["2018_P2_q3_1", "2018_P2_q3_2", "2018_P2_q3_3"], ["2018_P2_q3_answer"]),
+    _extended(_MOMENTUM_IMPULSE_DIR, "SPQ", "P2", "3",
+              ["SPQ_P2_q3_1", "SPQ_P2_q3_2"], ["SPQ_P2_q3_answer"]),
+    _extended(_MOMENTUM_IMPULSE_DIR, "2019", "P2", "1",
+              ["2019_P2_q1_1", "2019_P2_q1_2", "2019_P2_q1_3", "2019_P2_q1_4"],
+              ["2019_P2_q1_answer_1", "2019_P2_q1_answer_2", "2019_P2_q1_answer_3"]),
+    _extended(_MOMENTUM_IMPULSE_DIR, "2020", "P2", "3",
+              ["2020_P2_q3_1", "2020_P2_q3_2"], ["2020_P2_q3_answer"]),
+    _extended(_MOMENTUM_IMPULSE_DIR, "2022", "P2", "3",
+              ["2022_P2_q3_1", "2022_P2_q3_2"],
+              ["2022_P2_q3_answer_1", "2022_P2_q3_answer_2"]),
+    _extended(_MOMENTUM_IMPULSE_DIR, "2023", "P2", "3",
+              ["2023_P2_q3_1", "2023_P2_q3_2", "2023_P2_q3_3"], ["2023_P2_q3_answer"]),
+    _extended(_MOMENTUM_IMPULSE_DIR, "2025", "P2", "2",
+              ["2025_P2_q2_1", "2025_P2_q2_2"], ["2025_P2_q2_answer"]),
+]
+
 PAST_PAPERS = {
     ("Our Dynamic Universe", "Special Relativity"): _SPECIAL_RELATIVITY,
     ("Our Dynamic Universe", "Gravitation"): _GRAVITATION,
     ("Particles and Waves", "Standard Model"): _STANDARD_MODEL,
+    ("Our Dynamic Universe", "Momentum and Impulse"): _MOMENTUM_IMPULSE,
 }
 
 
