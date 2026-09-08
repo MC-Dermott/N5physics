@@ -217,11 +217,24 @@ _EFFECTIVE_WEIGHT = [
     _mcq(_EFFECTIVE_WEIGHT_DIR, "2022", "P1", "5", "2022_P1_q5", "D"),
 ]
 
+_ENERGY_WORK_POWER_DIR = "energy_work_power"
+
+_ENERGY_WORK_POWER = [
+    _mcq(_ENERGY_WORK_POWER_DIR, "2015", "P1", "6", "2015_P1_q6", "B"),
+    _mcq(_ENERGY_WORK_POWER_DIR, "2022", "P1", "6", "2022_P1_q6", "B"),
+    _mcq(_ENERGY_WORK_POWER_DIR, "2024", "P1", "5", "2024_P1_q5", "C"),
+
+    _extended(_ENERGY_WORK_POWER_DIR, "2016", "P2", "2",
+              ["2016_P2_q2_1", "2016_P2_q2_2"],
+              ["2016_P2_q2_answer_1", "2016_P2_q2_answer_2"]),
+]
+
 PAST_PAPERS = {
     ("Our Dynamic Universe", "Special Relativity"): _SPECIAL_RELATIVITY,
     ("Our Dynamic Universe", "Gravitation"): _GRAVITATION,
     ("Particles and Waves", "Standard Model"): _STANDARD_MODEL,
     ("Our Dynamic Universe", "Momentum and Impulse"): _MOMENTUM_IMPULSE,
+    ("Our Dynamic Universe", "Energy, Work and Power"): _ENERGY_WORK_POWER,
     ("Our Dynamic Universe", "Equations of Motion"): _EQUATIONS_OF_MOTION,
     ("Our Dynamic Universe", "Graphs of Motion"): _GRAPHS_OF_MOTION,
     ("Our Dynamic Universe", "Towing"): _TOWING,
