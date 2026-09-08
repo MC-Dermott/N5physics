@@ -40,5 +40,8 @@ def render_past_papers(topic, question_type):
         st.session_state.past_paper_revealed = True
 
     if st.session_state.get("past_paper_revealed"):
+        answer_text = entry.get("answer_text")
+        if answer_text:
+            st.success(f"Correct answer: **{answer_text}**")
         for img in _img_paths(entry, "answer_images"):
             st.image(img)
