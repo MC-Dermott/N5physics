@@ -90,9 +90,34 @@ _GRAVITATION = [
               ["2025_P2_q5_answer_1", "2025_P2_q5_answer_2"]),
 ]
 
+_STANDARD_MODEL_DIR = "standard_model"
+
+_STANDARD_MODEL = [
+    _mcq(_STANDARD_MODEL_DIR, "2016", "P1", "8", "2016_P1_q8", "A"),
+    _mcq(_STANDARD_MODEL_DIR, "2018", "P1", "8", "2018_P1_q8", "B"),
+    _mcq(_STANDARD_MODEL_DIR, "2018", "P1", "9", "2018_P1_q9", "E"),
+    _mcq(_STANDARD_MODEL_DIR, "SPQ", "P1", "14", "SPQ_P1_q14", "E"),
+    _mcq(_STANDARD_MODEL_DIR, "2020", "P1", "14", "2020_P1_q14", "D"),
+    _mcq(_STANDARD_MODEL_DIR, "2020", "P1", "15", "2020_P1_q15", "E"),
+    _mcq(_STANDARD_MODEL_DIR, "2022", "P1", "11", "2022_P1_q11", "B"),
+    _mcq(_STANDARD_MODEL_DIR, "2023", "P1", "11", "2023_P1_q11", "C"),
+    _mcq(_STANDARD_MODEL_DIR, "2024", "P1", "10", "2024_P1_q10", "E"),
+
+    _extended(_STANDARD_MODEL_DIR, "2015", "P2", "6",
+              ["2015_P2_q6"], ["2015_P2_q6_answer"]),
+    _extended(_STANDARD_MODEL_DIR, "2017", "P2", "7",
+              ["2017_P2_q7_1", "2017_P2_q7_2"], ["2017_P2_q7_answer"]),
+    _extended(_STANDARD_MODEL_DIR, "SPQ", "P2", "7",
+              ["SPQ_P2_q7_1", "SPQ_P2_q7_2"], ["SPQ_P2_q7_answer"]),
+    _extended(_STANDARD_MODEL_DIR, "2025", "P2", "6",
+              ["2025_P2_q6_1", "2025_P2_q6_2", "2025_P2_q6_3", "2025_P2_q6_4"],
+              ["2025_P2_q6_answer_1", "2025_P2_q6_answer_2"]),
+]
+
 PAST_PAPERS = {
     ("Our Dynamic Universe", "Special Relativity"): _SPECIAL_RELATIVITY,
     ("Our Dynamic Universe", "Gravitation"): _GRAVITATION,
+    ("Particles and Waves", "Standard Model"): _STANDARD_MODEL,
 }
 
 
