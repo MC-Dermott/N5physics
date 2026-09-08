@@ -146,11 +146,60 @@ _MOMENTUM_IMPULSE = [
               ["2025_P2_q2_1", "2025_P2_q2_2"], ["2025_P2_q2_answer"]),
 ]
 
+_EQUATIONS_OF_MOTION_DIR = "equations_of_motion"
+
+_EQUATIONS_OF_MOTION = [
+    _mcq(_EQUATIONS_OF_MOTION_DIR, "2015", "P1", "2", "2015_P1_q2", "B"),
+    _mcq(_EQUATIONS_OF_MOTION_DIR, "2016", "P1", "1", "2016_P1_q1", "B"),
+    _mcq(_EQUATIONS_OF_MOTION_DIR, "2018", "P1", "1", "2018_P1_q1", "C"),
+    _mcq(_EQUATIONS_OF_MOTION_DIR, "2020", "P1", "1", "2020_P1_q1", "B"),
+    _mcq(_EQUATIONS_OF_MOTION_DIR, "2022", "P1", "2", "2022_P1_q2", "A"),
+    _mcq(_EQUATIONS_OF_MOTION_DIR, "2024", "P1", "1", "2024_P1_q1", "B"),
+    _mcq(_EQUATIONS_OF_MOTION_DIR, "2025", "P1", "1", "2025_P1_q1", "C"),
+
+    _extended(_EQUATIONS_OF_MOTION_DIR, "2017", "P2", "1",
+              ["2017_P2_q1"], ["2017_P2_q1_answer"]),
+    _extended(_EQUATIONS_OF_MOTION_DIR, "2022", "P2", "2",
+              ["2022_P2_q2_1", "2022_P2_q2_2"], ["2022_P2_q2_answer"]),
+    _extended(_EQUATIONS_OF_MOTION_DIR, "2023", "P2", "1",
+              ["2023_P2_q1_1", "2023_P2_q1_2"], ["2023_P2_q1_answer"]),
+    _extended(_EQUATIONS_OF_MOTION_DIR, "2025", "P2", "1",
+              ["2025_P2_q1_1", "2025_P2_q1_2"], ["2025_P2_q1_answer"]),
+]
+
+_GRAPHS_OF_MOTION_DIR = "graphs_of_motion"
+
+_GRAPHS_OF_MOTION = [
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2015", "P1", "1", "2015_P1_q1", "C"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2016", "P1", "2", "2016_P1_q2", "A"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2017", "P1", "1", "2017_P1_q1", "A"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2018", "P1", "2", "2018_P1_q2", "D"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2019", "P1", "1", "2019_P1_q1", "E"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2019", "P1", "4", "2019_P1_q4", "A"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2020", "P1", "2", "2020_P1_q2", "E"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2020", "P1", "3", "2020_P1_q3", "A"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2022", "P1", "1", "2022_P1_q1", "A"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2023", "P1", "1", "2023_P1_q1", "A"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2024", "P1", "2", "2024_P1_q2", "A"),
+    _mcq(_GRAPHS_OF_MOTION_DIR, "2025", "P1", "2", "2025_P1_q2", "A"),
+
+    _extended(_GRAPHS_OF_MOTION_DIR, "2017", "P2", "3",
+              ["2017_P2_q3_1", "2017_P2_q3_2"],
+              ["2017_P2_q3_answer_1", "2017_P2_q3_answer_2"]),
+    _extended(_GRAPHS_OF_MOTION_DIR, "SPQ", "P2", "1",
+              ["SPQ_P2_q1_1", "SPQ_P2_q1_2", "SPQ_P2_q1_3"], ["SPQ_P2_q1_answer"]),
+    _extended(_GRAPHS_OF_MOTION_DIR, "2019", "P2", "1",
+              ["2019_P2_q1_1", "2019_P2_q1_2", "2019_P2_q1_3", "2019_P2_q1_4"],
+              ["2019_P2_q1_answer_1", "2019_P2_q1_answer_2", "2019_P2_q1_answer_3"]),
+]
+
 PAST_PAPERS = {
     ("Our Dynamic Universe", "Special Relativity"): _SPECIAL_RELATIVITY,
     ("Our Dynamic Universe", "Gravitation"): _GRAVITATION,
     ("Particles and Waves", "Standard Model"): _STANDARD_MODEL,
     ("Our Dynamic Universe", "Momentum and Impulse"): _MOMENTUM_IMPULSE,
+    ("Our Dynamic Universe", "Equations of Motion"): _EQUATIONS_OF_MOTION,
+    ("Our Dynamic Universe", "Graphs of Motion"): _GRAPHS_OF_MOTION,
 }
 
 
