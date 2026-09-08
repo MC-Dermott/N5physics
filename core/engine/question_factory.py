@@ -14,6 +14,11 @@ from topics.dynamics.vt_graph_distance_s3   import (
     gen_vt_distance_trapezium,
     gen_vt_distance_compound,
 )
+from topics.dynamics.vt_graph_acceleration_s3 import (
+    gen_accel_graph_compare,
+    gen_accel_graph_basic,
+    gen_accel_graph_compound,
+)
 from topics.dynamics.weight_calculations_s3 import (
     gen_weight_forward,
     gen_weight_find_mass,
@@ -151,6 +156,9 @@ QUAL_REGISTRY = {
                 "Distance — Simple Shapes":    gen_vt_distance_simple,
                 "Distance — Trapezium Shapes": gen_vt_distance_trapezium,
                 "Distance — Compound Graphs":  gen_vt_distance_compound,
+                "Acceleration — Comparing Steepness":   gen_accel_graph_compare,
+                "Acceleration — Calculating from a Graph": gen_accel_graph_basic,
+                "Acceleration — Compound Graphs":       gen_accel_graph_compound,
             },
             "Weight Calculations": {
                 "Calculate Weight": gen_weight_forward,

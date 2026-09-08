@@ -158,6 +158,32 @@ $$\\text{distance} = 18 + 48 + 18 = 84\\ \\mathrm{m}$$
 > Split any compound shape into rectangles and triangles first, then add every section together.
 """,
 
+    "vt_graph_acceleration_s3": """
+## Acceleration from Speed-Time Graphs
+
+**The acceleration of an object is equal to the gradient (slope) of its speed-time graph.**
+$$a = \\frac{\\Delta v}{t} \\qquad \\Delta v = v - u$$
+
+The steeper the line, the greater the size of the acceleration. A line sloping **upward**
+means the object is speeding up (positive acceleration); a line sloping **downward** means
+it's slowing down (negative acceleration). A **flat, horizontal** section means constant
+speed — zero acceleration.
+
+**Worked Example:** A(0, 0), B(4, 12).
+$$\\Delta v = v - u = 12 - 0 = 12\\ \\mathrm{m/s} \\qquad t = 4\\ \\mathrm{s}$$
+$$a = \\frac{\\Delta v}{t} = \\frac{12}{4} = 3\\ \\mathrm{m/s^2}$$
+
+**Worked Example (slowing down):** A(0, 20), B(5, 0).
+$$\\Delta v = v - u = 0 - 20 = -20\\ \\mathrm{m/s} \\qquad t = 5\\ \\mathrm{s}$$
+$$a = \\frac{\\Delta v}{t} = \\frac{-20}{5} = -4\\ \\mathrm{m/s^2}$$
+
+> **Important:** Always read the two points straight off the graph — the initial speed *u* is
+> the **height at the start** of the section, the final speed *v* is the **height at the
+> end** of the section, and *t* is the **time interval** between them (not necessarily
+> starting from t = 0). For a multi-section graph, always use the two points at the ends of
+> the *one section* you're asked about — don't use the total time for the whole graph.
+""",
+
     "unbalanced_forces_s3": """
 ## Unbalanced (Resultant) Forces
 
