@@ -17,7 +17,8 @@ class PhysicsQuestion:
     working: list = field(default_factory=list)
     # Each working step: {"type": "text"|"latex", "content": str}
     scaffold: list = field(default_factory=list)
-    # Each scaffold step: {"prompt": str, "answer": float}
+    # Each scaffold step: {"prompt": str, "answer": float, "unit": str}
+    # "unit" is optional — omit or leave "" for a step with no unit box.
     notes: str = ""
     is_scenario: bool = False
     scenario_context: str = ""          # shared preamble shown above all parts

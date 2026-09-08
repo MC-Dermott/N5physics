@@ -4,21 +4,13 @@ from core.ui.feedback_ui import check_answer, render_feedback, render_working
 from core.ui.scaffold_ui import render_scaffold, render_widget
 from core.ui.graph_mcq_ui import render_main_graph, render_option_grid, render_correct_option
 from core.db.tracker import save_practice_attempt
+from core.data.examples import notes_for
 
 
 def _render_notes(question, label="📚 Notes"):
     if question.notes:
         with st.expander(label):
             st.markdown(question.notes)
-
-
-def _general_notes(question):
-    """Notes shared by (most of) a scenario's parts — shown once, above the whole
-    question, rather than repeated above every part."""
-    notes_list = [p.notes for p in question.parts if p.notes]
-    if not notes_list:
-        return ""
-    return max(set(notes_list), key=notes_list.count)
 
 
 _UNIT_HINT = "Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive."
@@ -56,7 +48,6 @@ def _render_single(question, user_id, qualification):
     submitted_key = f"sub_{question.qid}"
 
     if not st.session_state.get(submitted_key):
-        _render_notes(question)
         render_widget(question)
 
     st.markdown(question.question_text)
@@ -138,10 +129,7 @@ def _render_explain_part(question, part_idx, submitted_key):
 
 
 def _render_scenario(question, user_id, qualification):
-    general_notes = _general_notes(question)
-    if general_notes:
-        with st.expander("📚 Notes"):
-            st.markdown(general_notes)
+    general_notes = notes_for(question)
 
     render_widget(question)
 

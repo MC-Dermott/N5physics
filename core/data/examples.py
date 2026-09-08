@@ -958,14 +958,11 @@ def _format_example_question(q, heading):
     return "\n\n".join(parts)
 
 
-def derive_example(generate_fn, seed=42):
+def get_canonical_question(generate_fn, seed=42):
     """
-    Fallback for question types with no hand-authored EXAMPLES entry: runs
-    generate_fn with a fixed seed so the same canonical instance is produced
-    every time, then formats its own question text + working (equation ->
-    substitution -> answer, the same convention used throughout this file) as
-    a worked example — the same steps normally shown in the "Worked Solution"
-    expander after answering.
+    Runs generate_fn with a fixed seed so the same canonical instance is
+    produced every time — used to preview a question type's notes/example
+    before the student has generated a real (randomised) question.
     """
     state = random.getstate()
     try:
@@ -973,7 +970,25 @@ def derive_example(generate_fn, seed=42):
         q = generate_fn()
     finally:
         random.setstate(state)
+    return q
 
+
+def notes_for(q):
+    """A question's own notes, or — for a scenario — the notes shared by
+    (most of) its parts, shown once rather than repeated per part."""
+    if not q.is_scenario:
+        return q.notes or ""
+    notes_list = [p.notes for p in q.parts if p.notes]
+    if not notes_list:
+        return ""
+    return max(set(notes_list), key=notes_list.count)
+
+
+def format_example(q):
+    """Formats an already-generated question's own question text + working
+    (equation -> substitution -> answer, the same convention used throughout
+    this file) as a worked example — the same steps normally shown in the
+    "Worked Solution" expander after answering."""
     if not q.is_scenario:
         return _format_example_question(q, "Example")
 
@@ -983,3 +998,9 @@ def derive_example(generate_fn, seed=42):
         for i, part in enumerate(q.parts)
     ]
     return "\n\n---\n\n".join(blocks)
+
+
+def derive_example(generate_fn, seed=42):
+    """Fallback for question types with no hand-authored EXAMPLES entry —
+    see format_example()."""
+    return format_example(get_canonical_question(generate_fn, seed=seed))

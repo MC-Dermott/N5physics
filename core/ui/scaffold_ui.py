@@ -1,6 +1,8 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
+from core.ui.feedback_ui import _normalize_unit
+
 
 def _is_correct(user_input, expected, tolerance=0.02):
     try:
@@ -29,22 +31,44 @@ def render_scaffold(question, suffix=""):
             st.markdown(f"**Step {i + 1}:** {step['prompt']}")
 
             inp_key = f"scaf_{question.qid}_{suffix}_{i}_inp"
+            unit_key = f"scaf_{question.qid}_{suffix}_{i}_unit"
             chk_key = f"scaf_{question.qid}_{suffix}_{i}_chk"
             ok_key  = f"scaf_{question.qid}_{suffix}_{i}_ok"
+            unit_wrong_key = f"scaf_{question.qid}_{suffix}_{i}_unitwrong"
 
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                user_val = st.text_input("Answer:", key=inp_key, label_visibility="visible")
-            with col2:
-                st.write("")
-                st.write("")
-                if st.button("Check", key=f"scaf_{question.qid}_{suffix}_{i}_btn"):
-                    st.session_state[chk_key] = True
-                    st.session_state[ok_key] = _is_correct(user_val, step["answer"])
+            step_unit = step.get("unit", "")
+
+            if step_unit:
+                col1, col2, col3 = st.columns([3, 2, 1])
+                with col1:
+                    user_val = st.text_input("Answer:", key=inp_key, label_visibility="visible")
+                with col2:
+                    user_unit = st.text_input("Units:", key=unit_key, placeholder="e.g. m/s")
+                with col3:
+                    st.write("")
+                    st.write("")
+                    if st.button("Check", key=f"scaf_{question.qid}_{suffix}_{i}_btn"):
+                        st.session_state[chk_key] = True
+                        num_ok = _is_correct(user_val, step["answer"])
+                        unit_ok = _normalize_unit(user_unit) == _normalize_unit(step_unit)
+                        st.session_state[ok_key] = num_ok and unit_ok
+                        st.session_state[unit_wrong_key] = num_ok and not unit_ok
+            else:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    user_val = st.text_input("Answer:", key=inp_key, label_visibility="visible")
+                with col2:
+                    st.write("")
+                    st.write("")
+                    if st.button("Check", key=f"scaf_{question.qid}_{suffix}_{i}_btn"):
+                        st.session_state[chk_key] = True
+                        st.session_state[ok_key] = _is_correct(user_val, step["answer"])
 
             if st.session_state.get(chk_key):
                 if st.session_state.get(ok_key):
                     st.success("✓ Correct!")
+                elif st.session_state.get(unit_wrong_key):
+                    st.warning(f"⚠️ Your value is correct, but the unit is wrong. Expected **{step_unit}**.")
                 else:
                     st.error("✗ Not quite — check your working and try again.")
 

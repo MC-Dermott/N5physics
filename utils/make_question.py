@@ -37,7 +37,7 @@ def make_question(question, correct_val, options_data, unit,
         distractors=distractors,
         working=correct_working,
         scaffold=[
-            {"prompt": s["question"], "answer": s["answer"]}
+            {"prompt": s["question"], "answer": s["answer"], "unit": s.get("unit", "")}
             for s in (scaffold or [])
             if s.get("answer") is not None
         ],
