@@ -21,7 +21,7 @@ def _load_game_html():
     return _game_html_cache
 
 
-def render_test(topic, question_type, qualification, generate_fn, user_id=None):
+def render_test(topic, question_type, qualification, generate_fn, user_id=None, example=None):
     from core.db.tracker import save_test_result, save_test_question_attempt
 
     test = st.session_state.test
@@ -40,6 +40,10 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None):
             reset_test()
             st.session_state.test["questions"] = [generate_fn() for _ in range(_NUM_QUESTIONS)]
             st.rerun()
+
+        if example:
+            with st.expander("💡 Example"):
+                st.markdown(example)
         return
 
     # --- Summary screen ---
@@ -178,6 +182,10 @@ def _render_scenario_test(test, idx, question):
 
     if question.scenario_context:
         st.info(question.scenario_context)
+
+    if question.metadata.get("main_figure") is not None:
+        render_main_graph(question, key_suffix=f"_test_{idx}_scenario")
+        st.write("")
 
     part = scored_parts[part_idx]
     st.markdown(f"**Part {part_idx + 1} of {len(scored_parts)}:** {part.question_text}")

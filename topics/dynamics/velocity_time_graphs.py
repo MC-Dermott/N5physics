@@ -25,6 +25,79 @@ _NOTES = """
 
 _CONTEXTS = ["car", "cyclist", "train", "ferry", "tractor", "go-kart", "trolley"]
 
+_LINE_COLOR = "#1f4e8c"
+_FILL_COLOR = "rgba(31, 78, 140, 0.15)"
+_AXIS_COLOR = "#555555"
+_GRID_COLOR = "rgba(0,0,0,0.12)"
+_POINT_COLOR = "#c0392b"
+
+
+def _area_figure(points):
+    """points: list of (t, v, label) in order along the line. Shades the area
+    under the graph — this may dip below the time axis for a reversal case."""
+    ts = [p[0] for p in points]
+    vs = [p[1] for p in points]
+
+    fig = go.Figure(go.Scatter(
+        x=ts, y=vs, mode="lines", line=dict(color=_LINE_COLOR, width=3),
+        fill="tozeroy", fillcolor=_FILL_COLOR,
+    ))
+    fig.add_trace(go.Scatter(
+        x=ts, y=vs, mode="markers+text",
+        text=[label for _, _, label in points],
+        textposition="top center",
+        textfont=dict(size=14, color=_AXIS_COLOR),
+        marker=dict(color=_POINT_COLOR, size=9),
+        showlegend=False,
+    ))
+
+    t_max = max(ts) * 1.15 if max(ts) > 0 else 1
+    v_max = max(vs) * 1.25 if max(vs) > 0 else 1
+    v_min = min(vs) * 1.25 if min(vs) < 0 else 0
+    fig.update_xaxes(title_text="Time (s)", range=[0, t_max], zeroline=True,
+                     zerolinecolor=_AXIS_COLOR, gridcolor=_GRID_COLOR, linecolor=_AXIS_COLOR)
+    fig.update_yaxes(title_text="Velocity (m/s)", range=[v_min, v_max], zeroline=True,
+                     zerolinecolor=_AXIS_COLOR, gridcolor=_GRID_COLOR, linecolor=_AXIS_COLOR)
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=45, r=15, t=25, b=35), height=320, showlegend=False,
+        font=dict(size=11),
+    )
+    return fig
+
+
+def _interval_figure(points, t_start, v_start, t_end, v_end):
+    """points: full compound journey as (t, v) tuples, unlabelled. Highlights
+    the queried interval with labelled points P and Q."""
+    ts = [p[0] for p in points]
+    vs = [p[1] for p in points]
+    all_v = vs + [v_start, v_end]
+
+    fig = go.Figure(go.Scatter(
+        x=ts, y=vs, mode="lines", line=dict(color=_LINE_COLOR, width=3),
+    ))
+    fig.add_trace(go.Scatter(
+        x=[t_start, t_end], y=[v_start, v_end], mode="markers+text",
+        text=["P", "Q"], textposition="top center",
+        textfont=dict(size=14, color=_POINT_COLOR),
+        marker=dict(color=_POINT_COLOR, size=10),
+        showlegend=False,
+    ))
+
+    t_max = max(ts) * 1.1
+    v_max = max(all_v) * 1.25 if max(all_v) > 0 else 1
+    v_min = min(all_v) * 1.25 if min(all_v) < 0 else 0
+    fig.update_xaxes(title_text="Time (s)", range=[0, t_max], zeroline=True,
+                     zerolinecolor=_AXIS_COLOR, gridcolor=_GRID_COLOR, linecolor=_AXIS_COLOR)
+    fig.update_yaxes(title_text="Velocity (m/s)", range=[v_min, v_max], zeroline=True,
+                     zerolinecolor=_AXIS_COLOR, gridcolor=_GRID_COLOR, linecolor=_AXIS_COLOR)
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=45, r=15, t=25, b=35), height=320, showlegend=False,
+        font=dict(size=11),
+    )
+    return fig
+
 
 def _dedup(options_data, correct):
     seen = {round(float(correct), 2)}
@@ -183,8 +256,11 @@ def gen_distance_displacement(level="N5"):
             {"question": "What is the area of stage 2?", "answer": area2},
             {"question": "What is the total distance travelled?", "answer": total},
         ]
-        return make_question(question, total, options_data, "m", scaffold=scaffold,
-                             notes=_NOTES, topic="Dynamics", question_type="Velocity-Time Graphs", level=level)
+        q = make_question(question, total, options_data, "m", scaffold=scaffold,
+                         notes=_NOTES, topic="Dynamics", question_type="Velocity-Time Graphs", level=level)
+        points = [(0, v1, "A"), (t1, v1, "B"), (t1 + t2, v2, "C")]
+        q.metadata["main_figure"] = _area_figure(points)
+        return q
 
     # --- reversal case: two-part scenario (distance, then displacement) ---
     v0 = random.choice([4, 5, 6, 8])
@@ -260,11 +336,14 @@ def gen_distance_displacement(level="N5"):
         ],
     )
 
-    return PhysicsQuestion(
+    points = [(0, v0, "A"), (round(t_cross, 2), 0, ""), (T, -v1_mag, "B")]
+    scenario = PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Dynamics", question_type="Velocity-Time Graphs", level=level,
         is_scenario=True, scenario_context=context, parts=[part_a, part_b],
     )
+    scenario.metadata["main_figure"] = _area_figure(points)
+    return scenario
 
 
 # ── Acceleration from a v-t graph, over an interval not starting at t = 0 ───
@@ -303,8 +382,8 @@ def gen_acceleration_interval(level="N5"):
         f"further {span2} s."
     )
     question = (
-        f"{context}\n\nUsing the graph, calculate the {ctx}'s acceleration between "
-        f"t = {t_start} s and t = {t_end} s."
+        f"{context}\n\nUsing the graph, calculate the {ctx}'s acceleration between the points "
+        f"marked P and Q, at t = {t_start} s and t = {t_end} s."
     )
     working = [
         {"type": "text", "content": f"At t = {t_start} s, v = {v_start} m/s. At t = {t_end} s, v = {v_end} m/s."},
@@ -328,8 +407,12 @@ def gen_acceleration_interval(level="N5"):
         {"question": f"What is the velocity at t = {t_end} s?", "answer": v_end},
         {"question": "What is the acceleration?", "answer": a_answer},
     ]
-    return make_question(question, a_answer, options_data, "m/s²", scaffold=scaffold,
-                         notes=_NOTES, topic="Dynamics", question_type="Velocity-Time Graphs", level=level)
+    q = make_question(question, a_answer, options_data, "m/s²", scaffold=scaffold,
+                     notes=_NOTES, topic="Dynamics", question_type="Velocity-Time Graphs", level=level)
+    v_final = v_end1 + a2 * span2
+    journey = [(0, 0), (t1, v_end1), (t1 + hold, v_end1), (t1 + hold + span2, v_final)]
+    q.metadata["main_figure"] = _interval_figure(journey, t_start, v_start, t_end, v_end)
+    return q
 
 
 _ALL_GENS = [

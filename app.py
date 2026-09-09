@@ -252,15 +252,12 @@ if notes:
         st.markdown(notes)
 
 example = get_examples(topic, question_type, sub_type=sub_type) or format_example(canonical_question)
-if example:
-    with st.expander("💡 Example"):
-        st.markdown(example)
 
 st.divider()
 
 # ── Route to practice or test ─────────────────────────────────────────────────
 
 if mode == "Test":
-    render_test(topic, question_type, qualification, generate_fn, user_id=user_id)
+    render_test(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)
 else:
-    render_practice(topic, question_type, qualification, generate_fn, user_id=user_id)
+    render_practice(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)

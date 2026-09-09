@@ -136,6 +136,10 @@ def _render_scenario(question, user_id, qualification):
     if question.scenario_context:
         st.info(question.scenario_context)
 
+    if question.metadata.get("main_figure") is not None:
+        render_main_graph(question, key_suffix="_scenario")
+        st.write("")
+
     for i, part in enumerate(question.parts):
         part_submitted_key = f"sub_{question.qid}_part{i}"
         part_type = part.metadata.get("type")
@@ -212,7 +216,7 @@ def _render_scenario(question, user_id, qualification):
 # Public entry point
 # =========================================================
 
-def render_practice(topic, question_type, qualification, generate_fn, user_id=None):
+def render_practice(topic, question_type, qualification, generate_fn, user_id=None, example=None):
     quiz = st.session_state.quiz
 
     if st.button("Generate Question", type="primary"):
@@ -223,6 +227,10 @@ def render_practice(topic, question_type, qualification, generate_fn, user_id=No
             if key.startswith("sub_") or key.startswith("result_") or key.startswith("ans_") or key.startswith("scaf_"):
                 del st.session_state[key]
         st.rerun()
+
+    if example:
+        with st.expander("💡 Example"):
+            st.markdown(example)
 
     question = quiz.get("current_question")
     if not question:

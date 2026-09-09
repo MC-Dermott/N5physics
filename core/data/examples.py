@@ -401,6 +401,24 @@ $$v = 5.0\ \mathrm{m/s}, \quad \theta = 53.1°\ \text{from straight across}$$
 subtract them rather than adding.
 """,
 
+    ("Dynamics", "Velocity-Time Graphs", "Which Graph Matches?"): r"""
+**Example:** A ball is dropped from rest and caught at the ground.
+
+Four velocity-time graphs (A–D) are shown. Which one matches this description?
+
+A ball moving freely under gravity changes direction *smoothly*, passing gradually through
+v = 0. A ball that **bounces** changes direction *instantly* — the graph jumps straight from
+a negative velocity to a smaller positive one, without passing through zero.
+
+Since the ball here is simply dropped and caught (no bounce, no throw upward), its velocity
+starts at 0 and increases in one direction only — the correct graph is a single straight ramp
+starting from the origin, with no direction change at all.
+
+**Common exam trap:** don't confuse this with a ball *thrown upward and caught* (a smooth,
+symmetric crossing through zero) or a ball that *bounces* (a graph with a sudden jump). Match
+the shape of the graph to what physically happens at each stage of the motion.
+""",
+
     ("Dynamics", "Velocity-Time Graphs"): r"""
 **Example (distance & displacement):** A car accelerates from rest to 8 m/s over 4 s, then
 brakes and reverses, reaching −4 m/s after a further 4 s.
@@ -476,37 +494,47 @@ $$s = (0 \times 3.0) + \frac{1}{2}\times 9.8\times 3.0^2$$
 $$s = 44.1\ \mathrm{m}$$
 """,
 
-    ("Our Dynamic Universe", "Graphs of Motion"): r"""
-**Example:** A v–t graph rises in a straight line from 0 to 8 m/s over the first 4 s, then stays
-constant at 8 m/s for the next 3 s.
+    ("Our Dynamic Universe", "Graphs of Motion", "Graph Matching"): r"""
+**Example:** A car accelerates uniformly from rest, reaching 15 m/s after 5 s. Its
+velocity–time graph (a straight line from the origin) is shown.
 
-**Acceleration in the first 4 s** — the gradient of the v-t graph:
+Which combination of graphs (A–E) correctly shows the displacement–time and
+acceleration–time graphs for this motion?
+
+- **Acceleration–time graph:** since the v–t graph is a straight line, the acceleration is
+  constant — the a–t graph must be a single **horizontal line** at
+  $a = \frac{15}{5} = 3\ \mathrm{m/s^2}$, not sloped and not changing level.
+- **Displacement–time graph:** since the acceleration is constant and non-zero, displacement
+  builds up according to $s = ut + \tfrac{1}{2}at^2$ — the s–t graph must be a **curve** (part
+  of a parabola), not a straight line copying the shape of the v–t graph.
+
+The correct option is the one pairing a horizontal a–t line with a correctly curved s–t graph,
+both with the correct sign.
+
+**Common exam trap:** a straight-line v–t graph does *not* mean the s–t graph is also straight
+— only a *constant* velocity (horizontal v–t line) gives a straight s–t graph.
+""",
+
+    ("Our Dynamic Universe", "Graphs of Motion", "Velocity from a-t Graph"): r"""
+**Example:** A car has an initial velocity of 5 m/s. An acceleration–time graph shows a
+constant acceleration of 2 m/s² for 4 s.
+
+*Calculate the final velocity.*
+
+The change in velocity equals the **area under** the acceleration-time graph:
 
 *Equation:*
-$$a = \frac{\Delta v}{\Delta t}$$
+$$\Delta v = a \times t \qquad v = u + \Delta v$$
 
 *Substitute:*
-$$a = \frac{8 - 0}{4}$$
+$$\Delta v = 2 \times 4 = 8\ \mathrm{m/s} \qquad v = 5 + 8$$
 
 *Answer:*
-$$a = 2\ \mathrm{m/s^2}$$
+$$v = 13\ \mathrm{m/s}$$
 
-**Displacement in the first 4 s** — the area under the graph (a triangle):
-
-*Equation:*
-$$s = \tfrac{1}{2} \times \text{base} \times \text{height}$$
-
-*Substitute:*
-$$s = \tfrac{1}{2} \times 4 \times 8$$
-
-*Answer:*
-$$s = 16\ \mathrm{m}$$
-
-Acceleration during the constant-speed phase = **0 m/s²** (horizontal line — zero gradient).
-
-**Common exam trap:** don't assume the s–t and a–t graphs look like copies of the v–t graph.
-Only the *gradient* (→ a–t) and *area* (→ s–t) relationships matter — always check whether the
-shape should be straight or curved, and check the sign.
+**Common exam trap:** don't forget to add on the initial velocity u — the area under the a–t
+graph only gives the *change* in velocity, not the final velocity itself. If the graph has more
+than one stage, find the change in velocity for each stage in turn and add them on one at a time.
 """,
 
     ("Our Dynamic Universe", "Special Relativity"): r"""
@@ -545,10 +573,49 @@ $$g = 9.8\ \mathrm{N/kg}$$
 height — always convert distances to metres before substituting.
 """,
 
-    ("Our Dynamic Universe", "Momentum and Impulse"): r"""
-**Example (collision, objects separate):** A trolley of mass 0.50 kg moving at 1.5 m/s (right,
-positive) collides with a trolley of mass 0.30 kg moving at 1.0 m/s to the left. After the
-collision the first trolley rebounds at 0.30 m/s to the left.
+    ("Our Dynamic Universe", "Momentum and Impulse", "Momentum"): r"""
+**Example:** A car of mass 1200 kg travels at 18 m/s.
+
+*Calculate its momentum.*
+
+*Equation:*
+$$p = mv$$
+
+*Substitute:*
+$$p = 1200 \times 18$$
+
+*Answer:*
+$$p = 21\,600\ \mathrm{kg\ m/s}$$
+
+**Important:** the same equation rearranges to find the mass ($m = p \div v$) or the velocity
+($v = p \div m$) if momentum is given instead.
+""",
+
+    ("Our Dynamic Universe", "Momentum and Impulse", "Collisions — Stick Together"): r"""
+**Example:** Trolley A (mass 0.50 kg), moving at 2.0 m/s, collides with trolley B (mass
+0.30 kg), which is stationary. The two trolleys stick together after the collision.
+
+*Calculate their common velocity.*
+
+Total momentum before = total momentum after:
+
+*Equation:*
+$$m_1u_1 + m_2u_2 = (m_1 + m_2)v$$
+
+*Substitute:*
+$$(0.50 \times 2.0) + (0.30 \times 0) = (0.50 + 0.30)v$$
+
+*Rearrange and solve:*
+$$1.0 = 0.80v \implies v = 1.25\ \mathrm{m/s}$$
+
+**Important:** after sticking together, both objects move at the *same* final velocity — use
+the combined mass on the right-hand side, not the two masses separately.
+""",
+
+    ("Our Dynamic Universe", "Momentum and Impulse", "Collisions — Separate"): r"""
+**Example:** A trolley of mass 0.50 kg moving at 1.5 m/s (right, positive) collides with a
+trolley of mass 0.30 kg moving at 1.0 m/s to the left. After the collision the first trolley
+rebounds at 0.30 m/s to the left.
 
 *Calculate the velocity of the second trolley.*
 
@@ -566,10 +633,216 @@ after, provided no external forces act. Always state which direction is positive
 substituting — a velocity in the opposite direction must be entered as negative.
 """,
 
-    ("Our Dynamic Universe", "Energy, Work and Power"): r"""
-**Example (conservation of energy):** A skateboarder of mass 55 kg starts from rest at the top
-of a ramp of height 2.0 m. She reaches 5.5 m/s at the bottom, having travelled 8.0 m along the
-ramp.
+    ("Our Dynamic Universe", "Momentum and Impulse", "Explosions and Recoil"): r"""
+**Example:** A stationary firework shell of total mass 2.0 kg explodes into two fragments:
+fragment A (mass 0.8 kg) and fragment B (mass 1.2 kg). Fragment A moves off at 15 m/s.
+
+*Calculate the velocity of fragment B immediately after the explosion.*
+
+Total momentum before the explosion is zero:
+
+*Equation:*
+$$0 = m_1v_1 + m_2v_2$$
+
+*Substitute:*
+$$0 = (0.8 \times 15) + 1.2v_2$$
+
+*Rearrange and solve:*
+$$0 = 12 + 1.2v_2 \implies v_2 = -10\ \mathrm{m/s}$$
+
+**Important:** since total momentum starts at zero, the two fragments must always move off in
+**opposite** directions with equal and opposite momenta — a negative answer here just means
+fragment B moves the opposite way to fragment A.
+""",
+
+    ("Our Dynamic Universe", "Momentum and Impulse", "Impulse"): r"""
+**Example:** A ball of mass 0.20 kg, initially moving at 3 m/s, is struck and speeds up to
+18 m/s. The force acts for 0.01 s.
+
+*Calculate the average force exerted on the ball.*
+
+*Equation:*
+$$Ft = mv - mu$$
+
+*Substitute:*
+$$F \times 0.01 = (0.20 \times 18) - (0.20 \times 3)$$
+
+*Rearrange and solve:*
+$$F \times 0.01 = 3.0 \implies F = 300\ \mathrm{N}$$
+
+**Important:** the same equation rearranges to find the contact time t if the force is given
+instead: $t = (mv - mu) \div F$.
+""",
+
+    ("Our Dynamic Universe", "Momentum and Impulse", "Impulse from a Force-Time Graph"): r"""
+**Example:** A football, initially at rest, is kicked. The force-time graph for the kick is a
+triangle, rising from 0 to a peak force of 800 N at t = 0.008 s, then falling back to 0 N at
+t = 0.016 s. The mass of the ball is 0.44 kg.
+
+**(a) Calculate the impulse given to the ball.**
+
+Impulse equals the area under the force-time graph:
+
+*Equation:*
+$$\text{impulse} = \tfrac{1}{2} \times \text{base} \times \text{height}$$
+
+*Substitute:*
+$$\text{impulse} = \tfrac{1}{2} \times 0.016 \times 800$$
+
+*Answer:*
+$$\text{impulse} = 6.4\ \mathrm{N\ s}$$
+
+**(b) Calculate the velocity of the ball as it leaves the ground.**
+
+The ball starts from rest, so the impulse equals its final momentum:
+
+*Equation:*
+$$Ft = mv - mu$$
+
+*Substitute:*
+$$6.4 = 0.44v - 0$$
+
+*Answer:*
+$$v = 14.5\ \mathrm{m/s}$$
+
+**Common exam trap:** for a triangular force-time graph, the impulse is the area of the
+*triangle* (½ × base × height), not base × height as for a constant force.
+""",
+
+    ("Our Dynamic Universe", "Momentum and Impulse", "Elastic and Inelastic Collisions"): r"""
+**Example:** Trolley A of mass 0.50 kg moving at 4.0 m/s collides with a stationary trolley B
+of mass 0.50 kg. After the collision the two move off together at 2.0 m/s.
+
+*Determine, by calculation, whether the collision is elastic or inelastic.*
+
+Whether a collision is elastic or inelastic is decided by comparing the **total kinetic
+energy** before and after (momentum is always conserved in a collision, so it cannot be used
+to decide this):
+
+$$E_k(\text{before}) = \tfrac{1}{2} \times 0.50 \times 4.0^2 = 4.0\ \mathrm{J}$$
+$$E_k(\text{after}) = \left(\tfrac{1}{2} \times 0.50 \times 2.0^2\right) + \left(\tfrac{1}{2} \times 0.50 \times 2.0^2\right) = 2.0\ \mathrm{J}$$
+
+Since $E_k(\text{before}) > E_k(\text{after})$, kinetic energy has been lost, so the collision
+is **inelastic**.
+
+**Common exam trap:** an *elastic* collision needs $E_k(\text{before}) = E_k(\text{after})$
+exactly — if the two totals differ at all, the collision is inelastic, even if momentum still
+balances perfectly on both sides.
+""",
+
+    ("Our Dynamic Universe", "Energy, Work and Power", "Work Done"): r"""
+**Example:** A crane applies an average force of 400 N over a distance of 25 m.
+
+*Calculate the work done.*
+
+*Equation:*
+$$E_W = Fd$$
+
+*Substitute:*
+$$E_W = 400 \times 25$$
+
+*Answer:*
+$$E_W = 10\,000\ \mathrm{J}$$
+
+**Important:** the same equation rearranges to find the force ($F = E_W \div d$) or the
+distance ($d = E_W \div F$) if either of those is the unknown instead.
+""",
+
+    ("Our Dynamic Universe", "Energy, Work and Power", "Gravitational Potential Energy"): r"""
+**Example:** A crane raises an object of mass 40 kg through a height of 12 m.
+
+*Calculate the gain in gravitational potential energy.*
+
+*Equation:*
+$$E_p = mgh$$
+
+*Substitute:*
+$$E_p = 40 \times 9.8 \times 12$$
+
+*Answer:*
+$$E_p = 4704\ \mathrm{J}$$
+
+**Important:** if the mass is given in grams, convert it to kilograms before substituting. The
+same equation rearranges to find h ($h = E_p \div mg$) or m ($m = E_p \div gh$).
+""",
+
+    ("Our Dynamic Universe", "Energy, Work and Power", "Kinetic Energy"): r"""
+**Example:** A car of mass 900 kg travels at a speed of 20 m/s.
+
+*Calculate the kinetic energy.*
+
+*Equation:*
+$$E_k = \tfrac{1}{2}mv^2$$
+
+*Substitute:*
+$$E_k = \tfrac{1}{2} \times 900 \times 20^2$$
+
+*Answer:*
+$$E_k = 180\,000\ \mathrm{J}$$
+
+**Common exam trap:** remember to square the velocity *before* halving and multiplying by the
+mass — the same equation rearranges to $v = \sqrt{2E_k \div m}$ or $m = 2E_k \div v^2$.
+""",
+
+    ("Our Dynamic Universe", "Energy, Work and Power", "Power"): r"""
+**Example:** A motor transfers 24 000 J of energy in 60 s.
+
+*Calculate the power.*
+
+*Equation:*
+$$P = \frac{E}{t}$$
+
+*Substitute:*
+$$P = \frac{24\,000}{60}$$
+
+*Answer:*
+$$P = 400\ \mathrm{W}$$
+
+**Important:** if the time is given in minutes or hours, convert it to seconds first. The same
+equation rearranges to find E ($E = Pt$) or t ($t = E \div P$).
+""",
+
+    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Free-Fall Speed"): r"""
+**Example:** An object is dropped from a height of 8.0 m. Assuming no energy is lost to air
+resistance, calculate the speed of the object just before it hits the ground.
+
+All the gravitational potential energy converts to kinetic energy:
+
+*Equation:*
+$$mgh = \tfrac{1}{2}mv^2 \implies v = \sqrt{2gh}$$
+
+*Substitute:*
+$$v = \sqrt{2 \times 9.8 \times 8.0}$$
+
+*Answer:*
+$$v = 12.5\ \mathrm{m/s}$$
+
+**Important:** the mass cancels out of the equation entirely — the final speed of a
+free-falling object doesn't depend on its mass.
+""",
+
+    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Maximum Height"): r"""
+**Example:** A ball is thrown vertically upwards with an initial speed of 14 m/s. Assuming no
+energy is lost to air resistance, calculate the maximum height reached by the ball.
+
+All the kinetic energy converts to gravitational potential energy at maximum height:
+
+*Equation:*
+$$\tfrac{1}{2}mv^2 = mgh \implies h = \frac{v^2}{2g}$$
+
+*Substitute:*
+$$h = \frac{14^2}{2 \times 9.8}$$
+
+*Answer:*
+$$h = 10.0\ \mathrm{m}$$
+
+**Important:** the mass cancels out of the equation, and at maximum height the ball's vertical
+velocity is momentarily zero — all its kinetic energy has been converted.
+""",
+
+    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Frictional Force"): r"""
+**Example:** A skateboarder of mass 55 kg starts from rest at the top of a ramp of height
+2.0 m. She reaches 5.5 m/s at the bottom, having travelled 8.0 m along the ramp.
 
 *Calculate the average frictional force acting on her.*
 
@@ -610,7 +883,50 @@ $$F = \frac{246}{8.0} = 31\ \mathrm{N}$$
 friction, and that lost energy equals the work done against the resistive force.
 """,
 
-    ("Our Dynamic Universe", "Effective Weight"): r"""
+    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Useful Power"): r"""
+**Example:** A goods lift carries a load of mass 80 kg through a vertical height of 6.0 m in a
+time of 15 s, moving at constant speed.
+
+*Calculate the useful power developed.*
+
+At constant speed, the useful power equals the gravitational potential energy gained divided
+by the time taken:
+
+*Equation:*
+$$E_p = mgh \qquad P = \frac{E_p}{t}$$
+
+*Substitute:*
+$$E_p = 80 \times 9.8 \times 6.0 = 4704\ \mathrm{J} \qquad P = \frac{4704}{15}$$
+
+*Answer:*
+$$P = 313.6\ \mathrm{W}$$
+
+**Important:** work out the GPE gained first, then divide by time — don't forget the height
+when calculating Ep.
+""",
+
+    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Engine Power"): r"""
+**Example:** A car's engine produces a driving force of 900 N while travelling at a constant
+speed of 15 m/s along a level road.
+
+*Calculate the power developed by the engine.*
+
+At constant speed, $E_W = Fd = F(vt)$, so $P = E_W \div t = Fv$:
+
+*Equation:*
+$$P = Fv$$
+
+*Substitute:*
+$$P = 900 \times 15$$
+
+*Answer:*
+$$P = 13\,500\ \mathrm{W}$$
+
+**Important:** this shortcut ($P = Fv$) only applies at **constant speed**, where the driving
+force exactly balances the resistive forces.
+""",
+
+    ("Our Dynamic Universe", "Effective Weight", "Lifts"): r"""
 **Example:** A person of mass 70 kg stands on bathroom scales inside a lift. The lift is moving
 upwards but slowing down at a rate of 1.5 m/s².
 
@@ -628,12 +944,76 @@ $$(70 \times 9.8) - R = 70 \times 1.5$$
 *Rearrange and solve:*
 $$R = 686 - 105 = 581\ \mathrm{N}$$
 
-**Important:** the same physics applies beyond lifts — a crane cable's tension, a rocket's
-thrust, or the force a drone's platform exerts on a parcel all follow the same F = ma / W = mg
-reasoning. In true free fall, the only force acting is gravity, so a supporting force reads 0 N.
+**Important:** first work out the true weight (W = mg), then decide whether the acceleration
+acts upwards or downwards — this sets whether R is bigger or smaller than W. The same approach
+finds the acceleration or the mass if either of those is the unknown instead.
 """,
 
-    ("Our Dynamic Universe", "Components of Vectors"): r"""
+    ("Our Dynamic Universe", "Effective Weight", "Lifts — Constant Velocity"): r"""
+**Example:** A lift moves upwards at a constant speed of 1.2 m/s, carrying a passenger of mass
+65 kg.
+
+**(a) State the acceleration of the lift.**
+
+The lift moves at a constant speed, so its velocity is not changing:
+$$a = 0\ \mathrm{m/s^2}$$
+
+**(b) Calculate the reading on scales carried by the passenger.**
+
+With zero acceleration, the resultant force is zero, so the reading equals the true weight:
+
+*Equation:*
+$$R = mg$$
+
+*Substitute:*
+$$R = 65 \times 9.8$$
+
+*Answer:*
+$$R = 637\ \mathrm{N}$$
+
+**Important:** at **constant speed** (moving up or down, it doesn't matter which), the scale
+reading always equals the true weight — it's only *changing* speed that makes the reading
+different from mg.
+""",
+
+    ("Our Dynamic Universe", "Effective Weight", "Beyond Lifts"): r"""
+**Example:** A rocket of mass 500 kg is launched vertically. It is moving upwards and speeding
+up at a rate of 6.0 m/s². Calculate the thrust force needed.
+
+The resultant force acts upwards (in the direction of the acceleration), so the thrust must
+overcome the weight *and* provide the extra force for the acceleration:
+
+*Equation:*
+$$F = mg + ma$$
+
+*Substitute:*
+$$F = (500 \times 9.8) + (500 \times 6.0)$$
+
+*Answer:*
+$$F = 4900 + 3000 = 7900\ \mathrm{N}$$
+
+**Important:** this is the same reasoning as a lift, applied to any supporting or driving
+force — a crane cable, a rocket's thrust, or the force a drone's platform exerts on a parcel.
+Work out the weight first, then add or subtract ma depending on which way the resultant force
+(and so the acceleration) acts.
+""",
+
+    ("Our Dynamic Universe", "Effective Weight", "Beyond Lifts — Explain Free Fall"): r"""
+**Example:** A skydiver of mass 75 kg is falling and speeding up at a rate of 9.8 m/s² (free
+fall) before their parachute opens. A harness sensor recording the force exerted on the
+skydiver by their equipment reads 0 N. Explain why this reading is 0 N.
+
+In free fall, gravity (weight) is the **only** force acting on the skydiver — the equipment
+exerts no additional supporting force. Since the resultant force is just the weight, the
+acceleration equals g, and the harness sensor, which measures any *extra* supporting force,
+reads 0 N.
+
+**Common exam trap:** this doesn't mean gravity has "switched off" — it's still acting exactly
+as normal. It's the *absence of any other force* that makes the sensor read zero, not the
+absence of weight.
+""",
+
+    ("Our Dynamic Universe", "Components of Vectors", "Level 1 — Finding Components"): r"""
 **Example:** A force of 50 N acts at 40° above the horizontal.
 
 *Resolve it into horizontal and vertical components.*
@@ -649,6 +1029,133 @@ $$F_x = 38.3\ \mathrm{N} \qquad F_y = 32.1\ \mathrm{N}$$
 
 **Important:** always check which angle is given — the angle to the horizontal, or the angle to
 the slope/vertical — since this decides whether a component uses sin or cos.
+""",
+
+    ("Our Dynamic Universe", "Components of Vectors", "Level 2 — Balancing Forces and Force from Acceleration"): r"""
+**Example (balancing forces):** An object is held in equilibrium by two ropes. Rope A pulls
+horizontally with a force of 120 N. Rope B is inclined at 35° to the horizontal, and its
+horizontal component exactly balances the pull of Rope A.
+
+*Calculate the tension in Rope B.*
+
+Since the ropes balance, the horizontal component of Rope B's tension equals Rope A's pull:
+
+*Equation:*
+$$F_x = T\cos\theta \implies T = \frac{F_x}{\cos\theta}$$
+
+*Substitute:*
+$$T = \frac{120}{\cos35°}$$
+
+*Answer:*
+$$T = 146.5\ \mathrm{N}$$
+
+**Example (force from acceleration):** A trailer of mass 200 kg is pulled across level ground
+by a horizontal force of 300 N.
+
+*Calculate the acceleration of the trailer.*
+
+*Equation:*
+$$F = ma \implies a = \frac{F}{m}$$
+
+*Substitute:*
+$$a = \frac{300}{200}$$
+
+*Answer:*
+$$a = 1.5\ \mathrm{m/s^2}$$
+
+**Important:** the same F = ma reasoning also applies vertically — e.g. a crane lifting a load
+that is accelerating upwards needs $T = W + ma$, where W = mg is the weight.
+""",
+
+    ("Our Dynamic Universe", "Components of Vectors", "Level 3 — Weight on a Slope"): r"""
+**Example:** A crate of mass 20 kg rests on a ramp inclined at 25° to the horizontal.
+
+**(a) Calculate the weight of the object.**
+
+*Equation:*
+$$W = mg$$
+
+*Substitute:*
+$$W = 20 \times 9.8$$
+
+*Answer:*
+$$W = 196\ \mathrm{N}$$
+
+**(b) Calculate the component of the weight acting parallel to (down) the slope.**
+
+*Equation:*
+$$W_{\parallel} = W\sin\theta$$
+
+*Substitute:*
+$$W_{\parallel} = 196 \times \sin25°$$
+
+*Answer:*
+$$W_{\parallel} = 82.8\ \mathrm{N}$$
+
+**Common exam trap:** the component *parallel* to the slope uses **sin** θ, and the component
+*perpendicular* to the slope (into the surface) uses **cos** θ — mixing these up is the most
+common mistake.
+""",
+
+    ("Our Dynamic Universe", "Components of Vectors", "Level 4 — Acceleration, Force and Angle on a Slope"): r"""
+**Example:** A crate of mass 15 kg slides down a slope inclined at 30°. Friction acts on it
+with a force of 20 N, opposing the motion.
+
+*Calculate the acceleration of the crate.*
+
+*Equation:*
+$$W = mg \qquad W_{\parallel} = W\sin\theta \qquad a = \frac{W_{\parallel} - \text{friction}}{m}$$
+
+*Substitute:*
+$$W = 15 \times 9.8 = 147\ \mathrm{N} \qquad W_{\parallel} = 147 \times \sin30° = 73.5\ \mathrm{N}$$
+$$a = \frac{73.5 - 20}{15}$$
+
+*Answer:*
+$$a = 3.57\ \mathrm{m/s^2}$$
+
+**Important:** sliding *down* a slope, friction acts *up* the slope (opposing the motion), so
+it is subtracted from W∥. The same setup can instead ask for the friction force (rearranging,
+given a) or the angle of the slope (given the acceleration and friction).
+""",
+
+    ("Our Dynamic Universe", "Components of Vectors", "Level 5 — Sliding Up a Slope With Friction"): r"""
+**Example:** A crate of mass 12 kg is given a push and slides up a slope inclined at 20°. As it
+slides up, a friction force of 15 N acts on the crate, opposing the motion.
+
+*Calculate the deceleration of the crate.*
+
+Moving up the slope, both the parallel weight component **and** friction act down the slope,
+opposing the motion, so they add together:
+
+*Equation:*
+$$W = mg \qquad W_{\parallel} = W\sin\theta \qquad a = \frac{W_{\parallel} + \text{friction}}{m}$$
+
+*Substitute:*
+$$W = 12 \times 9.8 = 117.6\ \mathrm{N} \qquad W_{\parallel} = 117.6 \times \sin20° = 40.2\ \mathrm{N}$$
+$$a = \frac{40.2 + 15}{12}$$
+
+*Answer:*
+$$a = 4.6\ \mathrm{m/s^2}$$
+
+**Common exam trap:** the direction friction acts depends on which way the object is *moving*,
+not which way it's accelerating — sliding up, friction always acts down the slope, whether the
+object is being driven by a constant force or simply decelerating after a single push.
+""",
+
+    ("Our Dynamic Universe", "Components of Vectors", "Level 6 — Explain: Effect of Angle"): r"""
+**Example:** A crate is held stationary on a smooth (frictionless) slope by a rope running
+parallel to the slope. The angle of the slope is then increased, while the mass of the crate
+stays the same.
+
+*What happens to the tension in the rope, and why?*
+
+With no friction, the rope's tension must exactly balance the parallel component of the
+crate's weight: $T = W\sin\theta$. As θ increases (up to 90°), sin θ increases, so **the
+tension increases** too — even though the crate's weight itself hasn't changed.
+
+**Common exam trap:** don't confuse the weight (W = mg, which never changes with angle) with
+the *component* of weight along the slope (W sin θ, which does) — these explain questions test
+whether you know which quantities depend on the angle and which don't.
 """,
 
     ("Our Dynamic Universe", "Projectile Motion", "Level 1 — Same Height"): r"""
