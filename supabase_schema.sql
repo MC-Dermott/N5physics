@@ -51,8 +51,10 @@ CREATE INDEX ON test_question_attempts (user_id);
 -- Migration: add class_code column (run once if not already present)
 ALTER TABLE users ADD COLUMN IF NOT EXISTS class_code TEXT;
 
--- Disable RLS so the anon key can read/write all three tracking tables.
-ALTER TABLE users                  DISABLE ROW LEVEL SECURITY;
-ALTER TABLE question_attempts      DISABLE ROW LEVEL SECURITY;
-ALTER TABLE test_results           DISABLE ROW LEVEL SECURITY;
-ALTER TABLE test_question_attempts DISABLE ROW LEVEL SECURITY;
+-- RLS is enabled with no policies, so the anon key has zero access.
+-- The app must use the service_role key (SUPABASE_KEY in .streamlit/secrets.toml),
+-- which bypasses RLS, rather than the anon key.
+ALTER TABLE users                  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE question_attempts      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE test_results           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE test_question_attempts ENABLE ROW LEVEL SECURITY;
