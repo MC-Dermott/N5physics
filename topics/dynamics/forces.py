@@ -142,7 +142,53 @@ def gen_missing_acceleration(level="N5"):
                          topic="Dynamics", question_type="Forces", level=level)
 
 
-_ALL_GENS = [gen_missing_friction, gen_missing_driving, gen_missing_acceleration]
+def _two_forces_working(mass, force_a, force_b, friction, answer):
+    combined = force_a + force_b
+    resultant = combined - friction
+    return [
+        {"type": "text",  "content": "Step 1: Add the two forces pulling in the same direction"},
+        {"type": "latex", "content": rf"F_{{combined}} = {force_a} + {force_b} = {combined}\ \mathrm{{N}}"},
+        {"type": "text",  "content": "Step 2: Subtract friction to find the resultant force"},
+        {"type": "latex", "content": rf"F_{{resultant}} = {combined} - {friction} = {resultant}\ \mathrm{{N}}"},
+        {"type": "text",  "content": "Step 3: Apply Newton's Second Law"},
+        {"type": "latex", "content": r"a = \frac{F}{m}"},
+        {"type": "latex", "content": rf"a = \frac{{{resultant}}}{{{mass}}}"},
+        {"type": "latex", "content": rf"a = {answer}\ \mathrm{{m/s^2}}"},
+    ]
+
+
+def gen_missing_acceleration_two_forces(level="N5"):
+    mass     = random.randint(15, 60)
+    force_a  = random.randint(30, 80)
+    force_b  = random.randint(20, 60)
+    combined = force_a + force_b
+    friction = random.randint(10, combined - 5)
+    resultant = combined - friction
+    correct  = round(resultant / mass, 2)
+
+    working = _two_forces_working(mass, force_a, force_b, friction, correct)
+    question = (f"An object of mass {mass} kg is pulled forward by two ropes with forces of "
+                f"{force_a} N and {force_b} N. Friction acts backward on the object with a force "
+                f"of {friction} N. Calculate the acceleration of the object.")
+    options_data = [
+        {"value": correct,                                  "summary": "Correct!", "mistake": None, "working": working},
+        {"value": round(combined / mass, 2),                "summary": "Incorrect.", "mistake": "You forgot to subtract friction before dividing by mass.", "working": working},
+        {"value": round((force_a - friction) / mass, 2),    "summary": "Incorrect.", "mistake": "You only used one of the two forward forces — add both ropes' forces together first.", "working": working},
+        {"value": round(resultant / mass + force_b / mass, 2), "summary": "Incorrect.", "mistake": "Check your working — combine the two forward forces, then subtract friction, then divide by mass.", "working": working},
+    ]
+    options_data = _dedup(options_data, correct)
+    return make_question(question, correct, options_data, "m/s²",
+                         scaffold=[
+                             {"question": "What is the combined forward force?", "answer": combined, "unit": "N"},
+                             {"question": "What is the resultant (unbalanced) force?", "answer": resultant, "unit": "N"},
+                             {"question": "What is the acceleration?", "answer": correct, "unit": "m/s²"},
+                         ],
+                         notes=NOTES["dynamics_newton"],
+                         topic="Dynamics", question_type="Forces", level=level)
+
+
+_ALL_GENS = [gen_missing_friction, gen_missing_driving, gen_missing_acceleration,
+             gen_missing_acceleration_two_forces]
 
 
 def generate_forces(level="N5"):

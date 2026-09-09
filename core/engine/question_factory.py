@@ -30,6 +30,7 @@ from topics.dynamics.unbalanced_forces_s3   import (
     gen_vertical_acceleration,
 )
 from topics.dynamics.forces                import generate_forces
+from topics.dynamics.vertical_forces       import generate_vertical_forces
 from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
 from topics.dynamics.projectiles           import generate_projectiles
@@ -206,6 +207,7 @@ QUAL_REGISTRY = {
             "Speed, Distance & Time": generate_sdt,
             "Acceleration":           generate_acceleration,
             "Forces":                 generate_forces,
+            "Vertical Forces":        generate_vertical_forces,
             "Weight":                 generate_weight,
             "Energy":                 generate_energy,
             "Projectile Motion":      generate_projectiles,
