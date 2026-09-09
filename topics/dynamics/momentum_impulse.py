@@ -7,10 +7,20 @@ _COLLISIONS_WIDGET_HTML = (
     pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "momentum_collisions_widget.html"
 ).read_text(encoding="utf-8")
 
+_IMPULSE_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "impulse_widget.html"
+).read_text(encoding="utf-8")
+
 
 def _with_collisions_widget(question):
     question.metadata["widget_html"] = _COLLISIONS_WIDGET_HTML
     question.metadata["widget_height"] = 900
+    return question
+
+
+def _with_impulse_widget(question):
+    question.metadata["widget_html"] = _IMPULSE_WIDGET_HTML
+    question.metadata["widget_height"] = 1200
     return question
 
 _NOTES = """
@@ -337,9 +347,9 @@ def gen_impulse_find_f(level="Higher"):
         {"question": "What is the change in momentum (mv − mu)?", "answer": delta_p},
         {"question": "What is the average force F?", "answer": F},
     ]
-    return make_question(question, F, options_data, "N", scaffold=scaffold,
+    return _with_impulse_widget(make_question(question, F, options_data, "N", scaffold=scaffold,
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Momentum and Impulse", level=level)
+                         question_type="Momentum and Impulse", level=level))
 
 
 def gen_impulse_find_t(level="Higher"):
@@ -372,9 +382,9 @@ def gen_impulse_find_t(level="Higher"):
         {"question": "What is the change in momentum (mv − mu)?", "answer": delta_p},
         {"question": "What is the contact time t?", "answer": t},
     ]
-    return make_question(question, t, options_data, "s", scaffold=scaffold,
+    return _with_impulse_widget(make_question(question, t, options_data, "s", scaffold=scaffold,
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Momentum and Impulse", level=level)
+                         question_type="Momentum and Impulse", level=level))
 
 
 def generate_impulse_basic(level="Higher"):
@@ -444,11 +454,11 @@ def gen_impulse_graph(level="Higher"):
         ],
     )
 
-    return PhysicsQuestion(
+    return _with_impulse_widget(PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Momentum and Impulse", level=level,
         is_scenario=True, scenario_context=context, parts=[part_a, part_b],
-    )
+    ))
 
 
 # ── Elastic and inelastic collisions ─────────────────────────────────────────

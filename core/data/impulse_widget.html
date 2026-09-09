@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impulse–Momentum Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --paper: #eef2f5;
+    --panel: #ffffff;
+    --panel-sunken: #e4eaee;
+    --ink: #16202c;
+    --ink-soft: #55636f;
+    --line: #cfd8de;
+    --accent: #0891b2;
+    --accent-ink: #ffffff;
+    --p-before: #2563eb;
+    --p-after: #15803d;
+    --impulse: #b45309;
+    --force: #b91c1c;
+    --font-display: 'Archivo', 'Arial Narrow', sans-serif;
+    --font-body: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0f161c;
+      --panel: #161f27;
+      --panel-sunken: #10171d;
+      --ink: #e8eef2;
+      --ink-soft: #93a4b0;
+      --line: #29343d;
+      --accent: #2dd4e6;
+      --accent-ink: #04222a;
+      --p-before: #6b9bff;
+      --p-after: #4ade80;
+      --impulse: #fbbf24;
+      --force: #f87171;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0f161c;
+    --panel: #161f27;
+    --panel-sunken: #10171d;
+    --ink: #e8eef2;
+    --ink-soft: #93a4b0;
+    --line: #29343d;
+    --accent: #2dd4e6;
+    --accent-ink: #04222a;
+    --p-before: #6b9bff;
+    --p-after: #4ade80;
+    --impulse: #fbbf24;
+    --force: #f87171;
+  }
+
+  * { box-sizing: border-box; }
+  *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    padding: 32px clamp(16px, 4vw, 48px) 56px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header.page { max-width: 780px; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(28px, 4vw, 38px);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 6px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+
+  p.intro {
+    color: var(--ink-soft);
+    font-size: 15.5px;
+    max-width: 68ch;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin: 18px 0 30px;
+    padding: 12px 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    width: fit-content;
+  }
+  .legend .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .legend .dot {
+    width: 11px; height: 11px; border-radius: 3px; flex: none;
+    display: inline-block;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(240px, 1fr);
+    gap: 22px;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px 20px;
+  }
+
+  .panel h2 {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 4px;
+  }
+  .panel .sub {
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    margin: 0 0 14px;
+  }
+
+  canvas { display: block; width: 100%; height: auto; background: var(--panel-sunken); border-radius: 6px; }
+
+  .status-line {
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-soft);
+    min-height: 18px;
+  }
+  .status-line strong { color: var(--ink); font-weight: 600; }
+
+  .stat-grid {
+    margin-top: 12px;
+    display: grid;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 3px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .k { color: var(--ink-soft); }
+  .stat-row .v { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat-row .v.match { color: var(--p-after); }
+
+  .controls-panel .field { margin-bottom: 16px; }
+  .controls-panel label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .controls-panel label .val {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  button {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 7px;
+    padding: 10px 16px;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    transition: filter 0.15s ease;
+  }
+  button:hover { filter: brightness(0.97); }
+  button.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+  }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .closeup-panel { margin-top: 22px; }
+
+  .analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: 22px;
+  }
+
+  .canvas-wrap { position: relative; }
+  .placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    font-style: normal;
+    pointer-events: none;
+  }
+  .placeholder.hidden { display: none; }
+
+  .caption {
+    margin-top: 12px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  footer.notes {
+    margin-top: 36px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    max-width: 78ch;
+  }
+  footer.notes strong { color: var(--ink); }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .analysis-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="page">
+    <p class="eyebrow">Momentum &amp; Impulse · frictionless collision</p>
+    <h1>Impulse&ndash;Momentum Lab</h1>
+    <p class="intro">
+      A glider slides along a frictionless air track and rebounds off the fixed buffer at one end, always
+      travelling straight along the track. Off the buffer its momentum is constant &mdash; it only changes during
+      the brief contact, shown as arrows: momentum arriving (blue), the force the buffer exerts while they're
+      touching (red), and momentum leaving (green). Everything plays in slow motion, and the moment of contact
+      is repeated, enlarged, in its own panel below so the arrows are easy to read.
+    </p>
+  </header>
+
+  <div class="legend">
+    <span class="chip"><span class="dot" style="background:var(--p-before)"></span>Momentum in, p&#8321;</span>
+    <span class="chip"><span class="dot" style="background:var(--force)"></span>Force on glider, F</span>
+    <span class="chip"><span class="dot" style="background:var(--p-after)"></span>Momentum out, p&#8322;</span>
+    <span class="chip"><span class="dot" style="background:var(--impulse)"></span>Impulse, &Delta;p</span>
+  </div>
+
+  <div class="layout">
+    <section class="panel">
+      <h2>Air track</h2>
+      <p class="sub">The glider always travels straight along the track, square-on into the buffer.</p>
+      <canvas id="stage" width="640" height="170"></canvas>
+      <div class="status-line" id="statusLine">Status: <strong>ready to launch</strong></div>
+      <div class="stat-grid">
+        <div class="stat-row"><span class="k">Live momentum |p|</span><span class="v" id="liveP">&mdash;</span></div>
+        <div class="stat-row"><span class="k">Direction</span><span class="v" id="liveDir">&mdash;</span></div>
+      </div>
+    </section>
+
+    <aside class="panel controls-panel">
+      <h2>Launch settings</h2>
+      <p class="sub">Adjust, then launch. Controls lock while the glider is moving.</p>
+
+      <div class="field">
+        <label for="mass">Mass, m <span class="val" id="massVal">1.5 kg</span></label>
+        <input type="range" id="mass" min="0.5" max="4" step="0.1" value="1.5">
+      </div>
+      <div class="field">
+        <label for="speed">Launch speed, v <span class="val" id="speedVal">6.0 m/s</span></label>
+        <input type="range" id="speed" min="2" max="10" step="0.5" value="6">
+      </div>
+      <div class="field">
+        <label for="restitution">Restitution (bounciness), e <span class="val" id="restVal">0.85</span></label>
+        <input type="range" id="restitution" min="0.3" max="1" step="0.05" value="0.85">
+      </div>
+      <div class="field">
+        <label for="contact">Contact time (model), &Delta;t <span class="val" id="contactVal">400 ms</span></label>
+        <input type="range" id="contact" min="100" max="900" step="20" value="400">
+      </div>
+
+      <div class="btn-row">
+        <button class="primary" id="launchBtn">Launch glider</button>
+        <button id="pauseBtn" disabled>Pause</button>
+        <button id="resetBtn">Reset</button>
+      </div>
+    </aside>
+  </div>
+
+  <section class="panel closeup-panel">
+    <h2>Contact close-up</h2>
+    <p class="sub">The same arrows, enlarged and slowed right down, at the instant of contact.</p>
+    <div class="canvas-wrap">
+      <canvas id="closeupCanvas" width="1000" height="150"></canvas>
+      <p class="placeholder" id="closeupPlaceholder">Arrows appear here, enlarged, when the glider reaches the buffer.</p>
+    </div>
+  </section>
+
+  <div class="analysis-grid">
+    <section class="panel">
+      <h2>Momentum vector diagram</h2>
+      <p class="sub">Same horizontal scale, three rows: p&#8321; plus &Delta;p lands exactly on p&#8322;.</p>
+      <div class="canvas-wrap">
+        <canvas id="vectorCanvas" width="460" height="260"></canvas>
+        <p class="placeholder" id="vectorPlaceholder">Launch the glider &mdash; the diagram fills in once it bounces off the buffer.</p>
+      </div>
+      <div class="stat-grid" id="vectorStats"></div>
+      <p class="caption">With e&nbsp;=&nbsp;1 the glider rebounds at exactly the same speed, just reversed. Drop e below 1 and it comes back slower &mdash; but &Delta;p still equals the impulse delivered.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Contact force vs. time</h2>
+      <p class="sub">Shaded area = impulse = &int;F&nbsp;dt.</p>
+      <div class="canvas-wrap">
+        <canvas id="graphCanvas" width="460" height="260"></canvas>
+        <p class="placeholder" id="graphPlaceholder">The force pulse is recorded live during contact.</p>
+      </div>
+      <div class="stat-grid" id="graphStats"></div>
+      <p class="caption">Try stretching &Delta;t: the peak force drops, but the shaded area &mdash; the impulse &mdash; stays the same.</p>
+    </section>
+  </div>
+
+  <footer class="notes">
+    <strong>Model notes.</strong> The track is treated as frictionless, so momentum changes only during contact
+    with the buffer. Real collisions last a fraction of a millisecond; the contact time here is a model duration,
+    deliberately stretched to hundreds of milliseconds so the force pulse has a visible shape &mdash; and the whole
+    animation is then played back even slower than that, purely so the arrows are easy to follow. Neither slow-down
+    changes the result: impulse still equals the change in momentum.
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // How much slower than real time the whole animation plays, purely for legibility.
+  var SLOWMO = 0.4;
+
+  // ---------- theme-aware colour lookup ----------
+  var colors = {};
+  function readColors() {
+    var s = getComputedStyle(document.documentElement);
+    colors.panelSunken = s.getPropertyValue('--panel-sunken').trim();
+    colors.ink = s.getPropertyValue('--ink').trim();
+    colors.inkSoft = s.getPropertyValue('--ink-soft').trim();
+    colors.line = s.getPropertyValue('--line').trim();
+    colors.accent = s.getPropertyValue('--accent').trim();
+    colors.pBefore = s.getPropertyValue('--p-before').trim();
+    colors.pAfter = s.getPropertyValue('--p-after').trim();
+    colors.impulse = s.getPropertyValue('--impulse').trim();
+    colors.force = s.getPropertyValue('--force').trim();
+  }
+  readColors();
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors);
+  }
+
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(function (c) { return c + c; }).join('');
+    var n = parseInt(hex, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function lerpColor(hexA, hexB, t) {
+    t = Math.max(0, Math.min(1, t));
+    var a = hexToRgb(hexA), b = hexToRgb(hexB);
+    var r = Math.round(a[0] + (b[0] - a[0]) * t);
+    var g = Math.round(a[1] + (b[1] - a[1]) * t);
+    var bl = Math.round(a[2] + (b[2] - a[2]) * t);
+    return 'rgb(' + r + ',' + g + ',' + bl + ')';
+  }
+
+  // ---------- drawing helpers ----------
+  function drawArrow(ctx, x1, y1, x2, y2, color, width, headLen) {
+    width = width || 3; headLen = headLen || 10;
+    var dx = x2 - x1, dy = y2 - y1;
+    if (Math.hypot(dx, dy) < 1) return;
+    ctx.strokeStyle = color; ctx.fillStyle = color;
+    ctx.lineWidth = width; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    var angle = Math.atan2(dy, dx);
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath(); ctx.fill();
+  }
+  function labelText(ctx, x, y, text, color, size, align) {
+    ctx.font = (size || 13) + 'px "IBM Plex Mono", monospace';
+    ctx.fillStyle = color;
+    ctx.textAlign = align || 'left';
+    ctx.fillText(text, x, y);
+    ctx.textAlign = 'left';
+  }
+
+  // ---------- world / simulation (motion is purely 1-D, along the track) ----------
+  var stage = document.getElementById('stage');
+  var sctx = stage.getContext('2d');
+  var SCALE = 50;               // px per metre
+  var WORLD_W = stage.width / SCALE;
+  var WORLD_H = stage.height / SCALE;
+  var WALL_THICK = 0.14;        // metres
+  var HALF_LEN = 0.28;          // glider half-length, metres
+
+  function px(xm) { return xm * SCALE; }
+
+  var sim = {
+    state: 'ready',       // ready | flying-in | contact | flying-out | done
+    m: 1.5, v0: 6, e: 0.85, contactMs: 400,
+    x: 0, vx: 0,
+    vx0: 0, vxAfter: 0, contactDt: 0, tContact: 0,
+    forceSamples: [],
+    results: null,
+    paused: false
+  };
+
+  function resetToReady() {
+    sim.state = 'ready';
+    sim.x = HALF_LEN + 0.25;
+    sim.vx = sim.v0;
+    sim.forceSamples = [];
+    sim.results = null;
+    sim.paused = false;
+    updateUIState();
+    renderAll();
+  }
+
+  function readSliders() {
+    sim.m = parseFloat(massInput.value);
+    sim.v0 = parseFloat(speedInput.value);
+    sim.e = parseFloat(restInput.value);
+    sim.contactMs = parseFloat(contactInput.value);
+  }
+
+  function launch() {
+    if (sim.state !== 'ready' && sim.state !== 'done') return;
+    readSliders();
+    sim.x = HALF_LEN + 0.25;
+    sim.vx = sim.v0;
+    sim.forceSamples = [];
+    sim.results = null;
+    sim.paused = false;
+    sim.state = 'flying-in';
+    updateUIState();
+  }
+
+  function finalizeContact() {
+    var p1 = sim.m * sim.vx0;
+    var p2 = sim.m * sim.vxAfter;
+    var dp = p2 - p1;
+    var peakF = Math.abs(sim.m * (sim.vxAfter - sim.vx0) * Math.PI / (2 * sim.contactDt));
+    var impulseArea = 0;
+    for (var i = 1; i < sim.forceSamples.length; i++) {
+      var a = sim.forceSamples[i - 1], b = sim.forceSamples[i];
+      impulseArea += (b.t - a.t) * (a.F + b.F) / 2;
+    }
+    sim.results = {
+      p1: p1, p2: p2, dp: dp,
+      v1: sim.vx0, v2: sim.vxAfter,
+      peakF: peakF, impulseArea: Math.abs(impulseArea),
+      contactMs: sim.contactMs
+    };
+    updateResultPanels();
+  }
+
+  function step(dt) {
+    if (sim.state === 'flying-in' || sim.state === 'flying-out') {
+      sim.x += sim.vx * dt;
+
+      if (sim.state === 'flying-in' && sim.vx > 0 && sim.x + HALF_LEN >= WORLD_W - WALL_THICK) {
+        sim.x = WORLD_W - WALL_THICK - HALF_LEN;
+        sim.vx0 = sim.vx;
+        sim.vxAfter = -sim.e * sim.vx0;
+        sim.contactDt = sim.contactMs / 1000;
+        sim.tContact = 0;
+        sim.forceSamples = [{ t: 0, F: 0 }];
+        sim.state = 'contact';
+      } else if (sim.state === 'flying-out' && sim.x - HALF_LEN <= 0) {
+        sim.x = HALF_LEN;
+        sim.state = 'done';
+        updateUIState();
+      }
+    } else if (sim.state === 'contact') {
+      sim.tContact += dt;
+      if (sim.tContact >= sim.contactDt) {
+        sim.vx = sim.vxAfter;
+        sim.forceSamples.push({ t: sim.contactDt, F: 0 });
+        finalizeContact();
+        sim.state = 'flying-out';
+        updateUIState();
+      } else {
+        var s = Math.sin(Math.PI * sim.tContact / (2 * sim.contactDt));
+        sim.vx = sim.vx0 + (sim.vxAfter - sim.vx0) * s * s;
+        var F = sim.m * (sim.vxAfter - sim.vx0) * (Math.PI / (2 * sim.contactDt)) * Math.sin(Math.PI * sim.tContact / sim.contactDt);
+        sim.forceSamples.push({ t: sim.tContact, F: F });
+      }
+    }
+  }
+
+  // current momentum-arrow colour, given sim.state
+  function momentumColor() {
+    if (sim.state === 'contact') return lerpColor(colors.pBefore, colors.pAfter, sim.tContact / sim.contactDt);
+    if (sim.state === 'flying-out' || sim.state === 'done') return colors.pAfter;
+    return colors.pBefore;
+  }
+  function peakForceEstimate() {
+    return Math.abs(sim.m * (sim.vxAfter - sim.vx0) * Math.PI / (2 * sim.contactDt)) || 1;
+  }
+
+  // ---------- stage rendering ----------
+  function drawStage() {
+    var W = stage.width, H = stage.height;
+    sctx.clearRect(0, 0, W, H);
+    sctx.fillStyle = colors.panelSunken;
+    sctx.fillRect(0, 0, W, H);
+
+    var midY = H * 0.46;
+    // twin rails, like a real air track
+    sctx.strokeStyle = colors.line;
+    sctx.lineWidth = 2;
+    sctx.beginPath(); sctx.moveTo(0, midY - 20); sctx.lineTo(W, midY - 20); sctx.stroke();
+    sctx.beginPath(); sctx.moveTo(0, midY + 20); sctx.lineTo(W, midY + 20); sctx.stroke();
+
+    // metre ticks along the bottom
+    sctx.font = '500 10px "IBM Plex Mono", monospace';
+    sctx.fillStyle = colors.inkSoft;
+    sctx.textAlign = 'center';
+    for (var mi = 0; mi <= Math.floor(WORLD_W); mi++) {
+      var tx = px(mi);
+      sctx.strokeStyle = colors.line;
+      sctx.beginPath(); sctx.moveTo(tx, H - 24); sctx.lineTo(tx, H - 16); sctx.stroke();
+      sctx.fillText(String(mi), tx, H - 5);
+    }
+    sctx.textAlign = 'left';
+
+    // buffer
+    var wallPx = px(WORLD_W - WALL_THICK);
+    var wallW = px(WALL_THICK);
+    sctx.fillStyle = colors.accent;
+    sctx.fillRect(wallPx, midY - 34, wallW, 68);
+    sctx.save();
+    sctx.font = '600 11px "IBM Plex Mono", monospace';
+    sctx.fillStyle = colors.inkSoft;
+    sctx.translate(wallPx - 8, H - 10);
+    sctx.rotate(-Math.PI / 2);
+    sctx.textAlign = 'left';
+    sctx.fillText('measured buffer', 0, 0);
+    sctx.restore();
+
+    var pxx = px(sim.x);
+    var halfW = HALF_LEN * SCALE, halfH = 17;
+
+    // momentum arrow
+    var mColor = momentumColor();
+    var pNow = sim.m * sim.vx;
+    var arrowLen = Math.min(9 * Math.abs(pNow), 130);
+    if (Math.abs(pNow) > 0.001) {
+      var dir = pNow > 0 ? 1 : -1;
+      drawArrow(sctx, pxx, midY - 30, pxx + dir * arrowLen, midY - 30, mColor, 3.5, 11);
+    }
+
+    // force arrow, during contact only
+    if (sim.state === 'contact' && sim.forceSamples.length) {
+      var Fnow = sim.forceSamples[sim.forceSamples.length - 1].F;
+      var fLen = (Fnow / peakForceEstimate()) * 90;
+      drawArrow(sctx, pxx, midY + 30, pxx + fLen, midY + 30, colors.force, 3.5, 10);
+    }
+
+    // glider (rounded block with a small fin, like a real air-track glider)
+    sctx.fillStyle = colors.ink;
+    roundRect(sctx, pxx - halfW, midY - halfH, halfW * 2, halfH * 2, 4);
+    sctx.fill();
+    sctx.fillStyle = colors.accent;
+    sctx.fillRect(pxx - 2, midY - halfH - 10, 4, 10);
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  // ---------- contact close-up ----------
+  var closeup = document.getElementById('closeupCanvas');
+  var cctx = closeup.getContext('2d');
+  var closeupPlaceholder = document.getElementById('closeupPlaceholder');
+
+  function drawCloseup() {
+    var W = closeup.width, H = closeup.height;
+    cctx.clearRect(0, 0, W, H);
+    cctx.fillStyle = colors.panelSunken;
+    cctx.fillRect(0, 0, W, H);
+
+    var inContact = sim.state === 'contact';
+    var justFinished = sim.results && (sim.state === 'flying-out' || sim.state === 'done');
+    if (!inContact && !justFinished) {
+      closeupPlaceholder.classList.remove('hidden');
+      return;
+    }
+    closeupPlaceholder.classList.add('hidden');
+
+    var midY = H * 0.5;
+    var bufferX = W * 0.74;
+    var gliderX = bufferX - 46;
+
+    // buffer
+    cctx.fillStyle = colors.accent;
+    cctx.fillRect(bufferX, midY - 46, 10, 92);
+
+    // glider
+    cctx.fillStyle = colors.ink;
+    roundRect(cctx, gliderX - 32, midY - 20, 64, 40, 6);
+    cctx.fill();
+
+    var vNow, showForce, Fnow;
+    if (inContact) {
+      vNow = sim.vx;
+      var Fpeak = peakForceEstimate();
+      Fnow = sim.forceSamples.length ? sim.forceSamples[sim.forceSamples.length - 1].F : 0;
+      showForce = true;
+      var fLen = (Fnow / Fpeak) * 150;
+      drawArrow(cctx, gliderX, midY + 34, gliderX + fLen, midY + 34, colors.force, 6, 16);
+      labelText(cctx, gliderX + fLen / 2, midY + 58, 'F = ' + Math.abs(Fnow).toFixed(0) + ' N', colors.force, 14, 'center');
+    } else {
+      vNow = sim.results.v2;
+      showForce = false;
+    }
+
+    var mColor = momentumColor();
+    var pNow = sim.m * vNow;
+    var pScale = 150 / Math.max(sim.m * sim.v0, 0.01);
+    var maxRightLen = (bufferX - 10) - gliderX;   // never draw over the buffer
+    var maxLeftLen = gliderX - 16;                 // never run off the left edge
+    var pLen = pNow >= 0
+      ? Math.min(pNow * pScale, maxRightLen)
+      : Math.max(pNow * pScale, -maxLeftLen);
+    drawArrow(cctx, gliderX, midY - 34, gliderX + pLen, midY - 34, mColor, 6, 16);
+    labelText(cctx, gliderX + pLen / 2, midY - 50, 'p = ' + pNow.toFixed(1) + ' kg·m/s', mColor, 14, 'center');
+  }
+
+  // ---------- vector diagram (1-D: three aligned rows on one scale) ----------
+  var vecCanvas = document.getElementById('vectorCanvas');
+  var vctx = vecCanvas.getContext('2d');
+  var vecPlaceholder = document.getElementById('vectorPlaceholder');
+
+  function drawVectorPanel() {
+    var W = vecCanvas.width, H = vecCanvas.height;
+    vctx.clearRect(0, 0, W, H);
+    vctx.fillStyle = colors.panelSunken;
+    vctx.fillRect(0, 0, W, H);
+
+    if (!sim.results) {
+      vecPlaceholder.classList.remove('hidden');
+      return;
+    }
+    vecPlaceholder.classList.add('hidden');
+
+    var r = sim.results;
+    var padL = 34, padR = 34;
+    var zeroX = padL + (W - padL - padR) * 0.34;
+    var leftExtent = Math.max(Math.abs(r.p2), Math.abs(r.dp), 0.01);
+    var rightExtent = Math.max(r.p1, 0.01);
+    var scale = Math.min((zeroX - padL) / leftExtent, (W - padR - zeroX) / rightExtent);
+
+    var rows = [
+      { y: 78, label: 'p₁ before', color: colors.pBefore, from: 0, to: r.p1 },
+      { y: 148, label: 'p₂ after', color: colors.pAfter, from: 0, to: r.p2 },
+      { y: 218, label: 'Δp impulse', color: colors.impulse, from: r.p1, to: r.p2 }
+    ];
+
+    // faint vertical guides tying the rows together
+    vctx.strokeStyle = colors.line;
+    vctx.lineWidth = 1;
+    [0, r.p1, r.p2].forEach(function (v) {
+      var x = zeroX + v * scale;
+      vctx.beginPath();
+      vctx.setLineDash([2, 3]);
+      vctx.moveTo(x, 50); vctx.lineTo(x, 240);
+      vctx.stroke();
+      vctx.setLineDash([]);
+    });
+
+    rows.forEach(function (row) {
+      var x1 = zeroX + row.from * scale, x2 = zeroX + row.to * scale;
+      labelText(vctx, padL, row.y - 14, row.label, colors.inkSoft, 12.5);
+      drawArrow(vctx, x1, row.y, x2, row.y, row.color, 4, 12);
+      var val = row.to - row.from;
+      labelText(vctx, x2 + (val >= 0 ? 8 : -8), row.y + 5, val.toFixed(1), row.color, 13, val >= 0 ? 'left' : 'right');
+    });
+  }
+
+  function updateVectorStats() {
+    var el = document.getElementById('vectorStats');
+    if (!sim.results) { el.innerHTML = ''; return; }
+    var r = sim.results;
+    el.innerHTML =
+      row('|p₁| before', Math.abs(r.p1).toFixed(2) + ' kg·m/s') +
+      row('|p₂| after', Math.abs(r.p2).toFixed(2) + ' kg·m/s') +
+      row('|Δp| impulse', Math.abs(r.dp).toFixed(2) + ' kg·m/s', true) +
+      row('speed, before → after', r.v1.toFixed(2) + ' → ' + Math.abs(r.v2).toFixed(2) + ' m/s');
+  }
+
+  // ---------- force/time graph ----------
+  var graphCanvas = document.getElementById('graphCanvas');
+  var gctx = graphCanvas.getContext('2d');
+  var graphPlaceholder = document.getElementById('graphPlaceholder');
+
+  function drawGraphPanel() {
+    var W = graphCanvas.width, H = graphCanvas.height;
+    gctx.clearRect(0, 0, W, H);
+    gctx.fillStyle = colors.panelSunken;
+    gctx.fillRect(0, 0, W, H);
+
+    if (sim.forceSamples.length < 2) {
+      graphPlaceholder.classList.remove('hidden');
+      return;
+    }
+    graphPlaceholder.classList.add('hidden');
+
+    var padL = 46, padR = 16, padT = 16, padB = 30;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+
+    var tMax = sim.results ? sim.results.contactMs / 1000 : sim.contactMs / 1000;
+    var fMax = (sim.results ? sim.results.peakF : peakForceEstimate()) * 1.15 || 1;
+
+    function tx(t) { return padL + (t / tMax) * plotW; }
+    function fy(f) { return padT + plotH - (Math.abs(f) / fMax) * plotH; }
+
+    gctx.strokeStyle = colors.line;
+    gctx.lineWidth = 1;
+    gctx.beginPath();
+    gctx.moveTo(padL, padT); gctx.lineTo(padL, padT + plotH); gctx.lineTo(padL + plotW, padT + plotH);
+    gctx.stroke();
+
+    gctx.fillStyle = colors.inkSoft;
+    gctx.font = '500 11px "IBM Plex Mono", monospace';
+    gctx.fillText('0', padL - 4, padT + plotH + 14);
+    gctx.fillText((tMax * 1000).toFixed(0) + ' ms', padL + plotW - 34, padT + plotH + 14);
+    gctx.save();
+    gctx.translate(12, padT + plotH * 0.5 + 14);
+    gctx.rotate(-Math.PI / 2);
+    gctx.fillText('F (N)', 0, 0);
+    gctx.restore();
+
+    gctx.beginPath();
+    gctx.moveTo(tx(0), fy(0));
+    for (var j = 0; j < sim.forceSamples.length; j++) {
+      gctx.lineTo(tx(sim.forceSamples[j].t), fy(sim.forceSamples[j].F));
+    }
+    var lastT = sim.forceSamples[sim.forceSamples.length - 1].t;
+    gctx.lineTo(tx(lastT), fy(0));
+    gctx.closePath();
+    gctx.fillStyle = colors.force;
+    gctx.globalAlpha = 0.22;
+    gctx.fill();
+    gctx.globalAlpha = 1;
+
+    gctx.beginPath();
+    gctx.moveTo(tx(0), fy(0));
+    for (var k = 0; k < sim.forceSamples.length; k++) {
+      gctx.lineTo(tx(sim.forceSamples[k].t), fy(sim.forceSamples[k].F));
+    }
+    gctx.strokeStyle = colors.force;
+    gctx.lineWidth = 2.5;
+    gctx.stroke();
+  }
+
+  function updateGraphStats() {
+    var el = document.getElementById('graphStats');
+    if (!sim.results) { el.innerHTML = ''; return; }
+    var r = sim.results;
+    el.innerHTML =
+      row('peak force', r.peakF.toFixed(1) + ' N') +
+      row('contact time (model)', r.contactMs.toFixed(0) + ' ms') +
+      row('area under graph (∫F dt)', r.impulseArea.toFixed(2) + ' N·s') +
+      row('matches |Δp|?', Math.abs(r.dp).toFixed(2) + ' kg·m/s ✓', true);
+  }
+
+  function row(k, v, match) {
+    return '<div class="stat-row"><span class="k">' + k + '</span><span class="v' + (match ? ' match' : '') + '">' + v + '</span></div>';
+  }
+
+  function updateResultPanels() {
+    updateVectorStats();
+    updateGraphStats();
+  }
+
+  // ---------- status / live readout ----------
+  function updateStatus() {
+    var el = document.getElementById('statusLine');
+    var msgs = {
+      'ready': 'ready to launch',
+      'flying-in': 'gliding toward the buffer at ' + sim.v0.toFixed(1) + ' m/s',
+      'contact': 'in contact with the buffer — t = ' + (sim.tContact * 1000).toFixed(0) + ' / ' + sim.contactMs.toFixed(0) + ' ms',
+      'flying-out': 'rebounding away from the buffer',
+      'done': 'trial complete — press Launch to run again'
+    };
+    el.innerHTML = 'Status: <strong>' + msgs[sim.state] + '</strong>';
+
+    var pMag = Math.abs(sim.m * sim.vx);
+    document.getElementById('liveP').textContent = pMag.toFixed(2) + ' kg·m/s';
+    document.getElementById('liveDir').textContent = sim.vx > 0.01 ? 'toward the buffer' : (sim.vx < -0.01 ? 'away from the buffer' : 'momentarily at rest');
+  }
+
+  function updateUIState() {
+    var running = (sim.state === 'flying-in' || sim.state === 'contact' || sim.state === 'flying-out');
+    launchBtn.disabled = running;
+    pauseBtn.disabled = !running;
+    pauseBtn.textContent = sim.paused ? 'Resume' : 'Pause';
+    [massInput, speedInput, restInput, contactInput].forEach(function (inp) {
+      inp.disabled = running;
+    });
+  }
+
+  function renderAll() {
+    drawStage();
+    drawCloseup();
+    drawVectorPanel();
+    drawGraphPanel();
+    updateStatus();
+  }
+
+  // ---------- controls wiring ----------
+  var massInput = document.getElementById('mass');
+  var speedInput = document.getElementById('speed');
+  var restInput = document.getElementById('restitution');
+  var contactInput = document.getElementById('contact');
+  var launchBtn = document.getElementById('launchBtn');
+  var pauseBtn = document.getElementById('pauseBtn');
+  var resetBtn = document.getElementById('resetBtn');
+
+  function syncSliderLabels() {
+    document.getElementById('massVal').textContent = parseFloat(massInput.value).toFixed(1) + ' kg';
+    document.getElementById('speedVal').textContent = parseFloat(speedInput.value).toFixed(1) + ' m/s';
+    document.getElementById('restVal').textContent = parseFloat(restInput.value).toFixed(2);
+    document.getElementById('contactVal').textContent = contactInput.value + ' ms';
+  }
+
+  [massInput, speedInput, restInput, contactInput].forEach(function (inp) {
+    inp.addEventListener('input', function () {
+      syncSliderLabels();
+      if (sim.state === 'ready' || sim.state === 'done') {
+        readSliders();
+        resetToReady();
+      }
+    });
+  });
+
+  launchBtn.addEventListener('click', launch);
+  resetBtn.addEventListener('click', resetToReady);
+  pauseBtn.addEventListener('click', function () {
+    sim.paused = !sim.paused;
+    pauseBtn.textContent = sim.paused ? 'Resume' : 'Pause';
+  });
+
+  // ---------- main loop ----------
+  var lastT = null;
+  function frame(ts) {
+    if (lastT === null) lastT = ts;
+    var dt = Math.min((ts - lastT) / 1000, 0.05) * SLOWMO;
+    lastT = ts;
+    if (!sim.paused && (sim.state === 'flying-in' || sim.state === 'contact' || sim.state === 'flying-out')) {
+      step(dt);
+    }
+    renderAll();
+    requestAnimationFrame(frame);
+  }
+
+  syncSliderLabels();
+  resetToReady();
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
