@@ -1,8 +1,18 @@
 import random
+import pathlib
 from utils.make_question import make_question
 from utils.notes import NOTES
 
 G = 9.8
+
+_FBD_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "free_body_diagram_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_fbd_widget(question):
+    question.metadata["widget_html"] = _FBD_WIDGET_HTML
+    return question
 
 
 def _dedup(options_data, correct):
@@ -72,9 +82,9 @@ def gen_vertical_liftoff_accel(level="N5"):
         {"question": "What is the net (unbalanced) force?", "answer": net, "unit": "N"},
         {"question": "What is the acceleration?", "answer": correct, "unit": "m/s²"},
     ]
-    return make_question(question, correct, options_data, "m/s²", scaffold=scaffold,
+    return _with_fbd_widget(make_question(question, correct, options_data, "m/s²", scaffold=scaffold,
                          notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
-                         question_type="Vertical Forces", level=level)
+                         question_type="Vertical Forces", level=level))
 
 
 # (label, mass_lo, mass_hi) for the free-falling/parachute-deceleration scenarios.

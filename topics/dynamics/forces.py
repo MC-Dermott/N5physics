@@ -1,6 +1,16 @@
 import random
+import pathlib
 from utils.make_question import make_question
 from utils.notes import NOTES
+
+_FBD_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "free_body_diagram_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_fbd_widget(question):
+    question.metadata["widget_html"] = _FBD_WIDGET_HTML
+    return question
 
 
 def _dedup(options_data, correct):
@@ -81,13 +91,13 @@ def gen_missing_friction(level="N5"):
         {"value": abs(resultant - driving_force),"summary": "Incorrect.", "mistake": "Check the direction of subtraction. Friction = driving force − unbalanced force.", "working": working},
     ]
     options_data = _dedup(options_data, correct)
-    return make_question(question, correct, options_data, "N",
+    return _with_fbd_widget(make_question(question, correct, options_data, "N",
                          scaffold=[
                              {"question": "Calculate the unbalanced force.", "answer": resultant, "unit": "N"},
                              {"question": "Calculate the frictional force.", "answer": correct, "unit": "N"},
                          ],
                          notes=NOTES["dynamics_newton"],
-                         topic="Dynamics", question_type="Forces", level=level)
+                         topic="Dynamics", question_type="Forces", level=level))
 
 
 def gen_missing_driving(level="N5"):
@@ -107,13 +117,13 @@ def gen_missing_driving(level="N5"):
         {"value": friction_force,               "summary": "Incorrect.", "mistake": "This is only the friction, not the driving force.", "working": working},
     ]
     options_data = _dedup(options_data, correct)
-    return make_question(question, correct, options_data, "N",
+    return _with_fbd_widget(make_question(question, correct, options_data, "N",
                          scaffold=[
                              {"question": "Calculate the unbalanced force.", "answer": resultant, "unit": "N"},
                              {"question": "Calculate the driving force.", "answer": correct, "unit": "N"},
                          ],
                          notes=NOTES["dynamics_newton"],
-                         topic="Dynamics", question_type="Forces", level=level)
+                         topic="Dynamics", question_type="Forces", level=level))
 
 
 def gen_missing_acceleration(level="N5"):
@@ -133,13 +143,13 @@ def gen_missing_acceleration(level="N5"):
         {"value": round((driving_force + friction_force) / mass, 2), "summary": "Incorrect.", "mistake": "The unbalanced force is the DIFFERENCE between driving force and friction, not the sum.", "working": working},
     ]
     options_data = _dedup(options_data, correct)
-    return make_question(question, correct, options_data, "m/s²",
+    return _with_fbd_widget(make_question(question, correct, options_data, "m/s²",
                          scaffold=[
                              {"question": "Calculate the unbalanced force.", "answer": resultant, "unit": "N"},
                              {"question": "Calculate the acceleration.", "answer": correct, "unit": "m/s²"},
                          ],
                          notes=NOTES["dynamics_newton"],
-                         topic="Dynamics", question_type="Forces", level=level)
+                         topic="Dynamics", question_type="Forces", level=level))
 
 
 def _two_forces_working(mass, force_a, force_b, friction, answer):
@@ -177,14 +187,14 @@ def gen_missing_acceleration_two_forces(level="N5"):
         {"value": round(resultant / mass + force_b / mass, 2), "summary": "Incorrect.", "mistake": "Check your working — combine the two forward forces, then subtract friction, then divide by mass.", "working": working},
     ]
     options_data = _dedup(options_data, correct)
-    return make_question(question, correct, options_data, "m/s²",
+    return _with_fbd_widget(make_question(question, correct, options_data, "m/s²",
                          scaffold=[
                              {"question": "What is the combined forward force?", "answer": combined, "unit": "N"},
                              {"question": "What is the resultant (unbalanced) force?", "answer": resultant, "unit": "N"},
                              {"question": "What is the acceleration?", "answer": correct, "unit": "m/s²"},
                          ],
                          notes=NOTES["dynamics_newton"],
-                         topic="Dynamics", question_type="Forces", level=level)
+                         topic="Dynamics", question_type="Forces", level=level))
 
 
 _ALL_GENS = [gen_missing_friction, gen_missing_driving, gen_missing_acceleration,

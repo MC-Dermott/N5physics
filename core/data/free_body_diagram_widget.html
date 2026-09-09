@@ -1,0 +1,586 @@
+<title>Free Body Diagram Explorer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --paper: #eef2f5;
+    --panel: #ffffff;
+    --panel-sunken: #e4eaee;
+    --ink: #16202c;
+    --ink-soft: #55636f;
+    --line: #cfd8de;
+    --accent: #0891b2;
+    --accent-ink: #ffffff;
+    --force-a: #2563eb;
+    --force-b: #c2410c;
+    --resultant: #7c3aed;
+    --ok: #15803d;
+    --font-display: 'Archivo', 'Arial Narrow', sans-serif;
+    --font-body: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0f161c;
+      --panel: #161f27;
+      --panel-sunken: #10171d;
+      --ink: #e8eef2;
+      --ink-soft: #93a4b0;
+      --line: #29343d;
+      --accent: #2dd4e6;
+      --accent-ink: #04222a;
+      --force-a: #6b9bff;
+      --force-b: #fb923c;
+      --resultant: #c4b5fd;
+      --ok: #4ade80;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0f161c;
+    --panel: #161f27;
+    --panel-sunken: #10171d;
+    --ink: #e8eef2;
+    --ink-soft: #93a4b0;
+    --line: #29343d;
+    --accent: #2dd4e6;
+    --accent-ink: #04222a;
+    --force-a: #6b9bff;
+    --force-b: #fb923c;
+    --resultant: #c4b5fd;
+    --ok: #4ade80;
+  }
+
+  * { box-sizing: border-box; }
+  *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    padding: 32px clamp(16px, 4vw, 48px) 56px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header.page { max-width: 780px; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(28px, 4vw, 38px);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 6px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+
+  p.intro {
+    color: var(--ink-soft);
+    font-size: 15.5px;
+    max-width: 68ch;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin: 18px 0 30px;
+    padding: 12px 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    width: fit-content;
+  }
+  .legend .chip { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
+  .legend .dot { width: 11px; height: 11px; border-radius: 3px; flex: none; display: inline-block; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(250px, 1fr);
+    gap: 22px;
+    align-items: start;
+  }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px 20px; }
+  .panel h2 { font-family: var(--font-display); font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 4px; }
+  .panel .sub { color: var(--ink-soft); font-size: 12.5px; margin: 0 0 14px; }
+
+  svg#stage { display: block; width: 100%; height: auto; background: var(--panel-sunken); border-radius: 6px; }
+
+  .stat-grid { margin-top: 12px; display: grid; gap: 6px; font-family: var(--font-mono); font-size: 13px; }
+  .stat-row { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border-bottom: 1px dashed var(--line); }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .k { color: var(--ink-soft); }
+  .stat-row .v { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat-row .v.accent-a { color: var(--force-a); }
+  .stat-row .v.accent-b { color: var(--force-b); }
+  .stat-row .v.accent-r { color: var(--resultant); }
+  .stat-row .v.accent-ok { color: var(--ok); }
+
+  .controls-panel .field { margin-bottom: 16px; }
+  .controls-panel label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .controls-panel label .val { font-family: var(--font-mono); font-weight: 600; }
+  .controls-panel label .val.accent-a { color: var(--force-a); }
+  .controls-panel label .val.accent-b { color: var(--force-b); }
+  .controls-panel label .val.accent-m { color: var(--accent); }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  input[type="range"].force-a { accent-color: var(--force-a); }
+  input[type="range"].force-b { accent-color: var(--force-b); }
+
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; margin-bottom: 16px; }
+  .seg button {
+    flex: 1; margin: 0; border: none; border-radius: 0; background: var(--panel);
+    font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    padding: 9px 8px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
+  }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button.active { background: var(--accent); color: var(--accent-ink); }
+  .seg button:hover:not(.active) { background: var(--panel-sunken); }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  button.btn {
+    font-family: var(--font-body); font-size: 14px; font-weight: 600; border-radius: 7px;
+    padding: 10px 16px; cursor: pointer; border: 1px solid var(--line); background: var(--panel);
+    color: var(--ink); transition: filter 0.15s ease;
+  }
+  button.btn:hover { filter: brightness(0.97); }
+  button.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .state-line {
+    margin-top: 12px; font-family: var(--font-mono); font-size: 13px; color: var(--ink-soft); min-height: 18px;
+  }
+  .state-line strong { color: var(--ink); font-weight: 600; }
+
+  footer.notes {
+    margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-soft); max-width: 78ch;
+  }
+  footer.notes strong { color: var(--ink); }
+
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+</style>
+
+<div class="wrap">
+  <header class="page">
+    <p class="eyebrow">Forces &middot; Newton's second law</p>
+    <h1>Free Body Diagram Explorer</h1>
+    <p class="intro">
+      One object, two opposing forces along a single axis. Set the forces and the mass and watch the
+      resultant force &mdash; drawn in violet, offset from the pair it was built from &mdash; drive the
+      object's acceleration, exactly as F<sub>net</sub>&nbsp;=&nbsp;ma predicts. Switch the axis to horizontal
+      or vertical, and swap the object between an idealised point and a real block.
+    </p>
+  </header>
+
+  <div class="legend">
+    <span class="chip"><span class="dot" style="background:var(--force-a)"></span><span id="legendA">Force, left</span></span>
+    <span class="chip"><span class="dot" style="background:var(--force-b)"></span><span id="legendB">Force, right</span></span>
+    <span class="chip"><span class="dot" style="background:var(--resultant)"></span>Resultant force, F<sub>net</sub></span>
+  </div>
+
+  <div class="layout">
+    <section class="panel">
+      <h2>Diagram</h2>
+      <p class="sub">The object moves freely along the chosen axis under the resultant force; it stops at the edge of the frame.</p>
+      <svg id="stage" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="state-line" id="stateLine">Status: <strong>balanced</strong></div>
+    </section>
+
+    <aside class="panel controls-panel">
+      <h2>Setup</h2>
+      <p class="sub">Adjust freely &mdash; the diagram updates live.</p>
+
+      <div class="field">
+        <label>Axis</label>
+        <div class="seg" id="axisSeg">
+          <button data-axis="horizontal" class="active">Horizontal</button>
+          <button data-axis="vertical">Vertical</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Object</label>
+        <div class="seg" id="shapeSeg">
+          <button data-shape="dot" class="active">Dot</button>
+          <button data-shape="object">Object</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="mass">Mass, m <span class="val accent-m" id="massVal">5.0 kg</span></label>
+        <input type="range" id="mass" min="1" max="20" step="0.5" value="5">
+      </div>
+      <div class="field">
+        <label for="forceA"><span id="forceALabel">Force left, F<sub>L</sub></span> <span class="val accent-a" id="forceAVal">15 N</span></label>
+        <input type="range" id="forceA" class="force-a" min="0" max="50" step="1" value="15">
+      </div>
+      <div class="field">
+        <label for="forceB"><span id="forceBLabel">Force right, F<sub>R</sub></span> <span class="val accent-b" id="forceBVal">25 N</span></label>
+        <input type="range" id="forceB" class="force-b" min="0" max="50" step="1" value="25">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="pauseBtn">Pause</button>
+        <button class="btn" id="resetBtn">Reset position</button>
+      </div>
+
+      <div class="stat-grid" id="statGrid"></div>
+    </aside>
+  </div>
+
+  <footer class="notes">
+    <strong>Model notes.</strong> Only one axis is loaded at a time, so the resultant is simply the difference
+    between the two forces shown. Acceleration is calculated for real &mdash; a&nbsp;=&nbsp;F<sub>net</sub>&nbsp;/&nbsp;m
+    in m/s&sup2; &mdash; but its effect on-screen is exaggerated for visibility: forces here aren't drawn to a
+    real-world newton scale, so treat the motion as illustrative, not measured.
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var NS = "http://www.w3.org/2000/svg";
+  var stage = document.getElementById("stage");
+  var W = 640, H = 480, CX = W / 2, CY = H / 2;
+  var PAD = 140;              // how far the object's centre may travel from the wall
+  var FORCE_SCALE = 1.9;      // px per newton for arrow length
+  var MAX_ARROW = 100;        // px, clamps arrow length so it never leaves the frame
+  var MOTION_SCALE = 22;      // converts real m/s^2 into a legible px/s^2 for the animation
+
+  // ---------- theme-aware colour lookup ----------
+  var colors = {};
+  function readColors() {
+    var s = getComputedStyle(document.documentElement);
+    colors.ink = s.getPropertyValue("--ink").trim();
+    colors.inkSoft = s.getPropertyValue("--ink-soft").trim();
+    colors.line = s.getPropertyValue("--line").trim();
+    colors.accent = s.getPropertyValue("--accent").trim();
+    colors.panelSunken = s.getPropertyValue("--panel-sunken").trim();
+    colors.panel = s.getPropertyValue("--panel").trim();
+    colors.forceA = s.getPropertyValue("--force-a").trim();
+    colors.forceB = s.getPropertyValue("--force-b").trim();
+    colors.resultant = s.getPropertyValue("--resultant").trim();
+    colors.ok = s.getPropertyValue("--ok").trim();
+  }
+  readColors();
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+      readColors();
+      render();
+    });
+  }
+
+  // ---------- svg helpers ----------
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function setAttrs(e, attrs) { for (var k in attrs) e.setAttribute(k, attrs[k]); }
+
+  var bg = el("rect", { x: 0, y: 0, width: W, height: H, fill: "var(--panel-sunken)" });
+  stage.appendChild(bg);
+
+  // frame boundary (dashed) showing the limit of travel
+  var boundary = el("rect", {
+    x: CX - PAD, y: CY - PAD, width: PAD * 2, height: PAD * 2,
+    fill: "none", stroke: "var(--line)", "stroke-width": 1.5, "stroke-dasharray": "5 5", rx: 8
+  });
+  stage.appendChild(boundary);
+
+  // reference cross at centre
+  var refV = el("line", { x1: CX, y1: CY - PAD, x2: CX, y2: CY + PAD, stroke: "var(--line)", "stroke-width": 1, "stroke-dasharray": "2 4" });
+  var refH = el("line", { x1: CX - PAD, y1: CY, x2: CX + PAD, y2: CY, stroke: "var(--line)", "stroke-width": 1, "stroke-dasharray": "2 4" });
+  stage.appendChild(refV);
+  stage.appendChild(refH);
+
+  // object group: dot representation
+  var dotGroup = el("g", { id: "dotGroup" });
+  var dotShadow = el("ellipse", { rx: 14, ry: 5, fill: "var(--line)", opacity: 0.5 });
+  var dotCircle = el("circle", { r: 10, fill: "var(--ink)" });
+  var dotCrossV = el("line", { x1: 0, y1: -6, x2: 0, y2: 6, stroke: "var(--panel-sunken)", "stroke-width": 1.6 });
+  var dotCrossH = el("line", { x1: -6, y1: 0, x2: 6, y2: 0, stroke: "var(--panel-sunken)", "stroke-width": 1.6 });
+  dotGroup.appendChild(dotShadow);
+  dotGroup.appendChild(dotCircle);
+  dotGroup.appendChild(dotCrossV);
+  dotGroup.appendChild(dotCrossH);
+
+  // object group: crate representation
+  var crateGroup = el("g", { id: "crateGroup" });
+  var crateShadow = el("ellipse", { rx: 40, ry: 8, fill: "var(--line)", opacity: 0.5 });
+  var crateBody = el("rect", { x: -34, y: -27, width: 68, height: 54, rx: 6, fill: "var(--ink)" });
+  var crateSlatV = el("line", { x1: 0, y1: -27, x2: 0, y2: 27, stroke: "var(--panel-sunken)", "stroke-width": 2, opacity: 0.55 });
+  var crateSlatD1 = el("line", { x1: -34, y1: -27, x2: 34, y2: 27, stroke: "var(--panel-sunken)", "stroke-width": 1.4, opacity: 0.35 });
+  var crateSlatD2 = el("line", { x1: 34, y1: -27, x2: -34, y2: 27, stroke: "var(--panel-sunken)", "stroke-width": 1.4, opacity: 0.35 });
+  crateGroup.appendChild(crateShadow);
+  crateGroup.appendChild(crateBody);
+  crateGroup.appendChild(crateSlatD1);
+  crateGroup.appendChild(crateSlatD2);
+  crateGroup.appendChild(crateSlatV);
+
+  var objectLayer = el("g");
+  objectLayer.appendChild(crateGroup);
+  objectLayer.appendChild(dotGroup);
+  stage.appendChild(objectLayer);
+
+  // ---------- arrow factory ----------
+  function makeArrow(color) {
+    var g = el("g");
+    var line = el("line", { stroke: color, "stroke-width": 4, "stroke-linecap": "round" });
+    var head = el("polygon", { fill: color });
+    var label = el("text", {
+      fill: color, "font-family": "'IBM Plex Mono', monospace", "font-size": 13, "font-weight": 600
+    });
+    g.appendChild(line);
+    g.appendChild(head);
+    g.appendChild(label);
+    stage.appendChild(g);
+    return { g: g, line: line, head: head, label: label, color: color };
+  }
+
+  var arrowA = makeArrow(colors.forceA);
+  var arrowB = makeArrow(colors.forceB);
+  var arrowR = makeArrow(colors.resultant);
+  var balancedMark = el("circle", { r: 5, fill: "var(--resultant)", opacity: 0 });
+  var balancedLabel = el("text", {
+    fill: "var(--resultant)", "font-family": "'IBM Plex Mono', monospace", "font-size": 13, "font-weight": 600, opacity: 0
+  });
+  stage.appendChild(balancedMark);
+  stage.appendChild(balancedLabel);
+
+  function drawArrow(a, x1, y1, x2, y2, labelText, labelDX, labelDY) {
+    var dx = x2 - x1, dy = y2 - y1;
+    var len = Math.hypot(dx, dy);
+    a.g.style.display = len < 1 ? "none" : "";
+    if (len < 1) return;
+    var ux = dx / len, uy = dy / len;
+    var headLen = 11;
+    var shaftX = x2 - ux * headLen, shaftY = y2 - uy * headLen;
+    setAttrs(a.line, { x1: x1, y1: y1, x2: shaftX, y2: shaftY, stroke: a.color });
+    var perp = 5.5;
+    var hx1 = shaftX + uy * perp, hy1 = shaftY - ux * perp;
+    var hx2 = shaftX - uy * perp, hy2 = shaftY + ux * perp;
+    a.head.setAttribute("points", x2 + "," + y2 + " " + hx1 + "," + hy1 + " " + hx2 + "," + hy2);
+    a.head.setAttribute("fill", a.color);
+    setAttrs(a.label, { x: x2 + (labelDX || 0), y: y2 + (labelDY || 0), fill: a.color });
+    a.label.textContent = labelText;
+  }
+
+  // ---------- state ----------
+  var state = {
+    axis: "horizontal",
+    shape: "dot",
+    mass: 5,
+    forceA: 15,   // left / up
+    forceB: 25,   // right / down
+    pos: 0,       // px offset from centre, along the active axis
+    vel: 0,
+    paused: false
+  };
+
+  function objectHalfExtent() {
+    return state.shape === "dot" ? 16 : 42; // gap from object edge to arrow start
+  }
+
+  function clampArrowLen(force) {
+    return Math.min(force * FORCE_SCALE, MAX_ARROW);
+  }
+
+  function render() {
+    var horiz = state.axis === "horizontal";
+    var half = objectHalfExtent();
+
+    // object position (clamped within the frame)
+    var maxTravel = PAD - half - 4;
+    state.pos = Math.max(-maxTravel, Math.min(maxTravel, state.pos));
+    var ox = horiz ? CX + state.pos : CX;
+    var oy = horiz ? CY : CY + state.pos;
+
+    dotGroup.style.display = state.shape === "dot" ? "" : "none";
+    crateGroup.style.display = state.shape === "object" ? "" : "none";
+    setAttrs(objectLayer, {});
+    objectLayer.setAttribute("transform", "translate(" + ox + "," + oy + ")");
+
+    // --- force arrows ---
+    var lenA = clampArrowLen(state.forceA);
+    var lenB = clampArrowLen(state.forceB);
+
+    if (horiz) {
+      // A = left (points -x), B = right (points +x)
+      drawArrow(arrowA, ox - half, oy, ox - half - lenA, oy, state.forceA.toFixed(0) + " N", -8, -10);
+      arrowA.label.setAttribute("text-anchor", "end");
+      drawArrow(arrowB, ox + half, oy, ox + half + lenB, oy, state.forceB.toFixed(0) + " N", 8, -10);
+      arrowB.label.setAttribute("text-anchor", "start");
+    } else {
+      // A = up (points -y), B = down (points +y)
+      drawArrow(arrowA, ox, oy - half, ox, oy - half - lenA, state.forceA.toFixed(0) + " N", 10, -4);
+      arrowA.label.setAttribute("text-anchor", "start");
+      drawArrow(arrowB, ox, oy + half, ox, oy + half + lenB, state.forceB.toFixed(0) + " N", 10, 4);
+      arrowB.label.setAttribute("text-anchor", "start");
+    }
+
+    // --- resultant, offset into its own lane, real signed physics ---
+    var net = horiz ? (state.forceB - state.forceA) : (state.forceA - state.forceB); // horiz: +right; vert: +up
+    var accel = net / state.mass; // m/s^2, signed in the "positive" convention above
+
+    var lenR = clampArrowLen(Math.abs(net));
+    if (Math.abs(net) < 0.05) {
+      arrowR.g.style.display = "none";
+      var mx = horiz ? ox : CX + PAD + 34;
+      var my = horiz ? CY + PAD + 34 : oy;
+      setAttrs(balancedMark, { cx: mx, cy: my, opacity: 1 });
+      setAttrs(balancedLabel, { x: mx + 10, y: my + 4, opacity: 1 });
+      balancedLabel.textContent = "balanced";
+    } else {
+      balancedMark.setAttribute("opacity", 0);
+      balancedLabel.setAttribute("opacity", 0);
+      if (horiz) {
+        var laneY = CY + PAD + 34;
+        var dir = net > 0 ? 1 : -1;
+        drawArrow(arrowR, ox, laneY, ox + dir * lenR, laneY, "F_net " + Math.abs(net).toFixed(0) + " N", dir > 0 ? 8 : -8, 4);
+        arrowR.label.setAttribute("text-anchor", dir > 0 ? "start" : "end");
+      } else {
+        var laneX = CX + PAD + 34;
+        var vdir = net > 0 ? -1 : 1; // net>0 means upward (screen -y)
+        drawArrow(arrowR, laneX, oy, laneX, oy + vdir * lenR, "F_net " + Math.abs(net).toFixed(0) + " N", 10, vdir > 0 ? 14 : -6);
+        arrowR.label.setAttribute("text-anchor", "start");
+      }
+    }
+
+    updateStats(net, accel, horiz);
+  }
+
+  function directionWord(net, horiz) {
+    if (Math.abs(net) < 0.05) return "balanced";
+    if (horiz) return net > 0 ? "rightward &rarr;" : "leftward &larr;";
+    return net > 0 ? "upward &uarr;" : "downward &darr;";
+  }
+
+  function row(k, v, cls) {
+    return '<div class="stat-row"><span class="k">' + k + '</span><span class="v' + (cls ? " " + cls : "") + '">' + v + "</span></div>";
+  }
+
+  function updateStats(net, accel, horiz) {
+    var el2 = document.getElementById("statGrid");
+    var labelA = horiz ? "Force left" : "Force up";
+    var labelB = horiz ? "Force right" : "Force down";
+    var dirWord = directionWord(net, horiz);
+    el2.innerHTML =
+      row(labelA, state.forceA.toFixed(0) + " N", "accent-a") +
+      row(labelB, state.forceB.toFixed(0) + " N", "accent-b") +
+      row("Resultant, F_net", Math.abs(net).toFixed(1) + " N", Math.abs(net) < 0.05 ? "accent-ok" : "accent-r") +
+      row("Mass, m", state.mass.toFixed(1) + " kg") +
+      row("Acceleration, a", Math.abs(accel).toFixed(2) + " m/s²") +
+      row("Direction", dirWord);
+
+    var stateLine = document.getElementById("stateLine");
+    if (Math.abs(net) < 0.05) {
+      stateLine.innerHTML = "Status: <strong>balanced &mdash; no acceleration</strong>";
+    } else {
+      stateLine.innerHTML = "Status: <strong>accelerating " + dirWord.replace("&rarr;", "→").replace("&larr;", "←").replace("&uarr;", "↑").replace("&darr;", "↓") + "</strong>";
+    }
+  }
+
+  // ---------- controls wiring ----------
+  var axisSeg = document.getElementById("axisSeg");
+  var shapeSeg = document.getElementById("shapeSeg");
+  var massInput = document.getElementById("mass");
+  var forceAInput = document.getElementById("forceA");
+  var forceBInput = document.getElementById("forceB");
+  var forceALabel = document.getElementById("forceALabel");
+  var forceBLabel = document.getElementById("forceBLabel");
+  var legendA = document.getElementById("legendA");
+  var legendB = document.getElementById("legendB");
+  var pauseBtn = document.getElementById("pauseBtn");
+  var resetBtn = document.getElementById("resetBtn");
+
+  function syncLabels() {
+    document.getElementById("massVal").textContent = state.mass.toFixed(1) + " kg";
+    document.getElementById("forceAVal").textContent = state.forceA.toFixed(0) + " N";
+    document.getElementById("forceBVal").textContent = state.forceB.toFixed(0) + " N";
+    if (state.axis === "horizontal") {
+      forceALabel.innerHTML = "Force left, F<sub>L</sub>";
+      forceBLabel.innerHTML = "Force right, F<sub>R</sub>";
+      legendA.innerHTML = "Force, left";
+      legendB.innerHTML = "Force, right";
+    } else {
+      forceALabel.innerHTML = "Force up, F<sub>U</sub>";
+      forceBLabel.innerHTML = "Force down, F<sub>D</sub>";
+      legendA.innerHTML = "Force, up";
+      legendB.innerHTML = "Force, down";
+    }
+  }
+
+  axisSeg.addEventListener("click", function (e) {
+    var btn = e.target.closest("button[data-axis]");
+    if (!btn) return;
+    state.axis = btn.getAttribute("data-axis");
+    state.pos = 0;
+    state.vel = 0;
+    Array.prototype.forEach.call(axisSeg.querySelectorAll("button"), function (b) { b.classList.toggle("active", b === btn); });
+    syncLabels();
+    render();
+  });
+
+  shapeSeg.addEventListener("click", function (e) {
+    var btn = e.target.closest("button[data-shape]");
+    if (!btn) return;
+    state.shape = btn.getAttribute("data-shape");
+    Array.prototype.forEach.call(shapeSeg.querySelectorAll("button"), function (b) { b.classList.toggle("active", b === btn); });
+    render();
+  });
+
+  massInput.addEventListener("input", function () { state.mass = parseFloat(massInput.value); syncLabels(); render(); });
+  forceAInput.addEventListener("input", function () { state.forceA = parseFloat(forceAInput.value); syncLabels(); render(); });
+  forceBInput.addEventListener("input", function () { state.forceB = parseFloat(forceBInput.value); syncLabels(); render(); });
+
+  pauseBtn.addEventListener("click", function () {
+    state.paused = !state.paused;
+    pauseBtn.textContent = state.paused ? "Resume" : "Pause";
+  });
+  resetBtn.addEventListener("click", function () {
+    state.pos = 0;
+    state.vel = 0;
+    render();
+  });
+
+  // ---------- physics loop ----------
+  var lastT = null;
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function frame(ts) {
+    if (lastT === null) lastT = ts;
+    var dt = Math.min((ts - lastT) / 1000, 0.05);
+    lastT = ts;
+
+    if (!state.paused && !reduceMotion) {
+      var horiz = state.axis === "horizontal";
+      var net = horiz ? (state.forceB - state.forceA) : (state.forceA - state.forceB);
+      var accelReal = net / state.mass;
+      var accelPx = accelReal * MOTION_SCALE * (horiz ? 1 : -1); // vertical: net>0 (up) means -y
+      state.vel += accelPx * dt;
+      state.pos += state.vel * dt;
+
+      var half = objectHalfExtent();
+      var maxTravel = PAD - half - 4;
+      if (state.pos > maxTravel) { state.pos = maxTravel; state.vel = 0; }
+      if (state.pos < -maxTravel) { state.pos = -maxTravel; state.vel = 0; }
+    }
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  syncLabels();
+  render();
+  requestAnimationFrame(frame);
+})();
+</script>

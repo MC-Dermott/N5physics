@@ -1,7 +1,17 @@
 import random
+import pathlib
 from utils.make_question import make_question
 from utils.notes import NOTES
 from topics.dynamics.forces import generate_forces
+
+_FBD_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "free_body_diagram_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_fbd_widget(question):
+    question.metadata["widget_html"] = _FBD_WIDGET_HTML
+    return question
 
 G = 9.8
 
@@ -88,9 +98,9 @@ def gen_vertical_unbalanced_force(level="S3"):
         {"question": "What is the weight of the object?", "answer": weight},
         {"question": "What is the unbalanced force?", "answer": unbalanced},
     ]
-    return make_question(question, unbalanced, options_data, "N", scaffold=scaffold,
+    return _with_fbd_widget(make_question(question, unbalanced, options_data, "N", scaffold=scaffold,
                          notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
-                         question_type="Unbalanced Forces", level=level)
+                         question_type="Unbalanced Forces", level=level))
 
 
 def gen_vertical_acceleration(level="S3"):
@@ -124,9 +134,9 @@ def gen_vertical_acceleration(level="S3"):
         {"question": "What is the unbalanced force?", "answer": unbalanced},
         {"question": "What is the acceleration?", "answer": accel},
     ]
-    return make_question(question, accel, options_data, "m/s²", scaffold=scaffold,
+    return _with_fbd_widget(make_question(question, accel, options_data, "m/s²", scaffold=scaffold,
                          notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
-                         question_type="Unbalanced Forces", level=level)
+                         question_type="Unbalanced Forces", level=level))
 
 
 def generate_unbalanced_forces_s3(level="S3"):
