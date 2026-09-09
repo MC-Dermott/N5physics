@@ -1,6 +1,17 @@
 import random
+import pathlib
 from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
+
+_COLLISIONS_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "momentum_collisions_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_collisions_widget(question):
+    question.metadata["widget_html"] = _COLLISIONS_WIDGET_HTML
+    question.metadata["widget_height"] = 900
+    return question
 
 _NOTES = """
 ## Momentum and Impulse
@@ -201,9 +212,9 @@ def gen_stick_together(level="Higher"):
         {"question": "What is the total momentum before the collision?", "answer": total_before},
         {"question": "What is the common velocity v after the collision?", "answer": v},
     ]
-    return make_question(question, v, options_data, "m/s", scaffold=scaffold,
+    return _with_collisions_widget(make_question(question, v, options_data, "m/s", scaffold=scaffold,
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Momentum and Impulse", level=level)
+                         question_type="Momentum and Impulse", level=level))
 
 
 # ── Type 3: Collisions where objects separate ────────────────────────────────
@@ -253,9 +264,9 @@ def gen_separate(level="Higher"):
         {"question": "What is the total momentum before the collision?", "answer": total_before},
         {"question": "What is v2, the velocity of the second object?", "answer": v2},
     ]
-    return make_question(question, v2, options_data, "m/s", scaffold=scaffold,
+    return _with_collisions_widget(make_question(question, v2, options_data, "m/s", scaffold=scaffold,
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Momentum and Impulse", level=level)
+                         question_type="Momentum and Impulse", level=level))
 
 
 # ── Type 4: Explosions and recoil ────────────────────────────────────────────
@@ -290,9 +301,9 @@ def gen_explosion(level="Higher"):
         {"question": "What is the momentum of fragment A (m1 × v1)?", "answer": momentum1},
         {"question": "What is the velocity of fragment B?", "answer": v2},
     ]
-    return make_question(question, v2, options_data, "m/s", scaffold=scaffold,
+    return _with_collisions_widget(make_question(question, v2, options_data, "m/s", scaffold=scaffold,
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Momentum and Impulse", level=level)
+                         question_type="Momentum and Impulse", level=level))
 
 
 # ── Impulse: Ft = mv - mu ─────────────────────────────────────────────────────

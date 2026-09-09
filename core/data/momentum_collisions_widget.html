@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentum in collisions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F2EA;
+    --grid:#DAD6C7;
+    --ink:#232323;
+    --ink-soft:#5B5A52;
+    --panel:#FBFAF5;
+    --line:#CFCBBA;
+    --objA:#2455A4;
+    --objB:#B5750E;
+    --positive:#2455A4;
+    --negative:#B23A2F;
+    --momentum:#7A4E9E;
+    --energy:#3E7A3F;
+    --warn:#B23A2F;
+    --ok:#3E7A3F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'IBM Plex Sans', Arial, sans-serif;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/32px 32px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/32px 32px,
+      var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    padding:28px;
+  }
+  .wrap{max-width:1520px; margin:0 auto;}
+  header{
+    margin-bottom:20px;
+    display:flex; align-items:baseline; justify-content:space-between;
+    flex-wrap:wrap; gap:8px;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:14px;
+  }
+  h1{font-size:22px; font-weight:600; margin:0; letter-spacing:0.2px;}
+  header p{margin:0; font-size:13px; color:var(--ink-soft); font-family:'IBM Plex Mono', monospace;}
+  .layout{display:grid; grid-template-columns:300px 1fr; gap:20px; align-items:start;}
+  @media (max-width:820px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--panel); border:1px solid var(--line); padding:18px 18px 20px;}
+  .panel h2{
+    font-size:12px; text-transform:uppercase; letter-spacing:1px; font-weight:600;
+    color:var(--ink-soft); margin:0 0 14px; font-family:'IBM Plex Mono', monospace;
+  }
+  .control{margin-bottom:18px;}
+  .control:last-child{margin-bottom:0;}
+  .control-label{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:14px; margin-bottom:6px;
+  }
+  .control-label span:last-child{font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--ink-soft);}
+  input[type=range]{-webkit-appearance:none; width:100%; height:4px; background:var(--line); outline:none; border-radius:2px;}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; background:var(--ink); border-radius:50%;
+    cursor:pointer; border:2px solid var(--panel); box-shadow:0 0 0 1px var(--ink);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px; height:16px; background:var(--ink); border-radius:50%; cursor:pointer;
+    border:2px solid var(--panel); box-shadow:0 0 0 1px var(--ink);
+  }
+  input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(36,85,164,0.4);}
+  .segmented{display:flex; border:1px solid var(--ink);}
+  .segmented button{
+    flex:1; padding:8px 6px; font-family:'IBM Plex Sans', sans-serif; font-size:13px;
+    background:var(--panel); border:none; border-left:1px solid var(--ink); cursor:pointer; color:var(--ink);
+  }
+  .segmented button:first-child{border-left:none;}
+  .segmented button.active{background:var(--ink); color:var(--panel);}
+  .segmented button:focus-visible{outline:2px solid var(--objA); outline-offset:-2px;}
+  .btn-row{display:flex; gap:8px; margin-top:10px;}
+  .btn{
+    flex:1; padding:8px 10px; font-family:'IBM Plex Sans', sans-serif; font-size:13px;
+    background:var(--panel); border:1px solid var(--ink); cursor:pointer; color:var(--ink);
+  }
+  .btn:hover{background:var(--grid);}
+  .btn:focus-visible{outline:2px solid var(--objA); outline-offset:2px;}
+  .toggle-row{display:flex; align-items:center; justify-content:space-between; font-size:14px;}
+  .switch{position:relative; width:40px; height:22px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0; position:absolute;}
+  .switch .track{position:absolute; inset:0; background:var(--line); border:1px solid var(--ink); cursor:pointer; transition:background .15s;}
+  .switch .track::before{
+    content:""; position:absolute; width:14px; height:14px; left:3px; top:3px;
+    background:var(--panel); border:1px solid var(--ink); transition:transform .15s;
+  }
+  .switch input:checked + .track{background:var(--warn);}
+  .switch input:checked + .track::before{transform:translateX(18px);}
+  .switch input:focus-visible + .track{outline:2px solid var(--objA); outline-offset:2px;}
+  .sub-row{margin-top:12px; padding-top:12px; border-top:1px dashed var(--line);}
+  .sub-row.hidden{display:none;}
+  .hint{font-size:12px; color:var(--ink-soft); margin-top:4px; line-height:1.4;}
+
+  .diagram-box{background:var(--panel); border:1px solid var(--line); padding:6px;}
+  svg{display:block; width:100%; height:auto;}
+
+  .legend{
+    display:flex; flex-wrap:wrap; gap:14px 22px; padding:12px 16px;
+    border-top:1px solid var(--line); font-size:12.5px; font-family:'IBM Plex Mono', monospace;
+  }
+  .legend-item{display:flex; align-items:center; gap:7px;}
+  .swatch{width:16px; height:3px; border-radius:2px;}
+  .swatch.dot{width:12px; height:12px; border-radius:50%;}
+
+  .readout{margin-top:16px; background:var(--panel); border:1px solid var(--line); padding:16px 18px;}
+  .readout h2{
+    font-size:12px; text-transform:uppercase; letter-spacing:1px; font-weight:600;
+    color:var(--ink-soft); margin:0 0 12px; font-family:'IBM Plex Mono', monospace;
+  }
+  table.rt{width:100%; border-collapse:collapse; font-size:14px;}
+  table.rt th, table.rt td{
+    text-align:right; padding:6px 8px; font-family:'IBM Plex Mono', monospace; font-size:13.5px;
+    border-bottom:1px solid var(--line);
+  }
+  table.rt th{
+    text-align:right; font-family:'IBM Plex Sans', sans-serif; font-size:12px; text-transform:uppercase;
+    letter-spacing:0.5px; color:var(--ink-soft); font-weight:600;
+  }
+  table.rt td:first-child, table.rt th:first-child{text-align:left; font-family:'IBM Plex Sans', sans-serif; font-size:13.5px;}
+  table.rt tr.total td{font-weight:600; color:var(--momentum);}
+  table.rt tr.energy td{color:var(--energy);}
+  table.rt tr.total.energy td{font-weight:600;}
+
+  .verdict{margin-top:14px; padding:10px 12px; border-left:3px solid var(--ok); font-size:13.5px; line-height:1.5; background:rgba(62,122,63,0.06);}
+  .verdict.warn{border-left-color:var(--warn); background:rgba(178,58,47,0.07);}
+  .verdict + .verdict{margin-top:10px;}
+  .verdict strong{font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Momentum in collisions</h1>
+    <p>total momentum before = total momentum after (no external force)</p>
+  </header>
+
+  <div class="layout">
+    <div class="panel">
+      <h2>Collision type</h2>
+      <div class="control">
+        <div class="segmented" role="group" aria-label="Collision type">
+          <button id="modeStick" type="button" class="active">Stick together</button>
+          <button id="modeSeparate" type="button">Separate</button>
+          <button id="modeExplosion" type="button">Explosion</button>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="control-label"><span>Mass A</span><span id="mAOut">1.0 kg</span></div>
+        <input type="range" id="mA" min="0.2" max="5" value="1" step="0.1">
+      </div>
+      <div class="control">
+        <div class="control-label"><span>Mass B</span><span id="mBOut">1.0 kg</span></div>
+        <input type="range" id="mB" min="0.2" max="5" value="1" step="0.1">
+      </div>
+
+      <div id="uRow">
+        <div class="control">
+          <div class="control-label"><span>Velocity of A (u<sub>A</sub>)</span><span id="uAOut">+4.0 m/s</span></div>
+          <input type="range" id="uA" min="-10" max="10" value="4" step="0.5">
+        </div>
+        <div class="control">
+          <div class="control-label"><span>Velocity of B (u<sub>B</sub>)</span><span id="uBOut">0.0 m/s</span></div>
+          <input type="range" id="uB" min="-10" max="10" value="0" step="0.5">
+        </div>
+      </div>
+
+      <div class="control sub-row hidden" id="restitutionRow">
+        <div class="control-label"><span>How bouncy?</span><span id="eOut">Elastic (e = 1.0)</span></div>
+        <input type="range" id="restitution" min="0" max="1" value="1" step="0.05">
+        <div class="hint">e = 1: perfectly elastic (kinetic energy conserved). e &lt; 1: inelastic — some kinetic energy is lost, but the two still separate.</div>
+      </div>
+
+      <div class="control sub-row hidden" id="explosionRow">
+        <div class="control-label"><span>Launch velocity of A</span><span id="vExpOut">+6.0 m/s</span></div>
+        <input type="range" id="vExp" min="-10" max="10" value="6" step="0.5">
+        <div class="hint">Both fragments start joined together at rest, so total momentum before the explosion is zero.</div>
+      </div>
+
+      <div class="control">
+        <div class="toggle-row">
+          <span>External force on A during collision</span>
+          <label class="switch">
+            <input type="checkbox" id="externalToggle">
+            <span class="track" aria-hidden="true"></span>
+          </label>
+        </div>
+        <div class="sub-row hidden" id="externalRow">
+          <div class="control-label"><span>Extra velocity change on A</span><span id="dvOut">+2.0 m/s</span></div>
+          <input type="range" id="dv" min="-8" max="8" value="2" step="0.5">
+          <div class="hint">A push from outside the A–B system during the collision changes A's velocity by this extra amount — so momentum is no longer conserved.</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button id="runBtn" type="button" class="btn">Run collision</button>
+        <button id="resetBtn" type="button" class="btn">Reset</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="diagram-box">
+        <svg id="scene" viewBox="0 0 760 400" role="img" aria-labelledby="svgTitle svgDesc">
+          <title id="svgTitle">Diagram of two objects colliding along a line</title>
+          <desc id="svgDesc">Two blocks move along a horizontal track, collide, and move apart or stick together, with arrows showing their velocity direction and magnitude before and after.</desc>
+          <defs>
+            <marker id="arrowPos" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M1 1L9 5L1 9Z" fill="var(--positive)"/>
+            </marker>
+            <marker id="arrowNeg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M1 1L9 5L1 9Z" fill="var(--negative)"/>
+            </marker>
+            <marker id="arrowExternal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M1 1L9 5L1 9Z" fill="var(--warn)"/>
+            </marker>
+          </defs>
+
+          <g id="dirIndicator"></g>
+          <line id="trackLine" stroke="var(--ink)" stroke-width="1.5"/>
+          <g id="ticks"></g>
+          <line id="centerMark" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 4"/>
+
+          <g id="impactFlash"></g>
+          <g id="blocks"></g>
+          <g id="velocityArrows"></g>
+          <g id="externalArrow"></g>
+        </svg>
+        <div class="legend">
+          <div class="legend-item"><span class="swatch dot" style="background:var(--objA)"></span>Object A</div>
+          <div class="legend-item"><span class="swatch dot" style="background:var(--objB)"></span>Object B</div>
+          <div class="legend-item"><span class="swatch" style="background:var(--positive)"></span>Moving in + direction</div>
+          <div class="legend-item"><span class="swatch" style="background:var(--negative)"></span>Moving in &minus; direction</div>
+          <div class="legend-item"><span class="swatch" style="background:var(--warn)"></span>External force</div>
+        </div>
+      </div>
+
+      <div class="readout">
+        <h2>Values</h2>
+        <table class="rt">
+          <thead><tr><th>Quantity</th><th>Before</th><th>After</th></tr></thead>
+          <tbody>
+            <tr><td>Momentum of A</td><td id="pAbefore">0</td><td id="pAafter">0</td></tr>
+            <tr><td>Momentum of B</td><td id="pBbefore">0</td><td id="pBafter">0</td></tr>
+            <tr class="total"><td>Total momentum</td><td id="pTotBefore">0</td><td id="pTotAfter">0</td></tr>
+            <tr class="energy"><td>Kinetic energy of A</td><td id="ekAbefore">0</td><td id="ekAafter">0</td></tr>
+            <tr class="energy"><td>Kinetic energy of B</td><td id="ekBbefore">0</td><td id="ekBafter">0</td></tr>
+            <tr class="total energy"><td>Total kinetic energy</td><td id="ekTotBefore">0</td><td id="ekTotAfter">0</td></tr>
+          </tbody>
+        </table>
+        <div id="momentumVerdict" class="verdict"></div>
+        <div id="energyVerdict" class="verdict"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var state = {
+    mode: 'stick',
+    mA: 1.0, mB: 1.0,
+    uA: 4.0, uB: 0.0,
+    restitution: 1.0,
+    vExp: 6.0,
+    externalOn: false,
+    dv: 2.0,
+    phase: 0,
+    animating: false
+  };
+
+  var els = {};
+  ['mA','mB','uA','uB','restitution','vExp','dv'].forEach(function(id){ els[id] = document.getElementById(id); });
+  var externalToggle = document.getElementById('externalToggle');
+  var modeStickBtn = document.getElementById('modeStick');
+  var modeSeparateBtn = document.getElementById('modeSeparate');
+  var modeExplosionBtn = document.getElementById('modeExplosion');
+  var uRow = document.getElementById('uRow');
+  var restitutionRow = document.getElementById('restitutionRow');
+  var explosionRow = document.getElementById('explosionRow');
+  var externalRow = document.getElementById('externalRow');
+  var runBtn = document.getElementById('runBtn');
+  var resetBtn = document.getElementById('resetBtn');
+
+  function fmtSigned(v, dp){
+    dp = (dp === undefined) ? 1 : dp;
+    var s = v.toFixed(dp);
+    if (v >= 0 && s.charAt(0) !== '-') s = '+' + s;
+    return s;
+  }
+  function fmt(v, dp){
+    dp = (dp === undefined) ? 2 : dp;
+    return v.toFixed(dp);
+  }
+
+  function setMode(mode){
+    state.mode = mode;
+    modeStickBtn.classList.toggle('active', mode === 'stick');
+    modeSeparateBtn.classList.toggle('active', mode === 'separate');
+    modeExplosionBtn.classList.toggle('active', mode === 'explosion');
+    uRow.style.display = (mode === 'explosion') ? 'none' : '';
+    restitutionRow.classList.toggle('hidden', mode !== 'separate');
+    explosionRow.classList.toggle('hidden', mode !== 'explosion');
+    resetAnim();
+    render();
+  }
+  modeStickBtn.addEventListener('click', function(){ setMode('stick'); });
+  modeSeparateBtn.addEventListener('click', function(){ setMode('separate'); });
+  modeExplosionBtn.addEventListener('click', function(){ setMode('explosion'); });
+
+  els.mA.addEventListener('input', function(){ state.mA = parseFloat(els.mA.value); document.getElementById('mAOut').textContent = fmt(state.mA,1) + ' kg'; resetAnim(); render(); });
+  els.mB.addEventListener('input', function(){ state.mB = parseFloat(els.mB.value); document.getElementById('mBOut').textContent = fmt(state.mB,1) + ' kg'; resetAnim(); render(); });
+  els.uA.addEventListener('input', function(){ state.uA = parseFloat(els.uA.value); document.getElementById('uAOut').textContent = fmtSigned(state.uA) + ' m/s'; resetAnim(); render(); });
+  els.uB.addEventListener('input', function(){ state.uB = parseFloat(els.uB.value); document.getElementById('uBOut').textContent = fmtSigned(state.uB) + ' m/s'; resetAnim(); render(); });
+  els.restitution.addEventListener('input', function(){
+    state.restitution = parseFloat(els.restitution.value);
+    var label = state.restitution >= 0.999 ? 'Elastic (e = 1.0)' : (state.restitution <= 0.001 ? 'Perfectly inelastic (e = 0)' : ('Inelastic (e = ' + fmt(state.restitution,2) + ')'));
+    document.getElementById('eOut').textContent = label;
+    resetAnim(); render();
+  });
+  els.vExp.addEventListener('input', function(){ state.vExp = parseFloat(els.vExp.value); document.getElementById('vExpOut').textContent = fmtSigned(state.vExp) + ' m/s'; resetAnim(); render(); });
+  els.dv.addEventListener('input', function(){ state.dv = parseFloat(els.dv.value); document.getElementById('dvOut').textContent = fmtSigned(state.dv) + ' m/s'; resetAnim(); render(); });
+  externalToggle.addEventListener('change', function(){
+    state.externalOn = externalToggle.checked;
+    externalRow.classList.toggle('hidden', !state.externalOn);
+    resetAnim(); render();
+  });
+
+  function resetAnim(){
+    state.phase = 0;
+    state.animating = false;
+    runBtn.disabled = false;
+  }
+  resetBtn.addEventListener('click', resetAnim);
+  runBtn.addEventListener('click', function(){
+    if (state.animating) return;
+    state.animating = true;
+    state.phase = 0;
+    var start = null;
+    var DURATION = 1800;
+    function step(ts){
+      if (start === null) start = ts;
+      var elapsed = ts - start;
+      state.phase = Math.min(elapsed / DURATION, 1);
+      render();
+      if (state.phase < 1){
+        requestAnimationFrame(step);
+      } else {
+        state.animating = false;
+      }
+    }
+    requestAnimationFrame(step);
+  });
+
+  function computePhysics(){
+    var mA = state.mA, mB = state.mB;
+    var uA, uB, vA, vB;
+    if (state.mode === 'explosion'){
+      uA = 0; uB = 0;
+      vA = state.vExp;
+      vB = -(mA * vA) / mB;
+    } else {
+      uA = state.uA; uB = state.uB;
+      if (state.mode === 'stick'){
+        var vCommon = (mA * uA + mB * uB) / (mA + mB);
+        vA = vCommon; vB = vCommon;
+      } else {
+        var e = state.restitution;
+        vA = ((mA - e * mB) * uA + (1 + e) * mB * uB) / (mA + mB);
+        vB = ((mB - e * mA) * uB + (1 + e) * mA * uA) / (mA + mB);
+      }
+    }
+    var vAfinal = vA + (state.externalOn ? state.dv : 0);
+    var vBfinal = vB;
+    var totalBefore = mA * uA + mB * uB;
+    var totalAfter = mA * vAfinal + mB * vBfinal;
+    var ekBefore = 0.5 * mA * uA * uA + 0.5 * mB * uB * uB;
+    var ekAfter = 0.5 * mA * vAfinal * vAfinal + 0.5 * mB * vBfinal * vBfinal;
+    return {
+      mA: mA, mB: mB, uA: uA, uB: uB, vA: vAfinal, vB: vBfinal,
+      totalBefore: totalBefore, totalAfter: totalAfter,
+      ekBefore: ekBefore, ekAfter: ekAfter
+    };
+  }
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs){
+    var e = document.createElementNS(svgNS, tag);
+    for (var k in attrs){ e.setAttribute(k, attrs[k]); }
+    return e;
+  }
+
+  var trackY = 240, trackX0 = 70, trackX1 = 690, centerX = (trackX0 + trackX1) / 2;
+  var halfSpan = (trackX1 - trackX0) / 2 - 60;
+
+  function trackX(u){ return centerX + u * halfSpan; }
+
+  function blockSize(m){
+    return Math.max(34, Math.min(86, 30 + 18 * Math.sqrt(m)));
+  }
+
+  function velColor(v){ return Math.abs(v) < 0.05 ? 'var(--ink-soft)' : (v > 0 ? 'var(--positive)' : 'var(--negative)'); }
+  function velMarker(v){ return v >= 0 ? 'arrowPos' : 'arrowNeg'; }
+
+  function easeInOut(t){ return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
+
+  function finalPos(v){
+    if (Math.abs(v) < 0.05) return 0;
+    var mag = 0.35 + 0.55 * Math.min(Math.abs(v) / 10, 1);
+    return (v > 0 ? 1 : -1) * mag;
+  }
+
+  function render(){
+    document.getElementById('trackLine').setAttribute('x1', trackX0 - 20);
+    document.getElementById('trackLine').setAttribute('x2', trackX1 + 20);
+    document.getElementById('trackLine').setAttribute('y1', trackY + 60);
+    document.getElementById('trackLine').setAttribute('y2', trackY + 60);
+    document.getElementById('centerMark').setAttribute('x1', centerX);
+    document.getElementById('centerMark').setAttribute('x2', centerX);
+    document.getElementById('centerMark').setAttribute('y1', trackY - 90);
+    document.getElementById('centerMark').setAttribute('y2', trackY + 60);
+
+    var ticks = document.getElementById('ticks');
+    ticks.innerHTML = '';
+    for (var i = -1; i <= 1; i += 0.5){
+      var tx = trackX(i);
+      ticks.appendChild(el('line', {x1: tx, y1: trackY + 55, x2: tx, y2: trackY + 65, stroke:'var(--ink-soft)', 'stroke-width':1}));
+    }
+
+    var dirG = document.getElementById('dirIndicator');
+    dirG.innerHTML = '';
+    var dirY = 34;
+    dirG.appendChild(el('line', {x1: centerX - 45, y1: dirY, x2: centerX + 45, y2: dirY, stroke:'var(--positive)', 'stroke-width':2.5, 'marker-end':'url(#arrowPos)'}));
+    var dirLabel = el('text', {x: centerX, y: dirY - 10, 'text-anchor':'middle', 'font-family':'IBM Plex Mono, monospace', 'font-size':12.5, fill:'var(--ink-soft)'});
+    dirLabel.textContent = 'positive direction';
+    dirG.appendChild(dirLabel);
+
+    var phys = computePhysics();
+    var p = state.phase;
+    var approach = Math.min(p / 0.5, 1);
+    var separate = Math.max((p - 0.5) / 0.5, 0);
+    var eApproach = easeInOut(approach);
+    var eSeparate = easeInOut(separate);
+
+    var blocksG = document.getElementById('blocks');
+    var arrowsG = document.getElementById('velocityArrows');
+    var flashG = document.getElementById('impactFlash');
+    var extG = document.getElementById('externalArrow');
+    blocksG.innerHTML = ''; arrowsG.innerHTML = ''; flashG.innerHTML = ''; extG.innerHTML = '';
+
+    var sizeA = blockSize(phys.mA), sizeB = blockSize(phys.mB);
+    var blockY = trackY;
+
+    function drawBlock(cx, cy, size, color, label){
+      var g = el('g', {});
+      g.appendChild(el('rect', {x: cx - size/2, y: cy - size/2, width: size, height: size, fill: color, stroke:'var(--ink)', 'stroke-width':2, rx:4}));
+      var t = el('text', {x: cx, y: cy + 5, 'text-anchor':'middle', 'font-family':'IBM Plex Sans, sans-serif', 'font-size':14, 'font-weight':600, fill:'#FBFAF5'});
+      t.textContent = label;
+      g.appendChild(t);
+      blocksG.appendChild(g);
+      return {x: cx, y: cy};
+    }
+
+    function drawArrow(cx, cy, v, size){
+      if (Math.abs(v) < 0.05) return;
+      var len = Math.min(Math.abs(v) * 7, 130);
+      var dir = v > 0 ? 1 : -1;
+      var y = cy - size/2 - 22;
+      var x2 = cx + dir * len;
+      arrowsG.appendChild(el('line', {x1: cx, y1: y, x2: x2, y2: y, stroke: velColor(v), 'stroke-width':3, 'marker-end':'url(#' + velMarker(v) + ')'}));
+      var lbl = el('text', {x: (cx + x2)/2, y: y - 8, 'text-anchor':'middle', 'font-family':'IBM Plex Mono, monospace', 'font-size':13, 'font-weight':500, fill: velColor(v)});
+      lbl.textContent = fmtSigned(v) + ' m/s';
+      arrowsG.appendChild(lbl);
+    }
+
+    if (state.mode === 'explosion'){
+      if (p < 0.5){
+        var mergedSize = blockSize(phys.mA + phys.mB);
+        var splitFrac = phys.mA / (phys.mA + phys.mB);
+        var cx = centerX;
+        var g = el('g', {});
+        g.appendChild(el('rect', {x: cx - mergedSize/2, y: blockY - mergedSize/2, width: mergedSize * splitFrac, height: mergedSize, fill:'var(--objA)', stroke:'var(--ink)', 'stroke-width':2}));
+        g.appendChild(el('rect', {x: cx - mergedSize/2 + mergedSize*splitFrac, y: blockY - mergedSize/2, width: mergedSize * (1-splitFrac), height: mergedSize, fill:'var(--objB)', stroke:'var(--ink)', 'stroke-width':2}));
+        blocksG.appendChild(g);
+        drawArrow(cx, blockY, 0, mergedSize);
+      } else {
+        var xA = eSeparate * finalPos(phys.vA);
+        var xB = eSeparate * finalPos(phys.vB);
+        drawBlock(trackX(xA), blockY, sizeA, 'var(--objA)', 'A');
+        drawBlock(trackX(xB), blockY, sizeB, 'var(--objB)', 'B');
+        drawArrow(trackX(xA), blockY, phys.vA, sizeA);
+        drawArrow(trackX(xB), blockY, phys.vB, sizeB);
+      }
+      if (p >= 0.42 && p <= 0.62){
+        var fa = 1 - Math.abs(p - 0.5) / 0.12;
+        flashG.appendChild(el('circle', {cx: centerX, cy: blockY, r: 10 + 40*(p-0.42)/0.2, fill:'none', stroke:'var(--warn)', 'stroke-width':2, opacity: Math.max(fa,0)*0.7}));
+      }
+    } else if (state.mode === 'stick'){
+      if (p < 0.5){
+        var xA0 = -1, xB0 = 1;
+        var xA = xA0 + eApproach * (0 - xA0);
+        var xB = xB0 + eApproach * (0 - xB0);
+        drawBlock(trackX(xA), blockY, sizeA, 'var(--objA)', 'A');
+        drawBlock(trackX(xB), blockY, sizeB, 'var(--objB)', 'B');
+        drawArrow(trackX(xA), blockY, phys.uA, sizeA);
+        drawArrow(trackX(xB), blockY, phys.uB, sizeB);
+      } else {
+        var mergedSize = blockSize(phys.mA + phys.mB);
+        var splitFrac = phys.mA / (phys.mA + phys.mB);
+        var cx = trackX(eSeparate * finalPos(phys.vA));
+        var g = el('g', {});
+        g.appendChild(el('rect', {x: cx - mergedSize/2, y: blockY - mergedSize/2, width: mergedSize * splitFrac, height: mergedSize, fill:'var(--objA)', stroke:'var(--ink)', 'stroke-width':2}));
+        g.appendChild(el('rect', {x: cx - mergedSize/2 + mergedSize*splitFrac, y: blockY - mergedSize/2, width: mergedSize * (1-splitFrac), height: mergedSize, fill:'var(--objB)', stroke:'var(--ink)', 'stroke-width':2}));
+        blocksG.appendChild(g);
+        drawArrow(cx, blockY, phys.vA, mergedSize);
+      }
+      if (p >= 0.42 && p <= 0.62){
+        var fa = 1 - Math.abs(p - 0.5) / 0.12;
+        flashG.appendChild(el('circle', {cx: centerX, cy: blockY, r: 10 + 40*(p-0.42)/0.2, fill:'none', stroke:'var(--warn)', 'stroke-width':2, opacity: Math.max(fa,0)*0.7}));
+      }
+    } else {
+      var xA0 = -1, xB0 = 1;
+      var xA, xB;
+      if (p < 0.5){
+        xA = xA0 + eApproach * (0 - xA0);
+        xB = xB0 + eApproach * (0 - xB0);
+      } else {
+        xA = eSeparate * finalPos(phys.vA);
+        xB = eSeparate * finalPos(phys.vB);
+      }
+      drawBlock(trackX(xA), blockY, sizeA, 'var(--objA)', 'A');
+      drawBlock(trackX(xB), blockY, sizeB, 'var(--objB)', 'B');
+      drawArrow(trackX(xA), blockY, p < 0.5 ? phys.uA : phys.vA, sizeA);
+      drawArrow(trackX(xB), blockY, p < 0.5 ? phys.uB : phys.vB, sizeB);
+      if (p >= 0.42 && p <= 0.62){
+        var fa = 1 - Math.abs(p - 0.5) / 0.12;
+        flashG.appendChild(el('circle', {cx: centerX, cy: blockY, r: 10 + 40*(p-0.42)/0.2, fill:'none', stroke:'var(--warn)', 'stroke-width':2, opacity: Math.max(fa,0)*0.7}));
+      }
+    }
+
+    if (state.externalOn && p >= 0.42 && p <= 0.68){
+      var opacity = 1 - Math.abs(p - 0.55) / 0.13;
+      var extDir = state.dv >= 0 ? 1 : -1;
+      var ax = trackX(0);
+      var ay = blockY + 46;
+      var x2 = ax + extDir * 55;
+      extG.appendChild(el('line', {x1: ax, y1: ay, x2: x2, y2: ay, stroke:'var(--warn)', 'stroke-width':3, 'marker-end':'url(#arrowExternal)', opacity: Math.max(opacity,0)}));
+      var lbl = el('text', {x:(ax+x2)/2, y: ay + 18, 'text-anchor':'middle', 'font-family':'IBM Plex Mono, monospace', 'font-size':12, 'font-weight':600, fill:'var(--warn)', opacity: Math.max(opacity,0)});
+      lbl.textContent = 'external force on A';
+      extG.appendChild(lbl);
+    }
+
+    document.getElementById('pAbefore').textContent = fmt(phys.mA * phys.uA) + ' kg·m/s';
+    document.getElementById('pAafter').textContent = fmt(phys.mA * phys.vA) + ' kg·m/s';
+    document.getElementById('pBbefore').textContent = fmt(phys.mB * phys.uB) + ' kg·m/s';
+    document.getElementById('pBafter').textContent = fmt(phys.mB * phys.vB) + ' kg·m/s';
+    document.getElementById('pTotBefore').textContent = fmt(phys.totalBefore) + ' kg·m/s';
+    document.getElementById('pTotAfter').textContent = fmt(phys.totalAfter) + ' kg·m/s';
+    document.getElementById('ekAbefore').textContent = fmt(0.5*phys.mA*phys.uA*phys.uA) + ' J';
+    document.getElementById('ekAafter').textContent = fmt(0.5*phys.mA*phys.vA*phys.vA) + ' J';
+    document.getElementById('ekBbefore').textContent = fmt(0.5*phys.mB*phys.uB*phys.uB) + ' J';
+    document.getElementById('ekBafter').textContent = fmt(0.5*phys.mB*phys.vB*phys.vB) + ' J';
+    document.getElementById('ekTotBefore').textContent = fmt(phys.ekBefore) + ' J';
+    document.getElementById('ekTotAfter').textContent = fmt(phys.ekAfter) + ' J';
+
+    var mv = document.getElementById('momentumVerdict');
+    var diff = Math.abs(phys.totalAfter - phys.totalBefore);
+    if (!state.externalOn || diff < 0.02){
+      mv.className = 'verdict';
+      mv.innerHTML = '<strong>Momentum conserved:</strong> total momentum before (' + fmt(phys.totalBefore) + ' kg·m/s) equals total momentum after (' + fmt(phys.totalAfter) + ' kg·m/s) &mdash; no external force is acting on the A&ndash;B system.';
+    } else {
+      mv.className = 'verdict warn';
+      mv.innerHTML = '<strong>Momentum NOT conserved:</strong> total momentum before (' + fmt(phys.totalBefore) + ' kg·m/s) does not equal total momentum after (' + fmt(phys.totalAfter) + ' kg·m/s) because an external force acted on A during the collision.';
+    }
+
+    var ev = document.getElementById('energyVerdict');
+    var ediff = phys.ekAfter - phys.ekBefore;
+    if (state.mode === 'explosion'){
+      ev.className = 'verdict';
+      ev.innerHTML = '<strong>Kinetic energy increases</strong> from ' + fmt(phys.ekBefore) + ' J to ' + fmt(phys.ekAfter) + ' J. This is expected in an explosion &mdash; stored (e.g. chemical) energy converts into kinetic energy.';
+    } else if (Math.abs(ediff) < 0.02 * Math.max(phys.ekBefore, 0.02)){
+      ev.className = 'verdict';
+      ev.innerHTML = '<strong>Elastic collision:</strong> total kinetic energy is the same before (' + fmt(phys.ekBefore) + ' J) and after (' + fmt(phys.ekAfter) + ' J).';
+    } else {
+      ev.className = 'verdict warn';
+      ev.innerHTML = '<strong>Inelastic collision:</strong> total kinetic energy falls from ' + fmt(phys.ekBefore) + ' J to ' + fmt(phys.ekAfter) + ' J &mdash; the difference is transferred to heat, sound and deformation.';
+    }
+  }
+
+  setMode('stick');
+  render();
+})();
+</script>
+</body>
+</html>
