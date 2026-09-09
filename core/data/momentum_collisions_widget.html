@@ -188,16 +188,17 @@
 
       <div class="control">
         <div class="toggle-row">
-          <span>External force on A during collision</span>
+          <span>Something else also pushes A</span>
           <label class="switch">
             <input type="checkbox" id="externalToggle">
             <span class="track" aria-hidden="true"></span>
           </label>
         </div>
+        <div class="hint">Momentum is only conserved if A and B are a closed system — the only forces are the ones they exert on each other. Switch this on to see what happens if something outside the system (a wall, a motor, friction) also acts on A during the collision.</div>
         <div class="sub-row hidden" id="externalRow">
-          <div class="control-label"><span>Extra velocity change on A</span><span id="dvOut">+2.0 m/s</span></div>
+          <div class="control-label"><span>Speed this adds to A</span><span id="dvOut">+2.0 m/s</span></div>
           <input type="range" id="dv" min="-8" max="8" value="2" step="0.5">
-          <div class="hint">A push from outside the A–B system during the collision changes A's velocity by this extra amount — so momentum is no longer conserved.</div>
+          <div class="hint">A leaves the collision this much faster (or slower) than momentum conservation alone would predict — so total momentum before no longer equals total momentum after.</div>
         </div>
       </div>
 
@@ -412,10 +413,34 @@
 
   function easeInOut(t){ return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
 
-  function finalPos(v){
-    if (Math.abs(v) < 0.05) return 0;
+  function restPosOrFinal(v, restPos){
+    if (Math.abs(v) < 0.05) return restPos;
     var mag = 0.35 + 0.55 * Math.min(Math.abs(v) / 10, 1);
     return (v > 0 ? 1 : -1) * mag;
+  }
+
+  function contactPositions(sizeA, sizeB){
+    var gap = (sizeA / 2 + sizeB / 2) / halfSpan;
+    return { gap: gap, xA: -gap / 2, xB: gap / 2 };
+  }
+
+  function keepApart(xA, xB, sizeA, sizeB){
+    var gap = (sizeA / 2 + sizeB / 2) / halfSpan;
+    if (xB - xA < gap){
+      var mid = (xA + xB) / 2;
+      return { xA: mid - gap / 2, xB: mid + gap / 2 };
+    }
+    return { xA: xA, xB: xB };
+  }
+
+  function splitLaunchPositions(mA, mB){
+    var mergedSize = blockSize(mA + mB);
+    var splitFrac = mA / (mA + mB);
+    var aWidth = mergedSize * splitFrac;
+    var bWidth = mergedSize * (1 - splitFrac);
+    var aCenterPx = -mergedSize / 2 + aWidth / 2;
+    var bCenterPx = -mergedSize / 2 + aWidth + bWidth / 2;
+    return { xA: aCenterPx / halfSpan, xB: bCenterPx / halfSpan };
   }
 
   function render(){
@@ -481,6 +506,8 @@
       arrowsG.appendChild(lbl);
     }
 
+    var contact = contactPositions(sizeA, sizeB);
+
     if (state.mode === 'explosion'){
       if (p < 0.5){
         var mergedSize = blockSize(phys.mA + phys.mB);
@@ -492,12 +519,14 @@
         blocksG.appendChild(g);
         drawArrow(cx, blockY, 0, mergedSize);
       } else {
-        var xA = eSeparate * finalPos(phys.vA);
-        var xB = eSeparate * finalPos(phys.vB);
-        drawBlock(trackX(xA), blockY, sizeA, 'var(--objA)', 'A');
-        drawBlock(trackX(xB), blockY, sizeB, 'var(--objB)', 'B');
-        drawArrow(trackX(xA), blockY, phys.vA, sizeA);
-        drawArrow(trackX(xB), blockY, phys.vB, sizeB);
+        var launch = splitLaunchPositions(phys.mA, phys.mB);
+        var xA = launch.xA + eSeparate * (restPosOrFinal(phys.vA, launch.xA) - launch.xA);
+        var xB = launch.xB + eSeparate * (restPosOrFinal(phys.vB, launch.xB) - launch.xB);
+        var kept = keepApart(xA, xB, sizeA, sizeB);
+        drawBlock(trackX(kept.xA), blockY, sizeA, 'var(--objA)', 'A');
+        drawBlock(trackX(kept.xB), blockY, sizeB, 'var(--objB)', 'B');
+        drawArrow(trackX(kept.xA), blockY, phys.vA, sizeA);
+        drawArrow(trackX(kept.xB), blockY, phys.vB, sizeB);
       }
       if (p >= 0.42 && p <= 0.62){
         var fa = 1 - Math.abs(p - 0.5) / 0.12;
@@ -505,9 +534,8 @@
       }
     } else if (state.mode === 'stick'){
       if (p < 0.5){
-        var xA0 = -1, xB0 = 1;
-        var xA = xA0 + eApproach * (0 - xA0);
-        var xB = xB0 + eApproach * (0 - xB0);
+        var xA = -1 + eApproach * (contact.xA - (-1));
+        var xB = 1 + eApproach * (contact.xB - 1);
         drawBlock(trackX(xA), blockY, sizeA, 'var(--objA)', 'A');
         drawBlock(trackX(xB), blockY, sizeB, 'var(--objB)', 'B');
         drawArrow(trackX(xA), blockY, phys.uA, sizeA);
@@ -515,7 +543,7 @@
       } else {
         var mergedSize = blockSize(phys.mA + phys.mB);
         var splitFrac = phys.mA / (phys.mA + phys.mB);
-        var cx = trackX(eSeparate * finalPos(phys.vA));
+        var cx = trackX(eSeparate * restPosOrFinal(phys.vA, 0));
         var g = el('g', {});
         g.appendChild(el('rect', {x: cx - mergedSize/2, y: blockY - mergedSize/2, width: mergedSize * splitFrac, height: mergedSize, fill:'var(--objA)', stroke:'var(--ink)', 'stroke-width':2}));
         g.appendChild(el('rect', {x: cx - mergedSize/2 + mergedSize*splitFrac, y: blockY - mergedSize/2, width: mergedSize * (1-splitFrac), height: mergedSize, fill:'var(--objB)', stroke:'var(--ink)', 'stroke-width':2}));
@@ -527,14 +555,15 @@
         flashG.appendChild(el('circle', {cx: centerX, cy: blockY, r: 10 + 40*(p-0.42)/0.2, fill:'none', stroke:'var(--warn)', 'stroke-width':2, opacity: Math.max(fa,0)*0.7}));
       }
     } else {
-      var xA0 = -1, xB0 = 1;
       var xA, xB;
       if (p < 0.5){
-        xA = xA0 + eApproach * (0 - xA0);
-        xB = xB0 + eApproach * (0 - xB0);
+        xA = -1 + eApproach * (contact.xA - (-1));
+        xB = 1 + eApproach * (contact.xB - 1);
       } else {
-        xA = eSeparate * finalPos(phys.vA);
-        xB = eSeparate * finalPos(phys.vB);
+        xA = contact.xA + eSeparate * (restPosOrFinal(phys.vA, contact.xA) - contact.xA);
+        xB = contact.xB + eSeparate * (restPosOrFinal(phys.vB, contact.xB) - contact.xB);
+        var kept = keepApart(xA, xB, sizeA, sizeB);
+        xA = kept.xA; xB = kept.xB;
       }
       drawBlock(trackX(xA), blockY, sizeA, 'var(--objA)', 'A');
       drawBlock(trackX(xB), blockY, sizeB, 'var(--objB)', 'B');
