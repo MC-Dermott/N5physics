@@ -12,8 +12,8 @@ _IMPULSE_WIDGET_HTML = (
 ).read_text(encoding="utf-8")
 
 
-def _with_collisions_widget(question):
-    question.metadata["widget_html"] = _COLLISIONS_WIDGET_HTML
+def _with_collisions_widget(question, initial_mode):
+    question.metadata["widget_html"] = _COLLISIONS_WIDGET_HTML.replace("__INITIAL_MODE__", initial_mode)
     question.metadata["widget_height"] = 900
     return question
 
@@ -224,7 +224,7 @@ def gen_stick_together(level="Higher"):
     ]
     return _with_collisions_widget(make_question(question, v, options_data, "m/s", scaffold=scaffold,
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Momentum and Impulse", level=level))
+                         question_type="Momentum and Impulse", level=level), "stick")
 
 
 # ── Type 3: Collisions where objects separate ────────────────────────────────
@@ -276,7 +276,7 @@ def gen_separate(level="Higher"):
     ]
     return _with_collisions_widget(make_question(question, v2, options_data, "m/s", scaffold=scaffold,
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Momentum and Impulse", level=level))
+                         question_type="Momentum and Impulse", level=level), "separate")
 
 
 # ── Type 4: Explosions and recoil ────────────────────────────────────────────
@@ -313,7 +313,7 @@ def gen_explosion(level="Higher"):
     ]
     return _with_collisions_widget(make_question(question, v2, options_data, "m/s", scaffold=scaffold,
                          notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Momentum and Impulse", level=level))
+                         question_type="Momentum and Impulse", level=level), "explosion")
 
 
 # ── Impulse: Ft = mv - mu ─────────────────────────────────────────────────────

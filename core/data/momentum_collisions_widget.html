@@ -624,7 +624,8 @@
     }
   }
 
-  setMode('stick');
+  var _initialMode = '__INITIAL_MODE__';
+  setMode(['stick', 'separate', 'explosion'].indexOf(_initialMode) !== -1 ? _initialMode : 'stick');
   render();
 })();
 </script>
