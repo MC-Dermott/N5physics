@@ -462,44 +462,81 @@ def gen_impulse_graph(level="Higher"):
 
 
 # ── Elastic and inelastic collisions ─────────────────────────────────────────
+#
+# Covers all the collision "types" the worksheet's Section 3 now works through:
+#   - stick together, stationary target      (perfectly inelastic)
+#   - stick together, head-on, both moving   (perfectly inelastic)
+#   - separate, stationary target, elastic   (kinetic energy conserved)
+#   - separate, stationary target, partial   (inelastic, but doesn't stick)
 
 def gen_elastic_inelastic(level="Higher"):
     m1 = round(random.uniform(0.3, 1.5), 2)
     m2 = round(random.uniform(0.3, 1.5), 2)
     u1 = round(random.uniform(2.0, 5.0), 1)
 
-    make_elastic = random.choice([True, False])
-    if make_elastic:
-        v1 = round(((m1 - m2) / (m1 + m2)) * u1, 3)
-        v2 = round((2 * m1 / (m1 + m2)) * u1, 3)
-    else:
-        total_mass = m1 + m2
-        v = round((m1 * u1) / total_mass, 3)
-        v1 = v
-        v2 = v
+    collision_type = random.choice(["stick_stationary", "stick_moving", "elastic", "partial"])
 
-    ek_before = _r2(0.5 * m1 * u1 ** 2)
+    if collision_type == "stick_moving":
+        opposite = random.choice([True, False])
+        u2_mag = round(random.uniform(0.5, 2.5), 1)
+        u2 = u2_mag * (-1 if opposite else 1)
+    else:
+        u2 = 0.0
+
+    total_p = _r2(m1 * u1 + m2 * u2)
+    total_mass = round(m1 + m2, 3)
+    v_stick = round(total_p / total_mass, 3)
+
+    # Stationary-target elastic solution — used directly for the "elastic" type,
+    # and as one endpoint when interpolating a "partial" (separates, but lossy) outcome.
+    v1_elastic = round(((m1 - m2) / (m1 + m2)) * u1, 3)
+    v2_elastic = round((2 * m1 / (m1 + m2)) * u1, 3)
+
+    if collision_type in ("stick_stationary", "stick_moving"):
+        v1 = v2 = v_stick
+    elif collision_type == "elastic":
+        v1, v2 = v1_elastic, v2_elastic
+    else:  # "partial": separates, and loses some — but not all — kinetic energy.
+        # Interpolating between the stick solution (minimum possible Ek after,
+        # at f=0) and the elastic solution (maximum possible Ek after, at f=1)
+        # guarantees a physically valid, genuinely inelastic outcome for any
+        # f strictly between 0 and 1.
+        f = round(random.uniform(0.25, 0.75), 2)
+        v1 = round(v_stick + f * (v1_elastic - v_stick), 3)
+        v2 = round((total_p - m1 * v1) / m2, 3)
+
+    ek_before = _r2(0.5 * m1 * u1 ** 2 + 0.5 * m2 * u2 ** 2)
     ek_after = _r2(0.5 * m1 * v1 ** 2 + 0.5 * m2 * v2 ** 2)
     is_elastic = abs(ek_before - ek_after) < 0.01 * max(ek_before, 0.01)
 
     kind_name = _pick_kind(_SMALL_KINDS)[0]
     obj1, obj2 = f"{kind_name} A", f"{kind_name} B"
+    if u2 == 0:
+        setup = f"a stationary {obj2} of mass {m2} kg"
+    else:
+        dir2 = "in the same direction" if u2 > 0 else "in the opposite direction"
+        setup = f"{obj2} (mass {m2} kg), moving at {abs(u2)} m/s {dir2}"
     if v1 == v2:
         outcome = f"the two move off together at {v1} m/s"
     else:
         outcome = f"{obj1} continues at {v1} m/s and {obj2} moves off at {v2} m/s"
     question_text = (
-        f"{_cap(obj1)} of mass {m1} kg moving at {u1} m/s collides with a stationary "
-        f"{obj2} of mass {m2} kg. After the collision {outcome}.\n\nDetermine, by "
-        f"calculation, whether the collision is elastic or inelastic."
+        f"{_cap(obj1)} of mass {m1} kg moving at {u1} m/s collides with {setup}. "
+        f"After the collision {outcome}.\n\nDetermine, by calculation, whether the "
+        f"collision is elastic or inelastic."
     )
     correct = (
         f"Elastic — Ek(before) = {ek_before} J and Ek(after) = {ek_after} J are equal."
         if is_elastic else
         f"Inelastic — Ek(before) = {ek_before} J is greater than Ek(after) = {ek_after} J."
     )
+    before_terms = (
+        rf"\tfrac{{1}}{{2}} \times {m1} \times {u1}^2"
+        if u2 == 0 else
+        rf"(\tfrac{{1}}{{2}} \times {m1} \times {u1}^2) + (\tfrac{{1}}{{2}} \times {m2} \times {u2}^2)"
+    )
     working = [
-        {"type": "latex", "content": rf"E_k(\text{{before}}) = \tfrac{{1}}{{2}} \times {m1} \times {u1}^2 = {ek_before}\ \mathrm{{J}}"},
+        {"type": "latex", "content": rf"E_k(\text{{before}}) = {before_terms} = {ek_before}\ \mathrm{{J}}"},
         {"type": "latex", "content": rf"E_k(\text{{after}}) = (\tfrac{{1}}{{2}} \times {m1} \times {v1}^2) + (\tfrac{{1}}{{2}} \times {m2} \times {v2}^2) = {ek_after}\ \mathrm{{J}}"},
     ]
     distractors = [
@@ -516,7 +553,8 @@ def gen_elastic_inelastic(level="Higher"):
     options = [correct] + [d["value"] for d in distractors]
     random.shuffle(options)
 
-    return PhysicsQuestion(
+    widget_mode = "stick" if collision_type in ("stick_stationary", "stick_moving") else "separate"
+    return _with_collisions_widget(PhysicsQuestion(
         question_text=question_text,
         correct_answer=correct,
         unit="",
@@ -527,14 +565,91 @@ def gen_elastic_inelastic(level="Higher"):
         question_type="Momentum and Impulse",
         level=level,
         metadata={"type": "classification", "options": options},
+    ), widget_mode)
+
+
+def gen_ke_lost(level="Higher"):
+    """Numeric counterpart to gen_elastic_inelastic's classification questions —
+    calculate the actual kinetic energy lost in a sticking collision, rather
+    than just identifying elastic/inelastic. Target may be stationary or
+    (head-on) already moving, matching both variants on the worksheet."""
+    m1 = round(random.uniform(0.3, 2.0), 2)
+    m2 = round(random.uniform(0.3, 2.0), 2)
+    u1 = round(random.uniform(2.0, 6.0), 1)
+
+    head_on = random.choice([True, False])
+    if head_on:
+        opposite = random.choice([True, False])
+        # keep enough relative speed between the two that the collision has a
+        # real (and never rounding-noise-sized) kinetic energy loss
+        u2_mag = round(random.uniform(0.5, 3.0), 1)
+        while not opposite and abs(u1 - u2_mag) < 1.0:
+            u2_mag = round(random.uniform(0.5, 3.0), 1)
+        u2 = u2_mag * (-1 if opposite else 1)
+    else:
+        u2 = 0.0
+
+    kind_name = _pick_kind(_SMALL_KINDS)[0]
+    obj1, obj2 = f"{kind_name} A", f"{kind_name} B"
+
+    total_p = _r2(m1 * u1 + m2 * u2)
+    total_mass = round(m1 + m2, 3)
+    v_exact = total_p / total_mass
+    v = _r2(v_exact)
+
+    # Use the unrounded common velocity for the energy comparison so 2-d.p.
+    # rounding of v can never flip Ek(after) above Ek(before).
+    ek_before = _r2(0.5 * m1 * u1 ** 2 + 0.5 * m2 * u2 ** 2)
+    ek_after = _r2(0.5 * total_mass * v_exact ** 2)
+    loss = _r2(max(ek_before - ek_after, 0.0))
+
+    if u2 == 0:
+        setup = f"a stationary {obj2} of mass {m2} kg"
+    else:
+        dir2 = "in the same direction" if u2 > 0 else "in the opposite direction"
+        setup = f"{obj2} (mass {m2} kg), moving at {abs(u2)} m/s {dir2}"
+
+    question = (
+        f"{_cap(obj1)} of mass {m1} kg, moving at {u1} m/s, collides with {setup}. "
+        f"The two stick together after the collision. Calculate the kinetic energy "
+        f"lost in this collision."
     )
+    before_terms = (
+        rf"\tfrac{{1}}{{2}} \times {m1} \times {u1}^2"
+        if u2 == 0 else
+        rf"(\tfrac{{1}}{{2}} \times {m1} \times {u1}^2) + (\tfrac{{1}}{{2}} \times {m2} \times {u2}^2)"
+    )
+    working = [
+        {"type": "text",  "content": "Find the common velocity from conservation of momentum:"},
+        {"type": "latex", "content": r"m_1u_1 + m_2u_2 = (m_1 + m_2)v"},
+        {"type": "latex", "content": rf"({m1} \times {u1}) + ({m2} \times {u2}) = ({total_mass})v"},
+        {"type": "latex", "content": rf"v = {v}\ \mathrm{{m/s}}"},
+        {"type": "text",  "content": "Compare kinetic energy before and after:"},
+        {"type": "latex", "content": rf"E_k(\text{{before}}) = {before_terms} = {ek_before}\ \mathrm{{J}}"},
+        {"type": "latex", "content": rf"E_k(\text{{after}}) = \tfrac{{1}}{{2}} \times {total_mass} \times {v}^2 = {ek_after}\ \mathrm{{J}}"},
+        {"type": "latex", "content": rf"\text{{loss}} = {ek_before} - {ek_after} = {loss}\ \mathrm{{J}}"},
+    ]
+    options_data = [
+        {"value": loss, "mistake": None, "working": working},
+        {"value": ek_after, "mistake": "This is the kinetic energy remaining after the collision, not the amount lost.", "working": working},
+        {"value": ek_before, "mistake": "This is the kinetic energy before the collision — you need to subtract Ek(after) to find the loss.", "working": working},
+    ]
+    scaffold = [
+        {"question": "What is the common velocity v after the collision (m/s)?", "answer": v},
+        {"question": "What is Ek before the collision (J)?", "answer": ek_before},
+        {"question": "What is Ek after the collision (J)?", "answer": ek_after},
+        {"question": "What is the kinetic energy lost (J)?", "answer": loss},
+    ]
+    return _with_collisions_widget(make_question(question, loss, options_data, "J", scaffold=scaffold,
+                         notes=_NOTES, topic="Our Dynamic Universe",
+                         question_type="Momentum and Impulse", level=level), "stick")
 
 
 _ALL_GENS = [
     gen_p_from_mv, gen_v_from_pm, gen_m_from_pv,
     gen_stick_together, gen_separate, gen_explosion,
     gen_impulse_find_f, gen_impulse_find_t, gen_impulse_graph,
-    gen_elastic_inelastic,
+    gen_elastic_inelastic, gen_ke_lost,
 ]
 
 
