@@ -318,7 +318,12 @@ $$a = \\frac{F}{m} \\qquad m = \\frac{F}{a}$$
 **Worked Example:** Calculate the force needed to accelerate an 8 kg object at 3 m/s².
 $$F = ma = 8 \\times 3 = 24\\ \\mathrm{N}$$
 
-> **Important:** Use the *resultant* (unbalanced) force — the net force after subtracting friction from driving force.
+> **Important: Calculate the unbalanced force first**, using $F = ma$, before finding
+> the forward (driving) force or the frictional force.
+
+**Forward force, friction, and the unbalanced force:**
+$$F_{\\text{friction}} = F_{\\text{forwards}} - F_{\\text{unbalanced}}$$
+$$F_{\\text{forwards}} = F_{\\text{friction}} + F_{\\text{unbalanced}}$$
 """,
 
     "dynamics_weight": """
