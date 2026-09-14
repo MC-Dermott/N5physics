@@ -298,6 +298,10 @@ $$a = \\frac{v - u}{t} = \\frac{20 - 5}{5} = 3\\ \\mathrm{m/s^2}$$
     "dynamics_newton": """
 ## Newton's Second Law — F = ma
 
+> **Calculate the unbalanced force first**, before finding anything else.
+> - If you have an acceleration, use **F = ma**.
+> - If you don't, use **unbalanced force = forwards force − friction**.
+
 **Definitions:**
 - Force is a push or pull, measured in Newtons, that can change an object's speed, direction of
   motion, or shape.
@@ -317,9 +321,6 @@ $$a = \\frac{F}{m} \\qquad m = \\frac{F}{a}$$
 
 **Worked Example:** Calculate the force needed to accelerate an 8 kg object at 3 m/s².
 $$F = ma = 8 \\times 3 = 24\\ \\mathrm{N}$$
-
-> **Important: Calculate the unbalanced force first**, using $F = ma$, before finding
-> the forward (driving) force or the frictional force.
 
 **Forward force, friction, and the unbalanced force:**
 $$F_{\\text{friction}} = F_{\\text{forwards}} - F_{\\text{unbalanced}}$$
