@@ -1,5 +1,6 @@
 import random
 import pathlib
+import plotly.graph_objects as go
 from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
 
@@ -22,6 +23,24 @@ def _with_impulse_widget(question):
     question.metadata["widget_html"] = _IMPULSE_WIDGET_HTML
     question.metadata["widget_height"] = 1200
     return question
+
+
+def _force_time_figure(t_peak, t_total, peak_F):
+    """The actual triangular force-time graph a question describes in words —
+    shaded, since the shaded area is exactly the impulse being asked about."""
+    fig = go.Figure(go.Scatter(
+        x=[0, t_peak, t_total], y=[0, peak_F, 0],
+        mode="lines", line=dict(color="#d62728", width=3),
+        fill="tozeroy", fillcolor="rgba(214,39,40,0.15)",
+    ))
+    fig.update_xaxes(title_text="Time (s)", zeroline=True, zerolinecolor="#555",
+                      gridcolor="rgba(0,0,0,0.15)", linecolor="#555")
+    fig.update_yaxes(title_text="Force (N)", zeroline=True, zerolinecolor="#555",
+                      gridcolor="rgba(0,0,0,0.15)", linecolor="#555", rangemode="tozero")
+    fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                       margin=dict(l=45, r=15, t=25, b=35), height=320,
+                       showlegend=False, font=dict(size=11))
+    return fig
 
 _MOMENTUM_NOTES = """
 ## Momentum
@@ -450,9 +469,10 @@ def gen_impulse_graph(level="Higher"):
 
     obj = random.choice(["football", "rugby ball", "hockey ball"])
     context = (
-        f"A {obj}, initially at rest, is kicked. The force-time graph for the kick is a "
-        f"triangle, rising from 0 to a peak force of {peak_F} N at t = {t_peak} s, then "
-        f"falling back to 0 N at t = {t_total} s. The mass of the {obj} is {m} kg."
+        f"A {obj}, initially at rest, is kicked. The force-time graph for the kick is "
+        f"shown below: a triangle, rising from 0 to a peak force of {peak_F} N at "
+        f"t = {t_peak} s, then falling back to 0 N at t = {t_total} s. The mass of the "
+        f"{obj} is {m} kg."
     )
 
     working_a = [
@@ -501,11 +521,13 @@ def gen_impulse_graph(level="Higher"):
         ],
     )
 
-    return _with_impulse_widget(PhysicsQuestion(
+    scenario = PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Momentum and Impulse", level=level,
         is_scenario=True, scenario_context=context, parts=[part_a, part_b],
-    ))
+    )
+    scenario.metadata["main_figure"] = _force_time_figure(t_peak, t_total, peak_F)
+    return _with_impulse_widget(scenario)
 
 
 # ── Elastic and inelastic collisions ─────────────────────────────────────────

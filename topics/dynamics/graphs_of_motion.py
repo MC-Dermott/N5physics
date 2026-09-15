@@ -409,6 +409,17 @@ def _at_ctx():
     return random.choice(_AT_CONTEXTS)
 
 
+def _at_graph_figure(segs):
+    """The actual acceleration-time graph a gen_at_* question describes in
+    words — reuses the same step-sampling and styling as the a-t subplot in
+    generate_graphs_of_motion above."""
+    xs, ys = _sample_a_step(segs)
+    fig = go.Figure(go.Scatter(x=xs, y=ys, mode="lines", line=dict(color=_A_COLOR, width=3)))
+    _style_axes(fig, xtitle="Time (s)", ytitle="Acceleration (m/s²)")
+    _base_layout(fig, height=280)
+    return fig
+
+
 def _dedup_at_options(options_data, correct):
     """Remove distractor entries whose value equals the correct answer or another distractor."""
     seen = {round(float(correct), 4)}
@@ -438,8 +449,8 @@ def gen_at_final_velocity(level="Higher"):
 
     accel_word = "a constant deceleration" if a < 0 else "a constant acceleration"
     question = (
-        f"{obj} has an initial velocity of {u} m/s. An acceleration–time graph shows "
-        f"{accel_word} of {abs(a)} m/s² for {t} s. Calculate the final velocity."
+        f"{obj} has an initial velocity of {u} m/s. The acceleration–time graph below "
+        f"shows {accel_word} of {abs(a)} m/s² for {t} s. Calculate the final velocity."
     )
     working = [
         {"type": "text",  "content": "The change in velocity equals the area under the a-t graph:"},
@@ -465,9 +476,11 @@ def gen_at_final_velocity(level="Higher"):
         {"question": "What is the change in velocity, Δv (= a × t)?", "answer": round(a * t, 2)},
         {"question": "What is the final velocity v?", "answer": v},
     ]
-    return make_question(question, v, options_data, "m/s",
-                         notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Graphs of Motion", level=level, scaffold=scaffold)
+    q = make_question(question, v, options_data, "m/s",
+                      notes=_NOTES, topic="Our Dynamic Universe",
+                      question_type="Graphs of Motion", level=level, scaffold=scaffold)
+    q.metadata["main_figure"] = _at_graph_figure([{"t0": 0.0, "t1": float(t), "a": float(a)}])
+    return q
 
 
 def gen_at_initial_velocity(level="Higher"):
@@ -483,8 +496,8 @@ def gen_at_initial_velocity(level="Higher"):
 
     accel_word = "a constant deceleration" if a < 0 else "a constant acceleration"
     question = (
-        f"{obj} undergoes {accel_word} of {abs(a)} m/s² for {t} s, shown on an "
-        f"acceleration–time graph, finishing with a velocity of {v} m/s. "
+        f"{obj} undergoes {accel_word} of {abs(a)} m/s² for {t} s, shown on the "
+        f"acceleration–time graph below, finishing with a velocity of {v} m/s. "
         f"Calculate its initial velocity."
     )
     working = [
@@ -511,9 +524,11 @@ def gen_at_initial_velocity(level="Higher"):
         {"question": "What is the change in velocity, Δv (= a × t)?", "answer": round(a * t, 2)},
         {"question": "What is the initial velocity u?", "answer": u},
     ]
-    return make_question(question, u, options_data, "m/s",
-                         notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Graphs of Motion", level=level, scaffold=scaffold)
+    q = make_question(question, u, options_data, "m/s",
+                      notes=_NOTES, topic="Our Dynamic Universe",
+                      question_type="Graphs of Motion", level=level, scaffold=scaffold)
+    q.metadata["main_figure"] = _at_graph_figure([{"t0": 0.0, "t1": float(t), "a": float(a)}])
+    return q
 
 
 def gen_at_two_stage_velocity(level="Higher"):
@@ -528,7 +543,7 @@ def gen_at_two_stage_velocity(level="Higher"):
 
     stage1_desc = f"shows a constant {a1} m/s² for the first {t1} s"
     question = (
-        f"{obj} starts with a velocity of {u} m/s. An acceleration–time graph "
+        f"{obj} starts with a velocity of {u} m/s. The acceleration–time graph below "
         f"{stage1_desc}, then steps up to a constant {a2} m/s² for a further {t2} s. "
         f"Calculate the velocity at the end of the {t1 + t2} s shown."
     )
@@ -559,9 +574,14 @@ def gen_at_two_stage_velocity(level="Higher"):
         {"question": "What is the velocity at the end of the first stage, v_mid?", "answer": v_mid},
         {"question": "What is the final velocity v?", "answer": v_final},
     ]
-    return make_question(question, v_final, options_data, "m/s",
-                         notes=_NOTES, topic="Our Dynamic Universe",
-                         question_type="Graphs of Motion", level=level, scaffold=scaffold)
+    q = make_question(question, v_final, options_data, "m/s",
+                      notes=_NOTES, topic="Our Dynamic Universe",
+                      question_type="Graphs of Motion", level=level, scaffold=scaffold)
+    q.metadata["main_figure"] = _at_graph_figure([
+        {"t0": 0.0, "t1": float(t1), "a": float(a1)},
+        {"t0": float(t1), "t1": float(t1 + t2), "a": float(a2)},
+    ])
+    return q
 
 
 _ALL_AT_GRAPH_GENS = [
