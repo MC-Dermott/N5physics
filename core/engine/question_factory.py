@@ -83,6 +83,7 @@ from topics.dynamics.momentum_impulse      import (
     gen_impulse_graph,
     gen_elastic_inelastic,
     gen_ke_lost,
+    gen_impulse_explain,
 )
 from topics.dynamics.energy_work_power_higher import (
     generate_work_done as generate_work_done_higher,
@@ -302,6 +303,7 @@ QUAL_REGISTRY = {
                 "Impulse from a Force-Time Graph": gen_impulse_graph,
                 "Elastic and Inelastic Collisions": gen_elastic_inelastic,
                 "Kinetic Energy Lost — Collisions": gen_ke_lost,
+                "Explain — Reducing Injury":    gen_impulse_explain,
             },
             "Energy, Work and Power": {
                 "Work Done":                   generate_work_done_higher,

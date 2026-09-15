@@ -25,22 +25,42 @@ def _with_impulse_widget(question):
     return question
 
 
-def _force_time_figure(t_peak, t_total, peak_F):
+def _force_time_figure(t_peak, t_total, peak_F, time_unit="s", force_unit="N"):
     """The actual triangular force-time graph a question describes in words —
-    shaded, since the shaded area is exactly the impulse being asked about."""
+    shaded, since the shaded area is exactly the impulse being asked about.
+    t_peak/t_total/peak_F are given already converted to time_unit/force_unit,
+    matching whatever units the question text quotes."""
     fig = go.Figure(go.Scatter(
         x=[0, t_peak, t_total], y=[0, peak_F, 0],
         mode="lines", line=dict(color="#d62728", width=3),
         fill="tozeroy", fillcolor="rgba(214,39,40,0.15)",
     ))
-    fig.update_xaxes(title_text="Time (s)", zeroline=True, zerolinecolor="#555",
+    fig.update_xaxes(title_text=f"Time ({time_unit})", zeroline=True, zerolinecolor="#555",
                       gridcolor="rgba(0,0,0,0.15)", linecolor="#555")
-    fig.update_yaxes(title_text="Force (N)", zeroline=True, zerolinecolor="#555",
+    fig.update_yaxes(title_text=f"Force ({force_unit})", zeroline=True, zerolinecolor="#555",
                       gridcolor="rgba(0,0,0,0.15)", linecolor="#555", rangemode="tozero")
     fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
                        margin=dict(l=45, r=15, t=25, b=35), height=320,
                        showlegend=False, font=dict(size=11))
     return fig
+
+
+# Time is always generated in seconds and rounded to 3 d.p. (i.e. whole
+# milliseconds), and force is always generated as a multiple of 100 N, so
+# converting either into these alternative units always lands on a clean,
+# non-messy displayed number.
+_TIME_UNITS = [("s", 1.0), ("ms", 1e-3), ("µs", 1e-6)]
+_FORCE_UNITS = [("N", 1.0), ("kN", 1e3)]
+
+
+def _display_time(t_seconds, unit, multiplier):
+    val = t_seconds / multiplier
+    return round(val, 3) if unit == "s" else round(val)
+
+
+def _display_force(f_newtons, unit, multiplier):
+    val = f_newtons / multiplier
+    return round(val, 3) if unit == "kN" else round(val)
 
 _MOMENTUM_NOTES = """
 ## Momentum
@@ -461,39 +481,64 @@ def generate_impulse_basic(level="Higher"):
 
 def gen_impulse_graph(level="Higher"):
     m = round(random.uniform(0.1, 0.6), 2)
-    peak_F = random.choice([400, 500, 600, 700, 800, 900, 1000, 1200])
-    t_peak = round(random.uniform(0.006, 0.012), 3)
-    t_total = round(t_peak * 2, 3)
+    peak_F = random.choice([400, 500, 600, 700, 800, 900, 1000, 1200])  # N, SI
+    t_peak = round(random.uniform(0.006, 0.012), 3)                     # s, SI
+    t_total = round(t_peak * 2, 3)                                      # s, SI
     impulse = _r2(0.5 * t_total * peak_F)
     v = _r2(impulse / m)
+
+    time_unit, time_mult = random.choice(_TIME_UNITS)
+    force_unit, force_mult = random.choice(_FORCE_UNITS)
+    needs_conversion = time_unit != "s" or force_unit != "N"
+
+    t_peak_disp = _display_time(t_peak, time_unit, time_mult)
+    t_total_disp = _display_time(t_total, time_unit, time_mult)
+    peak_F_disp = _display_force(peak_F, force_unit, force_mult)
 
     obj = random.choice(["football", "rugby ball", "hockey ball"])
     context = (
         f"A {obj}, initially at rest, is kicked. The force-time graph for the kick is "
-        f"shown below: a triangle, rising from 0 to a peak force of {peak_F} N at "
-        f"t = {t_peak} s, then falling back to 0 N at t = {t_total} s. The mass of the "
-        f"{obj} is {m} kg."
+        f"shown below: a triangle, rising from 0 to a peak force of {peak_F_disp} {force_unit} "
+        f"at t = {t_peak_disp} {time_unit}, then falling back to 0 {force_unit} at "
+        f"t = {t_total_disp} {time_unit}. The mass of the {obj} is {m} kg."
     )
 
-    working_a = [
+    working_a = []
+    if needs_conversion:
+        working_a.append({"type": "text", "content": "Convert to SI units (N and s) before substituting:"})
+        if force_unit != "N":
+            working_a.append({"type": "latex", "content": rf"{peak_F_disp}\ \mathrm{{{force_unit}}} = {peak_F}\ \mathrm{{N}}"})
+        if time_unit != "s":
+            working_a.append({"type": "latex", "content": rf"{t_total_disp}\ \mathrm{{{time_unit}}} = {t_total}\ \mathrm{{s}}"})
+    working_a += [
         {"type": "text",  "content": "Impulse equals the area under the force-time graph:"},
         {"type": "latex", "content": r"\text{impulse} = \frac{1}{2} \times \text{base} \times \text{height}"},
         {"type": "latex", "content": rf"\text{{impulse}} = \frac{{1}}{{2}} \times {t_total} \times {peak_F}"},
         {"type": "latex", "content": rf"\text{{impulse}} = {impulse}\ \mathrm{{N\ s}}"},
     ]
+    distractors_a = [
+        {"value": _r2(t_total * peak_F),
+         "mistake": "You found the area of a rectangle. For a triangular force-time graph, impulse = ½ × base × height.",
+         "working": working_a},
+        {"value": float(peak_F),
+         "mistake": "This is just the peak force, not the impulse. Impulse is the whole area under the graph.",
+         "working": working_a},
+    ]
+    if needs_conversion:
+        not_converted = _r2(0.5 * t_total_disp * peak_F_disp)
+        if abs(not_converted - impulse) > 0.01:
+            distractors_a.append({
+                "value": not_converted,
+                "mistake": f"You used {t_total_disp} {time_unit} and {peak_F_disp} {force_unit} directly. "
+                           f"Convert to SI units (seconds and newtons) before substituting.",
+                "working": working_a,
+            })
     part_a = PhysicsQuestion(
         question_text="Calculate the impulse given to the ball.",
         correct_answer=impulse, unit="N s",
         topic="Our Dynamic Universe", question_type="Momentum and Impulse", level=level,
         working=working_a,
-        distractors=[
-            {"value": _r2(t_total * peak_F),
-             "mistake": "You found the area of a rectangle. For a triangular force-time graph, impulse = ½ × base × height.",
-             "working": working_a},
-            {"value": float(peak_F),
-             "mistake": "This is just the peak force, not the impulse. Impulse is the whole area under the graph.",
-             "working": working_a},
-        ],
+        distractors=distractors_a,
         notes=_IMPULSE_NOTES,
         scaffold=[{"prompt": "What is the impulse (area under the graph)?", "answer": impulse}],
     )
@@ -526,7 +571,8 @@ def gen_impulse_graph(level="Higher"):
         topic="Our Dynamic Universe", question_type="Momentum and Impulse", level=level,
         is_scenario=True, scenario_context=context, parts=[part_a, part_b],
     )
-    scenario.metadata["main_figure"] = _force_time_figure(t_peak, t_total, peak_F)
+    scenario.metadata["main_figure"] = _force_time_figure(
+        t_peak_disp, t_total_disp, peak_F_disp, time_unit=time_unit, force_unit=force_unit)
     return _with_impulse_widget(scenario)
 
 
@@ -728,11 +774,109 @@ def gen_ke_lost(level="Higher"):
                          question_type="Momentum and Impulse", level=level), "stick")
 
 
+# ── Explain: reducing injury by increasing impulse time ──────────────────────
+#
+# All of these safety features work the same way: for a given collision the
+# change in momentum (impulse) needed to bring the person to rest is fixed,
+# so Ft = mv - mu means increasing the time t is the only way to reduce the
+# force F that actually causes injury.
+
+_SAFETY_DEVICES = [
+    {
+        "name": "cycle helmet",
+        "who": "the cyclist's head",
+        "mechanism": "the polystyrene lining inside the helmet crushes and compresses on impact",
+    },
+    {
+        "name": "seatbelt",
+        "who": "the passenger",
+        "mechanism": "the seatbelt stretches slightly during the crash",
+    },
+    {
+        "name": "crumple zone",
+        "who": "the passengers",
+        "mechanism": "the front and rear of the car are designed to crumple and deform in a collision",
+    },
+    {
+        "name": "airbag",
+        "who": "the passenger's head and chest",
+        "mechanism": "the airbag inflates, then slowly deflates as the passenger presses into it",
+    },
+    {
+        "name": "crash mat",
+        "who": "the gymnast",
+        "mechanism": "the crash mat compresses beneath the gymnast on landing",
+    },
+    {
+        "name": "boxing glove",
+        "who": "the boxer being hit",
+        "mechanism": "the padding inside the glove compresses on impact",
+    },
+]
+
+
+def gen_impulse_explain(level="Higher"):
+    device = random.choice(_SAFETY_DEVICES)
+    name, who, mechanism = device["name"], device["who"], device["mechanism"]
+
+    question_text = (
+        f"During a collision or impact, {mechanism}. Explain, in terms of impulse, why "
+        f"this reduces the risk of injury to {who}."
+    )
+
+    working = [
+        {"type": "text",  "content": "Impulse-momentum relationship:"},
+        {"type": "latex", "content": r"Ft = mv - mu"},
+        {"type": "text",  "content": f"The change in momentum (mv − mu) needed to bring "
+                                      f"{who} to rest is fixed by the collision — the {name} "
+                                      f"can't change it. Increasing t on the left-hand side must "
+                                      f"therefore decrease F, the force that causes injury."},
+    ]
+
+    correct = (
+        f"The {name} increases the time (t) taken for the change in momentum to happen. Since "
+        f"the impulse (Ft = mv − mu) is fixed by the collision, a longer time means a "
+        f"smaller average force (F) on {who} — and it is the force that causes injury."
+    )
+    distractors = [
+        {"value": f"The {name} decreases the change in momentum (mv − mu) of {who}, which reduces the force.",
+         "mistake": f"The change in momentum needed to stop {who} is set by their mass and change "
+                    f"in velocity in the collision — the {name} doesn't change it. What it "
+                    f"changes is the *time* over which that momentum change happens.",
+         "working": working},
+        {"value": f"The {name} decreases the time taken for the change in momentum to occur, which reduces the force.",
+         "mistake": f"This has the relationship backwards: Ft = mv − mu means a *shorter* time "
+                    f"gives a *larger* force, not a smaller one. The {name} works by increasing the "
+                    f"time taken for the change in momentum, not decreasing it.",
+         "working": working},
+        {"value": f"The {name} reduces the initial speed of the collision, which reduces the impulse.",
+         "mistake": f"The {name} acts during the collision itself — it doesn't change the speed "
+                    f"at which the collision begins.",
+         "working": working},
+    ]
+
+    options = [correct] + [d["value"] for d in distractors]
+    random.shuffle(options)
+
+    return PhysicsQuestion(
+        question_text=question_text,
+        correct_answer=correct,
+        unit="",
+        distractors=distractors,
+        working=working,
+        notes=_IMPULSE_NOTES,
+        topic="Our Dynamic Universe",
+        question_type="Momentum and Impulse",
+        level=level,
+        metadata={"type": "classification", "options": options},
+    )
+
+
 _ALL_GENS = [
     gen_p_from_mv, gen_v_from_pm, gen_m_from_pv,
     gen_stick_together, gen_separate, gen_explosion,
     gen_impulse_find_f, gen_impulse_find_t, gen_impulse_graph,
-    gen_elastic_inelastic, gen_ke_lost,
+    gen_elastic_inelastic, gen_ke_lost, gen_impulse_explain,
 ]
 
 

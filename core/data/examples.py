@@ -686,11 +686,16 @@ if the force is given instead: $t = (mv - mu) \div F$.
 """,
 
     ("Our Dynamic Universe", "Momentum and Impulse", "Impulse from a Force-Time Graph"): r"""
-**Example:** A football, initially at rest, is kicked. The force-time graph for the kick is a
-triangle, rising from 0 to a peak force of 800 N at t = 0.008 s, then falling back to 0 N at
-t = 0.016 s. The mass of the ball is 0.44 kg.
+**Example:** A football, initially at rest, is kicked. The force-time graph for the kick is
+shown below: a triangle, rising from 0 to a peak force of 0.8 kN at t = 8 ms, then falling
+back to 0 kN at t = 16 ms. The mass of the ball is 0.44 kg.
 
 **(a) Calculate the impulse given to the ball.**
+
+The graph's axes aren't in N and s here, so convert to SI units first:
+
+$$0.8\ \mathrm{kN} = 800\ \mathrm{N}$$
+$$16\ \mathrm{ms} = 0.016\ \mathrm{s}$$
 
 Impulse equals the area under the force-time graph:
 
@@ -717,7 +722,9 @@ $$6.4 = 0.44v - 0$$
 $$v = 14.5\ \mathrm{m/s}$$
 
 **Common exam trap:** for a triangular force-time graph, the impulse is the area of the
-*triangle* (½ × base × height), not base × height as for a constant force.
+*triangle* (½ × base × height), not base × height as for a constant force. Also watch the
+axis units — force-time graphs are sometimes given in kN and/or ms or µs rather than N and s,
+and you must convert to SI units before substituting.
 """,
 
     ("Our Dynamic Universe", "Momentum and Impulse", "Elastic and Inelastic Collisions"): r"""
@@ -739,6 +746,28 @@ is **inelastic**.
 **Common exam trap:** an *elastic* collision needs $E_k(\text{before}) = E_k(\text{after})$
 exactly — if the two totals differ at all, the collision is inelastic, even if momentum still
 balances perfectly on both sides.
+""",
+
+    ("Our Dynamic Universe", "Momentum and Impulse", "Explain — Reducing Injury"): r"""
+**Example:** During a crash, an airbag inflates, then slowly deflates as the passenger's head
+presses into it.
+
+*Explain, in terms of impulse, why this reduces the risk of injury to the passenger.*
+
+The change in momentum (mv − mu) needed to bring the passenger's head to rest is fixed by the
+crash — the airbag can't change *that*. What it changes is the **time** over which it happens:
+
+$$Ft = mv - mu$$
+
+Since the right-hand side is fixed, increasing $t$ (the airbag lets the head decelerate over a
+longer time than hitting the dashboard directly) must decrease $F$ — and it is the force that
+causes injury, not the change in momentum itself.
+
+**Common exam trap:** these questions are often answered with "it reduces the impulse" or "it
+reduces the force" without saying *why* — full marks need the chain of reasoning: the change in
+momentum is fixed → the device increases the time → so the force must decrease. Also watch the
+direction of the time/force relationship — a *longer* time gives a *smaller* force, not a larger
+one.
 """,
 
     ("Our Dynamic Universe", "Energy, Work and Power", "Work Done"): r"""
