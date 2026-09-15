@@ -23,35 +23,78 @@ def _with_impulse_widget(question):
     question.metadata["widget_height"] = 1200
     return question
 
-_NOTES = """
-## Momentum and Impulse
+_MOMENTUM_NOTES = """
+## Momentum
 
-**Definitions:**
-- Momentum is the product of an object's mass and velocity — it is a vector, so direction
-  matters.
-- Impulse is the change in momentum produced by a force acting for a certain time; it is
-  also equal to the area under a force–time graph.
+**Definition:** momentum is the product of an object's mass and its velocity.
 
 $$p = mv$$
-$$m_1u_1 + m_2u_2 = m_1v_1 + m_2v_2 \\ \\text{(total momentum before = total momentum after)}$$
-$$Ft = mv - mu$$
-$$E_k = \\frac{1}{2}mv^2$$
 
 | Symbol | Quantity | Unit |
 |---|---|---|
 | p | Momentum | kg m/s |
 | m | Mass | kg |
-| v, u | Final / initial velocity | m/s |
+| v | Velocity | m/s |
+
+> **Momentum is a vector, not just a number.** It has direction as well as size, so before
+> substituting into any momentum equation you must state which direction you are taking as
+> positive. A velocity in the opposite direction to the one you chose must be entered as
+> negative — get the sign wrong and the answer will be wrong too.
+
+**Conservation of momentum:** provided no external forces act, the total momentum of a
+system before a collision or explosion is equal to the total momentum after.
+
+$$m_1u_1 + m_2u_2 = m_1v_1 + m_2v_2$$
+
+| Symbol | Quantity | Unit |
+|---|---|---|
+| $m_1$, $m_2$ | Mass of object 1, object 2 | kg |
+| $u_1$, $u_2$ | Initial velocity of object 1, object 2 | m/s |
+| $v_1$, $v_2$ | Final velocity of object 1, object 2 | m/s |
+
+> In an explosion, both objects start at rest, so total momentum before is zero — the two
+> parts must fly apart in **opposite directions** with equal and opposite momenta. Whenever a
+> collision or explosion sends an object back the way it came, that change of direction is
+> stated explicitly (never just implied) and shown as a change of sign.
+>
+> A collision is **elastic** only if total kinetic energy is the same before and after;
+> otherwise it is **inelastic**.
+
+$$E_k = \\frac{1}{2}mv^2$$
+
+| Symbol | Quantity | Unit |
+|---|---|---|
+| $E_k$ | Kinetic energy | J |
+"""
+
+_IMPULSE_NOTES = """
+## Impulse
+
+**Definition:** impulse is the change in momentum produced when a force acts on an object
+for a certain time.
+
+$$Ft = mv - mu$$
+
+| Symbol | Quantity | Unit |
+|---|---|---|
 | F | Force | N |
 | t | Time | s |
-| $E_k$ | Kinetic energy | J |
+| m | Mass | kg |
+| u | Initial velocity | m/s |
+| v | Final velocity | m/s |
 
-> **Important:** Total momentum before a collision or explosion always equals total
-> momentum after, provided no external forces act. Always state which direction is positive
-> before substituting — a velocity in the opposite direction must be entered as negative.
-> In an explosion, both objects start at rest, so total momentum before is zero. A collision
-> is elastic only if total kinetic energy is the same before and after; otherwise it is
-> inelastic.
+> Impulse is a vector, measured in newton seconds (N s) — the same unit as momentum
+> (kg m/s). It is also equal to the area under a force–time graph.
+
+> **Direction is essential.** Always state which direction you are taking as positive before
+> substituting into $Ft = mv - mu$. If the object changes direction (e.g. it bounces off a
+> wall, or is struck back the way it came), that change of direction is always stated
+> explicitly — it is never left for you to assume.
+>
+> **Choosing directions when an object reverses:** take the object's *initial* direction of
+> travel as **negative**, so the direction it ends up moving in (after the bounce) is
+> positive. Because $u$ is then negative, the term $-mu$ in $Ft = mv-mu$ becomes $+m|u|$ —
+> every minus sign disappears and the two momenta simply add. See the worked example.
 """
 
 # Each context object is tied to its own plausible mass range, so a generated
@@ -126,7 +169,7 @@ def gen_p_from_mv(level="Higher"):
         {"value": _r2(m + v), "mistake": "Momentum is the product of mass and velocity, not their sum. p = m × v.", "working": working},
     ]
     return make_question(question, p, options_data, "kg m/s",
-                         notes=_NOTES, topic="Our Dynamic Universe",
+                         notes=_MOMENTUM_NOTES, topic="Our Dynamic Universe",
                          question_type="Momentum and Impulse", level=level)
 
 
@@ -148,7 +191,7 @@ def gen_v_from_pm(level="Higher"):
         {"value": _r2(m / p), "mistake": "You divided the wrong way round. v = p ÷ m.", "working": working},
     ]
     return make_question(question, v, options_data, "m/s",
-                         notes=_NOTES, topic="Our Dynamic Universe",
+                         notes=_MOMENTUM_NOTES, topic="Our Dynamic Universe",
                          question_type="Momentum and Impulse", level=level)
 
 
@@ -170,7 +213,7 @@ def gen_m_from_pv(level="Higher"):
         {"value": _r2(v / p), "mistake": "You divided the wrong way round. m = p ÷ v.", "working": working},
     ]
     return make_question(question, float(m), options_data, "kg",
-                         notes=_NOTES, topic="Our Dynamic Universe",
+                         notes=_MOMENTUM_NOTES, topic="Our Dynamic Universe",
                          question_type="Momentum and Impulse", level=level)
 
 
@@ -223,7 +266,7 @@ def gen_stick_together(level="Higher"):
         {"question": "What is the common velocity v after the collision?", "answer": v},
     ]
     return _with_collisions_widget(make_question(question, v, options_data, "m/s", scaffold=scaffold,
-                         notes=_NOTES, topic="Our Dynamic Universe",
+                         notes=_MOMENTUM_NOTES, topic="Our Dynamic Universe",
                          question_type="Momentum and Impulse", level=level), "stick")
 
 
@@ -251,11 +294,11 @@ def gen_separate(level="Higher"):
     total_before = _r2(m1 * u1 + m2 * u2)
     v2 = _r2((total_before - m1 * v1) / m2)
     dir2 = "in the opposite direction" if opposite else "in the same direction"
-    v1_dir = "continues forward" if v1 > 0 else "rebounds"
+    v1_dir = "continues in the same direction" if v1 > 0 else "rebounds, now moving in the opposite direction"
     question = (
         f"{_cap(obj1)} (mass {m1} kg) travelling at {u1} m/s collides with "
         f"{obj2} (mass {m2} kg) travelling at {abs(u2)} m/s {dir2}. After the collision "
-        f"{obj1} {v1_dir} at {abs(v1)} m/s. Calculate the velocity of {obj2} immediately "
+        f"{obj1} {v1_dir}, at {abs(v1)} m/s. Calculate the velocity of {obj2} immediately "
         f"after the collision (taking {obj1}'s initial direction as positive)."
     )
     working = [
@@ -275,7 +318,7 @@ def gen_separate(level="Higher"):
         {"question": "What is v2, the velocity of the second object?", "answer": v2},
     ]
     return _with_collisions_widget(make_question(question, v2, options_data, "m/s", scaffold=scaffold,
-                         notes=_NOTES, topic="Our Dynamic Universe",
+                         notes=_MOMENTUM_NOTES, topic="Our Dynamic Universe",
                          question_type="Momentum and Impulse", level=level), "separate")
 
 
@@ -312,7 +355,7 @@ def gen_explosion(level="Higher"):
         {"question": "What is the velocity of fragment B?", "answer": v2},
     ]
     return _with_collisions_widget(make_question(question, v2, options_data, "m/s", scaffold=scaffold,
-                         notes=_NOTES, topic="Our Dynamic Universe",
+                         notes=_MOMENTUM_NOTES, topic="Our Dynamic Universe",
                          question_type="Momentum and Impulse", level=level), "explosion")
 
 
@@ -320,21 +363,23 @@ def gen_explosion(level="Higher"):
 
 def gen_impulse_find_f(level="Higher"):
     m = round(random.uniform(0.05, 0.5), 3)
-    u = round(random.uniform(0, 5), 1)
-    v = round(random.uniform(u + 2, u + 25), 1)
+    u = -round(random.uniform(0.5, 5), 1)
+    v = round(random.uniform(5, 25), 1)
     t = round(random.uniform(0.005, 0.05), 3)
     delta_p = _r2(m * v - m * u)
     F = _r2(delta_p / t)
 
     obj = random.choice(["ball", "puck", "shuttlecock"])
     question = (
-        f"A {obj} of mass {m} kg, initially moving at {u} m/s, is struck and speeds up to "
-        f"{v} m/s. The force acts for {t} s. Calculate the average force exerted on the {obj}."
+        f"A {obj} of mass {m} kg is moving at {abs(u)} m/s towards a player when it is struck "
+        f"and rebounds, changing direction, to move away at {v} m/s. Taking the {obj}'s "
+        f"initial direction of travel as negative, u = {u} m/s and v = {v} m/s. The force acts "
+        f"for {t} s. Calculate the average force exerted on the {obj}."
     )
     working = [
-        {"type": "text",  "content": "Use the impulse equation:"},
+        {"type": "text",  "content": "Use the impulse equation. The ball changes direction, so take its initial direction of travel as negative (u is negative, v is positive):"},
         {"type": "latex", "content": r"Ft = mv - mu"},
-        {"type": "latex", "content": rf"F \times {t} = ({m} \times {v}) - ({m} \times {u})"},
+        {"type": "latex", "content": rf"F \times {t} = ({m} \times {v}) - ({m} \times ({u}))"},
         {"type": "latex", "content": rf"F \times {t} = {delta_p}"},
         {"type": "latex", "content": rf"F = {F}\ \mathrm{{N}}"},
     ]
@@ -348,13 +393,13 @@ def gen_impulse_find_f(level="Higher"):
         {"question": "What is the average force F?", "answer": F},
     ]
     return _with_impulse_widget(make_question(question, F, options_data, "N", scaffold=scaffold,
-                         notes=_NOTES, topic="Our Dynamic Universe",
+                         notes=_IMPULSE_NOTES, topic="Our Dynamic Universe",
                          question_type="Momentum and Impulse", level=level))
 
 
 def gen_impulse_find_t(level="Higher"):
     m = round(random.uniform(0.05, 0.5), 3)
-    u = 0.0
+    u = -round(random.uniform(0.5, 5), 1)
     v = round(random.uniform(5, 40), 1)
     F = round(random.uniform(500, 8000), 0)
     delta_p = _r2(m * v - m * u)
@@ -362,14 +407,16 @@ def gen_impulse_find_t(level="Higher"):
 
     obj = random.choice(["ball", "puck"])
     question = (
-        f"A club exerts an average force of {F:g} N on a stationary {obj} of mass {m} kg. "
-        f"The {obj} leaves the club at {v} m/s. Calculate the time for which the club is in "
+        f"A club exerts an average force of {F:g} N on a {obj} of mass {m} kg that is moving "
+        f"at {abs(u)} m/s towards the club. The {obj} changes direction, leaving the club at "
+        f"{v} m/s the opposite way. Taking the {obj}'s initial direction of travel as "
+        f"negative, u = {u} m/s and v = {v} m/s. Calculate the time for which the club is in "
         f"contact with the {obj}."
     )
     working = [
-        {"type": "text",  "content": "Use the impulse equation:"},
+        {"type": "text",  "content": "Use the impulse equation. The ball changes direction, so take its initial direction of travel as negative (u is negative, v is positive):"},
         {"type": "latex", "content": r"Ft = mv - mu"},
-        {"type": "latex", "content": rf"{F:g} \times t = ({m} \times {v}) - 0"},
+        {"type": "latex", "content": rf"{F:g} \times t = ({m} \times {v}) - ({m} \times ({u}))"},
         {"type": "latex", "content": rf"{F:g} \times t = {delta_p}"},
         {"type": "latex", "content": rf"t = {t}\ \mathrm{{s}}"},
     ]
@@ -383,7 +430,7 @@ def gen_impulse_find_t(level="Higher"):
         {"question": "What is the contact time t?", "answer": t},
     ]
     return _with_impulse_widget(make_question(question, t, options_data, "s", scaffold=scaffold,
-                         notes=_NOTES, topic="Our Dynamic Universe",
+                         notes=_IMPULSE_NOTES, topic="Our Dynamic Universe",
                          question_type="Momentum and Impulse", level=level))
 
 
@@ -427,7 +474,7 @@ def gen_impulse_graph(level="Higher"):
              "mistake": "This is just the peak force, not the impulse. Impulse is the whole area under the graph.",
              "working": working_a},
         ],
-        notes=_NOTES,
+        notes=_IMPULSE_NOTES,
         scaffold=[{"prompt": "What is the impulse (area under the graph)?", "answer": impulse}],
     )
 
@@ -447,7 +494,7 @@ def gen_impulse_graph(level="Higher"):
              "mistake": "You multiplied the impulse by the mass instead of dividing. v = impulse ÷ m.",
              "working": working_b},
         ],
-        notes=_NOTES,
+        notes=_IMPULSE_NOTES,
         scaffold=[
             {"prompt": "What is the impulse given to the ball (area under the graph)?", "answer": impulse},
             {"prompt": "What is the velocity of the ball?", "answer": v},
@@ -517,9 +564,23 @@ def gen_elastic_inelastic(level="Higher"):
         dir2 = "in the same direction" if u2 > 0 else "in the opposite direction"
         setup = f"{obj2} (mass {m2} kg), moving at {abs(u2)} m/s {dir2}"
     if v1 == v2:
-        outcome = f"the two move off together at {v1} m/s"
+        if v1 >= 0:
+            outcome = f"the two move off together at {v1} m/s, continuing in {obj1}'s initial direction"
+        else:
+            outcome = (
+                f"the two move off together at {abs(v1)} m/s, in the opposite direction to "
+                f"{obj1}'s initial direction"
+            )
     else:
-        outcome = f"{obj1} continues at {v1} m/s and {obj2} moves off at {v2} m/s"
+        obj1_desc = (
+            f"{obj1} continues in the same direction at {v1} m/s" if v1 >= 0 else
+            f"{obj1} rebounds, now moving in the opposite direction at {abs(v1)} m/s"
+        )
+        obj2_desc = (
+            f"{obj2} moves off at {v2} m/s in the same direction as {obj1}'s initial direction" if v2 >= 0 else
+            f"{obj2} moves off at {abs(v2)} m/s in the opposite direction to {obj1}'s initial direction"
+        )
+        outcome = f"{obj1_desc} and {obj2_desc}"
     question_text = (
         f"{_cap(obj1)} of mass {m1} kg moving at {u1} m/s collides with {setup}. "
         f"After the collision {outcome}.\n\nDetermine, by calculation, whether the "
@@ -560,7 +621,7 @@ def gen_elastic_inelastic(level="Higher"):
         unit="",
         distractors=distractors,
         working=working,
-        notes=_NOTES,
+        notes=_MOMENTUM_NOTES,
         topic="Our Dynamic Universe",
         question_type="Momentum and Impulse",
         level=level,
@@ -641,7 +702,7 @@ def gen_ke_lost(level="Higher"):
         {"question": "What is the kinetic energy lost (J)?", "answer": loss},
     ]
     return _with_collisions_widget(make_question(question, loss, options_data, "J", scaffold=scaffold,
-                         notes=_NOTES, topic="Our Dynamic Universe",
+                         notes=_MOMENTUM_NOTES, topic="Our Dynamic Universe",
                          question_type="Momentum and Impulse", level=level), "stick")
 
 

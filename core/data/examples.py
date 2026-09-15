@@ -656,8 +656,14 @@ fragment B moves the opposite way to fragment A.
 """,
 
     ("Our Dynamic Universe", "Momentum and Impulse", "Impulse"): r"""
-**Example:** A ball of mass 0.20 kg, initially moving at 3 m/s, is struck and speeds up to
-18 m/s. The force acts for 0.01 s.
+**Example:** A ball of mass 0.20 kg is moving at 3 m/s towards a player when it is struck by
+a racket and **changes direction**, moving away at 18 m/s. Because the ball reverses, take its
+initial direction of travel as negative:
+
+$$u = -3\ \mathrm{m/s}$$
+$$v = 18\ \mathrm{m/s}$$
+
+The force acts for 0.01 s.
 
 *Calculate the average force exerted on the ball.*
 
@@ -665,13 +671,18 @@ fragment B moves the opposite way to fragment A.
 $$Ft = mv - mu$$
 
 *Substitute:*
-$$F \times 0.01 = (0.20 \times 18) - (0.20 \times 3)$$
+$$F \times 0.01 = (0.20 \times 18) - (0.20 \times (-3))$$
 
 *Rearrange and solve:*
-$$F \times 0.01 = 3.0 \implies F = 300\ \mathrm{N}$$
+$$F \times 0.01 = 3.6 + 0.6$$
+$$F \times 0.01 = 4.2$$
+$$F = 420\ \mathrm{N}$$
 
-**Important:** the same equation rearranges to find the contact time t if the force is given
-instead: $t = (mv - mu) \div F$.
+**Important:** always state which direction you are taking as positive before substituting.
+When an object changes direction like this, take its *initial* direction of travel as
+negative — that turns $-mu$ into $+m|u|$, so every minus sign in $Ft = mv - mu$ disappears and
+the two momenta simply add, as above. The same equation rearranges to find the contact time t
+if the force is given instead: $t = (mv - mu) \div F$.
 """,
 
     ("Our Dynamic Universe", "Momentum and Impulse", "Impulse from a Force-Time Graph"): r"""
