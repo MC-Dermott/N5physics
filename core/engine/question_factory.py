@@ -37,7 +37,12 @@ from topics.dynamics.forces                import (
     gen_missing_friction,
     gen_missing_driving,
 )
-from topics.dynamics.vertical_forces       import generate_vertical_forces
+from topics.dynamics.vertical_forces       import (
+    gen_vertical_liftoff_accel,
+    gen_vertical_liftoff_thrust,
+    gen_freefall_acceleration,
+    gen_parachute_deceleration,
+)
 from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
 from topics.dynamics.projectiles           import generate_projectiles
@@ -223,7 +228,12 @@ QUAL_REGISTRY = {
                 "Finding Friction":      gen_missing_friction,
                 "Finding Driving Force": gen_missing_driving,
             },
-            "Vertical Forces":        generate_vertical_forces,
+            "Vertical Forces": {
+                "Finding Acceleration": gen_vertical_liftoff_accel,
+                "Finding Thrust or Lift Force": gen_vertical_liftoff_thrust,
+                "Free-Fall Acceleration": gen_freefall_acceleration,
+                "Parachute Deceleration": gen_parachute_deceleration,
+            },
             "Weight":                 generate_weight,
             "Energy":                 generate_energy,
             "Projectile Motion":      generate_projectiles,

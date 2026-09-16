@@ -30,32 +30,36 @@ def _dedup(options_data, correct):
     return cleaned
 
 
-# (label, phrase, mass_lo, mass_hi, excess_factor_lo, excess_factor_hi) — the
-# applied force is drawn as a multiple of the object's own weight (not an
+# (label, phrase, force_noun, mass_lo, mass_hi, excess_factor_lo, excess_factor_hi) —
+# the applied force is drawn as a multiple of the object's own weight (not an
 # independent N range), so the net force stays a realistic, modest excess
 # over weight regardless of the object's scale (matches the worksheet's
 # helicopter/balloon/rocket examples, all roughly 1.1-1.4x weight).
 _LIFTOFF_SCENARIOS = [
-    ("helicopter", "the rotor blades provide an upward lift force of", 1000, 3000, 1.08, 1.25),
-    ("weather balloon", "it experiences an upward buoyancy force of", 1, 10, 1.15, 1.45),
-    ("rocket", "the engines provide an upward thrust of", 1500, 5000, 1.15, 1.35),
-    ("hot air balloon", "its burner provides an upward lift force of", 200, 800, 1.10, 1.30),
+    ("helicopter", "the rotor blades provide an upward lift force of",
+     "lift force provided by the rotor blades", 1000, 3000, 1.08, 1.25),
+    ("weather balloon", "it experiences an upward buoyancy force of",
+     "buoyancy force", 1, 10, 1.15, 1.45),
+    ("rocket", "the engines provide an upward thrust of",
+     "thrust provided by the engines", 1500, 5000, 1.15, 1.35),
+    ("hot air balloon", "its burner provides an upward lift force of",
+     "lift force provided by the burner", 200, 800, 1.10, 1.30),
 ]
 
 
 def _draw_liftoff():
-    label, phrase, m_lo, m_hi, x_lo, x_hi = random.choice(_LIFTOFF_SCENARIOS)
+    label, phrase, force_noun, m_lo, m_hi, x_lo, x_hi = random.choice(_LIFTOFF_SCENARIOS)
     mass = random.randint(m_lo, m_hi)
     weight = round(mass * G, 1)
     factor = random.uniform(x_lo, x_hi)
     applied = round(weight * factor / 10) * 10  # round to nearest 10 N
     if applied <= weight:
         applied = round(weight) + 10
-    return label, phrase, mass, applied, weight
+    return label, phrase, force_noun, mass, applied, weight
 
 
 def gen_vertical_liftoff_accel(level="N5"):
-    label, phrase, mass, applied, weight = _draw_liftoff()
+    label, phrase, force_noun, mass, applied, weight = _draw_liftoff()
     net = round(applied - weight, 1)
     correct = round(net / mass, 2)
 
@@ -83,6 +87,52 @@ def gen_vertical_liftoff_accel(level="N5"):
         {"question": "What is the acceleration?", "answer": correct, "unit": "m/s²"},
     ]
     return _with_fbd_widget(make_question(question, correct, options_data, "m/s²", scaffold=scaffold,
+                         notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
+                         question_type="Vertical Forces", level=level))
+
+
+# (mass_lo, mass_hi, accel_lo, accel_hi) — target liftoff acceleration is drawn
+# directly (rather than derived from an applied force), matching the worksheet's
+# "given the acceleration, find the thrust/lift force needed" question type.
+_LIFTOFF_THRUST_ACCEL = (0.3, 3.5)
+
+
+def gen_vertical_liftoff_thrust(level="N5"):
+    label, phrase, force_noun, mass, _applied, weight = _draw_liftoff()
+    accel = round(random.uniform(*_LIFTOFF_THRUST_ACCEL), 2)
+    net = round(mass * accel, 1)
+    correct = round(weight + net, 1)
+
+    working = [
+        {"type": "text",  "content": "Step 1: Find the weight"},
+        {"type": "latex", "content": rf"W = mg = {mass} \times {G} = {weight}\ \mathrm{{N}}"},
+        {"type": "text",  "content": "Step 2: Find the net (unbalanced) force needed for this acceleration"},
+        {"type": "latex", "content": rf"F_{{net}} = ma = {mass} \times {accel} = {net}\ \mathrm{{N}}"},
+        {"type": "text",  "content": "Step 3: Add the weight back on — the upward force must overcome "
+                                      "gravity as well as accelerate the object"},
+        {"type": "latex", "content": rf"F = F_{{net}} + W = {net} + {weight} = {correct}\ \mathrm{{N}}"},
+    ]
+    question = (f"A {label} has a mass of {mass} kg. It accelerates upward at {accel} m/s² as it "
+                f"takes off. Calculate the {force_noun} needed to produce this acceleration. (g = {G} N/kg)")
+    forgot_weight = net
+    subtracted = round(abs(weight - net), 1)
+    options_data = [
+        {"value": correct,        "mistake": None, "working": working},
+        {"value": forgot_weight,  "mistake": "That's just the net force (ma) — the upward force also has to "
+                                             "support the object's weight, not just accelerate it. Add the "
+                                             "weight back on.", "working": working},
+        {"value": subtracted,     "mistake": "You subtracted instead of adding — the upward force has to "
+                                             "overcome weight AND provide the net force, so add them.", "working": working},
+        {"value": weight,         "mistake": "That's just the weight — it would only be enough to hold the "
+                                             "object steady, not accelerate it upward.", "working": working},
+    ]
+    options_data = _dedup(options_data, correct)
+    scaffold = [
+        {"question": "What is the weight?", "answer": weight, "unit": "N"},
+        {"question": "What is the net (unbalanced) force needed?", "answer": net, "unit": "N"},
+        {"question": f"What {force_noun} is needed?", "answer": correct, "unit": "N"},
+    ]
+    return _with_fbd_widget(make_question(question, correct, options_data, "N", scaffold=scaffold,
                          notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
                          question_type="Vertical Forces", level=level))
 
@@ -154,7 +204,8 @@ def gen_parachute_deceleration(level="N5"):
                          question_type="Vertical Forces", level=level)
 
 
-_ALL_GENS = [gen_vertical_liftoff_accel, gen_freefall_acceleration, gen_parachute_deceleration]
+_ALL_GENS = [gen_vertical_liftoff_accel, gen_vertical_liftoff_thrust,
+             gen_freefall_acceleration, gen_parachute_deceleration]
 
 
 def generate_vertical_forces(level="N5"):
