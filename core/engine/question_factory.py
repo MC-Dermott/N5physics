@@ -227,10 +227,10 @@ QUAL_REGISTRY = {
                 "Finding Acceleration":  gen_finding_acceleration,
                 "Finding Friction":      gen_missing_friction,
                 "Finding Driving Force": gen_missing_driving,
+                "Vertical Forces — Finding Acceleration": gen_vertical_liftoff_accel,
+                "Vertical Forces — Finding Thrust or Lift Force": gen_vertical_liftoff_thrust,
             },
-            "Vertical Forces": {
-                "Finding Acceleration": gen_vertical_liftoff_accel,
-                "Finding Thrust or Lift Force": gen_vertical_liftoff_thrust,
+            "Vertical Motion": {
                 "Free-Fall Acceleration": gen_freefall_acceleration,
                 "Parachute Deceleration": gen_parachute_deceleration,
             },
