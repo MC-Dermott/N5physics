@@ -29,7 +29,14 @@ from topics.dynamics.unbalanced_forces_s3   import (
     gen_vertical_unbalanced_force,
     gen_vertical_acceleration,
 )
-from topics.dynamics.forces                import generate_forces
+from topics.dynamics.forces                import (
+    generate_forces,
+    gen_compare_forces,
+    gen_resultant_force,
+    gen_finding_acceleration,
+    gen_missing_friction,
+    gen_missing_driving,
+)
 from topics.dynamics.vertical_forces       import generate_vertical_forces
 from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
@@ -46,6 +53,7 @@ from topics.dynamics.velocity_time_graphs  import (
     gen_which_graph_matches,
     gen_distance_displacement,
     gen_acceleration_interval,
+    gen_describe_graph_stage,
 )
 from topics.dynamics.vectors_scalars       import gen_identify, gen_pairs
 from topics.dynamics.equations_of_motion   import generate_equations_of_motion
@@ -208,7 +216,13 @@ QUAL_REGISTRY = {
         "Dynamics": {
             "Speed, Distance & Time": generate_sdt,
             "Acceleration":           generate_acceleration,
-            "Forces":                 generate_forces,
+            "Forces": {
+                "Explain — Comparing Forces": gen_compare_forces,
+                "Resultant Force at Right Angles": gen_resultant_force,
+                "Finding Acceleration":  gen_finding_acceleration,
+                "Finding Friction":      gen_missing_friction,
+                "Finding Driving Force": gen_missing_driving,
+            },
             "Vertical Forces":        generate_vertical_forces,
             "Weight":                 generate_weight,
             "Energy":                 generate_energy,
@@ -227,6 +241,7 @@ QUAL_REGISTRY = {
                 "Resultant Velocity": generate_resultant_velocity,
             },
             "Velocity-Time Graphs": {
+                "Describe Motion from a Graph": gen_describe_graph_stage,
                 "Which Graph Matches?": gen_which_graph_matches,
                 "Distance and Displacement": gen_distance_displacement,
                 "Acceleration from an Interval": gen_acceleration_interval,

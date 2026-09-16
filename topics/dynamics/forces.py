@@ -1,5 +1,7 @@
 import random
+import math
 import pathlib
+from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
 from utils.notes import NOTES
 
@@ -203,3 +205,166 @@ _ALL_GENS = [gen_missing_friction, gen_missing_driving, gen_missing_acceleration
 
 def generate_forces(level="N5"):
     return random.choice(_ALL_GENS)(level=level)
+
+
+def gen_finding_acceleration(level="N5"):
+    return random.choice([gen_missing_acceleration, gen_missing_acceleration_two_forces])(level=level)
+
+
+# ── Explain: comparing forward and backward forces during a stage of motion ─
+
+_COMPARE_CASES = [
+    ("speeding up", "greater than"),
+    ("travelling at a constant, steady speed", "equal to"),
+    ("slowing down", "less than"),
+]
+_COMPARE_SUBJECTS = ["cyclist", "car", "runner", "van", "motorbike", "skateboarder"]
+
+
+def gen_compare_forces(level="N5"):
+    subject = random.choice(_COMPARE_SUBJECTS)
+    phase, answer_key = random.choice(_COMPARE_CASES)
+
+    phrasing = {
+        "greater than": "greater than",
+        "equal to": "equal to",
+        "less than": "less than",
+    }
+    reasoning = {
+        "greater than": "unbalanced, acting forward — this speeds the object up",
+        "equal to": "balanced — this keeps the object's speed constant",
+        "less than": "unbalanced, acting backward — this slows the object down",
+    }
+
+    question_text = (
+        f"A {subject} is {phase} along a flat, straight road.\n\n"
+        f"How does the size of the forward (driving) force compare with the size of the "
+        f"backward force (friction and air resistance) acting on the {subject}?"
+    )
+    working = [
+        {"type": "text", "content": f"The {subject} is {phase}, so the forces acting on it must be "
+                                     f"{reasoning[answer_key]}."},
+        {"type": "text", "content": f"The forward force is {phrasing[answer_key]} the backward force."},
+    ]
+    correct = f"The forward force is {phrasing[answer_key]} the backward force."
+    mistake_text = {
+        "greater than": "A forward force bigger than the backward force gives an unbalanced forward force, "
+                        "which speeds the object up — that's not this motion.",
+        "equal to": "Equal forward and backward forces are balanced, which keeps speed constant — that's not "
+                    "this motion.",
+        "less than": "A backward force bigger than the forward force gives an unbalanced backward force, "
+                     "which slows the object down — that's not this motion.",
+    }
+    distractors = []
+    for key in phrasing:
+        if key == answer_key:
+            continue
+        distractors.append({
+            "value": f"The forward force is {phrasing[key]} the backward force.",
+            "mistake": mistake_text[key],
+            "working": working,
+        })
+
+    options = [correct] + [d["value"] for d in distractors]
+    random.shuffle(options)
+
+    return PhysicsQuestion(
+        question_text=question_text,
+        correct_answer=correct,
+        unit="",
+        distractors=distractors,
+        working=working,
+        notes=NOTES["dynamics_newton"],
+        topic="Dynamics",
+        question_type="Forces",
+        level=level,
+        metadata={"type": "classification", "options": options},
+    )
+
+
+# ── Resultant of two forces acting at right angles ───────────────────────────
+
+_RESULTANT_FORCE_SCENARIOS = [
+    ("cyclist", "pushes forward with a force of", "A crosswind exerts a force of",
+     "at right angles to the direction of travel", "the forward force"),
+    ("aircraft's engines", "provide a forward thrust of", "A crosswind produces a force of",
+     "at right angles to the thrust", "the thrust"),
+    ("boat's engine", "provides a forward force of", "A river current pushes on the boat with a force of",
+     "at right angles to the engine force", "the engine force"),
+    ("go-kart", "is driven forward with a force of", "A gust of wind exerts a force of",
+     "at right angles to the direction of travel", "the driving force"),
+]
+
+
+def gen_resultant_force_magnitude(level="N5"):
+    subject, verb, perp_phrase, perp_qualifier, ref_name = random.choice(_RESULTANT_FORCE_SCENARIOS)
+    f1 = random.randint(150, 600)
+    f2 = random.randint(30, max(31, round(f1 * 0.6)))
+    magnitude = round(math.sqrt(f1 ** 2 + f2 ** 2), 1)
+
+    question = (f"The {subject} {verb} {f1} N. {perp_phrase} {f2} N {perp_qualifier}.\n\n"
+                f"Calculate the magnitude of the resultant force.")
+    working = [
+        {"type": "text", "content": "The two forces act at right angles, so use Pythagoras' theorem:"},
+        {"type": "latex", "content": r"R = \sqrt{F_1^2 + F_2^2}"},
+        {"type": "latex", "content": rf"R = \sqrt{{{f1}^2 + {f2}^2}}"},
+        {"type": "latex", "content": rf"R = {magnitude}\ \mathrm{{N}}"},
+    ]
+    options_data = [
+        {"value": magnitude, "mistake": None, "working": working},
+        {"value": float(f1 + f2),
+         "mistake": "You can't just add the two forces — they act at right angles, so use Pythagoras' theorem.",
+         "working": working},
+        {"value": float(abs(f1 - f2)),
+         "mistake": "You can't just subtract the two forces — they act at right angles, so use Pythagoras' theorem.",
+         "working": working},
+        {"value": round(f1 ** 2 + f2 ** 2, 1),
+         "mistake": "That's R² — remember to take the square root to get the resultant force itself.",
+         "working": working},
+    ]
+    options_data = _dedup(options_data, magnitude)
+    scaffold = [
+        {"question": "What is R² (F₁² + F₂²)?", "answer": round(f1 ** 2 + f2 ** 2, 1)},
+        {"question": "What is the magnitude of the resultant force?", "answer": magnitude},
+    ]
+    return make_question(question, magnitude, options_data, "N", scaffold=scaffold,
+                         notes=NOTES["dynamics_newton"], topic="Dynamics", question_type="Forces", level=level)
+
+
+def gen_resultant_force_direction(level="N5"):
+    subject, verb, perp_phrase, perp_qualifier, ref_name = random.choice(_RESULTANT_FORCE_SCENARIOS)
+    f1 = random.randint(150, 600)
+    f2 = random.randint(30, max(31, round(f1 * 0.6)))
+    angle = round(math.degrees(math.atan(f2 / f1)), 1)
+    angle_swapped = round(90 - angle, 1)
+    angle_wrong_ratio = round(math.degrees(math.atan(f1 / f2)), 1)
+
+    question = (f"The {subject} {verb} {f1} N. {perp_phrase} {f2} N {perp_qualifier}.\n\n"
+                f"Calculate the direction of the resultant force relative to {ref_name}.")
+    working = [
+        {"type": "text", "content": f"Use trigonometry, measuring the angle from {ref_name}:"},
+        {"type": "latex", "content": rf"\tan\theta = \frac{{{f2}}}{{{f1}}}"},
+        {"type": "latex", "content": rf"\theta = {angle}°"},
+    ]
+    options_data = [
+        {"value": angle, "display": f"{angle}°", "mistake": None, "working": working},
+        {"value": angle_swapped, "display": f"{angle_swapped}°",
+         "mistake": f"That's 90° minus the correct angle — θ is measured from {ref_name} itself, not from "
+                    f"the perpendicular force.",
+         "working": working},
+        {"value": angle_wrong_ratio, "display": f"{angle_wrong_ratio}°",
+         "mistake": f"Check which force goes on top of the fraction — tan θ = (perpendicular force) ÷ "
+                    f"({ref_name}), not the other way round.",
+         "working": working},
+    ]
+    options_data = _dedup(options_data, angle)
+    scaffold = [
+        {"question": "What is tan θ (perpendicular force ÷ reference force)?", "answer": round(f2 / f1, 3)},
+        {"question": "What is θ, the direction of the resultant force?", "answer": angle},
+    ]
+    return make_question(question, angle, options_data, "°", scaffold=scaffold,
+                         notes=NOTES["dynamics_newton"], topic="Dynamics", question_type="Forces", level=level)
+
+
+def gen_resultant_force(level="N5"):
+    return random.choice([gen_resultant_force_magnitude, gen_resultant_force_direction])(level=level)

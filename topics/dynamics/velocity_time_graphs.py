@@ -66,6 +66,38 @@ def _area_figure(points):
     return fig
 
 
+def _stage_figure(points):
+    """points: list of (t, v, label). Plain labelled line, no area shading —
+    for questions about the shape/description of the motion, not its area."""
+    ts = [p[0] for p in points]
+    vs = [p[1] for p in points]
+
+    fig = go.Figure(go.Scatter(
+        x=ts, y=vs, mode="lines", line=dict(color=_LINE_COLOR, width=3),
+    ))
+    fig.add_trace(go.Scatter(
+        x=ts, y=vs, mode="markers+text",
+        text=[label for _, _, label in points],
+        textposition="top center",
+        textfont=dict(size=14, color=_AXIS_COLOR),
+        marker=dict(color=_POINT_COLOR, size=9),
+        showlegend=False,
+    ))
+
+    t_max = max(ts) * 1.15 if max(ts) > 0 else 1
+    v_max = max(vs) * 1.25 if max(vs) > 0 else 1
+    fig.update_xaxes(title_text="Time (s)", range=[0, t_max], zeroline=True,
+                     zerolinecolor=_AXIS_COLOR, gridcolor=_GRID_COLOR, linecolor=_AXIS_COLOR)
+    fig.update_yaxes(title_text="Velocity (m/s)", range=[0, v_max], zeroline=True,
+                     zerolinecolor=_AXIS_COLOR, gridcolor=_GRID_COLOR, linecolor=_AXIS_COLOR)
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=45, r=15, t=25, b=35), height=320, showlegend=False,
+        font=dict(size=11),
+    )
+    return fig
+
+
 def _interval_figure(points, t_start, v_start, t_end, v_end):
     """points: full compound journey as (t, v) tuples, unlabelled. Highlights
     the queried interval with labelled points P and Q."""
@@ -415,10 +447,69 @@ def gen_acceleration_interval(level="N5"):
     return q
 
 
+# ── Describing the motion shown during one stage of a multi-stage graph ─────
+
+_STAGE_DESCRIPTIONS = [
+    "accelerating uniformly from rest",
+    "travelling at a constant, steady velocity",
+    "decelerating uniformly to rest",
+]
+_STAGE_EXTRA_DISTRACTOR = "accelerating uniformly, but not starting from rest"
+
+
+def gen_describe_graph_stage(level="N5"):
+    ctx = random.choice(_CONTEXTS)
+    v1 = random.choice([8, 10, 12, 15, 18, 20])
+    t1 = random.choice([4, 5, 6, 8])
+    hold = random.choice([3, 4, 5, 6])
+    t2 = random.choice([3, 4, 5])
+    t3 = t1 + hold + t2
+
+    stage_labels = ["A to B", "B to C", "C to D"]
+    idx = random.randrange(3)
+    label = stage_labels[idx]
+    correct = _STAGE_DESCRIPTIONS[idx]
+
+    question_text = (
+        f"The velocity-time graph below shows a {ctx} that accelerates uniformly from rest to "
+        f"{v1} m/s over {t1} s (A to B), travels at this constant velocity for {hold} s (B to C), "
+        f"then decelerates uniformly to rest over {t2} s (C to D).\n\n"
+        f"Which of the following best describes the {ctx}'s motion during stage {label}?"
+    )
+    working = [
+        {"type": "text", "content": f"Stage {label}: {correct}."},
+        {"type": "text", "content": "A sloped line means the object is accelerating or decelerating; a "
+                                     "horizontal line means a constant velocity."},
+    ]
+
+    distractor_descs = [d for d in _STAGE_DESCRIPTIONS if d != correct] + [_STAGE_EXTRA_DISTRACTOR]
+    mistake_for = {
+        _STAGE_DESCRIPTIONS[0]: "That describes stage A to B, not this stage.",
+        _STAGE_DESCRIPTIONS[1]: "That describes stage B to C, not this stage.",
+        _STAGE_DESCRIPTIONS[2]: "That describes stage C to D, not this stage.",
+        _STAGE_EXTRA_DISTRACTOR: "None of this graph's stages start from a non-zero velocity and then "
+                                 "accelerate — check the shape of the graph again.",
+    }
+    distractors = [{"value": d, "mistake": mistake_for[d], "working": working} for d in distractor_descs]
+    options = [correct] + [d["value"] for d in distractors]
+    random.shuffle(options)
+
+    q = PhysicsQuestion(
+        question_text=question_text, correct_answer=correct, unit="",
+        topic="Dynamics", question_type="Velocity-Time Graphs", level=level,
+        distractors=distractors, working=working, notes=_NOTES,
+        metadata={"type": "classification", "options": options},
+    )
+    points = [(0, 0, "A"), (t1, v1, "B"), (t1 + hold, v1, "C"), (t3, 0, "D")]
+    q.metadata["main_figure"] = _stage_figure(points)
+    return q
+
+
 _ALL_GENS = [
     gen_which_graph_matches,
     gen_distance_displacement,
     gen_acceleration_interval,
+    gen_describe_graph_stage,
 ]
 
 
