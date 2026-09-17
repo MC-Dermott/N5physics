@@ -631,7 +631,7 @@ def gen_energy_lift_power(level="Higher"):
     ep = round_sf(m_kg * G * h)
     P = round_sf(ep / t)
 
-    ctx = random.choice(["goods lift", "escalator", "chairlift", "hoist"])
+    ctx = random.choice(["goods lift", "escalator", "chairlift", "hoist", "crane"])
     question = (
         f"A {ctx} carries a load of mass {m_kg:g} kg through a vertical height of {h} m in "
         f"a time of {t:g} s, moving at constant speed. Calculate the useful power developed."
@@ -683,10 +683,234 @@ def gen_energy_engine_power(level="Higher"):
                          question_type="Energy, Work and Power", level=level)
 
 
+# ── Section 6: Power Over Time (lifting / speeding up / slowing down) ───────
+
+_ACCEL_CONTEXTS = ["car", "van", "train", "motorbike"]
+
+
+def _accel_mass(ctx):
+    return random.randint(150, 300) if ctx == "motorbike" else random.randint(800, 5000)
+
+
+def gen_power_accelerate(level="Higher"):
+    ctx = random.choice(_ACCEL_CONTEXTS)
+    m_kg = _accel_mass(ctx)
+    from_rest = random.random() < 0.5
+    u = 0.0 if from_rest else round(random.uniform(2, 8), 1)
+    v = round(random.uniform(u + 5, u + 25), 1)
+    t = round(random.uniform(5, 30), 0)
+    ek_i = round_sf(0.5 * m_kg * u ** 2)
+    ek_f = round_sf(0.5 * m_kg * v ** 2)
+    delta_ek = round_sf(ek_f - ek_i)
+    P = round_sf(delta_ek / t)
+
+    if from_rest:
+        question = (
+            f"A {ctx} of mass {m_kg} kg accelerates from rest to a speed of {v} m/s in "
+            f"{t:g} s. Calculate the average power developed by the engine."
+        )
+    else:
+        question = (
+            f"A {ctx} of mass {m_kg} kg accelerates from {u} m/s to {v} m/s in {t:g} s. "
+            f"Calculate the average power developed by the engine."
+        )
+    working = [{"type": "text", "content": "Average power = change in kinetic energy ÷ time:"}]
+    if not from_rest:
+        working.append({"type": "latex", "content": rf"E_{{k,i}} = \tfrac{{1}}{{2}}mu^2 = \tfrac{{1}}{{2}} \times {m_kg} \times {u}^2 = {ek_i}\ \mathrm{{J}}"})
+    working += [
+        {"type": "latex", "content": rf"E_{{k,f}} = \tfrac{{1}}{{2}}mv^2 = \tfrac{{1}}{{2}} \times {m_kg} \times {v}^2 = {ek_f}\ \mathrm{{J}}"},
+        {"type": "latex", "content": rf"\Delta E_k = {ek_f} - {ek_i} = {delta_ek}\ \mathrm{{J}}"},
+        {"type": "latex", "content": r"P = \frac{\Delta E_k}{t}"},
+        {"type": "latex", "content": rf"P = \frac{{{delta_ek}}}{{{t:g}}}"},
+        {"type": "latex", "content": rf"P = {P}\ \mathrm{{W}}"},
+    ]
+    options_data = [
+        {"value": P, "mistake": None, "working": working},
+        {"value": round_sf(ek_f / t), "mistake": "You used the final kinetic energy only. You must use the change in kinetic energy: P = ΔEk ÷ t.", "working": working},
+        {"value": round_sf(delta_ek * t), "mistake": "You multiplied ΔEk by t instead of dividing. P = ΔEk ÷ t.", "working": working},
+    ]
+    scaffold = [
+        {"question": "What is the change in kinetic energy, ΔEk?", "answer": delta_ek},
+        {"question": "What is the average power P?", "answer": P},
+    ]
+    return make_question(question, P, options_data, "W", scaffold=scaffold,
+                         notes=_NOTES, topic="Our Dynamic Universe",
+                         question_type="Energy, Work and Power", level=level)
+
+
+def gen_power_decelerate(level="Higher"):
+    ctx = random.choice(_ACCEL_CONTEXTS)
+    m_kg = _accel_mass(ctx)
+    v = round(random.uniform(15, 35), 1)
+    stops = random.random() < 0.6
+    u = 0.0 if stops else round(random.uniform(2, v - 5), 1)
+    t = round(random.uniform(3, 15), 0)
+    ek_i = round_sf(0.5 * m_kg * v ** 2)
+    ek_f = round_sf(0.5 * m_kg * u ** 2)
+    delta_ek = round_sf(ek_i - ek_f)
+    P = round_sf(delta_ek / t)
+
+    if stops:
+        question = (
+            f"A {ctx} of mass {m_kg} kg travelling at {v} m/s brakes to rest in {t:g} s. "
+            f"Calculate the average power dissipated by the brakes."
+        )
+    else:
+        question = (
+            f"A {ctx} of mass {m_kg} kg decelerates from {v} m/s to {u} m/s in {t:g} s. "
+            f"Calculate the average power dissipated by the brakes."
+        )
+    working = [
+        {"type": "text",  "content": "Average power dissipated = loss in kinetic energy ÷ time:"},
+        {"type": "latex", "content": rf"E_{{k,i}} = \tfrac{{1}}{{2}}mv^2 = \tfrac{{1}}{{2}} \times {m_kg} \times {v}^2 = {ek_i}\ \mathrm{{J}}"},
+    ]
+    if not stops:
+        working.append({"type": "latex", "content": rf"E_{{k,f}} = \tfrac{{1}}{{2}}mu^2 = \tfrac{{1}}{{2}} \times {m_kg} \times {u}^2 = {ek_f}\ \mathrm{{J}}"})
+    working += [
+        {"type": "latex", "content": rf"\Delta E_k = {ek_i} - {ek_f} = {delta_ek}\ \mathrm{{J}}"},
+        {"type": "latex", "content": r"P = \frac{\Delta E_k}{t}"},
+        {"type": "latex", "content": rf"P = \frac{{{delta_ek}}}{{{t:g}}}"},
+        {"type": "latex", "content": rf"P = {P}\ \mathrm{{W}}"},
+    ]
+    options_data = [
+        {"value": P, "mistake": None, "working": working},
+        {"value": round_sf(ek_i / t), "mistake": "You used the initial kinetic energy only. You must use the loss in kinetic energy: P = ΔEk ÷ t.", "working": working},
+        {"value": round_sf(delta_ek * t), "mistake": "You multiplied ΔEk by t instead of dividing. P = ΔEk ÷ t.", "working": working},
+    ]
+    scaffold = [
+        {"question": "What is the loss in kinetic energy, ΔEk?", "answer": delta_ek},
+        {"question": "What is the average power dissipated?", "answer": P},
+    ]
+    return make_question(question, P, options_data, "W", scaffold=scaffold,
+                         notes=_NOTES, topic="Our Dynamic Universe",
+                         question_type="Energy, Work and Power", level=level)
+
+
+def generate_power_time_scenario(level="Higher"):
+    """Randomly picks: lifted at constant speed, sped up, or slowed down — all use
+    average power = (energy transferred) ÷ time, just with a different energy term."""
+    return random.choice([gen_energy_lift_power, gen_power_accelerate, gen_power_decelerate])(level=level)
+
+
+# ── Section 7: Hydroelectric / Waterfall Power ───────────────────────────────
+
+def gen_hydro_power(level="Higher"):
+    is_dam = random.random() < 0.5
+    h = round(random.uniform(15, 300), 0)
+    rate_s = round_sf(random.uniform(1e4, 5e8))
+    use_minutes = random.random() < 0.5
+    unit_label = "minute" if use_minutes else "second"
+    rate_disp = round_sf(rate_s * 60) if use_minutes else rate_s
+    P = round_sf(rate_s * G * h)
+
+    if is_dam:
+        question = (
+            f"Water flows through a hydroelectric dam at a rate of {fmt_num(rate_disp)} kg "
+            f"per {unit_label}.\nThe water falls through a height of {h:g} m before reaching "
+            f"the turbines.\nCalculate the total power delivered by the falling water."
+        )
+    else:
+        question = (
+            f"Water flows at a rate of {fmt_num(rate_disp)} kg per {unit_label} over a "
+            f"waterfall.\nThe height of the waterfall is {h:g} m.\nCalculate the total power "
+            f"delivered by the water in falling through the {h:g} m."
+        )
+
+    working = []
+    if use_minutes:
+        working.append({"type": "text", "content": f"Convert the flow rate to kg/s: {fmt_num(rate_disp)} kg/min ÷ 60 = {fmt_num(rate_s)} kg/s"})
+    working += [
+        {"type": "text",  "content": "Power delivered = (mass per second) × g × h:"},
+        {"type": "latex", "content": r"P = \frac{m}{t} \times g \times h"},
+        {"type": "latex", "content": rf"P = {fmt_num(rate_s)} \times 9.8 \times {h:g}"},
+        {"type": "latex", "content": rf"P = {fmt_num(P)}\ \mathrm{{W}}"},
+    ]
+    options_data = [{"value": P, "mistake": None, "working": working}]
+    if use_minutes:
+        options_data.append({
+            "value": round_sf(rate_disp * G * h),
+            "mistake": f"You used the flow rate in kg per minute without converting to kg per second. {fmt_num(rate_disp)} kg/min ÷ 60 = {fmt_num(rate_s)} kg/s.",
+            "working": working,
+        })
+    options_data += [
+        {"value": round_sf(rate_s * h), "mistake": "You left out g. P = (m/t) × g × h.", "working": working},
+        {"value": round_sf(rate_s * G), "mistake": "You left out the height h. P = (m/t) × g × h.", "working": working},
+    ]
+    scaffold = [
+        {"question": "What is the flow rate in kg per second?", "answer": rate_s},
+        {"question": "What is the total power delivered?", "answer": P},
+    ]
+    return make_question(question, P, options_data, "W", scaffold=scaffold,
+                         notes=_NOTES, topic="Our Dynamic Universe",
+                         question_type="Energy, Work and Power", level=level)
+
+
+# ── Section 8: Vehicle Climbing a Slope (gravity + friction) ────────────────
+
+_SLOPE_VEHICLE_CONTEXTS = ["bus", "lorry", "car", "cyclist", "van"]
+
+
+def gen_slope_vehicle_power(level="Higher"):
+    ctx = random.choice(_SLOPE_VEHICLE_CONTEXTS)
+    if ctx == "cyclist":
+        m_kg = random.randint(70, 100)
+        f_friction = random.randint(20, 80)
+        d_km = round(random.uniform(0.3, 1.5), 2)
+        h = round(random.uniform(20, 80), 0)
+        t_min = round(random.uniform(3, 12), 0)
+    else:
+        m_kg = random.randint(1000, 12000)
+        f_friction = random.randint(400, 2000)
+        d_km = round(random.uniform(0.5, 3), 2)
+        h = round(random.uniform(80, 400), 0)
+        t_min = round(random.uniform(10, 30), 0)
+
+    d_m = round_sf(d_km * 1000)
+    t_s = t_min * 60
+    ep = round_sf(m_kg * G * h)
+    work_friction = round_sf(f_friction * d_m)
+    total_work = round_sf(ep + work_friction)
+    P = round_sf(total_work / t_s)
+
+    question = (
+        f"A {ctx} of mass {m_kg:g} kg climbs a hill on a motorway. Frictional forces of "
+        f"{f_friction:g} N act on the {ctx} throughout the climb, which has a length of "
+        f"{d_km:g} km. The {ctx} gains a height of {h:g} m during the climb. If the {ctx} "
+        f"takes {t_min:g} min to complete the climb, calculate the average power of the "
+        f"{ctx}'s engine."
+    )
+    working = [
+        {"type": "text",  "content": f"Convert the distance and time: {d_km:g} km = {d_m:g} m, {t_min:g} min = {t_s:g} s"},
+        {"type": "text",  "content": "Work done by the engine = gain in Ep + work done against friction:"},
+        {"type": "latex", "content": rf"E_p = mgh = {m_kg:g} \times 9.8 \times {h:g} = {ep}\ \mathrm{{J}}"},
+        {"type": "latex", "content": rf"E_{{W,friction}} = Fd = {f_friction:g} \times {d_m:g} = {work_friction}\ \mathrm{{J}}"},
+        {"type": "latex", "content": rf"E_{{W,total}} = {ep} + {work_friction} = {total_work}\ \mathrm{{J}}"},
+        {"type": "latex", "content": r"P = \frac{E_{W,total}}{t}"},
+        {"type": "latex", "content": rf"P = \frac{{{total_work}}}{{{t_s:g}}}"},
+        {"type": "latex", "content": rf"P = {P}\ \mathrm{{W}}"},
+    ]
+    options_data = [
+        {"value": P, "mistake": None, "working": working},
+        {"value": round_sf(ep / t_s), "mistake": "You forgot to include the work done against friction. Total work = Ep + Fd.", "working": working},
+        {"value": round_sf(work_friction / t_s), "mistake": "You forgot to include the gain in gravitational potential energy. Total work = Ep + Fd.", "working": working},
+        {"value": round_sf(total_work / t_min), "mistake": f"You did not convert the time to seconds. {t_min:g} min = {t_s:g} s.", "working": working},
+    ]
+    scaffold = [
+        {"question": "What is the gain in gravitational potential energy, Ep?", "answer": ep},
+        {"question": "What is the work done against friction?", "answer": work_friction},
+        {"question": "What is the total work done by the engine?", "answer": total_work},
+        {"question": "What is the average power of the engine?", "answer": P},
+    ]
+    return make_question(question, P, options_data, "W", scaffold=scaffold,
+                         notes=_NOTES, topic="Our Dynamic Universe",
+                         question_type="Energy, Work and Power", level=level)
+
+
 def generate_energy_conservation(level="Higher"):
     return random.choice([
         gen_energy_freefall_speed, gen_energy_max_height,
         gen_energy_friction_force, gen_energy_lift_power, gen_energy_engine_power,
+        gen_power_accelerate, gen_power_decelerate, gen_hydro_power, gen_slope_vehicle_power,
     ])(level=level)
 
 
@@ -697,6 +921,7 @@ _ALL_GENS = [
     gen_power_find_p, gen_power_find_e, gen_power_find_t,
     gen_energy_freefall_speed, gen_energy_max_height,
     gen_energy_friction_force, gen_energy_lift_power, gen_energy_engine_power,
+    gen_power_accelerate, gen_power_decelerate, gen_hydro_power, gen_slope_vehicle_power,
 ]
 
 

@@ -108,6 +108,9 @@ from topics.dynamics.energy_work_power_higher import (
     gen_energy_friction_force,
     gen_energy_lift_power,
     gen_energy_engine_power,
+    generate_power_time_scenario,
+    gen_hydro_power,
+    gen_slope_vehicle_power,
 )
 from topics.dynamics.effective_weight_higher import (
     generate_effective_weight_lifts,
@@ -152,6 +155,13 @@ from topics.electricity_and_energy.knowledge        import (
     generate_renewable_energy,
     generate_input_output_devices,
     generate_electromagnets,
+)
+
+from topics.skills.prefixes import (
+    gen_name_to_power,
+    gen_power_to_name,
+    gen_symbol_to_name,
+    gen_name_to_symbol,
 )
 
 QUAL_REGISTRY = {
@@ -288,6 +298,14 @@ QUAL_REGISTRY = {
                 "Exam Style":             generate_heat_exam_icemachine,
             },
         },
+        "Skills": {
+            "Scientific Prefixes": {
+                "Name → Power of 10": gen_name_to_power,
+                "Power of 10 → Name": gen_power_to_name,
+                "Symbol → Name":      gen_symbol_to_name,
+                "Name → Symbol":      gen_name_to_symbol,
+            },
+        },
     },
     "Higher": {
         "Our Dynamic Universe": {
@@ -343,6 +361,9 @@ QUAL_REGISTRY = {
                 "Conservation — Frictional Force": gen_energy_friction_force,
                 "Conservation — Useful Power":  gen_energy_lift_power,
                 "Conservation — Engine Power":  gen_energy_engine_power,
+                "Conservation — Power Over Time": generate_power_time_scenario,
+                "Conservation — Hydroelectric Power": gen_hydro_power,
+                "Conservation — Vehicle on a Slope": gen_slope_vehicle_power,
             },
             "Effective Weight": {
                 "Lifts":                         generate_effective_weight_lifts,

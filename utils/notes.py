@@ -401,8 +401,17 @@ $$E_k = \\frac{1}{2}mv^2 = \\frac{1}{2} \\times 3 \\times 4^2 = 24\\ \\mathrm{J}
     "energy_work": """
 ## Work Done — $E_W = Fd$
 
-**Definition:** Work done is the energy transferred when a force moves an object through a
-distance.
+**Definition:** Work done is a measure of the change in energy caused by a force acting on an
+object as it moves through a distance. Whenever a force does work, it changes the energy an
+object has in one of three ways:
+
+- **Force increases the energy an object has** — e.g. pushing a stationary trolley forward
+  increases its kinetic energy.
+- **Force decreases the energy an object has** — e.g. friction acting on a sliding box
+  decreases its kinetic energy.
+- **Force changes the type of energy an object has** — e.g. lifting a book at constant speed
+  does work against gravity, changing chemical energy (in your muscles) into gravitational
+  potential energy.
 
 **Key equation:**
 $$E_W = Fd$$
