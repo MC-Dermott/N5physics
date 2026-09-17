@@ -106,11 +106,7 @@ from topics.dynamics.energy_work_power_higher import (
     gen_energy_freefall_speed,
     gen_energy_max_height,
     gen_energy_friction_force,
-    gen_energy_lift_power,
-    gen_energy_engine_power,
-    generate_power_time_scenario,
-    gen_hydro_power,
-    gen_slope_vehicle_power,
+    gen_conservation_power,
 )
 from topics.dynamics.effective_weight_higher import (
     generate_effective_weight_lifts,
@@ -308,7 +304,7 @@ QUAL_REGISTRY = {
         },
     },
     "Higher": {
-        "Our Dynamic Universe": {
+        "Our Dynamic Universe (Part 1)": {
             "Equations of Motion": {
                 "Horizontal Motion": generate_equations_of_motion,
                 "Vertical Motion":   generate_equations_of_motion_vertical,
@@ -316,14 +312,6 @@ QUAL_REGISTRY = {
             "Graphs of Motion": {
                 "Graph Matching":          generate_graphs_of_motion,
                 "Velocity from a-t Graph": generate_at_graph_velocity,
-            },
-            "Special Relativity":  generate_special_relativity,
-            "Gravitation":         generate_orbital_gravitation,
-            "Projectile Motion": {
-                "Level 1 — Same Height":      generate_projectile_l1,
-                "Level 2 — Different Height": generate_projectile_l2,
-                "Time to Maximum Height":     generate_projectile_max_height,
-                "Level 3 — Exam Style":       generate_projectile_exam_style,
             },
             "Towing": {
                 "Level 1 — One Trailer, No Friction":        gen_l1_one_trailer_no_friction,
@@ -359,11 +347,7 @@ QUAL_REGISTRY = {
                 "Conservation — Free-Fall Speed": gen_energy_freefall_speed,
                 "Conservation — Maximum Height": gen_energy_max_height,
                 "Conservation — Frictional Force": gen_energy_friction_force,
-                "Conservation — Useful Power":  gen_energy_lift_power,
-                "Conservation — Engine Power":  gen_energy_engine_power,
-                "Conservation — Power Over Time": generate_power_time_scenario,
-                "Conservation — Hydroelectric Power": gen_hydro_power,
-                "Conservation — Vehicle on a Slope": gen_slope_vehicle_power,
+                "Conservation — Power":  gen_conservation_power,
             },
             "Effective Weight": {
                 "Lifts":                         generate_effective_weight_lifts,
@@ -371,6 +355,16 @@ QUAL_REGISTRY = {
                 "Beyond Lifts":                   generate_effective_weight_beyond_lifts,
                 "Beyond Lifts — Explain Free Fall": gen_ew_explain_freefall,
             },
+        },
+        "Our Dynamic Universe (Part 2)": {
+            "Projectile Motion": {
+                "Level 1 — Same Height":      generate_projectile_l1,
+                "Level 2 — Different Height": generate_projectile_l2,
+                "Time to Maximum Height":     generate_projectile_max_height,
+                "Level 3 — Exam Style":       generate_projectile_exam_style,
+            },
+            "Gravitation":         generate_orbital_gravitation,
+            "Special Relativity":  generate_special_relativity,
         },
         "Particles and Waves": {
             "Standard Model": {

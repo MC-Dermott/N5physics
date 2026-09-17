@@ -54,46 +54,49 @@ $$R = v_H \\times t_{\\text{total}}$$
 """
 
 _NOTES_L2 = """
-## Projectile Motion — Horizontal Launch from Height (Level 2)
+## Projectile Motion — Angled Launch from a Height (Level 2)
 
 **Definitions:**
 - Velocity is the speed of an object in a given direction (displacement per unit of time).
 - Acceleration is the change in velocity per second.
 
-An object launched **horizontally** at speed $v_H$ from height $h$.
+An object launched at speed **v** at angle **θ** above the horizontal, from a height **h**
+above the ground it lands on (so it falls further than it rises).
 
-**Vertical motion** (starts from rest, $u_V = 0$, accelerates at $g = 9.8$ m/s²):
-$$h = \\frac{1}{2}g t^2 \\quad\\Rightarrow\\quad t = \\sqrt{\\frac{2h}{g}}$$
+**Step 1 — Resolve into components:**
+$$v_H = v \\cos\\theta \\qquad v_V = v \\sin\\theta$$
 
-Vertical velocity at impact:
-$$v_y = g t$$
+**Step 2 — Vertical velocity just before landing.** Unlike a launch on flat ground, the
+projectile lands *below* its starting height, so its final vertical speed is larger than
+$v_V$. Use $v^2 = u^2 + 2gh$ (taking $u = v_V$, the initial upward vertical speed, and $h$
+the extra height it falls through):
+$$v_y = \\sqrt{v_V^2 + 2gh}$$
 
-**Horizontal motion** (constant — no horizontal force):
+**Step 3 — Time of flight**, from $v = u + gt$ rearranged for $t$:
+$$t = \\frac{v_y + v_V}{g}$$
+
+**Step 4 — Horizontal range** (constant horizontal velocity, no air resistance):
 $$R = v_H \\times t$$
-
-**Resultant speed at impact** (horizontal ⊥ vertical, so use Pythagoras):
-$$v = \\sqrt{v_H^2 + v_y^2}$$
 
 | Symbol | Quantity | Unit |
 |---|---|---|
-| h | Launch height | m |
-| v_H | Horizontal velocity (constant) | m/s |
+| v | Initial speed | m/s |
+| θ | Launch angle | ° |
+| h | Height fallen below the launch point | m |
+| v_H | Horizontal component (constant) | m/s |
+| v_V | Vertical component of the launch velocity | m/s |
+| v_y | Vertical velocity just before landing | m/s |
 | t | Time of flight | s |
-| v_y | Vertical velocity at impact | m/s |
-| v | Resultant speed at impact | m/s |
+| R | Horizontal range | m |
 
-> ⚠️ **Common mistake 1:** using $h = gt^2$ (forgetting the $\\frac{1}{2}$) gives $t = \\sqrt{h/g}$, which is too small by a factor of $\\sqrt{2}$.
->
-> ⚠️ **Common mistake 2:** adding $v_H + v_y$ instead of using Pythagoras for resultant speed.
+> ⚠️ **Most common mistake:** treating this like a same-height launch and using
+> $t = 2v_V/g$ — that only works when the landing height equals the launch height. Here you
+> must first find $v_y$ from $v^2 = u^2 + 2gh$, then use $t = (v_y + v_V)/g$.
 """
 
 # 45° excluded — at 45° sin θ = cos θ so the sin/cos swap distractors would equal the correct answer
 _ANGLES = [25, 30, 35, 40, 50, 55, 60, 65]
 _SPEEDS = [10, 12, 15, 18, 20, 22, 25, 28, 30]
-
-# Heights that avoid h ≈ 2g = 19.6 m, where t = h/g coincidentally equals √(2h/g)
-_HEIGHTS  = [5, 10, 15, 25, 30, 40, 45, 50, 60, 80]
-_H_SPEEDS = [5, 8, 10, 12, 15, 18, 20, 25]
 
 _CONTEXTS_L1 = [
     "A ball is kicked from flat ground at **{v} m/s** at **{theta}°** above the horizontal.",
@@ -103,12 +106,20 @@ _CONTEXTS_L1 = [
     "A javelin is thrown at **{v} m/s** at an angle of **{theta}°** to the horizontal, landing on flat ground.",
 ]
 
-_CONTEXTS_L2 = [
-    "A ball rolls off the edge of a table **{h} m** above the floor with a horizontal velocity of **{v_H} m/s**.",
-    "A ball is kicked horizontally from the top of a cliff **{h} m** above the sea at **{v_H} m/s**.",
-    "An object leaves the edge of a platform **{h} m** above the ground with a horizontal velocity of **{v_H} m/s**.",
-    "A ball slides off a bench **{h} m** above the ground and leaves horizontally at **{v_H} m/s**.",
+_CONTEXTS_L2_HUMAN = [
+    "A shot putter releases the shot at **{v} m/s** at **{theta}°** above the horizontal, from a height of **{h} m**.",
+    "A javelin thrower releases the javelin at **{v} m/s** at **{theta}°** above the horizontal, from a height of **{h} m**.",
+    "A basketball player shoots at **{v} m/s** at **{theta}°** above the horizontal, releasing the ball from a height of **{h} m**.",
 ]
+
+_CONTEXTS_L2_ELEVATED = [
+    "A ball is kicked at **{v} m/s** at **{theta}°** above the horizontal from the top of a cliff **{h} m** above the sea.",
+    "A stone is thrown at **{v} m/s** at **{theta}°** above the horizontal from a platform **{h} m** above the ground.",
+    "A ball is thrown at **{v} m/s** at **{theta}°** above the horizontal from the top of a building **{h} m** high.",
+]
+
+_L2_HUMAN_HEIGHTS = [1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2]
+_L2_ELEVATED_HEIGHTS = [10, 15, 20, 25, 30, 40, 50, 60]
 
 
 def _r2(val):
@@ -303,113 +314,117 @@ def generate_projectile_l1(level="Higher"):
     ))
 
 
-# ── Level 2 — Horizontal launch from height (asymmetric) ─────────────────────
+# ── Level 2 — Angled launch from a height (asymmetric) ───────────────────────
 
 def generate_projectile_l2(level="Higher"):
-    h   = random.choice(_HEIGHTS)
-    v_H = random.choice(_H_SPEEDS)
+    theta_deg = random.choice(_ANGLES)
+    v         = random.choice(_SPEEDS)
+    theta     = math.radians(theta_deg)
 
-    t        = _r3(math.sqrt(2 * h / g))
-    R        = _r2(v_H * t)
-    v_y      = _r2(g * t)
-    v_result = _r2(math.sqrt(v_H ** 2 + v_y ** 2))
+    is_human = random.random() < 0.5
+    if is_human:
+        h = random.choice(_L2_HUMAN_HEIGHTS)
+        context = random.choice(_CONTEXTS_L2_HUMAN)
+    else:
+        h = random.choice(_L2_ELEVATED_HEIGHTS)
+        context = random.choice(_CONTEXTS_L2_ELEVATED)
+    context = context.format(v=v, theta=theta_deg, h=h)
 
-    # ── Distractors ──────────────────────────────────────────────────────────
-    t_no_half = _r3(math.sqrt(h / g))   # forgot ½: used h = gt²
-    t_linear  = _r3(h / g)              # used h = gt (wrong equation entirely)
+    v_H  = _r2(v * math.cos(theta))
+    v_V  = _r2(v * math.sin(theta))
+    v_y  = _r2(math.sqrt(v_V ** 2 + 2 * g * h))
+    t    = _r3((v_y + v_V) / g)
+    R    = _r2(v_H * t)
 
-    context = random.choice(_CONTEXTS_L2).format(h=h, v_H=v_H)
+    vH_sin = _r2(v * math.sin(theta))  # sin/cos swapped
+    vV_cos = _r2(v * math.cos(theta))  # sin/cos swapped
 
-    # ── Part (a): time of flight ──────────────────────────────────────────────
-    two_h_over_g = _r3(2 * h / g)
-    working_t = [
-        {"type": "text",  "content": "Vertical motion starts from rest (initial vertical velocity = 0):"},
-        {"type": "latex", "content": r"s = \frac{1}{2}g t^2"},
-        {"type": "latex", "content": rf"{h} = \frac{{1}}{{2}} \times 9.8 \times t^2"},
-        {"type": "latex", "content": rf"t^2 = \frac{{2 \times {h}}}{{9.8}} = {two_h_over_g}\ \mathrm{{s^2}}"},
-        {"type": "latex", "content": rf"t = \sqrt{{{two_h_over_g}}} = {t}\ \mathrm{{s}}"},
+    # ── Part (a): horizontal component ───────────────────────────────────────
+    working_vH = [
+        {"type": "text",  "content": "Resolve the initial velocity into components:"},
+        {"type": "latex", "content": r"v_H = v \cos\theta"},
+        {"type": "latex", "content": rf"v_H = {v} \times \cos {theta_deg}°"},
+        {"type": "latex", "content": rf"v_H = {v_H}\ \mathrm{{m/s}}"},
     ]
     part_a = PhysicsQuestion(
-        question_text="Calculate the time taken for the projectile to reach the ground.",
-        correct_answer=t,
-        unit="s",
+        question_text="Calculate the horizontal component of the initial velocity.",
+        correct_answer=v_H,
+        unit="m/s",
         topic="Our Dynamic Universe",
         question_type="Projectile Motion",
         level=level,
         distractors=[
             {
-                "value": t_no_half,
+                "value": vH_sin,
                 "mistake": (
-                    f"You appear to have used h = gt² without the ½. "
-                    f"The correct equation is **h = ½gt²**, so "
-                    f"t = √(2h/g) = √(2×{h}/9.8) = {t} s."
+                    f"The **horizontal** component uses cos θ, not sin θ. "
+                    f"v_H = v × cos {theta_deg}° = {v} × {round(math.cos(theta), 3)} = {v_H} m/s."
                 ),
-                "working": working_t,
+                "working": working_vH,
             },
             {
-                "value": t_linear,
+                "value": float(v),
                 "mistake": (
-                    f"Use **h = ½gt²**, not h = gt. "
-                    f"Rearranging: t = √(2h/g) = √(2×{h}/9.8) = {t} s."
+                    f"This is the full initial speed. "
+                    f"The horizontal component is v_H = v × cos {theta_deg}° = {v_H} m/s."
                 ),
-                "working": working_t,
+                "working": working_vH,
             },
         ],
-        working=working_t,
+        working=working_vH,
         notes=_NOTES_L2,
-        scaffold=[
-            {"prompt": "What is 2h/g (t²)?", "answer": two_h_over_g},
-            {"prompt": "What is the time of flight t?", "answer": t},
-        ],
     )
 
-    # ── Part (b): horizontal range ────────────────────────────────────────────
-    working_R = [
-        {"type": "text",  "content": "Horizontal velocity is constant (no horizontal force acts on the projectile):"},
-        {"type": "latex", "content": r"R = v_H \times t"},
-        {"type": "latex", "content": rf"R = {v_H} \times {t}"},
-        {"type": "latex", "content": rf"R = {R}\ \mathrm{{m}}"},
+    # ── Part (b): vertical component ─────────────────────────────────────────
+    working_vV = [
+        {"type": "text",  "content": "The vertical component:"},
+        {"type": "latex", "content": r"v_V = v \sin\theta"},
+        {"type": "latex", "content": rf"v_V = {v} \times \sin {theta_deg}°"},
+        {"type": "latex", "content": rf"v_V = {v_V}\ \mathrm{{m/s}}"},
     ]
     part_b = PhysicsQuestion(
-        question_text="Calculate the horizontal distance travelled.",
-        correct_answer=R,
-        unit="m",
+        question_text="Calculate the vertical component of the initial velocity.",
+        correct_answer=v_V,
+        unit="m/s",
         topic="Our Dynamic Universe",
         question_type="Projectile Motion",
         level=level,
         distractors=[
             {
-                "value": _r2(v_H * t_no_half),
+                "value": vV_cos,
                 "mistake": (
-                    f"You appear to have used t = {t_no_half} s (from h = gt²). "
-                    f"Correct time is t = √(2h/g) = {t} s, giving R = {v_H} × {t} = {R} m."
+                    f"The **vertical** component uses sin θ, not cos θ. "
+                    f"v_V = v × sin {theta_deg}° = {v} × {round(math.sin(theta), 3)} = {v_V} m/s."
                 ),
-                "working": working_R,
+                "working": working_vV,
             },
             {
-                "value": _r2(v_H * t_linear),
+                "value": float(v),
                 "mistake": (
-                    f"Check the time calculation — use h = ½gt²: "
-                    f"t = √(2×{h}/9.8) = {t} s. Then R = {v_H} × {t} = {R} m."
+                    f"This is the initial speed. "
+                    f"The vertical component is v_V = v × sin {theta_deg}° = {v_V} m/s."
                 ),
-                "working": working_R,
+                "working": working_vV,
             },
         ],
-        working=working_R,
+        working=working_vV,
         notes=_NOTES_L2,
     )
 
-    # ── Part (c): vertical velocity at impact ─────────────────────────────────
+    # ── Part (c): vertical velocity just before landing ──────────────────────
+    vV2p2gh = _r2(v_V ** 2 + 2 * g * h)
     working_vy = [
-        {"type": "text",  "content": "Vertical velocity starts at zero and increases under gravity:"},
-        {"type": "latex", "content": r"v_y = u_y + gt"},
-        {"type": "latex", "content": rf"v_y = 0 + 9.8 \times {t}"},
+        {"type": "text",  "content": (
+            f"Unlike a launch on flat ground, this lands {h:g} m **below** the launch point, "
+            f"so the final vertical speed is larger than v_V. Use v² = u² + 2gh:"
+        )},
+        {"type": "latex", "content": r"v_y = \sqrt{v_V^2 + 2gh}"},
+        {"type": "latex", "content": rf"v_y = \sqrt{{{v_V}^2 + 2 \times 9.8 \times {h:g}}}"},
+        {"type": "latex", "content": rf"v_y = \sqrt{{{vV2p2gh}}}"},
         {"type": "latex", "content": rf"v_y = {v_y}\ \mathrm{{m/s}}"},
     ]
-    vy_wrong_t = _r2(g * t_no_half)    # used wrong time from the ½ mistake
-
     part_c = PhysicsQuestion(
-        question_text="Calculate the vertical velocity of the projectile just before it hits the ground.",
+        question_text="Calculate the vertical velocity of the projectile just before it lands.",
         correct_answer=v_y,
         unit="m/s",
         topic="Our Dynamic Universe",
@@ -417,66 +432,105 @@ def generate_projectile_l2(level="Higher"):
         level=level,
         distractors=[
             {
-                "value": float(v_H),
+                "value": v_V,
                 "mistake": (
-                    f"This is the horizontal velocity. Horizontal and vertical motions are independent. "
-                    f"v_y = g × t = 9.8 × {t} = {v_y} m/s."
+                    f"This is just the initial vertical component, v_V. Since the projectile falls "
+                    f"an extra {h:g} m below the launch point, it lands faster than it was launched. "
+                    f"v_y = √(v_V² + 2gh) = {v_y} m/s."
                 ),
                 "working": working_vy,
             },
             {
-                "value": vy_wrong_t,
+                "value": _r2(math.sqrt(v_V ** 2 + g * h)),
                 "mistake": (
-                    f"You appear to have used t = {t_no_half} s (from h = gt² without the ½). "
-                    f"Correct time is t = √(2h/g) = {t} s, giving v_y = 9.8 × {t} = {v_y} m/s."
+                    f"You appear to have left out the factor of 2. "
+                    f"Use v_y = √(v_V² + 2gh) = √({v_V}² + 2×9.8×{h:g}) = {v_y} m/s."
                 ),
                 "working": working_vy,
             },
         ],
         working=working_vy,
         notes=_NOTES_L2,
+        scaffold=[
+            {"prompt": "What is v_V² + 2gh?", "answer": vV2p2gh},
+            {"prompt": "What is the vertical velocity just before landing, v_y?", "answer": v_y},
+        ],
     )
 
-    # ── Part (d): resultant speed at impact ───────────────────────────────────
-    vH2pvy2 = _r2(v_H ** 2 + v_y ** 2)
-    working_v = [
-        {"type": "text",  "content": "At impact, the projectile has both horizontal and vertical velocity components (perpendicular). Use Pythagoras:"},
-        {"type": "latex", "content": r"v = \sqrt{v_H^2 + v_y^2}"},
-        {"type": "latex", "content": rf"v = \sqrt{{{v_H}^2 + {v_y}^2}}"},
-        {"type": "latex", "content": rf"v = \sqrt{{{vH2pvy2}}}"},
-        {"type": "latex", "content": rf"v = {v_result}\ \mathrm{{m/s}}"},
+    # ── Part (d): time of flight ──────────────────────────────────────────────
+    working_t = [
+        {"type": "text",  "content": "Use v = u + gt, rearranged for t (vertical motion, taking down as positive):"},
+        {"type": "latex", "content": r"t = \frac{v_y + v_V}{g}"},
+        {"type": "latex", "content": rf"t = \frac{{{v_y} + {v_V}}}{{9.8}}"},
+        {"type": "latex", "content": rf"t = {t}\ \mathrm{{s}}"},
     ]
     part_d = PhysicsQuestion(
-        question_text="Calculate the resultant speed of the projectile just before it hits the ground.",
-        correct_answer=v_result,
-        unit="m/s",
+        question_text="Calculate the total time of flight.",
+        correct_answer=t,
+        unit="s",
         topic="Our Dynamic Universe",
         question_type="Projectile Motion",
         level=level,
         distractors=[
             {
-                "value": _r2(v_H + v_y),
+                "value": _r3(v_y / g),
                 "mistake": (
-                    f"You cannot add perpendicular velocities directly. "
-                    f"Use Pythagoras: v = √(v_H² + v_y²) = √({v_H}² + {v_y}²) = {v_result} m/s."
+                    f"You left out v_V — the projectile was already moving upward at "
+                    f"{v_V} m/s when it launched. t = (v_y + v_V) ÷ g = {t} s."
                 ),
-                "working": working_v,
+                "working": working_t,
             },
             {
-                "value": v_y,
+                "value": _r3(2 * v_V / g),
                 "mistake": (
-                    f"This is only the vertical component. At impact the projectile still has "
-                    f"horizontal velocity {v_H} m/s. "
-                    f"v = √({v_H}² + {v_y}²) = {v_result} m/s."
+                    f"That formula (t = 2v_V/g) only works when the landing height equals the "
+                    f"launch height. Here it lands lower, so use t = (v_y + v_V) ÷ g = {t} s."
                 ),
-                "working": working_v,
+                "working": working_t,
             },
         ],
-        working=working_v,
+        working=working_t,
+        notes=_NOTES_L2,
+    )
+
+    # ── Part (e): horizontal range ────────────────────────────────────────────
+    working_R = [
+        {"type": "text",  "content": "Horizontal velocity is constant throughout. Use the total time:"},
+        {"type": "latex", "content": r"R = v_H \times t"},
+        {"type": "latex", "content": rf"R = {v_H} \times {t}"},
+        {"type": "latex", "content": rf"R = {R}\ \mathrm{{m}}"},
+    ]
+    part_e = PhysicsQuestion(
+        question_text="Calculate the range.",
+        correct_answer=R,
+        unit="m",
+        topic="Our Dynamic Universe",
+        question_type="Projectile Motion",
+        level=level,
+        distractors=[
+            {
+                "value": _r2(v * t),
+                "mistake": (
+                    f"Use the **horizontal component** (v_H = {v_H} m/s), "
+                    f"not the full initial speed ({v} m/s). "
+                    f"R = {v_H} × {t} = {R} m."
+                ),
+                "working": working_R,
+            },
+            {
+                "value": _r2(v_H * v_V / g),
+                "mistake": (
+                    f"Check your time of flight — use t = (v_y + v_V) ÷ g = {t} s, "
+                    f"then R = v_H × t = {v_H} × {t} = {R} m."
+                ),
+                "working": working_R,
+            },
+        ],
+        working=working_R,
         notes=_NOTES_L2,
         scaffold=[
-            {"prompt": "What is v_H² + v_y²?", "answer": vH2pvy2},
-            {"prompt": "What is the resultant speed v?", "answer": v_result},
+            {"prompt": "What is the total time of flight, t?", "answer": t},
+            {"prompt": "What is the range, R?", "answer": R},
         ],
     )
 
@@ -489,7 +543,7 @@ def generate_projectile_l2(level="Higher"):
         level=level,
         is_scenario=True,
         scenario_context=context,
-        parts=[part_a, part_b, part_c, part_d],
+        parts=[part_a, part_b, part_c, part_d, part_e],
     ))
 
 
