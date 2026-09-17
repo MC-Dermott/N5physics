@@ -190,8 +190,8 @@ def render_teacher_report(_qualification=None):
 
     st.divider()
 
-    # ── Progress heatmap ──────────────────────────────────────────────────────
-    st.subheader("Progress Heatmap")
+    # ── Progress ──────────────────────────────────────────────────────────────
+    st.subheader("Progress")
     render_progress_heatmaps(uid)
 
     st.divider()
