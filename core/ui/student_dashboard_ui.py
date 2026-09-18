@@ -31,7 +31,7 @@ def _colour_for(pct):
 
 
 def render_progress_heatmaps(user_id):
-    """Render the per-Unit progress list for a given user (no page header)."""
+    """Render the Unit/Topic progress list for a given user (no page header)."""
     try:
         tests = _fetch_tests(user_id)
     except Exception as e:
@@ -42,7 +42,7 @@ def render_progress_heatmaps(user_id):
     if not df.empty:
         df["pct"] = df["score"] / df["total"] * 100
         summary = (
-            df.groupby(["qualification", "topic"])["pct"]
+            df.groupby(["qualification", "topic", "question_type"])["pct"]
             .agg(pct="mean", attempts="count")
         )
         tested_quals = set(df["qualification"].unique())
@@ -58,11 +58,14 @@ def render_progress_heatmaps(user_id):
     level = st.selectbox("Level", qualifications, key="progress_level")
 
     units = list(QUAL_REGISTRY[level].keys())
-    if not units:
-        st.caption("No units for this level yet.")
-    for unit in units:
+    unit = st.selectbox("Unit", units, key=f"progress_unit_{level}")
+
+    question_types = QUAL_REGISTRY[level][unit].keys()
+    if not question_types:
+        st.caption("No topics in this unit yet.")
+    for qt in question_types:
         try:
-            row = summary.loc[(level, unit)]
+            row = summary.loc[(level, unit, qt)]
             pct, attempts = row["pct"], int(row["attempts"])
         except KeyError:
             pct, attempts = None, 0
@@ -72,7 +75,7 @@ def render_progress_heatmaps(user_id):
             detail = "No tests yet"
         else:
             detail = f"{pct:.0f}% ({attempts} test{'s' if attempts != 1 else ''})"
-        st.markdown(f"{colour} &nbsp; **{unit}** — {detail}")
+        st.markdown(f"{colour} &nbsp; **{qt}** — {detail}")
 
     st.caption("🟢 > 70%   🟡 50 – 70%   🔴 < 50%   ⚪ No tests taken")
 

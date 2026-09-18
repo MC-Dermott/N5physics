@@ -198,16 +198,6 @@ if mode == "Practice Assessment":
     render_assessment(topic, qualification, user_id=user_id)
     st.stop()
 
-# ── Test (topic-level: mixes question types from across the unit) ────────────
-
-if mode == "Test":
-    st.divider()
-    if not get_question_types(qualification, topic):
-        st.info("No questions available for this unit yet — check back soon!")
-        st.stop()
-    render_test(topic, qualification, user_id=user_id)
-    st.stop()
-
 # ── Question type selection ───────────────────────────────────────────────────
 
 question_types = get_question_types(qualification, topic)
@@ -232,13 +222,14 @@ if mode == "Past Paper Questions":
     st.stop()
 
 sub_types = get_sub_types(qualification, topic, question_type)
-if sub_types:
+if sub_types and mode != "Test":
     sub_type = st.selectbox("Question Style", sub_types)
     if st.session_state.get("last_sub_type") != sub_type:
         st.session_state.last_sub_type = sub_type
         reset_test()
         st.session_state.quiz = {"current_question": None}
 else:
+    # A Test mixes question styles within the topic rather than pinning one.
     sub_type = None
     st.session_state.pop("last_sub_type", None)
 
@@ -265,6 +256,9 @@ example = get_examples(topic, question_type, sub_type=sub_type) or format_exampl
 
 st.divider()
 
-# ── Practice ───────────────────────────────────────────────────────────────────
+# ── Route to practice or test ─────────────────────────────────────────────────
 
-render_practice(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)
+if mode == "Test":
+    render_test(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)
+else:
+    render_practice(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)

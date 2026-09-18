@@ -21,35 +21,36 @@ def _load_game_html():
     return _game_html_cache
 
 
-def render_test(topic, qualification, user_id=None):
-    from core.engine.question_factory import generate_question
+def render_test(topic, question_type, qualification, generate_fn, user_id=None, example=None):
     from core.db.tracker import save_test_result, save_test_question_attempt
 
     test = st.session_state.test
-    generate_fn = lambda: generate_question(qualification, topic)
 
     # --- Start screen ---
     if not test["questions"]:
         if user_id:
             from core.ui.reports_ui import render_student_insight
-            render_student_insight(user_id, qualification, topic)
+            render_student_insight(user_id, qualification, topic, question_type)
 
         st.markdown(
-            f"You will be given **{_NUM_QUESTIONS} questions** on *{topic}*, "
-            "covering a mix of question types from this unit. "
+            f"You will be given **{_NUM_QUESTIONS} questions** on *{question_type}*. "
             "Each question is marked automatically. A summary with feedback is shown at the end."
         )
         if st.button("Start Test", type="primary"):
             reset_test()
             st.session_state.test["questions"] = [generate_fn() for _ in range(_NUM_QUESTIONS)]
             st.rerun()
+
+        if example:
+            with st.expander("💡 Example"):
+                st.markdown(example)
         return
 
     # --- Summary screen ---
     if test["complete"]:
         if not test.get("saved") and user_id:
             total = len(test["results"])
-            save_test_result(user_id, qualification, topic,
+            save_test_result(user_id, qualification, topic, question_type,
                              sum(test["results"]), total)
             # Save per-question results with mistake text
             for result_type, distractor, q in test["feedback"]:

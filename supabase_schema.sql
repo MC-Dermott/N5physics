@@ -24,7 +24,7 @@ CREATE TABLE test_results (
     user_id       UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     qualification TEXT        NOT NULL,
     topic         TEXT        NOT NULL,
-    question_type TEXT,
+    question_type TEXT        NOT NULL,
     score         INTEGER     NOT NULL,
     total         INTEGER     NOT NULL,
     taken_at      TIMESTAMPTZ DEFAULT NOW()
@@ -50,11 +50,6 @@ CREATE INDEX ON test_question_attempts (user_id);
 
 -- Migration: add class_code column (run once if not already present)
 ALTER TABLE users ADD COLUMN IF NOT EXISTS class_code TEXT;
-
--- Migration: tests are now taken at topic (unit) level, mixing question types,
--- rather than per question type — question_type is no longer set on new rows.
--- Run once if not already applied.
-ALTER TABLE test_results ALTER COLUMN question_type DROP NOT NULL;
 
 -- RLS is enabled with no policies, so the anon key has zero access.
 -- The app must use the service_role key (SUPABASE_KEY in .streamlit/secrets.toml),

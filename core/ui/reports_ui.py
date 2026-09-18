@@ -30,7 +30,7 @@ def _fetch_mistakes(user_ids=None):
 
 # ── Student insight (shown before a test) ─────────────────────────────────────
 
-def render_student_insight(user_id, qualification, topic):
+def render_student_insight(user_id, qualification, topic, question_type):
     """Show a personalised tip before the test if there is a repeated mistake pattern."""
     try:
         data = (
@@ -40,6 +40,7 @@ def render_student_insight(user_id, qualification, topic):
             .eq("user_id", user_id)
             .eq("qualification", qualification)
             .eq("topic", topic)
+            .eq("question_type", question_type)
             .order("attempted_at", desc=True)
             .limit(30)
             .execute().data or []
@@ -181,7 +182,8 @@ def render_teacher_report(_qualification=None):
             tdf["Date"] = pd.to_datetime(tdf["taken_at"]).dt.strftime("%d %b %Y %H:%M")
             tdf = tdf.rename(columns={
                 "qualification": "Qual", "topic": "Unit",
-            })[["Date", "Qual", "Unit", "Score"]]
+                "question_type": "Topic",
+            })[["Date", "Qual", "Unit", "Topic", "Score"]]
             st.dataframe(tdf, use_container_width=True, hide_index=True)
         else:
             st.info("No tests taken yet.")

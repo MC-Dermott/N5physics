@@ -408,15 +408,10 @@ def get_sub_types(qualification, topic, question_type):
     return None
 
 
-def generate_question(qualification, topic, question_type=None, sub_type=None):
-    """If question_type is None, a question type is picked at random from the topic
-    (used for topic-level tests, which mix question types)."""
+def generate_question(qualification, topic, question_type, sub_type=None):
     level_map = {"S3": "S3", "National 4": "N4", "National 5": "N5", "Higher": "Higher"}
     level = level_map.get(qualification, "N5")
-    topic_entry = QUAL_REGISTRY[qualification][topic]
-    if question_type is None:
-        question_type = random.choice(list(topic_entry.keys()))
-    entry = topic_entry[question_type]
+    entry = QUAL_REGISTRY[qualification][topic][question_type]
     if isinstance(entry, dict):
         fn = entry[sub_type] if sub_type in entry else random.choice(list(entry.values()))
     else:
