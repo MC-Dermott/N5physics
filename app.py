@@ -198,6 +198,16 @@ if mode == "Practice Assessment":
     render_assessment(topic, qualification, user_id=user_id)
     st.stop()
 
+# ── Test (topic-level: mixes question types from across the unit) ────────────
+
+if mode == "Test":
+    st.divider()
+    if not get_question_types(qualification, topic):
+        st.info("No questions available for this unit yet — check back soon!")
+        st.stop()
+    render_test(topic, qualification, user_id=user_id)
+    st.stop()
+
 # ── Question type selection ───────────────────────────────────────────────────
 
 question_types = get_question_types(qualification, topic)
@@ -255,9 +265,6 @@ example = get_examples(topic, question_type, sub_type=sub_type) or format_exampl
 
 st.divider()
 
-# ── Route to practice or test ─────────────────────────────────────────────────
+# ── Practice ───────────────────────────────────────────────────────────────────
 
-if mode == "Test":
-    render_test(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)
-else:
-    render_practice(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)
+render_practice(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)
