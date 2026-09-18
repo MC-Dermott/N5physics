@@ -227,10 +227,24 @@ $$W = mg$$
 | m | Mass | kg |
 | g | Gravitational field strength | N/kg |
 
-**Rearrangement:** $$m = \\frac{W}{g}$$
+**Rearrangements:** $$m = \\frac{W}{g} \\qquad g = \\frac{W}{m}$$
 
 **Worked Example:** An object has a mass of 10 kg on Earth (g = 9.8 N/kg).
 $$W = mg = 10 \\times 9.8 = 98\\ \\mathrm{N}$$
+
+**Identifying an unknown planet:** if you're given a mass and a weight but not told which
+planet you're on, calculate $g = \\frac{W}{m}$ and match it against a table of g-values.
+
+| Planet | g (N/kg) |
+|---|---|
+| Mercury | 3.7 |
+| Venus | 8.9 |
+| Earth | 9.8 |
+| Mars | 3.7 |
+| Jupiter | 23 |
+| Saturn | 9.0 |
+| Neptune | 11 |
+| Uranus | 8.7 |
 
 > **Important:** An object's *mass* is the same on every planet — only its *weight*
 > changes, because $g$ is different. Never assume mass changes when the location changes.

@@ -9,6 +9,11 @@ _PLANETS = {
 
 _OBJECTS = ["astronaut", "rover", "lander", "sample container", "supply crate", "probe"]
 
+_UNIQUE_G_PLANETS = {
+    k: v for k, v in _PLANETS.items()
+    if list(_PLANETS.values()).count(v) == 1
+}
+
 
 def _dedup(options_data, correct):
     seen = {round(float(correct), 2)}
@@ -121,5 +126,39 @@ def gen_weight_same_mass(level="S3"):
                          question_type="Weight Calculations", level=level)
 
 
+# ── Rearranged: g = W / m, then identify the matching planet ────────────────
+
+def gen_weight_find_planet(level="S3"):
+    planet, g = random.choice(list(_UNIQUE_G_PLANETS.items()))
+    mass = random.choice([5, 10, 12, 20, 25, 40, 50, 64, 80, 100])
+    obj = random.choice(_OBJECTS)
+    weight = round(mass * g, 2)
+    correct = g
+
+    working = [
+        {"type": "latex", "content": r"g = \frac{W}{m}"},
+        {"type": "latex", "content": rf"g = \frac{{{weight}}}{{{mass}}}"},
+        {"type": "latex", "content": rf"g = {g}\ \mathrm{{N/kg}}"},
+        {"type": "text", "content": f"This matches {planet}."},
+    ]
+    question = (
+        f"A {obj} with a mass of {mass} kg has landed on an unknown planet.\n\n"
+        f"If its weight there is {weight} N, use the table to work out the gravitational "
+        f"field strength, g, and state which planet it must be on."
+    )
+    multiplied = round(weight * mass, 2)
+    options_data = [
+        {"value": correct, "mistake": None, "working": working},
+        {"value": multiplied,
+         "mistake": "You multiplied W by m instead of dividing. g = W ÷ m.", "working": working},
+    ]
+    options_data = _dedup(options_data, correct)
+    return make_question(question, correct, options_data, "N/kg", scaffold=None,
+                         notes=NOTES["weight_calculations_s3"], topic="Dynamics",
+                         question_type="Weight Calculations", level=level)
+
+
 def generate_weight_calculations(level="S3"):
-    return random.choice([gen_weight_forward, gen_weight_find_mass, gen_weight_same_mass])(level=level)
+    return random.choice([
+        gen_weight_forward, gen_weight_find_mass, gen_weight_same_mass, gen_weight_find_planet,
+    ])(level=level)
