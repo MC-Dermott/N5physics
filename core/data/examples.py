@@ -155,7 +155,7 @@ rise to match the extra friction. (The third option is a common trap — it's tr
 *driving force*, but the question asks specifically about the *tow bar tension*.)
 """,
 
-    ("Dynamics", "Acceleration", "Change in Speed"): r"""
+    ("Dynamics", "Acceleration", "Acceleration, Time & Change in Speed"): r"""
 **Example:** A car has an acceleration of −4 m/s² for 6 s.
 
 *Calculate the change in speed.*

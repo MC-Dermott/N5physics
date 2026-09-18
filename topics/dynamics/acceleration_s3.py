@@ -148,6 +148,10 @@ def gen_calculate_time(level="S3"):
                          question_type="Acceleration", level=level))
 
 
+def generate_acceleration_basic(level="S3"):
+    return random.choice([gen_calculate_acceleration, gen_calculate_time, gen_change_in_speed])(level=level)
+
+
 # ── Level 2 — initial or final speed (v = u + at) ───────────────────────────────
 
 def gen_initial_final_speed(level="S3"):

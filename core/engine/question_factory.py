@@ -3,10 +3,8 @@ import random
 from topics.dynamics.speed_distance_time   import generate_sdt
 from topics.dynamics.acceleration          import generate_acceleration
 from topics.dynamics.acceleration_s3       import (
-    gen_change_in_speed,
     gen_initial_final_speed,
-    gen_calculate_acceleration,
-    gen_calculate_time,
+    generate_acceleration_basic,
 )
 from topics.dynamics.instantaneous_speed_s3 import gen_instantaneous_speed, gen_average_speed_light_gate
 from topics.dynamics.vt_graph_distance_s3   import (
@@ -19,15 +17,10 @@ from topics.dynamics.vt_graph_acceleration_s3 import (
     gen_accel_graph_basic,
     gen_accel_graph_compound,
 )
-from topics.dynamics.weight_calculations_s3 import (
-    gen_weight_forward,
-    gen_weight_find_mass,
-    gen_weight_same_mass,
-)
+from topics.dynamics.weight_calculations_s3 import generate_weight_calculations
 from topics.dynamics.unbalanced_forces_s3   import (
     gen_horizontal_unbalanced_force,
-    gen_vertical_unbalanced_force,
-    gen_vertical_acceleration,
+    generate_unbalanced_forces_s3,
 )
 from topics.dynamics.forces                import (
     generate_forces,
@@ -165,10 +158,8 @@ QUAL_REGISTRY = {
         "Dynamics": {
             "Speed, Distance & Time": generate_sdt,
             "Acceleration": {
-                "Calculating Acceleration": gen_calculate_acceleration,
-                "Calculating Time":         gen_calculate_time,
-                "Change in Speed":          gen_change_in_speed,
-                "Initial & Final Speed":    gen_initial_final_speed,
+                "Acceleration, Time & Change in Speed": generate_acceleration_basic,
+                "Initial & Final Speed":                gen_initial_final_speed,
             },
             "Instantaneous Speed": {
                 "Instantaneous Speed at a Point": gen_instantaneous_speed,
@@ -182,15 +173,10 @@ QUAL_REGISTRY = {
                 "Acceleration — Calculating from a Graph": gen_accel_graph_basic,
                 "Acceleration — Compound Graphs":       gen_accel_graph_compound,
             },
-            "Weight Calculations": {
-                "Calculate Weight": gen_weight_forward,
-                "Calculate Mass":   gen_weight_find_mass,
-                "Mass on a Different Planet": gen_weight_same_mass,
-            },
+            "Weight Calculations": generate_weight_calculations,
             "Unbalanced Forces": {
                 "Horizontal (driving vs friction)": gen_horizontal_unbalanced_force,
-                "Vertical — Unbalanced Force (with weight)": gen_vertical_unbalanced_force,
-                "Vertical — Acceleration (with weight)":     gen_vertical_acceleration,
+                "Vertical (with weight)":           generate_unbalanced_forces_s3,
             },
         },
         "Waves": {
