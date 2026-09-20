@@ -38,7 +38,12 @@ from topics.dynamics.vertical_forces       import (
 )
 from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
-from topics.dynamics.projectiles           import generate_projectiles, gen_free_fall_velocity
+from topics.dynamics.projectiles           import (
+    generate_projectiles,
+    gen_free_fall_velocity,
+    gen_free_fall_height,
+    gen_projectile_time_explain,
+)
 from topics.dynamics.displacement          import (
     generate_vectors,
     generate_displacement_l1,
@@ -229,8 +234,10 @@ QUAL_REGISTRY = {
             "Weight":                 generate_weight,
             "Energy":                 generate_energy,
             "Projectile Motion": {
-                "Vertical Motion (Free Fall)": gen_free_fall_velocity,
+                "Vertical Motion — Velocity": gen_free_fall_velocity,
+                "Vertical Motion — Height Fallen": gen_free_fall_height,
                 "Full Projectile Motion": generate_projectiles,
+                "Explain — Time to Hit the Ground": gen_projectile_time_explain,
             },
             "Distance and Displacement": {
                 "Level 1 — 1D":                     generate_displacement_l1,
