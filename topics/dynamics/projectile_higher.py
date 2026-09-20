@@ -5,14 +5,14 @@ from core.models.question_model import PhysicsQuestion
 
 g = 9.8  # m/s²
 
-_SUVAT_WIDGET_HTML = (
-    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "suvat_widget.html"
+_PROJECTILE_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "projectile_higher_widget.html"
 ).read_text(encoding="utf-8")
 
 
-def _with_suvat_widget(question):
-    question.metadata["widget_html"] = _SUVAT_WIDGET_HTML
-    question.metadata["widget_height"] = 900
+def _with_projectile_widget(question):
+    question.metadata["widget_html"] = _PROJECTILE_WIDGET_HTML
+    question.metadata["widget_height"] = 950
     return question
 
 _NOTES_L1 = """
@@ -301,7 +301,7 @@ def generate_projectile_l1(level="Higher"):
         notes=_NOTES_L1,
     )
 
-    return _with_suvat_widget(PhysicsQuestion(
+    return _with_projectile_widget(PhysicsQuestion(
         question_text="",
         correct_answer=0,
         unit="",
@@ -534,7 +534,7 @@ def generate_projectile_l2(level="Higher"):
         ],
     )
 
-    return _with_suvat_widget(PhysicsQuestion(
+    return _with_projectile_widget(PhysicsQuestion(
         question_text="",
         correct_answer=0,
         unit="",
@@ -677,7 +677,7 @@ def generate_projectile_max_height(level="Higher"):
         ],
     )
 
-    return _with_suvat_widget(PhysicsQuestion(
+    return _with_projectile_widget(PhysicsQuestion(
         question_text="",
         correct_answer=0,
         unit="",
@@ -816,7 +816,7 @@ def generate_projectile_exam_style(level="Higher"):
         notes=_NOTES_L1,
     )
 
-    return _with_suvat_widget(PhysicsQuestion(
+    return _with_projectile_widget(PhysicsQuestion(
         question_text="",
         correct_answer=0,
         unit="",

@@ -1,9 +1,20 @@
 import random
 import math
+import pathlib
 from utils.make_question import make_question
 from utils.notes import NOTES
 
 G = 9.8
+
+_N5_PROJECTILE_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "projectile_n5_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_projectile_widget(question):
+    question.metadata["widget_html"] = _N5_PROJECTILE_WIDGET_HTML
+    question.metadata["widget_height"] = 950
+    return question
 
 
 def _pick():
@@ -40,8 +51,8 @@ def gen_find_range(level="N5"):
         {"value": float(t),                "display": f"{t} m",              "summary": "Incorrect.", "mistake": "This is the time of flight, not the horizontal distance. Use s_H = v_H × t.", "working": working},
         {"value": round(v + t, 2),         "display": f"{round(v + t, 2)} m", "summary": "Incorrect.", "mistake": "You added velocity and time instead of multiplying. Range = v_H × t.", "working": working},
     ]
-    return make_question(question, float(correct), options_data, "m",
-                         notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level)
+    return _with_projectile_widget(make_question(question, float(correct), options_data, "m",
+                         notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level))
 
 
 def gen_find_vertical_velocity(level="N5"):
@@ -66,8 +77,8 @@ def gen_find_vertical_velocity(level="N5"):
         {"value": float(G),               "display": f"{G} m/s",                "summary": "Incorrect.", "mistake": "This is the acceleration due to gravity, not the final vertical velocity. Use v_v = g × t.", "working": working},
         {"value": float(s["range"]),      "display": f"{s['range']} m/s",       "summary": "Incorrect.", "mistake": "This is the horizontal range, not the vertical velocity. Use v_v = g × t for vertical motion.", "working": working},
     ]
-    return make_question(question, float(correct), options_data, "m/s",
-                         notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level)
+    return _with_projectile_widget(make_question(question, float(correct), options_data, "m/s",
+                         notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level))
 
 
 def gen_find_height(level="N5"):
@@ -97,8 +108,8 @@ def gen_find_height(level="N5"):
         {"value": float(s["range"]), "display": f"{s['range']} m", "summary": "Incorrect.", "mistake": "This is the horizontal range. Height comes from vertical motion: s = ½gt².", "working": working},
         {"value": float(forgot_half), "display": f"{forgot_half} m", "summary": "Incorrect.", "mistake": "You forgot the ½ factor. Use s = ½ × g × t².", "working": working},
     ]
-    return make_question(question, float(correct), options_data, "m", scaffold=scaffold,
-                         notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level)
+    return _with_projectile_widget(make_question(question, float(correct), options_data, "m", scaffold=scaffold,
+                         notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level))
 
 
 _ALL_GENS = [gen_find_range, gen_find_vertical_velocity, gen_find_height]
