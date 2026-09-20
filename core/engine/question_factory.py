@@ -42,6 +42,7 @@ from topics.dynamics.projectiles           import (
     generate_projectiles,
     gen_free_fall_velocity,
     gen_free_fall_height,
+    gen_free_fall_time,
     gen_projectile_time_explain,
 )
 from topics.dynamics.displacement          import (
@@ -236,6 +237,7 @@ QUAL_REGISTRY = {
             "Projectile Motion": {
                 "Vertical Motion — Velocity": gen_free_fall_velocity,
                 "Vertical Motion — Height Fallen": gen_free_fall_height,
+                "Vertical Motion — Time to Fall": gen_free_fall_time,
                 "Full Projectile Motion": generate_projectiles,
                 "Explain — Time to Hit the Ground": gen_projectile_time_explain,
             },

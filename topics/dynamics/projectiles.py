@@ -237,39 +237,8 @@ def gen_free_fall_velocity_from_time(level="N5"):
                          notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level)
 
 
-def gen_free_fall_velocity_from_height(level="N5"):
-    context = random.choice(_FREEFALL_CONTEXTS)
-    height = random.randint(5, 80)
-    t = round(math.sqrt(2 * height / G), 2)
-    correct = round(G * t, 2)
-
-    working = [
-        {"type": "text",  "content": "Step 1: find the time of fall from the height, using the v-t graph."},
-        {"type": "latex", "content": r"\text{height} = \tfrac{1}{2} a t^2 \;\Rightarrow\; t = \sqrt{\dfrac{2 \times \text{height}}{a}}"},
-        {"type": "latex", "content": rf"t = \sqrt{{\dfrac{{2 \times {height}}}{{9.8}}}} = {t}\ \mathrm{{s}}"},
-        {"type": "text",  "content": "Step 2: use a = (v − u) ÷ t to find the final velocity."},
-        {"type": "latex", "content": rf"v = 9.8 \times {t} = {correct}\ \mathrm{{m/s}}"},
-    ]
-    question = f"{context} It falls a height of {height} m.\n\nCalculate its velocity just before it hits the ground."
-    forgot_sqrt = round(G * (2 * height / G), 2)
-    options_data = [
-        {"value": float(correct),   "display": f"{correct} m/s",   "mistake": None, "working": working},
-        {"value": float(height),    "display": f"{height} m/s",    "mistake": "That's just the height fallen, not the velocity — first find the time of fall, then use a = (v − u) ÷ t.", "working": working},
-        {"value": float(t),         "display": f"{t} m/s",         "mistake": "That's the time of fall, not the velocity — you still need a = (v − u) ÷ t.", "working": working},
-        {"value": round(forgot_sqrt, 2), "display": f"{round(forgot_sqrt, 2)} m/s",
-         "mistake": "Check your rearrangement — you need to take the square root to find t before using a = (v − u) ÷ t.", "working": working},
-    ]
-    options_data = _dedup(options_data, correct)
-    scaffold = [
-        {"question": "What is the time of fall?", "answer": t, "unit": "s"},
-        {"question": "What is the final velocity?", "answer": correct, "unit": "m/s"},
-    ]
-    return make_question(question, float(correct), options_data, "m/s", scaffold=scaffold,
-                         notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level)
-
-
 def gen_free_fall_velocity(level="N5"):
-    return random.choice([gen_free_fall_velocity_from_time, gen_free_fall_velocity_from_height])(level=level)
+    return gen_free_fall_velocity_from_time(level=level)
 
 
 def gen_free_fall_height_from_time(level="N5"):
@@ -302,38 +271,83 @@ def gen_free_fall_height_from_time(level="N5"):
                          notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level)
 
 
-def gen_free_fall_height_from_velocity(level="N5"):
+def gen_free_fall_height(level="N5"):
+    return gen_free_fall_height_from_time(level=level)
+
+
+def gen_free_fall_time_from_height_and_velocity(level="N5"):
+    """Height and final velocity are both given — find t directly from the area
+    under the v-t graph, without needing a at all. Matches the worksheet's Q4."""
     context = random.choice(_FREEFALL_CONTEXTS)
-    t_mult = random.choice([x for x in range(5, 41) if x != 10])
-    t = round(t_mult * 0.1, 1)
-    v = round(G * t, 2)
-    correct = round(0.5 * t * v, 3)
+    t_mult = random.choice([x for x in range(10, 41) if x != 10])
+    t_seed = round(t_mult * 0.1, 1)
+    v = round(G * t_seed, 2)
+    height = round(0.5 * t_seed * v, 2)
+    # recompute the answer from the (rounded) displayed height and velocity, so
+    # the stated correct answer is exactly what a pupil gets from the numbers
+    # actually printed in the question, not the unrounded seed values.
+    correct = round(2 * height / v, 2)
 
     working = [
-        {"type": "text",  "content": "Use a = (v − u) ÷ t to find the time of fall first."},
-        {"type": "latex", "content": rf"t = \dfrac{{v - u}}{{a}} = \dfrac{{{v}}}{{9.8}} = {t}\ \mathrm{{s}}"},
         {"type": "text",  "content": "The height fallen is the area under the v-t graph (a triangle)."},
-        {"type": "latex", "content": rf"\text{{height}} = \tfrac{{1}}{{2}} \times {t} \times {v} = {correct}\ \mathrm{{m}}"},
+        {"type": "latex", "content": r"\text{height} = \tfrac{1}{2} \times t \times v \;\Rightarrow\; t = \dfrac{2 \times \text{height}}{v}"},
+        {"type": "latex", "content": rf"t = \dfrac{{2 \times {height}}}{{{v}}} = {correct}\ \mathrm{{s}}"},
     ]
-    scaffold = [
-        {"question": "Calculate the time of fall.", "answer": float(t), "unit": "s"},
-        {"question": "Use the v-t graph (triangle area) to find the height fallen.", "answer": float(correct), "unit": "m"},
-    ]
-    question = f"{context} It hits the ground with a velocity of {v} m/s.\n\nCalculate the height from which it fell."
-    forgot_half = round(t * v, 3)
+    question = (
+        f"{context} It falls a height of {height} m and hits the ground with a velocity of {v} m/s.\n\n"
+        f"Calculate the time taken for it to hit the ground."
+    )
+    forgot_two = round(height / v, 3)
     options_data = [
-        {"value": float(correct),   "display": f"{correct} m", "mistake": None, "working": working},
-        {"value": forgot_half,      "display": f"{forgot_half} m", "mistake": "You forgot the ½ factor. The area of the triangle on the v-t graph is ½ × base × height = ½ × t × v.", "working": working},
-        {"value": float(v),         "display": f"{v} m",       "mistake": "That's the velocity, not the height. First find the time of fall using a = (v − u) ÷ t.", "working": working},
-        {"value": float(t),         "display": f"{t} m",       "mistake": "That's the time of fall, not the height. Sketch the v-t graph and find the area under it.", "working": working},
+        {"value": float(correct),   "display": f"{correct} s", "mistake": None, "working": working},
+        {"value": forgot_two,       "display": f"{forgot_two} s", "mistake": "You forgot the factor of 2 when rearranging. height = ½ × t × v, so t = 2 × height ÷ v.", "working": working},
+        {"value": round(height * v, 2), "display": f"{round(height * v, 2)} s",
+         "mistake": "You multiplied the height and velocity instead of dividing. t = 2 × height ÷ v.", "working": working},
+        {"value": round(v / height, 3) if height else 0.0, "display": f"{round(v / height, 3) if height else 0.0} s",
+         "mistake": "You divided the wrong way round. t = 2 × height ÷ v, not v ÷ height.", "working": working},
     ]
     options_data = _dedup(options_data, correct)
-    return make_question(question, float(correct), options_data, "m", scaffold=scaffold,
+    return make_question(question, float(correct), options_data, "s",
                          notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level)
 
 
-def gen_free_fall_height(level="N5"):
-    return random.choice([gen_free_fall_height_from_time, gen_free_fall_height_from_velocity])(level=level)
+def gen_free_fall_time_from_height(level="N5"):
+    """Only the height is given. Derives height = 1/2 a t^2 from v = at (a = (v-u)/t)
+    substituted into the v-t graph area, then solves for t — the guided route the
+    worksheet's Q5 walks pupils through, without giving them v directly."""
+    context = random.choice(_FREEFALL_CONTEXTS)
+    height = random.randint(10, 90)
+    t = round(math.sqrt(2 * height / G), 3)
+    correct = round(t, 2)
+    t_squared = round(2 * height / G, 3)
+
+    working = [
+        {"type": "text",  "content": "Since v = at (from a = (v − u) ÷ t with u = 0), the area under the "
+                                      "v-t graph gives height = ½ a t²."},
+        {"type": "latex", "content": rf"{height} = \tfrac{{1}}{{2}} \times 9.8 \times t^2"},
+        {"type": "latex", "content": rf"t^2 = \dfrac{{2 \times {height}}}{{9.8}} = {t_squared}"},
+        {"type": "latex", "content": rf"t = \sqrt{{{t_squared}}} = {correct}\ \mathrm{{s}}"},
+    ]
+    scaffold = [
+        {"question": "Calculate t² using height = ½at².", "answer": float(t_squared), "unit": "s²"},
+        {"question": "Calculate the time taken to fall.", "answer": float(correct), "unit": "s"},
+    ]
+    question = f"{context} It falls a height of {height} m.\n\nCalculate the time taken for it to hit the ground."
+    forgot_sqrt = round(t_squared, 2)
+    options_data = [
+        {"value": float(correct),  "display": f"{correct} s", "mistake": None, "working": working},
+        {"value": forgot_sqrt,     "display": f"{forgot_sqrt} s", "mistake": "That's t², not t — you still need to take the square root.", "working": working},
+        {"value": float(height),   "display": f"{height} s", "mistake": "That's the height, not the time. Use height = ½at² and solve for t.", "working": working},
+        {"value": round(2 * height / G, 2), "display": f"{round(2 * height / G, 2)} s",
+         "mistake": "You forgot to take the square root after rearranging height = ½at² for t².", "working": working},
+    ]
+    options_data = _dedup(options_data, correct)
+    return make_question(question, float(correct), options_data, "s", scaffold=scaffold,
+                         notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level)
+
+
+def gen_free_fall_time(level="N5"):
+    return random.choice([gen_free_fall_time_from_height_and_velocity, gen_free_fall_time_from_height])(level=level)
 
 
 # ── Explaining projectile motion (qualitative, no calculation) ──────────────
