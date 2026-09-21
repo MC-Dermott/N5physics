@@ -1,12 +1,13 @@
 import streamlit as st
 
-from core.engine.session_manager import initialise_session, reset_test, reset_assessment
+from core.engine.session_manager import initialise_session, reset_test, reset_assessment, reset_past_paper_quiz
 from core.engine.question_factory import generate_question, get_topics, get_question_types, get_sub_types
 from core.ui.auth_ui import render_auth, render_change_password
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
 from core.ui.assessment_ui import render_assessment
 from core.ui.past_paper_ui import render_past_papers
+from core.ui.past_paper_quiz_ui import render_past_paper_quiz
 from core.ui.reports_ui import render_teacher_report
 from core.ui.student_dashboard_ui import render_student_dashboard
 from core.data.backgrounds import get_background_videos
@@ -24,6 +25,7 @@ def _do_logout():
         st.session_state.pop(key, None)
     reset_test()
     reset_assessment()
+    reset_past_paper_quiz()
     st.session_state.quiz = {"current_question": None}
 
 
@@ -149,6 +151,7 @@ if st.button("← Change Level"):
     st.session_state.pop("qualification", None)
     reset_test()
     reset_assessment()
+    reset_past_paper_quiz()
     st.session_state.quiz = {"current_question": None}
     st.rerun()
 
@@ -157,6 +160,7 @@ if st.session_state.get("last_qualification") != qualification:
     st.session_state.last_qualification = qualification
     reset_test()
     reset_assessment()
+    reset_past_paper_quiz()
     st.session_state.quiz = {"current_question": None}
 
 st.divider()
@@ -165,6 +169,8 @@ st.divider()
 
 if qualification == "National 4":
     mode_options = ["Practice", "Test", "Practice Assessment"]
+elif qualification in ("National 5", "Higher"):
+    mode_options = ["Practice", "Test", "Past Paper Questions", "Past Paper Quiz"]
 else:
     mode_options = ["Practice", "Test", "Past Paper Questions"]
 
@@ -174,6 +180,7 @@ if st.session_state.get("mode") != mode:
     st.session_state.mode = mode
     reset_test()
     reset_assessment()
+    reset_past_paper_quiz()
     st.session_state.quiz = {"current_question": None}
     st.session_state.pop("past_paper_current", None)
     st.session_state.pop("past_paper_revealed", None)
@@ -185,6 +192,7 @@ if st.session_state.get("last_topic") != topic:
     st.session_state.last_topic = topic
     reset_test()
     reset_assessment()
+    reset_past_paper_quiz()
     st.session_state.quiz = {"current_question": None}
     st.session_state.pop("past_paper_current", None)
     st.session_state.pop("past_paper_revealed", None)
@@ -196,6 +204,13 @@ user_id = user["id"] if user else None
 if mode == "Practice Assessment":
     st.divider()
     render_assessment(topic, qualification, user_id=user_id)
+    st.stop()
+
+# ── Past Paper Quiz (unit-level, N5 & Higher) ─────────────────────────────────
+
+if mode == "Past Paper Quiz":
+    st.divider()
+    render_past_paper_quiz(topic, qualification, user_id=user_id)
     st.stop()
 
 # ── Question type selection ───────────────────────────────────────────────────

@@ -20,6 +20,9 @@
 #
 # Image paths are relative to core/data/past_paper_assets/.
 
+import re
+
+
 def _mcq(dir_, year, paper, qnum, page, answer):
     return {"year": year, "paper": paper, "qnum": qnum, "kind": "mcq",
             "question_images": [f"{dir_}/{page}.png"], "answer_text": answer}
@@ -274,3 +277,42 @@ def get_past_paper_entries(topic, question_type):
 
 def has_past_papers(topic, question_type):
     return bool(PAST_PAPERS.get((topic, question_type)))
+
+
+# ── Unit-level MCQ quiz ─────────────────────────────────────────────────────
+# Pools every past-paper MCQ across all topics within a unit, for the "Past
+# Paper Quiz" mode. Scoped per qualification (rather than trusting unit names
+# to be unique) since e.g. "Electricity" is a unit in both National 5 and
+# Higher.
+
+PAST_PAPER_UNITS = {
+    "Higher": ["Our Dynamic Universe", "Particles and Waves"],
+    "National 5": ["Dynamics", "Electricity", "Radiation", "Waves", "Properties"],
+}
+
+
+def get_past_paper_units(qualification):
+    """Units with a (possibly empty, for now) past-paper quiz for this qualification."""
+    return PAST_PAPER_UNITS.get(qualification, [])
+
+
+def canonical_unit(unit):
+    """Strip an app-UI " (Part N)" suffix (e.g. Higher's pacing split of "Our
+    Dynamic Universe") — the quiz always pools/tracks against the whole real unit."""
+    return re.sub(r"\s*\(Part\s*\d+\)\s*$", "", unit or "").strip()
+
+
+def get_unit_mcqs(qualification, unit):
+    """All past-paper MCQ entries across every topic in `unit`, each tagged with
+    its own topic/question_type so results can still be tracked per sub-topic."""
+    canonical = canonical_unit(unit)
+    if canonical not in PAST_PAPER_UNITS.get(qualification, []):
+        return []
+    mcqs = []
+    for (topic, question_type), entries in PAST_PAPERS.items():
+        if topic != canonical:
+            continue
+        for e in entries:
+            if e["kind"] == "mcq":
+                mcqs.append({**e, "topic": topic, "question_type": question_type})
+    return mcqs

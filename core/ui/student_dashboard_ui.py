@@ -80,6 +80,29 @@ def render_progress_heatmaps(user_id):
     st.caption("🟢 > 70%   🟡 50 – 70%   🔴 < 50%   ⚪ No tests taken")
 
 
+def render_past_paper_quiz_history(user_id):
+    """Recent unit-level Past Paper Quiz attempts. Shown separately from the
+    heatmap above since a quiz spans a whole unit rather than one curriculum
+    topic, so it can't slot into that per-topic grid."""
+    try:
+        tests = _fetch_tests(user_id)
+    except Exception:
+        return
+
+    quizzes = [t for t in tests if t["question_type"] == "Past Paper Quiz"]
+    if not quizzes:
+        return
+
+    quizzes.sort(key=lambda t: t["taken_at"], reverse=True)
+    st.subheader("Past Paper Quizzes")
+    df = pd.DataFrame(quizzes)
+    df["Score"] = df["score"].astype(str) + " / " + df["total"].astype(str)
+    df["Date"] = pd.to_datetime(df["taken_at"]).dt.strftime("%d %b %Y %H:%M")
+    df = df.rename(columns={"topic": "Unit"})[["Date", "Unit", "Score"]]
+    st.dataframe(df, use_container_width=True, hide_index=True)
+
+
 def render_student_dashboard(user):
     st.header("My Progress")
     render_progress_heatmaps(user["id"])
+    render_past_paper_quiz_history(user["id"])
