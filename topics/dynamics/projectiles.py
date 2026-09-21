@@ -1,6 +1,7 @@
 import random
 import math
 import pathlib
+from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
 from utils.notes import NOTES
 
@@ -212,67 +213,135 @@ def _dedup(options_data, correct):
     return cleaned
 
 
-def gen_free_fall_velocity_from_time(level="N5"):
-    context = random.choice(_FREEFALL_CONTEXTS)
-    t_mult = random.choice([x for x in range(2, 21) if x != 10])
-    t = round(t_mult * 0.1, 1)
-    correct = round(G * t, 2)
-
-    working = [
-        {"type": "text",  "content": "Falling from rest, so the initial velocity is 0."},
-        {"type": "latex", "content": r"a = \dfrac{v - u}{t}"},
-        {"type": "latex", "content": rf"9.8 = \dfrac{{v - 0}}{{{t}}}"},
-        {"type": "latex", "content": rf"v = 9.8 \times {t} = {correct}\ \mathrm{{m/s}}"},
+def _free_fall_height_part(level, t, v, height, part1_label, part1_answer, part1_unit):
+    """Part 2, shared by both directions of gen_free_fall_velocity_and_height:
+    find the height fallen from the area under a sketched v-t graph."""
+    working_h = [
+        {"type": "text",  "content": f"Sketch a v-t graph: velocity starts at 0 and rises steadily to "
+                                      f"{v} m/s over {t} s. The height fallen is the area under this graph "
+                                      f"(a triangle)."},
+        {"type": "latex", "content": r"\text{height} = \tfrac{1}{2} \times \text{base} \times \text{height} = \tfrac{1}{2} \times t \times v"},
+        {"type": "latex", "content": rf"\text{{height}} = \tfrac{{1}}{{2}} \times {t} \times {v} = {height}\ \mathrm{{m}}"},
     ]
-    question = f"{context} It takes {t} s to reach the ground.\n\nCalculate its velocity just before it hits the ground."
-    options_data = [
-        {"value": float(correct),  "display": f"{correct} m/s",       "mistake": None, "working": working},
-        {"value": float(t),        "display": f"{t} m/s",             "mistake": "That's just the time of fall — you still need to multiply by g. Use a = (v − u) ÷ t.", "working": working},
-        {"value": round(t / G, 3), "display": f"{round(t / G, 3)} m/s", "mistake": "You divided by g instead of multiplying. Rearrange a = (v − u) ÷ t to v = a × t.", "working": working},
-        {"value": round(0.5 * G * t ** 2, 2), "display": f"{round(0.5 * G * t ** 2, 2)} m/s",
-         "mistake": "That's the height fallen (the area under the v-t graph), not the velocity. Use a = (v − u) ÷ t for the final velocity.", "working": working},
+    forgot_half = round(t * v, 3)
+    options_h = [
+        {"value": float(height), "display": f"{height} m", "mistake": None, "working": working_h},
+        {"value": forgot_half,   "display": f"{forgot_half} m", "mistake": "You forgot the ½ factor. The area of the triangle on the v-t graph is ½ × base × height = ½ × t × v.", "working": working_h},
+        {"value": float(v),      "display": f"{v} m",       "mistake": "That's the velocity, not the height. Use it as the graph's height and find the triangle's area.", "working": working_h},
+        {"value": float(t),      "display": f"{t} m",       "mistake": "That's the time of fall, not the height. Sketch the v-t graph and find the area under it.", "working": working_h},
     ]
-    options_data = _dedup(options_data, correct)
-    return make_question(question, float(correct), options_data, "m/s",
-                         notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level)
+    options_h = _dedup(options_h, height)
+    return make_question(
+        "Calculate the height from which it fell.",
+        float(height), options_h, "m",
+        scaffold=[
+            {"question": part1_label, "answer": part1_answer, "unit": part1_unit},
+            {"question": "Use the v-t graph (triangle area) to find the height fallen.", "answer": float(height), "unit": "m"},
+        ],
+        notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level,
+    )
 
 
-def gen_free_fall_velocity(level="N5"):
-    return gen_free_fall_velocity_from_time(level=level)
-
-
-def gen_free_fall_height_from_time(level="N5"):
+def _gen_velocity_then_height(level="N5"):
+    """Standard direction: the time of fall is given. Part 1 finds the final
+    vertical velocity via a = (v − u) ÷ t, Part 2 then finds the height fallen
+    from the area under a sketched v-t graph (a triangle)."""
     context = random.choice(_FREEFALL_CONTEXTS)
     t_mult = random.choice([x for x in range(2, 21) if x != 10])
     t = round(t_mult * 0.1, 1)
     v = round(G * t, 2)
-    correct = round(0.5 * t * v, 3)
+    height = round(0.5 * t * v, 3)
 
-    working = [
+    working_v = [
         {"type": "text",  "content": "Falling from rest, so the initial velocity is 0."},
-        {"type": "latex", "content": rf"a = \dfrac{{v - u}}{{t}} \;\Rightarrow\; v = 9.8 \times {t} = {v}\ \mathrm{{m/s}}"},
-        {"type": "text",  "content": "The height fallen is the area under the v-t graph (a triangle)."},
-        {"type": "latex", "content": rf"\text{{height}} = \tfrac{{1}}{{2}} \times {t} \times {v} = {correct}\ \mathrm{{m}}"},
+        {"type": "latex", "content": r"a = \dfrac{v - u}{t}"},
+        {"type": "latex", "content": rf"9.8 = \dfrac{{v - 0}}{{{t}}}"},
+        {"type": "latex", "content": rf"v = 9.8 \times {t} = {v}\ \mathrm{{m/s}}"},
     ]
-    scaffold = [
-        {"question": "Calculate the final velocity.", "answer": float(v), "unit": "m/s"},
-        {"question": "Use the v-t graph (triangle area) to find the height fallen.", "answer": float(correct), "unit": "m"},
+    options_v = [
+        {"value": float(v),  "display": f"{v} m/s",         "mistake": None, "working": working_v},
+        {"value": float(t),  "display": f"{t} m/s",         "mistake": "That's just the time of fall — you still need to multiply by g. Use a = (v − u) ÷ t.", "working": working_v},
+        {"value": round(t / G, 3), "display": f"{round(t / G, 3)} m/s", "mistake": "You divided by g instead of multiplying. Rearrange a = (v − u) ÷ t to v = a × t.", "working": working_v},
+        {"value": round(0.5 * G * t ** 2, 2), "display": f"{round(0.5 * G * t ** 2, 2)} m/s",
+         "mistake": "That's the height fallen (the area under the v-t graph), not the velocity. Use a = (v − u) ÷ t for the final velocity.", "working": working_v},
     ]
-    question = f"{context} It takes {t} s to reach the ground.\n\nCalculate the height from which it fell."
-    forgot_half = round(t * v, 3)
-    options_data = [
-        {"value": float(correct),   "display": f"{correct} m", "mistake": None, "working": working},
-        {"value": forgot_half,      "display": f"{forgot_half} m", "mistake": "You forgot the ½ factor. The area of the triangle on the v-t graph is ½ × base × height = ½ × t × v.", "working": working},
-        {"value": float(v),         "display": f"{v} m",       "mistake": "That's the velocity, not the height. Use it as the graph height and find the triangle's area.", "working": working},
-        {"value": float(t),         "display": f"{t} m",       "mistake": "That's the time of fall, not the height. Sketch the v-t graph and find the area under it.", "working": working},
-    ]
-    options_data = _dedup(options_data, correct)
-    return make_question(question, float(correct), options_data, "m", scaffold=scaffold,
-                         notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level)
+    options_v = _dedup(options_v, v)
+    part_v = make_question(
+        "Calculate its velocity just before it hits the ground.",
+        float(v), options_v, "m/s",
+        notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level,
+    )
+
+    part_h = _free_fall_height_part(
+        level, t, v, height,
+        "What is the velocity just before it hits the ground (from Part 1)?", float(v), "m/s",
+    )
+
+    return PhysicsQuestion(
+        question_text="", correct_answer=0, unit="",
+        topic="Dynamics", question_type="Projectile Motion", level=level,
+        is_scenario=True,
+        scenario_context=f"{context} It takes {t} s to reach the ground.",
+        parts=[part_v, part_h],
+    )
 
 
-def gen_free_fall_height(level="N5"):
-    return gen_free_fall_height_from_time(level=level)
+def _gen_time_then_height(level="N5"):
+    """Reverse direction (occasional): the final velocity is given instead of
+    the time. Part 1 rearranges a = (v − u) ÷ t for t, Part 2 then finds the
+    height fallen the same way as the standard direction."""
+    t_mult = random.choice([x for x in range(2, 21) if x != 10])
+    t_seed = round(t_mult * 0.1, 1)
+    v = round(G * t_seed, 2)
+    # recompute t from the displayed v, so the stated answer matches exactly
+    # what a pupil gets back out from a = (v - u) / t rearranged for t.
+    t = round(v / G, 2)
+    height = round(0.5 * t * v, 3)
+    context = random.choice(_FREEFALL_CONTEXTS)
+
+    working_t = [
+        {"type": "text",  "content": "Falling from rest, so the initial velocity is 0."},
+        {"type": "latex", "content": r"a = \dfrac{v - u}{t} \;\Rightarrow\; t = \dfrac{v - u}{a}"},
+        {"type": "latex", "content": rf"t = \dfrac{{{v} - 0}}{{9.8}}"},
+        {"type": "latex", "content": rf"t = {t}\ \mathrm{{s}}"},
+    ]
+    options_t = [
+        {"value": float(t), "display": f"{t} s", "mistake": None, "working": working_t},
+        {"value": round(v * G, 2), "display": f"{round(v * G, 2)} s",
+         "mistake": "You multiplied by g instead of dividing. Rearrange a = (v − u) ÷ t to t = v ÷ a.", "working": working_t},
+        {"value": float(v), "display": f"{v} s",
+         "mistake": "That's the velocity, not the time — you still need to divide by g. Use t = v ÷ a.", "working": working_t},
+        {"value": round(0.5 * v / G, 2), "display": f"{round(0.5 * v / G, 2)} s",
+         "mistake": "Check your rearrangement — t = v ÷ a, with no extra factor of ½.", "working": working_t},
+    ]
+    options_t = _dedup(options_t, t)
+    part_t = make_question(
+        "Calculate the time taken for it to hit the ground.",
+        float(t), options_t, "s",
+        notes=NOTES["projectiles"], topic="Dynamics", question_type="Projectile Motion", level=level,
+    )
+
+    part_h = _free_fall_height_part(
+        level, t, v, height,
+        "What is the time taken to fall (from Part 1)?", float(t), "s",
+    )
+
+    return PhysicsQuestion(
+        question_text="", correct_answer=0, unit="",
+        topic="Dynamics", question_type="Projectile Motion", level=level,
+        is_scenario=True,
+        scenario_context=f"{context} It hits the ground with a velocity of {v} m/s.",
+        parts=[part_t, part_h],
+    )
+
+
+def gen_free_fall_velocity_and_height(level="N5"):
+    """Two-part scenario, usually giving the time of fall (find velocity, then
+    height); occasionally reversed to give the velocity instead (find time,
+    then height)."""
+    if random.random() < 0.15:
+        return _gen_time_then_height(level=level)
+    return _gen_velocity_then_height(level=level)
 
 
 def gen_free_fall_time_from_height_and_velocity(level="N5"):

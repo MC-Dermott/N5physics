@@ -40,8 +40,7 @@ from topics.dynamics.weight                import generate_weight
 from topics.dynamics.energy                import generate_energy
 from topics.dynamics.projectiles           import (
     generate_projectiles,
-    gen_free_fall_velocity,
-    gen_free_fall_height,
+    gen_free_fall_velocity_and_height,
     gen_free_fall_time,
     gen_projectile_time_explain,
 )
@@ -235,8 +234,7 @@ QUAL_REGISTRY = {
             "Weight":                 generate_weight,
             "Energy":                 generate_energy,
             "Projectile Motion": {
-                "Vertical Motion — Velocity": gen_free_fall_velocity,
-                "Vertical Motion — Height Fallen": gen_free_fall_height,
+                "Vertical Motion — Velocity & Height Fallen": gen_free_fall_velocity_and_height,
                 "Vertical Motion — Time to Fall": gen_free_fall_time,
                 "Full Projectile Motion": generate_projectiles,
                 "Explain — Time to Hit the Ground": gen_projectile_time_explain,
