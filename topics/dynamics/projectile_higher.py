@@ -260,12 +260,13 @@ def generate_projectile_l1(level="Higher"):
 # ── Level 2 — Angled launch from a height (asymmetric) ───────────────────────
 
 def generate_projectile_l2(level="Higher"):
-    if random.random() < 0.5:
-        return _generate_projectile_l2_time(level)
-    return _generate_projectile_l2_maxheight(level)
+    return _generate_projectile_l2_groundswap(level, given_time=random.random() < 0.5)
 
 
-def _generate_projectile_l2_time(level="Higher"):
+def _generate_projectile_l2_groundswap(level="Higher", given_time=True):
+    # Final part swaps given/asked between t_down (time from max height to the
+    # ground) and H_top (max height above the ground) — related by s = ½gt²
+    # from rest at the top, so neither direction ever needs the quadratic formula.
     theta_deg = random.choice(_ANGLES)
     v         = random.choice(_SPEEDS)
     theta     = math.radians(theta_deg)
@@ -279,14 +280,14 @@ def _generate_projectile_l2_time(level="Higher"):
         context = random.choice(_CONTEXTS_L2_ELEVATED)
     context = context.format(v=v, theta=theta_deg, h=h)
 
-    v_H  = _r2(v * math.cos(theta))
-    v_V  = _r2(v * math.sin(theta))
+    v_H   = _r2(v * math.cos(theta))
+    v_V   = _r2(v * math.sin(theta))
     h_max = _r2(v_V ** 2 / (2 * g))
     t_up  = _r2(v_V / g)
-    drop_total = _r2(h + h_max)
-    t_down     = _r2(math.sqrt(2 * drop_total / g))
-    t_total    = _r2(t_up + t_down)
-    R          = _r2(v_H * t_total)
+    H_top   = _r2(h + h_max)
+    t_down  = _r2(math.sqrt(2 * H_top / g))
+    t_total = _r2(t_up + t_down)
+    R       = _r2(v_H * t_total)
 
     vH_sin = _r2(v * math.sin(theta))  # sin/cos swapped
     vV_cos = _r2(v * math.cos(theta))  # sin/cos swapped
@@ -399,45 +400,83 @@ def _generate_projectile_l2_time(level="Higher"):
         notes=_NOTES_PROJECTILE,
     )
 
-    # ── Part (d): total time to reach the ground, given the further descent time ─
-    working_t = [
-        {"type": "text",  "content": "Add the time already spent rising to the further time given for the descent:"},
-        {"type": "latex", "content": r"t_{\text{total}} = t_{\text{up}} + t_{\text{down}}"},
-        {"type": "latex", "content": rf"t_{{\text{{total}}}} = {t_up} + {t_down} = {t_total}\ \mathrm{{s}}"},
-    ]
-    part_d = PhysicsQuestion(
-        question_text=(
-            f"The projectile takes a further {t_down} s to fall from its maximum height to the "
-            f"ground. Calculate the total time taken for the projectile to reach the ground."
-        ),
-        correct_answer=t_total,
-        unit="s",
-        topic="Our Dynamic Universe",
-        question_type="Projectile Motion",
-        level=level,
-        distractors=[
-            {
-                "value": t_down,
-                "mistake": (
-                    f"This is only the time falling from the maximum height. You also need to "
-                    f"add the time already spent **rising** to the top: "
-                    f"t_total = t_up + t_down = {t_up} + {t_down} = {t_total} s."
-                ),
-                "working": working_t,
-            },
-            {
-                "value": t_up,
-                "mistake": (
-                    f"This is only the time taken to reach maximum height. You also need to add "
-                    f"the further time it takes to fall back down: "
-                    f"t_total = t_up + t_down = {t_up} + {t_down} = {t_total} s."
-                ),
-                "working": working_t,
-            },
-        ],
-        working=working_t,
-        notes=_NOTES_PROJECTILE,
-    )
+    # ── Part (d): swap between t_down (given/find) and H_top (given/find) ────
+    if given_time:
+        # Given the time to fall from the top to the ground, find that height.
+        working_d = [
+            {"type": "text",  "content": "At the top, vertical velocity = 0, so use s = ½gt² to find the height fallen in this time:"},
+            {"type": "latex", "content": r"H_{\text{top}} = \tfrac{1}{2} g t_{\text{down}}^2"},
+            {"type": "latex", "content": rf"H_{{\text{{top}}}} = \tfrac{{1}}{{2}} \times 9.8 \times {t_down}^2 = {H_top}\ \mathrm{{m}}"},
+        ]
+        part_d = PhysicsQuestion(
+            question_text=(
+                f"The projectile takes a further {t_down} s to fall from its maximum height to "
+                f"the ground. Calculate the maximum height reached above the ground."
+            ),
+            correct_answer=H_top,
+            unit="m",
+            topic="Our Dynamic Universe",
+            question_type="Projectile Motion",
+            level=level,
+            distractors=[
+                {
+                    "value": _r2(g * t_down ** 2),
+                    "mistake": (
+                        f"You appear to have left out the factor of ½. "
+                        f"H_top = ½gt_down² = ½ × 9.8 × {t_down}² = {H_top} m."
+                    ),
+                    "working": working_d,
+                },
+                {
+                    "value": _r2(0.5 * g * t_up ** 2),
+                    "mistake": (
+                        f"That uses the time to **rise** (t_up), not the given time to fall "
+                        f"(t_down). H_top = ½ × 9.8 × {t_down}² = {H_top} m."
+                    ),
+                    "working": working_d,
+                },
+            ],
+            working=working_d,
+            notes=_NOTES_PROJECTILE,
+        )
+    else:
+        # Given the maximum height above the ground, find the time to fall to the ground.
+        working_d = [
+            {"type": "text",  "content": "At the top, vertical velocity = 0, so use s = ½gt², rearranged for t:"},
+            {"type": "latex", "content": r"t_{\text{down}} = \sqrt{\frac{2 H_{\text{top}}}{g}}"},
+            {"type": "latex", "content": rf"t_{{\text{{down}}}} = \sqrt{{\frac{{2 \times {H_top}}}{{9.8}}}} = {t_down}\ \mathrm{{s}}"},
+        ]
+        part_d = PhysicsQuestion(
+            question_text=(
+                f"The projectile reaches a maximum height of {H_top} m above the ground. "
+                f"Calculate the time it takes to fall from this height to the ground."
+            ),
+            correct_answer=t_down,
+            unit="s",
+            topic="Our Dynamic Universe",
+            question_type="Projectile Motion",
+            level=level,
+            distractors=[
+                {
+                    "value": _r2(math.sqrt(H_top / g)),
+                    "mistake": (
+                        f"You appear to have left out the factor of 2. "
+                        f"t_down = √(2 × H_top ÷ g) = √(2 × {H_top} ÷ 9.8) = {t_down} s."
+                    ),
+                    "working": working_d,
+                },
+                {
+                    "value": _r2(H_top / g),
+                    "mistake": (
+                        f"This isn't a constant-velocity relationship — falling from rest needs "
+                        f"s = ½gt², rearranged: t_down = √(2 × H_top ÷ g) = {t_down} s."
+                    ),
+                    "working": working_d,
+                },
+            ],
+            working=working_d,
+            notes=_NOTES_PROJECTILE,
+        )
 
     # ── Part (e): horizontal range ────────────────────────────────────────────
     working_R = [
@@ -490,267 +529,6 @@ def _generate_projectile_l2_time(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part_a, part_b, part_c, part_d, part_e],
-    ))
-
-
-def _generate_projectile_l2_maxheight(level="Higher", include_range=False):
-    theta_deg = random.choice(_ANGLES)
-    v         = random.choice(_SPEEDS)
-    theta     = math.radians(theta_deg)
-
-    is_human = random.random() < 0.5
-    if is_human:
-        h = random.choice(_L2_HUMAN_HEIGHTS)
-        context = random.choice(_CONTEXTS_L2_HUMAN)
-    else:
-        h = random.choice(_L2_ELEVATED_HEIGHTS)
-        context = random.choice(_CONTEXTS_L2_ELEVATED)
-    context = context.format(v=v, theta=theta_deg, h=h)
-
-    v_H  = _r2(v * math.cos(theta))
-    v_V  = _r2(v * math.sin(theta))
-    t_up = _r2(v_V / g)
-    h_max = _r2(v_V ** 2 / (2 * g))
-    H_top = _r2(h + h_max)
-
-    t_fall_full = math.sqrt(2 * H_top / g)
-    t2 = round(random.uniform(0.35, 0.75) * t_fall_full, 2)
-    s = _r2(0.5 * g * t2 ** 2)
-    h_final = _r2(H_top - s)
-
-    vH_sin = _r2(v * math.sin(theta))  # sin/cos swapped
-    vV_cos = _r2(v * math.cos(theta))  # sin/cos swapped
-    t_full_v = _r2(v / g)              # used full speed instead of v_V
-
-    # ── Part (a): horizontal component ───────────────────────────────────────
-    working_vH = [
-        {"type": "text",  "content": "Resolve the initial velocity into components:"},
-        {"type": "latex", "content": r"v_H = v \cos\theta"},
-        {"type": "latex", "content": rf"v_H = {v} \times \cos {theta_deg}°"},
-        {"type": "latex", "content": rf"v_H = {v_H}\ \mathrm{{m/s}}"},
-    ]
-    part_a = PhysicsQuestion(
-        question_text="Calculate the horizontal component of the initial velocity.",
-        correct_answer=v_H,
-        unit="m/s",
-        topic="Our Dynamic Universe",
-        question_type="Projectile Motion",
-        level=level,
-        distractors=[
-            {
-                "value": vH_sin,
-                "mistake": (
-                    f"The **horizontal** component uses cos θ, not sin θ. "
-                    f"v_H = v × cos {theta_deg}° = {v} × {round(math.cos(theta), 3)} = {v_H} m/s."
-                ),
-                "working": working_vH,
-            },
-            {
-                "value": float(v),
-                "mistake": (
-                    f"This is the full initial speed. "
-                    f"The horizontal component is v_H = v × cos {theta_deg}° = {v_H} m/s."
-                ),
-                "working": working_vH,
-            },
-        ],
-        working=working_vH,
-        notes=_NOTES_PROJECTILE,
-    )
-
-    # ── Part (b): vertical component ─────────────────────────────────────────
-    working_vV = [
-        {"type": "text",  "content": "The vertical component:"},
-        {"type": "latex", "content": r"v_V = v \sin\theta"},
-        {"type": "latex", "content": rf"v_V = {v} \times \sin {theta_deg}°"},
-        {"type": "latex", "content": rf"v_V = {v_V}\ \mathrm{{m/s}}"},
-    ]
-    part_b = PhysicsQuestion(
-        question_text="Calculate the vertical component of the initial velocity.",
-        correct_answer=v_V,
-        unit="m/s",
-        topic="Our Dynamic Universe",
-        question_type="Projectile Motion",
-        level=level,
-        distractors=[
-            {
-                "value": vV_cos,
-                "mistake": (
-                    f"The **vertical** component uses sin θ, not cos θ. "
-                    f"v_V = v × sin {theta_deg}° = {v} × {round(math.sin(theta), 3)} = {v_V} m/s."
-                ),
-                "working": working_vV,
-            },
-            {
-                "value": float(v),
-                "mistake": (
-                    f"This is the initial speed. "
-                    f"The vertical component is v_V = v × sin {theta_deg}° = {v_V} m/s."
-                ),
-                "working": working_vV,
-            },
-        ],
-        working=working_vV,
-        notes=_NOTES_PROJECTILE,
-    )
-
-    # ── Part (c): time to reach maximum height ────────────────────────────────
-    working_t = [
-        {"type": "text",  "content": "At maximum height, vertical velocity = 0:"},
-        {"type": "latex", "content": r"v = u + at \;\Rightarrow\; 0 = v_V - g\,t_{\text{up}}"},
-        {"type": "latex", "content": rf"t_{{\text{{up}}}} = \frac{{v_V}}{{g}} = \frac{{{v_V}}}{{9.8}} = {t_up}\ \mathrm{{s}}"},
-    ]
-    part_c = PhysicsQuestion(
-        question_text="Calculate the time taken for the projectile to reach its maximum height.",
-        correct_answer=t_up,
-        unit="s",
-        topic="Our Dynamic Universe",
-        question_type="Projectile Motion",
-        level=level,
-        distractors=[
-            {
-                "value": t_full_v,
-                "mistake": (
-                    f"Use the **vertical component** of the launch velocity, not the full speed. "
-                    f"v_V = v sin {theta_deg}° = {v_V} m/s, so t_up = v_V ÷ g = {t_up} s."
-                ),
-                "working": working_t,
-            },
-            {
-                "value": _r2(v_H / g),
-                "mistake": (
-                    f"That uses the horizontal component. Only the **vertical** component "
-                    f"decreases to zero at maximum height: t_up = v_V ÷ g = {v_V} ÷ 9.8 = {t_up} s."
-                ),
-                "working": working_t,
-            },
-        ],
-        working=working_t,
-        notes=_NOTES_PROJECTILE,
-        scaffold=[
-            {"prompt": "What is v_V (the vertical component of the launch velocity)?", "answer": v_V},
-            {"prompt": "What is the time to reach maximum height, t_up?", "answer": t_up},
-        ],
-    )
-
-    # ── Part (d): height above ground a further time after maximum height ────
-    working_h = [
-        {"type": "text",  "content": (
-            f"The projectile rises {h_max} m above its launch point, "
-            f"so its height above the **ground** at maximum height is:"
-        )},
-        {"type": "latex", "content": r"H_{\text{top}} = h + \frac{v_V^2}{2g}"},
-        {"type": "latex", "content": rf"H_{{\text{{top}}}} = {h:g} + \frac{{{v_V}^2}}{{2 \times 9.8}} = {H_top}\ \mathrm{{m}}"},
-        {"type": "text",  "content": (
-            f"A further {t2} s after reaching maximum height, the projectile has fallen "
-            f"(from rest, vertically):"
-        )},
-        {"type": "latex", "content": r"s = \tfrac{1}{2} g t_2^2"},
-        {"type": "latex", "content": rf"s = \tfrac{{1}}{{2}} \times 9.8 \times {t2}^2 = {s}\ \mathrm{{m}}"},
-        {"type": "text",  "content": "So its height above the ground is:"},
-        {"type": "latex", "content": r"h = H_{\text{top}} - s"},
-        {"type": "latex", "content": rf"h = {H_top} - {s} = {h_final}\ \mathrm{{m}}"},
-    ]
-    part_d = PhysicsQuestion(
-        question_text=(
-            f"The projectile takes a further {t2} s to fall from its maximum height. "
-            f"Calculate its height above the ground at this time."
-        ),
-        correct_answer=h_final,
-        unit="m",
-        topic="Our Dynamic Universe",
-        question_type="Projectile Motion",
-        level=level,
-        distractors=[
-            {
-                "value": _r2(h_max - s),
-                "mistake": (
-                    f"You appear to have forgotten to add the launch height h. The height above "
-                    f"the ground at maximum height is H_top = h + v_V²/2g = {H_top} m, "
-                    f"so h = {H_top} − {s} = {h_final} m."
-                ),
-                "working": working_h,
-            },
-            {
-                "value": _r2(H_top - g * t2 ** 2),
-                "mistake": (
-                    f"You appear to have left out the factor of ½ when finding the distance "
-                    f"fallen. Use s = ½ g t₂² = {s} m, so h = {H_top} − {s} = {h_final} m."
-                ),
-                "working": working_h,
-            },
-        ],
-        working=working_h,
-        notes=_NOTES_PROJECTILE,
-        scaffold=[
-            {"prompt": "What is the height above the ground at maximum height, H_top?", "answer": H_top},
-            {"prompt": f"What distance does the projectile fall in the further {t2} s, s?", "answer": s},
-            {"prompt": "What is the height above the ground when it hits, h?", "answer": h_final},
-        ],
-    )
-
-    parts = [part_a, part_b, part_c, part_d]
-
-    if include_range:
-        # ── Part (e): horizontal distance travelled by the time it hits ───────
-        t_total_flight = _r2(t_up + t2)
-        R = _r2(v_H * t_total_flight)
-        working_R = [
-            {"type": "text",  "content": (
-                f"The projectile has been in flight for t_up + t_2 since it launched:"
-            )},
-            {"type": "latex", "content": r"t_{\text{total}} = t_{\text{up}} + t_2"},
-            {"type": "latex", "content": rf"t_{{\text{{total}}}} = {t_up} + {t2} = {t_total_flight}\ \mathrm{{s}}"},
-            {"type": "text",  "content": "Horizontal velocity is constant throughout, so:"},
-            {"type": "latex", "content": r"R = v_H \times t_{\text{total}}"},
-            {"type": "latex", "content": rf"R = {v_H} \times {t_total_flight} = {R}\ \mathrm{{m}}"},
-        ]
-        part_e = PhysicsQuestion(
-            question_text="Calculate the horizontal distance travelled by the projectile by the time it reaches this height.",
-            correct_answer=R,
-            unit="m",
-            topic="Our Dynamic Universe",
-            question_type="Projectile Motion",
-            level=level,
-            distractors=[
-                {
-                    "value": _r2(v_H * t2),
-                    "mistake": (
-                        f"You appear to have only used the further time t₂ = {t2} s, forgetting "
-                        f"the time already spent rising to maximum height. "
-                        f"t_total = t_up + t₂ = {t_up} + {t2} = {t_total_flight} s, "
-                        f"so R = {v_H} × {t_total_flight} = {R} m."
-                    ),
-                    "working": working_R,
-                },
-                {
-                    "value": _r2(v * t_total_flight),
-                    "mistake": (
-                        f"Use the **horizontal component** (v_H = {v_H} m/s), not the full "
-                        f"initial speed ({v} m/s). R = {v_H} × {t_total_flight} = {R} m."
-                    ),
-                    "working": working_R,
-                },
-            ],
-            working=working_R,
-            notes=_NOTES_PROJECTILE,
-            scaffold=[
-                {"prompt": "What is the total time of flight, t_up + t_2?", "answer": t_total_flight},
-                {"prompt": "What is the horizontal distance travelled, R?", "answer": R},
-            ],
-        )
-        parts.append(part_e)
-
-    return _with_projectile_widget(PhysicsQuestion(
-        question_text="",
-        correct_answer=0,
-        unit="",
-        topic="Our Dynamic Universe",
-        question_type="Projectile Motion",
-        level=level,
-        is_scenario=True,
-        scenario_context=context,
-        parts=parts,
     ))
 
 
@@ -1207,17 +985,17 @@ def _generate_projectile_exam_target(level="Higher"):
 def generate_projectile_exam_style(level="Higher"):
     variant = random.choice([
         "same_height",
-        "diff_height_time",
-        "diff_height_maxheight",
+        "diff_height_given_time",
+        "diff_height_given_height",
         "backwards_horizontal",
         "target",
     ])
     if variant == "same_height":
         return generate_projectile_l1(level)
-    if variant == "diff_height_time":
-        return _generate_projectile_l2_time(level)
-    if variant == "diff_height_maxheight":
-        return _generate_projectile_l2_maxheight(level, include_range=True)
+    if variant == "diff_height_given_time":
+        return _generate_projectile_l2_groundswap(level, given_time=True)
+    if variant == "diff_height_given_height":
+        return _generate_projectile_l2_groundswap(level, given_time=False)
     if variant == "backwards_horizontal":
         return _generate_projectile_exam_backwards(level)
     return _generate_projectile_exam_target(level)

@@ -1292,8 +1292,8 @@ ball's height at that time.
     ("Our Dynamic Universe", "Projectile Motion", "Level 2 — Different Height"): r"""
 **Example:** A ball is thrown at 20 m/s at 40° above the horizontal from a height of 15 m.
 
-*The ball takes a further 2.19 s to fall from its maximum height to the ground. Calculate
-the total time taken for the ball to reach the ground.*
+*The ball takes a further 2.20 s to fall from its maximum height to the ground. Calculate
+the maximum height reached above the ground.*
 
 **Step 1 — resolve into components:**
 
@@ -1317,22 +1317,24 @@ $$t_{\text{up}} = \frac{12.9}{9.8}$$
 *Answer:*
 $$t_{\text{up}} = 1.31\ \mathrm{s}$$
 
-**Step 3 — total time of flight.** The further 2.19 s to fall from the top is given, so just
-add it to the time already spent rising:
+**Step 3 — maximum height above the ground.** At the top, vertical velocity = 0, so use the
+given falling time in $s = \tfrac{1}{2}gt^2$:
 
 *Equation:*
-$$t_{\text{total}} = t_{\text{up}} + t_{\text{down}}$$
+$$H_{\text{top}} = \tfrac{1}{2}g\,t_{\text{down}}^2$$
 
 *Substitute:*
-$$t_{\text{total}} = 1.31 + 2.19$$
+$$H_{\text{top}} = \tfrac{1}{2} \times 9.8 \times 2.20^2$$
 
 *Answer:*
-$$t_{\text{total}} = 3.50\ \mathrm{s}$$
+$$H_{\text{top}} = 23.7\ \mathrm{m}$$
 
-**Most common mistake:** forgetting to add $t_{\text{up}}$, and giving only the falling time
-as the final answer. Note that Higher Physics never expects you to solve
-$h = v_V t - \tfrac{1}{2}gt^2$ directly for $t$ (which would need the quadratic formula) —
-the falling time is always given, worked out separately from rest at the top.
+**Most common mistake:** solving $h = v_V t - \tfrac{1}{2}gt^2$ directly for the height fallen
+from launch — this needs the quadratic formula, which Higher Physics never requires. Because
+vertical velocity = 0 at the top, the height fallen in the *given* time is a simple
+$s = \tfrac{1}{2}gt^2$ calculation, with no quadratic involved. (If the maximum height were
+given instead, the falling time would be found the same way, rearranged: $t_{\text{down}} =
+\sqrt{2H_{\text{top}} \div g}$.)
 """,
 
     ("Particles and Waves", "Standard Model", "Particle Classification"): r"""
