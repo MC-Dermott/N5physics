@@ -1290,45 +1290,59 @@ ball's height at that time.
 """,
 
     ("Our Dynamic Universe", "Projectile Motion", "Level 2 — Different Height"): r"""
-**Example:** An object is launched horizontally at 15 m/s from a height of 20 m.
+**Example:** A ball is thrown at 20 m/s at 40° above the horizontal from a height of 15 m.
 
-*Calculate the resultant speed at impact.*
+*The ball reaches a maximum height of 8.44 m above the launch point. Calculate the total
+time taken for the ball to reach the ground.*
 
-**Step 1 — time of flight** (vertical motion starts from rest):
-
-*Equation:*
-$$h = \tfrac{1}{2}gt^2$$
-
-*Substitute:*
-$$20 = \tfrac{1}{2} \times 9.8 \times t^2$$
-
-*Rearrange and solve:*
-$$t = \sqrt{\frac{2 \times 20}{9.8}} = 2.02\ \mathrm{s}$$
-
-**Step 2 — vertical velocity at impact:**
+**Step 1 — resolve into components:**
 
 *Equation:*
-$$v_y = gt$$
+$$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
 
 *Substitute:*
-$$v_y = 9.8 \times 2.02$$
+$$v_H = 20\cos40° \qquad v_V = 20\sin40°$$
 
 *Answer:*
-$$v_y = 19.8\ \mathrm{m/s}$$
+$$v_H = 15.3\ \mathrm{m/s} \qquad v_V = 12.9\ \mathrm{m/s}$$
 
-**Step 3 — resultant speed** (horizontal ⊥ vertical, so use Pythagoras):
+**Step 2 — time to rise to maximum height:**
 
 *Equation:*
-$$v = \sqrt{v_H^2 + v_y^2}$$
+$$t_{\text{up}} = \frac{v_V}{g}$$
 
 *Substitute:*
-$$v = \sqrt{15^2 + 19.8^2}$$
+$$t_{\text{up}} = \frac{12.9}{9.8}$$
 
 *Answer:*
-$$v = 24.8\ \mathrm{m/s}$$
+$$t_{\text{up}} = 1.31\ \mathrm{s}$$
 
-**Common mistake:** using $h = gt^2$ (forgetting the $\frac{1}{2}$) gives a time too small by a
-factor of $\sqrt{2}$.
+**Step 3 — time to fall from the top to the ground** (vertical velocity = 0 at the top, so
+the ball falls from rest through a total distance of $h + h_{\text{max}}$):
+
+*Equation:*
+$$t_{\text{down}} = \sqrt{\frac{2(h + h_{\text{max}})}{g}}$$
+
+*Substitute:*
+$$t_{\text{down}} = \sqrt{\frac{2 \times (15 + 8.44)}{9.8}}$$
+
+*Answer:*
+$$t_{\text{down}} = 2.19\ \mathrm{s}$$
+
+**Step 4 — total time of flight:**
+
+*Equation:*
+$$t_{\text{total}} = t_{\text{up}} + t_{\text{down}}$$
+
+*Substitute:*
+$$t_{\text{total}} = 1.31 + 2.19$$
+
+*Answer:*
+$$t_{\text{total}} = 3.50\ \mathrm{s}$$
+
+**Most common mistake:** solving $h = v_V t - \tfrac{1}{2}gt^2$ directly for $t$ — this needs
+the quadratic formula, which Higher Physics never requires. Splitting the flight at the
+maximum height (where vertical velocity = 0) avoids this entirely.
 """,
 
     ("Particles and Waves", "Standard Model", "Particle Classification"): r"""
