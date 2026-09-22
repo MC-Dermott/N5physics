@@ -1241,10 +1241,12 @@ $t_{\text{total}} = 2t_{\text{up}}$ when calculating the range.
 """,
 
     ("Our Dynamic Universe", "Projectile Motion", "Level 3 — Exam Style"): r"""
-**Example:** A ball is kicked from flat ground at 10 m/s at 30° above the horizontal, towards
-a wall 0.8 m high, standing 6.1 m away.
+**Example:** A student throws a wet sponge at a teacher, at 7.4 m/s at 30° above the
+horizontal, from a height of 1.5 m. The sponge takes a further 0.45 s to fall from its
+maximum height until it hits the teacher.
 
-*Does the ball clear the wall?*
+*Calculate the height above the ground at which the sponge hits the teacher, then the
+horizontal range.*
 
 **Step 1 — resolve into components:**
 
@@ -1252,41 +1254,48 @@ a wall 0.8 m high, standing 6.1 m away.
 $$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
 
 *Substitute:*
-$$v_H = 10\cos30° \qquad v_V = 10\sin30°$$
+$$v_H = 7.4\cos30° \qquad v_V = 7.4\sin30°$$
 
 *Answer:*
-$$v_H = 8.66\ \mathrm{m/s} \qquad v_V = 5.0\ \mathrm{m/s}$$
+$$v_H = 6.41\ \mathrm{m/s} \qquad v_V = 3.7\ \mathrm{m/s}$$
 
-**Step 2 — time to reach the wall** (horizontal velocity is constant):
+**Step 2 — time to reach maximum height:**
 
 *Equation:*
-$$t = \frac{x}{v_H}$$
+$$t_{\text{up}} = \frac{v_V}{g}$$
 
 *Substitute:*
-$$t = \frac{6.1}{8.66}$$
+$$t_{\text{up}} = \frac{3.7}{9.8}$$
 
 *Answer:*
-$$t = 0.704\ \mathrm{s}$$
+$$t_{\text{up}} = 0.38\ \mathrm{s}$$
 
-**Step 3 — height of the ball above the ground at this time:**
+**Step 3 — height above the ground at this time.** The sponge rises $v_V^2 \div 2g = 0.70\
+\mathrm{m}$ above the launch point, so its height above the ground at the top is
+$H_{\text{top}} = 1.5 + 0.70 = 2.20\ \mathrm{m}$. In the given 0.45 s falling from there:
 
 *Equation:*
-$$s = v_V t - \tfrac{1}{2}gt^2$$
+$$s = \tfrac{1}{2}gt_2^2 \qquad h = H_{\text{top}} - s$$
 
 *Substitute:*
-$$s = 5.0 \times 0.704 - \tfrac{1}{2} \times 9.8 \times 0.704^2$$
+$$s = \tfrac{1}{2} \times 9.8 \times 0.45^2 \qquad h = 2.20 - 0.99$$
 
 *Answer:*
-$$s = 1.09\ \mathrm{m}$$
+$$h = 1.21\ \mathrm{m}$$
 
-**Step 4 — compare to the wall's height:**
+**Step 4 — horizontal range**, using the total time of flight $t_{\text{up}} + t_2$:
 
-$1.09\ \mathrm{m} > 0.8\ \mathrm{m}$, so the ball is still higher than the wall when it
-reaches it — **the ball clears the wall.**
+*Equation:*
+$$R = v_H \times (t_{\text{up}} + t_2)$$
 
-**Most common mistake:** using the full initial speed instead of $v_H$ when finding the time
-to reach the wall, or forgetting the $-\tfrac{1}{2}gt^2$ term (gravity) when finding the
-ball's height at that time.
+*Substitute:*
+$$R = 6.41 \times (0.38 + 0.45)$$
+
+*Answer:*
+$$R = 5.32\ \mathrm{m}$$
+
+**Most common mistake:** forgetting to add the launch height when finding $H_{\text{top}}$,
+or using only the given 0.45 s (instead of $t_{\text{up}} + t_2$) for the range.
 """,
 
     ("Our Dynamic Universe", "Projectile Motion", "Level 2 — Different Height"): r"""
