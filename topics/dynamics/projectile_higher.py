@@ -363,61 +363,52 @@ def _generate_projectile_l2_time(level="Higher"):
         notes=_NOTES_PROJECTILE,
     )
 
-    # ── Part (c): maximum height reached above the launch point ──────────────
-    working_hmax = [
-        {"type": "text",  "content": "At maximum height, vertical velocity = 0. Using the vertical component of the launch velocity:"},
-        {"type": "latex", "content": r"h_{\text{max}} = \frac{v_V^2}{2g}"},
-        {"type": "latex", "content": rf"h_{{\text{{max}}}} = \frac{{{v_V}^2}}{{2 \times 9.8}} = {h_max}\ \mathrm{{m}}"},
+    # ── Part (c): time to reach maximum height ────────────────────────────────
+    t_full_v = _r2(v / g)  # used full speed instead of v_V
+    working_tup = [
+        {"type": "text",  "content": "At maximum height, vertical velocity = 0:"},
+        {"type": "latex", "content": r"v = u + at \;\Rightarrow\; 0 = v_V - g\,t_{\text{up}}"},
+        {"type": "latex", "content": rf"t_{{\text{{up}}}} = \frac{{v_V}}{{g}} = \frac{{{v_V}}}{{9.8}} = {t_up}\ \mathrm{{s}}"},
     ]
     part_c = PhysicsQuestion(
-        question_text="Calculate the maximum height reached above the launch point.",
-        correct_answer=h_max,
-        unit="m",
+        question_text="Calculate the time taken for the projectile to reach its maximum height.",
+        correct_answer=t_up,
+        unit="s",
         topic="Our Dynamic Universe",
         question_type="Projectile Motion",
         level=level,
         distractors=[
             {
-                "value": _r2(v_V ** 2 / g),
+                "value": t_full_v,
                 "mistake": (
-                    f"You appear to have left out the factor of 2 in the denominator. "
-                    f"h_max = v_V² ÷ (2g) = {v_V}² ÷ 19.6 = {h_max} m."
+                    f"Use the **vertical component** of the launch velocity, not the full speed. "
+                    f"v_V = v sin {theta_deg}° = {v_V} m/s, so t_up = v_V ÷ g = {t_up} s."
                 ),
-                "working": working_hmax,
+                "working": working_tup,
             },
             {
-                "value": _r2(v ** 2 / (2 * g)),
+                "value": _r2(v_H / g),
                 "mistake": (
-                    f"Use the **vertical component** v_V = {v_V} m/s, not the full launch speed. "
-                    f"h_max = v_V² ÷ (2g) = {h_max} m."
+                    f"That uses the horizontal component. Only the **vertical** component "
+                    f"decreases to zero at maximum height: t_up = v_V ÷ g = {v_V} ÷ 9.8 = {t_up} s."
                 ),
-                "working": working_hmax,
+                "working": working_tup,
             },
         ],
-        working=working_hmax,
+        working=working_tup,
         notes=_NOTES_PROJECTILE,
     )
 
-    # ── Part (d): total time of flight, via the maximum height ───────────────
-    t_down_wrong = _r2(math.sqrt(2 * h_max / g))  # forgot to add the launch height h
+    # ── Part (d): total time to reach the ground, given the further descent time ─
     working_t = [
-        {"type": "text",  "content": (
-            f"The projectile falls from its maximum height, {h_max} m above the launch point, "
-            f"all the way down to the ground, {h:g} m below the launch point — a total drop of:"
-        )},
-        {"type": "latex", "content": r"h + h_{\text{max}}"},
-        {"type": "latex", "content": rf"{h:g} + {h_max} = {drop_total}\ \mathrm{{m}}"},
-        {"type": "text",  "content": "At the top, vertical velocity = 0, so use s = ½gt² to find the time to fall this distance:"},
-        {"type": "latex", "content": r"t_{\text{down}} = \sqrt{\frac{2(h + h_{\text{max}})}{g}}"},
-        {"type": "latex", "content": rf"t_{{\text{{down}}}} = \sqrt{{\frac{{2 \times {drop_total}}}{{9.8}}}} = {t_down}\ \mathrm{{s}}"},
-        {"type": "text",  "content": "Add the time already taken to rise to the maximum height:"},
+        {"type": "text",  "content": "Add the time already spent rising to the further time given for the descent:"},
         {"type": "latex", "content": r"t_{\text{total}} = t_{\text{up}} + t_{\text{down}}"},
         {"type": "latex", "content": rf"t_{{\text{{total}}}} = {t_up} + {t_down} = {t_total}\ \mathrm{{s}}"},
     ]
     part_d = PhysicsQuestion(
         question_text=(
-            f"The projectile reaches a maximum height of {h_max} m above the launch point. "
-            f"Calculate the total time taken for the projectile to reach the ground."
+            f"The projectile takes a further {t_down} s to fall from its maximum height to the "
+            f"ground. Calculate the total time taken for the projectile to reach the ground."
         ),
         correct_answer=t_total,
         unit="s",
@@ -426,20 +417,19 @@ def _generate_projectile_l2_time(level="Higher"):
         level=level,
         distractors=[
             {
-                "value": _r2(t_up + t_down_wrong),
+                "value": t_down,
                 "mistake": (
-                    f"You appear to have forgotten to add the launch height h when finding the "
-                    f"drop from the top. The total drop is h + h_max = {h:g} + {h_max} = "
-                    f"{drop_total} m, so t_down = √(2 × {drop_total} ÷ 9.8) = {t_down} s, "
-                    f"giving t_total = {t_up} + {t_down} = {t_total} s."
+                    f"This is only the time falling from the maximum height. You also need to "
+                    f"add the time already spent **rising** to the top: "
+                    f"t_total = t_up + t_down = {t_up} + {t_down} = {t_total} s."
                 ),
                 "working": working_t,
             },
             {
-                "value": t_down,
+                "value": t_up,
                 "mistake": (
-                    f"This is only the time falling from the maximum height. You also need the "
-                    f"time taken to **rise** to the top in the first place: "
+                    f"This is only the time taken to reach maximum height. You also need to add "
+                    f"the further time it takes to fall back down: "
                     f"t_total = t_up + t_down = {t_up} + {t_down} = {t_total} s."
                 ),
                 "working": working_t,
@@ -447,11 +437,6 @@ def _generate_projectile_l2_time(level="Higher"):
         ],
         working=working_t,
         notes=_NOTES_PROJECTILE,
-        scaffold=[
-            {"prompt": "What is the total vertical drop from the maximum height to the ground, h + h_max?", "answer": drop_total},
-            {"prompt": "What is the time to fall this distance, starting from rest at the top, t_down?", "answer": t_down},
-            {"prompt": "What is the total time of flight, t_up + t_down?", "answer": t_total},
-        ],
     )
 
     # ── Part (e): horizontal range ────────────────────────────────────────────

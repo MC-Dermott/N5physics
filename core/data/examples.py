@@ -1292,8 +1292,8 @@ ball's height at that time.
     ("Our Dynamic Universe", "Projectile Motion", "Level 2 — Different Height"): r"""
 **Example:** A ball is thrown at 20 m/s at 40° above the horizontal from a height of 15 m.
 
-*The ball reaches a maximum height of 8.44 m above the launch point. Calculate the total
-time taken for the ball to reach the ground.*
+*The ball takes a further 2.19 s to fall from its maximum height to the ground. Calculate
+the total time taken for the ball to reach the ground.*
 
 **Step 1 — resolve into components:**
 
@@ -1317,19 +1317,8 @@ $$t_{\text{up}} = \frac{12.9}{9.8}$$
 *Answer:*
 $$t_{\text{up}} = 1.31\ \mathrm{s}$$
 
-**Step 3 — time to fall from the top to the ground** (vertical velocity = 0 at the top, so
-the ball falls from rest through a total distance of $h + h_{\text{max}}$):
-
-*Equation:*
-$$t_{\text{down}} = \sqrt{\frac{2(h + h_{\text{max}})}{g}}$$
-
-*Substitute:*
-$$t_{\text{down}} = \sqrt{\frac{2 \times (15 + 8.44)}{9.8}}$$
-
-*Answer:*
-$$t_{\text{down}} = 2.19\ \mathrm{s}$$
-
-**Step 4 — total time of flight:**
+**Step 3 — total time of flight.** The further 2.19 s to fall from the top is given, so just
+add it to the time already spent rising:
 
 *Equation:*
 $$t_{\text{total}} = t_{\text{up}} + t_{\text{down}}$$
@@ -1340,9 +1329,10 @@ $$t_{\text{total}} = 1.31 + 2.19$$
 *Answer:*
 $$t_{\text{total}} = 3.50\ \mathrm{s}$$
 
-**Most common mistake:** solving $h = v_V t - \tfrac{1}{2}gt^2$ directly for $t$ — this needs
-the quadratic formula, which Higher Physics never requires. Splitting the flight at the
-maximum height (where vertical velocity = 0) avoids this entirely.
+**Most common mistake:** forgetting to add $t_{\text{up}}$, and giving only the falling time
+as the final answer. Note that Higher Physics never expects you to solve
+$h = v_V t - \tfrac{1}{2}gt^2$ directly for $t$ (which would need the quadratic formula) —
+the falling time is always given, worked out separately from rest at the top.
 """,
 
     ("Particles and Waves", "Standard Model", "Particle Classification"): r"""
