@@ -1241,9 +1241,10 @@ $t_{\text{total}} = 2t_{\text{up}}$ when calculating the range.
 """,
 
     ("Our Dynamic Universe", "Projectile Motion", "Level 3 — Exam Style"): r"""
-**Example:** An object is launched at 20 m/s at 30° above the horizontal on flat ground.
+**Example:** A ball is kicked from flat ground at 10 m/s at 30° above the horizontal, towards
+a wall 0.8 m high, standing 6.1 m away.
 
-*Calculate the range.*
+*Does the ball clear the wall?*
 
 **Step 1 — resolve into components:**
 
@@ -1251,35 +1252,41 @@ $t_{\text{total}} = 2t_{\text{up}}$ when calculating the range.
 $$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
 
 *Substitute:*
-$$v_H = 20\cos30° \qquad v_V = 20\sin30°$$
+$$v_H = 10\cos30° \qquad v_V = 10\sin30°$$
 
 *Answer:*
-$$v_H = 17.3\ \mathrm{m/s} \qquad v_V = 10\ \mathrm{m/s}$$
+$$v_H = 8.66\ \mathrm{m/s} \qquad v_V = 5.0\ \mathrm{m/s}$$
 
-**Step 2 — time of flight** (launch and landing heights are equal, so descent = ascent):
+**Step 2 — time to reach the wall** (horizontal velocity is constant):
 
 *Equation:*
-$$t_{\text{up}} = \frac{v_V}{g} \qquad t_{\text{total}} = 2 \times t_{\text{up}}$$
+$$t = \frac{x}{v_H}$$
 
 *Substitute:*
-$$t_{\text{up}} = \frac{10}{9.8} \qquad t_{\text{total}} = 2 \times 1.02$$
+$$t = \frac{6.1}{8.66}$$
 
 *Answer:*
-$$t_{\text{up}} = 1.02\ \mathrm{s} \qquad t_{\text{total}} = 2.04\ \mathrm{s}$$
+$$t = 0.704\ \mathrm{s}$$
 
-**Step 3 — range:**
+**Step 3 — height of the ball above the ground at this time:**
 
 *Equation:*
-$$R = v_H \times t_{\text{total}}$$
+$$s = v_V t - \tfrac{1}{2}gt^2$$
 
 *Substitute:*
-$$R = 17.3 \times 2.04$$
+$$s = 5.0 \times 0.704 - \tfrac{1}{2} \times 9.8 \times 0.704^2$$
 
 *Answer:*
-$$R = 35.3\ \mathrm{m}$$
+$$s = 1.09\ \mathrm{m}$$
 
-**Most common mistake:** using $t_{\text{up}}$ (time to reach the top) instead of
-$t_{\text{total}} = 2t_{\text{up}}$ when calculating the range.
+**Step 4 — compare to the wall's height:**
+
+$1.09\ \mathrm{m} > 0.8\ \mathrm{m}$, so the ball is still higher than the wall when it
+reaches it — **the ball clears the wall.**
+
+**Most common mistake:** using the full initial speed instead of $v_H$ when finding the time
+to reach the wall, or forgetting the $-\tfrac{1}{2}gt^2$ term (gravity) when finding the
+ball's height at that time.
 """,
 
     ("Our Dynamic Universe", "Projectile Motion", "Level 2 — Different Height"): r"""
@@ -1322,48 +1329,6 @@ $$v = 24.8\ \mathrm{m/s}$$
 
 **Common mistake:** using $h = gt^2$ (forgetting the $\frac{1}{2}$) gives a time too small by a
 factor of $\sqrt{2}$.
-""",
-
-    ("Our Dynamic Universe", "Projectile Motion", "Time to Maximum Height"): r"""
-**Example:** An object is launched at 20 m/s at 30° above the horizontal.
-
-*Calculate the time and height at which it reaches its maximum height.*
-
-**Step 1 — vertical component of the launch velocity:**
-
-*Equation:*
-$$v_V = v\sin\theta$$
-
-*Substitute:*
-$$v_V = 20\sin30°$$
-
-*Answer:*
-$$v_V = 10\ \mathrm{m/s}$$
-
-**Step 2 — time to reach maximum height** (vertical velocity falls to zero under gravity):
-
-*Equation:*
-$$v = u + at \implies 0 = v_V - gt_{\text{up}}$$
-
-*Substitute:*
-$$0 = 10 - 9.8 \times t_{\text{up}}$$
-
-*Rearrange and solve:*
-$$t_{\text{up}} = \frac{v_V}{g} = \frac{10}{9.8} = 1.02\ \mathrm{s}$$
-
-**Step 3 — maximum height:**
-
-*Equation:*
-$$h_{\text{max}} = \frac{v_V^2}{2g}$$
-
-*Substitute:*
-$$h_{\text{max}} = \frac{10^2}{2 \times 9.8}$$
-
-*Answer:*
-$$h_{\text{max}} = 5.1\ \mathrm{m}$$
-
-**Most common mistake:** using the full initial speed v instead of its vertical component
-$v_V$, or forgetting the factor of 2 in the denominator of $h_{\text{max}} = v_V^2 \div 2g$.
 """,
 
     ("Particles and Waves", "Standard Model", "Particle Classification"): r"""
