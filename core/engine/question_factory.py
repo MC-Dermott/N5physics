@@ -67,8 +67,8 @@ from topics.dynamics.gravitation           import generate_orbital_gravitation
 from topics.dynamics.projectile_higher     import (
     generate_projectile_l1,
     generate_projectile_l2,
-    generate_projectile_max_height,
     generate_projectile_exam_style,
+    generate_projectile_explain,
 )
 from topics.dynamics.towing                import (
     gen_l1_one_trailer_no_friction,
@@ -353,8 +353,8 @@ QUAL_REGISTRY = {
             "Projectile Motion": {
                 "Level 1 — Same Height":      generate_projectile_l1,
                 "Level 2 — Different Height": generate_projectile_l2,
-                "Time to Maximum Height":     generate_projectile_max_height,
                 "Level 3 — Exam Style":       generate_projectile_exam_style,
+                "Explain":                    generate_projectile_explain,
             },
             "Gravitation":         generate_orbital_gravitation,
             "Special Relativity":  generate_special_relativity,
