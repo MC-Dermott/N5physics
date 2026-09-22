@@ -18,21 +18,22 @@ def _with_projectile_widget(question):
 _NOTES_PROJECTILE = """
 ## Projectile Motion — Key Facts (Higher)
 
-- Horizontal and vertical motion are **independent** of each other — analyse them separately.
-- Horizontal velocity is constant throughout the flight:
-$$v_H = v\\cos\\theta$$
-- Vertical velocity changes under gravity, starting from:
-$$v_V = v\\sin\\theta$$
-- Vertical acceleration is constant, $a = -9.8\\ \\mathrm{m/s^2}$ (taking upward as positive);
-  horizontal acceleration = 0.
-- At the highest point of the flight, vertical velocity = 0.
+- Horizontal and vertical motion are **independent** — analyse them separately.
+- Horizontal velocity is constant; vertical velocity changes under gravity.
+- Acceleration is $-9.8\\ \\mathrm{m/s^2}$ vertically (taking upward as positive) and
+  $0$ horizontally.
+- At the highest point of the flight, vertical velocity $= 0$.
 
-**Equations of motion:**
+#### Velocity components
 
-Vertical (constant acceleration, $a = \\pm 9.8\\ \\mathrm{m/s^2}$):
-$$v = u + at \\qquad s = ut + \\tfrac{1}{2}at^2$$
+$$v_H = v\\cos\\theta \\qquad\\qquad v_V = v\\sin\\theta$$
 
-Horizontal (constant velocity, $a = 0$):
+#### Equations of motion
+
+Vertical:
+$$v = u + at \\qquad\\qquad s = ut + \\tfrac{1}{2}at^2$$
+
+Horizontal:
 $$s = vt$$
 """
 
