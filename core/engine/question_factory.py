@@ -80,6 +80,7 @@ from topics.dynamics.projectile_higher     import (
     generate_projectile_explain,
     generate_projectile_s1_vertical_same_height,
     generate_projectile_s1_vertical_from_highest_point,
+    generate_projectile_s1_vertical_height_at_time,
     generate_projectile_s2_horizontal_motion,
     generate_projectile_s3_components,
     generate_projectile_s4_time_same_height,
@@ -374,6 +375,7 @@ QUAL_REGISTRY = {
             "Projectile Motion": {
                 "1 — Vertical Launch: Same Height":            generate_projectile_s1_vertical_same_height,
                 "1 — Vertical Launch: From Highest Point":     generate_projectile_s1_vertical_from_highest_point,
+                "1 — Vertical Launch: Height at a Given Time": generate_projectile_s1_vertical_height_at_time,
                 "2 — Simple Horizontal Motion":                generate_projectile_s2_horizontal_motion,
                 "3 — Velocity Components":                     generate_projectile_s3_components,
                 "4 — Time to Highest Point (Same Height)":     generate_projectile_s4_time_same_height,

@@ -387,6 +387,61 @@ def generate_projectile_s1_vertical_from_highest_point(level="Higher"):
     return _scenario(context, [part_a, part_b, part_c], level)
 
 
+def generate_projectile_s1_vertical_height_at_time(level="Higher"):
+    """Straight-up launch, given a time measured from launch or from the highest
+    point: s = ut + ½at², then add to that point's height above the ground/sea."""
+    text, speeds, heights = random.choice(_CONTEXTS_VERTICAL_DIFF)
+    u, h = random.choice(list(speeds)), random.choice(heights)
+    context = text.format(v=u, h=f"{h:g}")
+    where = "the sea" if "sea" in text else "the ground"
+    t_up = u / g
+    H_top = _r2(h + u ** 2 / (2 * g))
+    t_land = t_up + math.sqrt(2 * H_top / g)
+    if random.random() < 0.5:
+        t = round(random.uniform(0.2, 0.85) * t_land, 2)
+        s = _r2(u * t - 0.5 * g * t ** 2)
+        working_a = [
+            {"type": "text",  "content": f"Vertically, from launch: u = {u} m/s, t = {t} s, a = −9.8 m/s²."},
+            {"type": "latex", "content": r"s = ut + \tfrac{1}{2}at^2"},
+            {"type": "latex", "content": rf"s = ({u} \times {t}) + \tfrac{{1}}{{2}} \times (-9.8) \times {t}^2"},
+            {"type": "latex", "content": rf"s = {s}\ \mathrm{{m}}"},
+        ]
+        part_a = _part(f"Calculate the displacement from the launch point {t} s after launch "
+                       f"(a negative answer means below the launch point).", s, "m", working_a, [
+            {"value": _r2(u * t + 0.5 * g * t ** 2), "mistake": f"Sign error — upwards is positive, so a = −9.8 m/s²: s = {s} m."},
+            {"value": _r2(u * t - g * t ** 2), "mistake": f"You appear to have left out the ½: s = {s} m."},
+            {"value": _r2(u * t), "mistake": f"You have left out gravity: s = ut + ½at² = {s} m."},
+        ], level)
+        base, base_text = h, f"{h:g}"
+    else:
+        t = round(random.uniform(0.3, 0.9) * math.sqrt(2 * H_top / g), 2)
+        s = _r2(-0.5 * g * t ** 2)
+        context += f" Its highest point is **{H_top} m** above {where}."
+        working_a = [
+            {"type": "text",  "content": f"From the highest point: u = 0, t = {t} s, a = −9.8 m/s²."},
+            {"type": "latex", "content": r"s = ut + \tfrac{1}{2}at^2"},
+            {"type": "latex", "content": rf"s = (0 \times {t}) + \tfrac{{1}}{{2}} \times (-9.8) \times {t}^2"},
+            {"type": "latex", "content": rf"s = {s}\ \mathrm{{m}}"},
+        ]
+        part_a = _part(f"Calculate the displacement from the highest point {t} s after passing it "
+                       f"(negative = below the highest point).", s, "m", working_a, [
+            {"value": _r2(-s), "mistake": f"Below the highest point, so the displacement is negative: s = {s} m."},
+            {"value": _r2(-g * t ** 2), "mistake": f"You appear to have left out the ½: s = ½ × (−9.8) × {t}² = {s} m."},
+            {"value": _r2(u * t - 0.5 * g * t ** 2), "mistake": f"At the highest point u = 0, not the launch speed: s = {s} m."},
+        ], level)
+        base, base_text = H_top, f"{H_top}"
+    H = _r2(base + s)
+    working_b = [{"type": "latex", "content": rf"h = {base_text} + ({s}) = {H}\ \mathrm{{m}}"}]
+    part_b = _part(f"Calculate the height above {where} at this time.", H, "m", working_b, [
+        {"value": s, "mistake": f"That is the displacement. Add it to the starting height: {base_text} + ({s}) = {H} m."},
+        {"value": _r2(base - s), "mistake": f"Add the displacement with its sign: {base_text} + ({s}) = {H} m."},
+    ], level, scaffold=[
+        {"prompt": "What is the displacement s?", "answer": s},
+        {"prompt": f"What is the height above {where}?", "answer": H},
+    ])
+    return _scenario(context, [part_a, part_b], level)
+
+
 # Section 2 — simple horizontal motion (constant horizontal velocity, s = vt)
 _CONTEXTS_HORIZONTAL = [
     # (object phrase, what happens, v range, t range)
