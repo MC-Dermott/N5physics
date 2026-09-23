@@ -26,12 +26,14 @@ _NOTES_PROJECTILE = """
 
 #### Velocity components
 
-$$v_H = v\\cos\\theta \\qquad\\qquad v_V = v\\sin\\theta$$
+$$v_H = v\\cos\\theta$$
+$$v_V = v\\sin\\theta$$
 
 #### Equations of motion
 
 Vertical:
-$$v = u + at \\qquad\\qquad s = ut + \\tfrac{1}{2}at^2$$
+$$v = u + at$$
+$$s = ut + \\tfrac{1}{2}at^2$$
 
 Horizontal:
 $$s = vt$$
@@ -169,9 +171,10 @@ def _l2_parts_ab(v, theta_deg, theta, v_H, v_V, level):
 def _l2_part_time_to_peak(v, v_H, v_V, t_up, theta_deg, level):
     t_full_v = _r2(v / g)  # used full speed instead of v_V
     working_tup = [
-        {"type": "text",  "content": "At maximum height, vertical velocity = 0:"},
-        {"type": "latex", "content": r"v = u + at \;\Rightarrow\; 0 = v_V - g\,t_{\text{up}}"},
-        {"type": "latex", "content": rf"t_{{\text{{up}}}} = \frac{{v_V}}{{g}} = \frac{{{v_V}}}{{9.8}} = {t_up}\ \mathrm{{s}}"},
+        {"type": "text",  "content": f"Vertically, up to the highest point: u = {v_V} m/s, v = 0, a = −9.8 m/s²."},
+        {"type": "latex", "content": r"v = u + at"},
+        {"type": "latex", "content": rf"0 = {v_V} + (-9.8) \times t_{{\text{{up}}}}"},
+        {"type": "latex", "content": rf"t_{{\text{{up}}}} = \frac{{{v_V}}}{{9.8}} = {t_up}\ \mathrm{{s}}"},
     ]
     return PhysicsQuestion(
         question_text="Calculate the time taken for the projectile to reach its maximum height.",
@@ -796,9 +799,11 @@ def generate_projectile_a_same_height(level="Higher"):
     working_t = [
         {"type": "text",  "content": (
             "The projectile lands at the same height it was launched, so it takes equally "
-            "long to rise as to fall. At maximum height, vertical velocity = 0:"
+            f"long to rise as to fall. Vertically, up to the highest point: u = {v_V} m/s, "
+            f"v = 0, a = −9.8 m/s²."
         )},
-        {"type": "latex", "content": r"t_{\text{up}} = \frac{v_V}{g}"},
+        {"type": "latex", "content": r"v = u + at"},
+        {"type": "latex", "content": rf"0 = {v_V} + (-9.8) \times t_{{\text{{up}}}}"},
         {"type": "latex", "content": rf"t_{{\text{{up}}}} = \frac{{{v_V}}}{{9.8}} = {t_up}\ \mathrm{{s}}"},
         {"type": "latex", "content": r"t_{\text{total}} = 2 \times t_{\text{up}}"},
         {"type": "latex", "content": rf"t_{{\text{{total}}}} = 2 \times {t_up} = {t_total}\ \mathrm{{s}}"},
@@ -835,9 +840,9 @@ def generate_projectile_a_same_height(level="Higher"):
 
     working_R = [
         {"type": "text",  "content": "Horizontal velocity is constant throughout. Use the total time:"},
-        {"type": "latex", "content": r"R = v_H \times t_{\text{total}}"},
-        {"type": "latex", "content": rf"R = {v_H} \times {t_total}"},
-        {"type": "latex", "content": rf"R = {R}\ \mathrm{{m}}"},
+        {"type": "latex", "content": r"s = vt"},
+        {"type": "latex", "content": rf"s = {v_H} \times {t_total}"},
+        {"type": "latex", "content": rf"s = {R}\ \mathrm{{m}}"},
     ]
     part_d = PhysicsQuestion(
         question_text="Calculate the range.",
@@ -908,10 +913,11 @@ def generate_projectile_b_given_height_time(level="Higher"):
 
     working_t = [
         {"type": "text",  "content": (
-            f"The projectile falls {H_top} m from the top to the ground, starting from rest, "
-            f"so use s = ½gt² to find the time to fall:"
+            f"The projectile falls {H_top} m from the top to the ground. From the highest "
+            f"point the vertical velocity is zero: u = 0, s = −{H_top} m, a = −9.8 m/s²."
         )},
-        {"type": "latex", "content": r"t_{\text{down}} = \sqrt{\frac{2 H_{\text{top}}}{g}}"},
+        {"type": "latex", "content": r"s = ut + \tfrac{1}{2}at^2"},
+        {"type": "latex", "content": rf"-{H_top} = (0 \times t_{{\text{{down}}}}) + \tfrac{{1}}{{2}} \times (-9.8) \times t_{{\text{{down}}}}^2"},
         {"type": "latex", "content": rf"t_{{\text{{down}}}} = \sqrt{{\frac{{2 \times {H_top}}}{{9.8}}}} = {t_down}\ \mathrm{{s}}"},
         {"type": "text",  "content": "Add the given time already spent rising to the maximum height:"},
         {"type": "latex", "content": r"t_{\text{total}} = t_{\text{up}} + t_{\text{down}}"},
@@ -953,9 +959,9 @@ def generate_projectile_b_given_height_time(level="Higher"):
 
     working_R = [
         {"type": "text",  "content": "Horizontal velocity is constant throughout. Use the total time:"},
-        {"type": "latex", "content": r"R = v_H \times t_{\text{total}}"},
-        {"type": "latex", "content": rf"R = {v_H} \times {t_total}"},
-        {"type": "latex", "content": rf"R = {R}\ \mathrm{{m}}"},
+        {"type": "latex", "content": r"s = vt"},
+        {"type": "latex", "content": rf"s = {v_H} \times {t_total}"},
+        {"type": "latex", "content": rf"s = {R}\ \mathrm{{m}}"},
     ]
     part_d = PhysicsQuestion(
         question_text="Calculate the range of the projectile for this throw.",
@@ -1029,8 +1035,8 @@ def generate_projectile_c_time_then_range(level="Higher"):
         {"type": "latex", "content": r"t_{\text{total}} = t_{\text{up}} + t_2"},
         {"type": "latex", "content": rf"t_{{\text{{total}}}} = {t_up} + {t2} = {t_total}\ \mathrm{{s}}"},
         {"type": "text",  "content": "Horizontal velocity is constant throughout, so:"},
-        {"type": "latex", "content": r"R = v_H \times t_{\text{total}}"},
-        {"type": "latex", "content": rf"R = {v_H} \times {t_total} = {R}\ \mathrm{{m}}"},
+        {"type": "latex", "content": r"s = vt"},
+        {"type": "latex", "content": rf"s = {v_H} \times {t_total} = {R}\ \mathrm{{m}}"},
     ]
     part_d = PhysicsQuestion(
         question_text=(
@@ -1110,13 +1116,12 @@ def generate_projectile_d_time_then_height(level="Higher"):
     working_d = [
         {"type": "text",  "content": (
             f"At maximum height, the projectile is {H_top} m above the ground. "
-            f"A further {t2} s later, it has fallen (from rest, vertically):"
+            f"From there, vertically: u = 0, t = {t2} s, a = −9.8 m/s²."
         )},
-        {"type": "latex", "content": r"s = \tfrac{1}{2} g t^2"},
-        {"type": "latex", "content": rf"s = \tfrac{{1}}{{2}} \times 9.8 \times {t2}^2 = {s}\ \mathrm{{m}}"},
+        {"type": "latex", "content": r"s = ut + \tfrac{1}{2}at^2"},
+        {"type": "latex", "content": rf"s = (0 \times {t2}) + \tfrac{{1}}{{2}} \times (-9.8) \times {t2}^2 = -{s}\ \mathrm{{m}}"},
         {"type": "text",  "content": "So its height above the ground at this time is:"},
-        {"type": "latex", "content": r"h = H_{\text{top}} - s"},
-        {"type": "latex", "content": rf"h = {H_top} - {s} = {h_final}\ \mathrm{{m}}"},
+        {"type": "latex", "content": rf"h = {H_top} + (-{s}) = {h_final}\ \mathrm{{m}}"},
     ]
     part_d = PhysicsQuestion(
         question_text=(
@@ -1201,7 +1206,8 @@ def generate_projectile_e_horizontal_backwards(level="Higher"):
 
     working_t = [
         {"type": "text",  "content": "Horizontal velocity is constant, so the time to travel this horizontal distance is:"},
-        {"type": "latex", "content": r"t = \frac{x}{v_H}"},
+        {"type": "latex", "content": r"s = vt"},
+        {"type": "latex", "content": rf"{x_target:g} = {v_H} \times t"},
         {"type": "latex", "content": rf"t = \frac{{{x_target:g}}}{{{v_H}}} = {t}\ \mathrm{{s}}"},
     ]
     part_c = PhysicsQuestion(
@@ -1234,9 +1240,9 @@ def generate_projectile_e_horizontal_backwards(level="Higher"):
     )
 
     working_h = [
-        {"type": "text",  "content": "Use the vertical equation of motion (taking upward as positive):"},
-        {"type": "latex", "content": r"s = v_V t - \tfrac{1}{2} g t^2"},
-        {"type": "latex", "content": rf"s = {v_V} \times {t} - \tfrac{{1}}{{2}} \times 9.8 \times {t}^2"},
+        {"type": "text",  "content": f"Vertically, from launch (taking upward as positive): u = {v_V} m/s, t = {t} s, a = −9.8 m/s²."},
+        {"type": "latex", "content": r"s = ut + \tfrac{1}{2}at^2"},
+        {"type": "latex", "content": rf"s = ({v_V} \times {t}) + \tfrac{{1}}{{2}} \times (-9.8) \times {t}^2"},
         {"type": "latex", "content": rf"s = {h_final}\ \mathrm{{m}}"},
     ]
     part_d = PhysicsQuestion(
@@ -1365,8 +1371,8 @@ def generate_projectile_f_given_time_clearance(level="Higher"):
 
     working_R = [
         {"type": "text",  "content": "Horizontal velocity is constant, so:"},
-        {"type": "latex", "content": r"R = v_H \times T"},
-        {"type": "latex", "content": rf"R = {v_H} \times {T} = {R}\ \mathrm{{m}}"},
+        {"type": "latex", "content": r"s = vt"},
+        {"type": "latex", "content": rf"s = {v_H} \times {T} = {R}\ \mathrm{{m}}"},
     ]
     part_c = PhysicsQuestion(
         question_text=(
@@ -1407,13 +1413,13 @@ def generate_projectile_f_given_time_clearance(level="Higher"):
     gap = _r2(ball_h - reach_height)
 
     working_d = [
-        {"type": "text",  "content": "Use the vertical equation of motion, measuring time from launch (taking upward as positive):"},
-        {"type": "latex", "content": r"s = h + v_V t - \tfrac{1}{2} g t^2"},
-        {"type": "latex", "content": rf"s = {h:g} + {v_V} \times {t3} - \tfrac{{1}}{{2}} \times 9.8 \times {t3}^2"},
-        {"type": "latex", "content": rf"s = {ball_h}\ \mathrm{{m}}"},
+        {"type": "text",  "content": f"Vertically, from launch (taking upward as positive): u = {v_V} m/s, t = {t3} s, a = −9.8 m/s²."},
+        {"type": "latex", "content": r"s = ut + \tfrac{1}{2}at^2"},
+        {"type": "latex", "content": rf"s = ({v_V} \times {t3}) + \tfrac{{1}}{{2}} \times (-9.8) \times {t3}^2 = {_r2(ball_h - h)}\ \mathrm{{m}}"},
+        {"type": "text",  "content": f"It was released {h:g} m above the ground, so its height at this time is:"},
+        {"type": "latex", "content": rf"h = {h:g} + ({_r2(ball_h - h)}) = {ball_h}\ \mathrm{{m}}"},
         {"type": "text",  "content": f"The friend's maximum reach is {reach_height} m, so the gap above their reach is:"},
-        {"type": "latex", "content": r"h = s - \text{reach}"},
-        {"type": "latex", "content": rf"h = {ball_h} - {reach_height} = {gap}\ \mathrm{{m}}"},
+        {"type": "latex", "content": rf"\text{{gap}} = {ball_h} - {reach_height} = {gap}\ \mathrm{{m}}"},
     ]
     part_d = PhysicsQuestion(
         question_text=(

@@ -335,11 +335,16 @@ _NOTES = """
 - Resolving a vector does not change it; the two components together are exactly
   equivalent to the original vector.
 
-$$F_x = F\\cos\\theta \\qquad F_y = F\\sin\\theta$$
+$$F_x = F\\cos\\theta$$
+$$F_y = F\\sin\\theta$$
 
 For an object of mass m on a slope inclined at angle θ to the horizontal, with weight
 $W = mg$:
-$$W_{\\parallel} = W\\sin\\theta \\ \\text{(component down the slope)} \\qquad W_{\\perp} = W\\cos\\theta \\ \\text{(component into the slope)}$$
+Component down the slope:
+$$W_{\\parallel} = W\\sin\\theta$$
+
+Component into the slope:
+$$W_{\\perp} = W\\cos\\theta$$
 
 If the object is sliding **down** the slope, friction acts up the slope, opposing the
 motion, so the resultant force down the slope is $W_{\\parallel} - \\text{friction}$. If
@@ -373,6 +378,15 @@ def _r1(val):
 
 def _obj():
     return random.choice(_OBJ)
+
+
+def _angle_steps(W_par, W, sin_theta):
+    """W∥ = W sinθ stated, substituted, then rearranged for sin θ."""
+    return [
+        {"type": "latex", "content": r"W_{\parallel} = W\sin\theta"},
+        {"type": "latex", "content": rf"{W_par} = {W} \times \sin\theta"},
+        {"type": "latex", "content": rf"\sin\theta = \dfrac{{{W_par}}}{{{W}}} = {sin_theta}"},
+    ]
 
 
 # ── Level 1 — Finding Components ─────────────────────────────────────────────
@@ -466,7 +480,8 @@ def gen_rf_l2_balancing(level="Higher"):
 
     working_T = [
         {"type": "text",  "content": "Since the ropes balance, the horizontal component of Rope B's tension equals Rope A's pull:"},
-        {"type": "latex", "content": r"F_x = T\cos\theta \;\Rightarrow\; T = \dfrac{F_x}{\cos\theta}"},
+        {"type": "latex", "content": r"F_x = T\cos\theta"},
+        {"type": "latex", "content": rf"{Fx_known} = T \times \cos {theta_deg}°"},
         {"type": "latex", "content": rf"T = \dfrac{{{Fx_known}}}{{\cos {theta_deg}°}} = {T}\ \mathrm{{N}}"},
     ]
     part_a = PhysicsQuestion(
@@ -561,8 +576,9 @@ def _l3_horizontal_find_a(level):
         f"{F} N. Calculate the acceleration of the trailer."
     )
     working = [
-        {"type": "text",  "content": "Rearrange Newton's second law for acceleration:"},
-        {"type": "latex", "content": r"F = ma \;\Rightarrow\; a = \dfrac{F}{m}"},
+        {"type": "text",  "content": "Apply Newton's second law:"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{F} = {m} \times a"},
         {"type": "latex", "content": rf"a = \dfrac{{{F}}}{{{m}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     options_data = [
@@ -589,17 +605,19 @@ def _l3_vertical_given_a(level):
     if mode == "up":
         T = _r1(W + m * a)
         context = f"A {obj} of mass {m} kg is lifted vertically by a crane, accelerating upwards at {a} m/s²."
-        rule_text = "Since the object accelerates upward, the tension must overcome its weight AND provide the extra force for the acceleration:"
-        eq_latex = r"T = W + ma"
-        sub_latex = rf"T = {W} + ({m} \times {a}) = {T}\ \mathrm{{N}}"
+        rule_text = "Since the object accelerates upward, the unbalanced force (T − W) acts upwards:"
+        eq_latex = r"F = ma"
+        sub_latex = rf"T - {W} = {m} \times {a}"
+        ans_latex = rf"T = {W} + {round(m * a, 2)} = {T}\ \mathrm{{N}}"
         wrong_T = _r1(W - m * a)
         wrong_mistake = f"Since the object accelerates upward, ma must be added to the weight, not subtracted. T = W + ma = {T} N."
     elif mode == "down":
         T = _r1(W - m * a)
         context = f"A {obj} of mass {m} kg is lowered vertically by a winch, accelerating downwards at {a} m/s² (less than g, since the cable is still under tension)."
-        rule_text = "Since the object accelerates downward (more slowly than free fall), the tension must be less than the weight, but still positive:"
-        eq_latex = r"T = W - ma"
-        sub_latex = rf"T = {W} - ({m} \times {a}) = {T}\ \mathrm{{N}}"
+        rule_text = "Since the object accelerates downward (more slowly than free fall), the unbalanced force (W − T) acts downwards, so the tension is less than the weight but still positive:"
+        eq_latex = r"F = ma"
+        sub_latex = rf"{W} - T = {m} \times {a}"
+        ans_latex = rf"T = {W} - {round(m * a, 2)} = {T}\ \mathrm{{N}}"
         wrong_T = _r1(W + m * a)
         wrong_mistake = f"Since the object accelerates downward, ma must be subtracted from the weight, not added. T = W − ma = {T} N."
     else:
@@ -608,6 +626,7 @@ def _l3_vertical_given_a(level):
         rule_text = "At constant speed the object is in equilibrium, so the tension simply equals the weight:"
         eq_latex = r"T = W"
         sub_latex = rf"T = {W}\ \mathrm{{N}}"
+        ans_latex = None
         wrong_T = _r1(W * 1.1)
         wrong_mistake = f"At constant speed there is no acceleration, so the tension equals the weight exactly: T = W = {T} N."
 
@@ -632,7 +651,7 @@ def _l3_vertical_given_a(level):
         {"type": "text",  "content": rule_text},
         {"type": "latex", "content": eq_latex},
         {"type": "latex", "content": sub_latex},
-    ]
+    ] + ([{"type": "latex", "content": ans_latex}] if ans_latex else [])
     distractors_T = [
         {"value": wrong_T, "mistake": wrong_mistake, "working": working_T},
     ]
@@ -670,8 +689,9 @@ def _l3_vertical_inverse(level):
         )
         working = [
             {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
-            {"type": "text",  "content": "Rearrange T = W + ma for acceleration:"},
-            {"type": "latex", "content": r"a = \dfrac{T - W}{m}"},
+            {"type": "text",  "content": "The unbalanced force (T − W) acts upwards:"},
+            {"type": "latex", "content": r"F = ma"},
+            {"type": "latex", "content": rf"{T} - {W} = {m} \times a"},
             {"type": "latex", "content": rf"a = \dfrac{{{T} - {W}}}{{{m}}} = {_r1((T - W) / m)}\ \mathrm{{m/s^2}}"},
         ]
         answer = _r1((T - W) / m)
@@ -702,8 +722,11 @@ def _l3_vertical_inverse(level):
             f"Calculate the mass of the box."
         )
         working = [
-            {"type": "latex", "content": r"T = W - ma = mg - ma = m(g - a)"},
-            {"type": "latex", "content": rf"m = \dfrac{{T}}{{g - a}} = \dfrac{{{T}}}{{9.8 - {a}}} = {answer}\ \mathrm{{kg}}"},
+            {"type": "text",  "content": "The unbalanced force (W − T) acts downwards, where W = mg:"},
+            {"type": "latex", "content": r"F = ma"},
+            {"type": "latex", "content": rf"(m \times 9.8) - {T} = m \times {a}"},
+            {"type": "latex", "content": rf"{T} = m \times (9.8 - {a})"},
+            {"type": "latex", "content": rf"m = \dfrac{{{T}}}{{{round(G - a, 2)}}} = {answer}\ \mathrm{{kg}}"},
         ]
         options_data = [
             {"value": answer, "mistake": None, "working": working},
@@ -810,8 +833,10 @@ def gen_rf_l5_acceleration_with_friction(level="Higher"):
     working = [
         {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
         {"type": "latex", "content": rf"W_{{\parallel}} = W\sin\theta = {W} \times \sin {theta_deg}° = {_r1(W_par)}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"\text{{Resultant}} = W_{{\parallel}} - \text{{friction}} = {_r1(W_par)} - {friction} = {resultant}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"a = \dfrac{{\text{{Resultant}}}}{{m}} = \dfrac{{{resultant}}}{{{m}}} = {a}\ \mathrm{{m/s^2}}"},
+        {"type": "text",  "content": "Down the slope, the unbalanced force is W∥ minus friction:"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{_r1(W_par)} - {friction} = {m} \times a"},
+        {"type": "latex", "content": rf"a = \dfrac{{{resultant}}}{{{m}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     options_data = [
         {"value": a, "mistake": None, "working": working},
@@ -850,8 +875,10 @@ def gen_rf_l6_unknown_force(level="Higher"):
     working = [
         {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
         {"type": "latex", "content": rf"W_{{\parallel}} = W\sin\theta = {W} \times \sin {theta_deg}° = {_r1(W_par)}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"ma = {m} \times {a} = {_r1(ma)}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"\text{{Friction}} = W_{{\parallel}} - ma = {_r1(W_par)} - {_r1(ma)} = {friction}\ \mathrm{{N}}"},
+        {"type": "text",  "content": "Down the slope, the unbalanced force is W∥ minus friction:"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{_r1(W_par)} - \text{{friction}} = {m} \times {a}"},
+        {"type": "latex", "content": rf"\text{{friction}} = {_r1(W_par)} - {_r1(ma)} = {friction}\ \mathrm{{N}}"},
     ]
     options_data = [
         {"value": friction, "mistake": None, "working": working},
@@ -887,8 +914,7 @@ def _l7_direct(level):
         f"acting parallel to the slope is {W_par} N. Calculate the angle of the slope."
     )
     working = [
-        {"type": "latex", "content": r"\sin\theta = \dfrac{W_{\parallel}}{W}"},
-        {"type": "latex", "content": rf"\sin\theta = \dfrac{{{W_par}}}{{{W}}} = {sin_theta}"},
+        *_angle_steps(W_par, W, sin_theta),
         {"type": "latex", "content": rf"\theta = \sin^{{-1}}({sin_theta}) = {theta_calc}°"},
     ]
     options_data = [
@@ -939,7 +965,7 @@ def _l7_dynamic(level):
             {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
             {"type": "text",  "content": "Constant speed means the forces along the slope are balanced, so W∥ = friction:"},
             {"type": "latex", "content": rf"W_{{\parallel}} = \text{{friction}} = {friction}\ \mathrm{{N}}"},
-            {"type": "latex", "content": rf"\sin\theta = \dfrac{{W_{{\parallel}}}}{{W}} = \dfrac{{{W_par}}}{{{W}}} = {sin_theta}"},
+            *_angle_steps(W_par, W, sin_theta),
             {"type": "latex", "content": rf"\theta = \sin^{{-1}}({sin_theta}) = {theta_calc}°"},
         ]
         scaffold = [
@@ -949,10 +975,11 @@ def _l7_dynamic(level):
     else:
         working = [
             {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
-            {"type": "latex", "content": rf"\text{{Resultant}} = ma = {m} \times {a} = {ma}\ \mathrm{{N}}"},
-            {"type": "text",  "content": "Rearranging Resultant = W∥ − friction gives the parallel component of weight:"},
-            {"type": "latex", "content": rf"W_{{\parallel}} = \text{{Resultant}} + \text{{friction}} = {ma} + {friction} = {W_par}\ \mathrm{{N}}"},
-            {"type": "latex", "content": rf"\sin\theta = \dfrac{{W_{{\parallel}}}}{{W}} = \dfrac{{{W_par}}}{{{W}}} = {sin_theta}"},
+            {"type": "text",  "content": "Down the slope, the unbalanced force is W∥ minus friction:"},
+            {"type": "latex", "content": r"F = ma"},
+            {"type": "latex", "content": rf"W_{{\parallel}} - {friction} = {m} \times {a}"},
+            {"type": "latex", "content": rf"W_{{\parallel}} = {ma} + {friction} = {W_par}\ \mathrm{{N}}"},
+            *_angle_steps(W_par, W, sin_theta),
             {"type": "latex", "content": rf"\theta = \sin^{{-1}}({sin_theta}) = {theta_calc}°"},
         ]
         scaffold = [
@@ -1008,9 +1035,12 @@ def _l7_find_mass(level):
     )
 
     working_mass = [
-        {"type": "latex", "content": r"W_{\parallel} = W\sin\theta \;\Rightarrow\; W = \dfrac{W_{\parallel}}{\sin\theta}"},
+        {"type": "latex", "content": r"W_{\parallel} = W\sin\theta"},
+        {"type": "latex", "content": rf"{W_par} = W \times \sin {theta_deg}°"},
         {"type": "latex", "content": rf"W = \dfrac{{{W_par}}}{{\sin {theta_deg}°}} = {W}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"m = \dfrac{{W}}{{g}} = \dfrac{{{W}}}{{9.8}} = {mass}\ \mathrm{{kg}}"},
+        {"type": "latex", "content": r"W = mg"},
+        {"type": "latex", "content": rf"{W} = m \times 9.8"},
+        {"type": "latex", "content": rf"m = \dfrac{{{W}}}{{9.8}} = {mass}\ \mathrm{{kg}}"},
     ]
     part_b = PhysicsQuestion(
         question_text="Hence calculate the weight and mass of the box.",
@@ -1089,7 +1119,8 @@ def gen_rf_l8_up_slope_deceleration(level="Higher"):
     )
 
     working_a = [
-        {"type": "latex", "content": r"a = \dfrac{\text{Resultant}}{m}"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{resultant} = {m} \times a"},
         {"type": "latex", "content": rf"a = \dfrac{{{resultant}}}{{{m}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     part_b = PhysicsQuestion(
@@ -1133,10 +1164,10 @@ def gen_rf_l8_up_slope_find_friction(level="Higher"):
     working = [
         {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
         {"type": "latex", "content": rf"W_{{\parallel}} = W\sin\theta = {W} \times \sin {theta_deg}° = {_r1(W_par)}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"ma = {m} \times {dec} = {_r1(ma)}\ \mathrm{{N}}"},
-        {"type": "text",  "content": "Moving up and decelerating, so both weight component and friction act down the slope:"},
-        {"type": "latex", "content": r"ma = W_{\parallel} + \text{friction}"},
-        {"type": "latex", "content": rf"\text{{Friction}} = ma - W_{{\parallel}} = {_r1(ma)} - {_r1(W_par)} = {friction}\ \mathrm{{N}}"},
+        {"type": "text",  "content": "Moving up and decelerating, so both weight component and friction act down the slope — the unbalanced force is W∥ + friction:"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{_r1(W_par)} + \text{{friction}} = {m} \times {dec}"},
+        {"type": "latex", "content": rf"\text{{friction}} = {_r1(ma)} - {_r1(W_par)} = {friction}\ \mathrm{{N}}"},
     ]
     options_data = [
         {"value": friction, "mistake": None, "working": working},
@@ -1179,9 +1210,11 @@ def gen_rf_l8_up_slope_find_angle_or_mass(level="Higher"):
         )
         working = [
             {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
-            {"type": "latex", "content": rf"ma = {m} \times {dec} = {_r1(ma)}\ \mathrm{{N}}"},
-            {"type": "latex", "content": rf"W_{{\parallel}} = ma - \text{{friction}} = {_r1(ma)} - {friction} = {W_par}\ \mathrm{{N}}"},
-            {"type": "latex", "content": rf"\sin\theta = \dfrac{{W_{{\parallel}}}}{{W}} = \dfrac{{{W_par}}}{{{W}}} = {sin_theta}"},
+            {"type": "text",  "content": "Moving up the slope, the unbalanced force is W∥ + friction:"},
+            {"type": "latex", "content": r"F = ma"},
+            {"type": "latex", "content": rf"W_{{\parallel}} + {friction} = {m} \times {dec}"},
+            {"type": "latex", "content": rf"W_{{\parallel}} = {_r1(ma)} - {friction} = {W_par}\ \mathrm{{N}}"},
+            *_angle_steps(W_par, W, sin_theta),
             {"type": "latex", "content": rf"\theta = \sin^{{-1}}({sin_theta}) = {theta_calc}°"},
         ]
         options_data = [
@@ -1216,9 +1249,11 @@ def gen_rf_l8_up_slope_find_angle_or_mass(level="Higher"):
             f"Calculate the mass of the {obj}."
         )
         working = [
-            {"type": "latex", "content": r"ma = W_{\parallel} + \text{friction} = mg\sin\theta + \text{friction}"},
-            {"type": "latex", "content": r"m(a - g\sin\theta) = \text{friction}"},
-            {"type": "latex", "content": rf"m = \dfrac{{\text{{friction}}}}{{a - g\sin\theta}} = \dfrac{{{friction}}}{{{dec} - 9.8\times\sin{theta_deg}°}} = {mass}\ \mathrm{{kg}}"},
+            {"type": "text",  "content": "Moving up the slope, the unbalanced force is W∥ + friction, where W∥ = W sin θ and W = mg:"},
+            {"type": "latex", "content": r"F = ma"},
+            {"type": "latex", "content": rf"(m \times 9.8 \times \sin {theta_deg}°) + {friction} = m \times {dec}"},
+            {"type": "latex", "content": rf"{friction} = m \times ({dec} - 9.8 \times \sin {theta_deg}°) = m \times {round(denom, 3)}"},
+            {"type": "latex", "content": rf"m = \dfrac{{{friction}}}{{{round(denom, 3)}}} = {mass}\ \mathrm{{kg}}"},
         ]
         options_data = [
             {"value": mass, "mistake": None, "working": working},
@@ -1258,9 +1293,10 @@ def gen_rf_l8_const_force_find_accel(level="Higher"):
         {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
         {"type": "latex", "content": rf"W_{{\parallel}} = W\sin\theta = {W} \times \sin {theta_deg}° = {_r1(W_par)}\ \mathrm{{N}}"},
         {"type": "text",  "content": "Both W∥ and friction oppose the applied force F, acting down the slope:"},
-        {"type": "latex", "content": r"\text{Resultant} = F - W_{\parallel} - \text{friction}"},
-        {"type": "latex", "content": rf"\text{{Resultant}} = {F:.0f} - {_r1(W_par)} - {friction} = {resultant}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"a = \dfrac{{\text{{Resultant}}}}{{m}} = \dfrac{{{resultant}}}{{{m}}} = {a}\ \mathrm{{m/s^2}}"},
+        {"type": "text",  "content": "The unbalanced force up the slope is the applied force minus W∥ and friction:"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{F:.0f} - {_r1(W_par)} - {friction} = {m} \times a"},
+        {"type": "latex", "content": rf"a = \dfrac{{{resultant}}}{{{m}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     options_data = [
         {"value": a, "mistake": None, "working": working},
@@ -1324,9 +1360,10 @@ def gen_rf_l8_const_force_find_force(level="Higher"):
         working = [
             {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
             {"type": "latex", "content": rf"W_{{\parallel}} = W\sin\theta = {W} \times \sin {theta_deg}° = {_r1(W_par)}\ \mathrm{{N}}"},
-            {"type": "latex", "content": rf"\text{{Resultant}} = ma = {m} \times {a} = {_r1(ma)}\ \mathrm{{N}}"},
-            {"type": "latex", "content": r"F = \text{Resultant} + W_{\parallel} + \text{friction}"},
-            {"type": "latex", "content": rf"F = {_r1(ma)} + {_r1(W_par)} + {friction} = {F}\ \mathrm{{N}}"},
+            {"type": "text",  "content": "The unbalanced force up the slope is the rope's force minus W∥ and friction:"},
+            {"type": "latex", "content": r"F = ma"},
+            {"type": "latex", "content": rf"F_{{\text{{rope}}}} - {_r1(W_par)} - {friction} = {m} \times {a}"},
+            {"type": "latex", "content": rf"F_{{\text{{rope}}}} = {_r1(ma)} + {_r1(W_par)} + {friction} = {F}\ \mathrm{{N}}"},
         ]
         wrong_mistake = f"F must overcome W∥ and friction *and* provide the resultant force for the acceleration — all three add together: F = {F} N."
         scaffold = [
@@ -1368,10 +1405,10 @@ def gen_rf_l8_const_force_find_friction(level="Higher"):
     working = [
         {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
         {"type": "latex", "content": rf"W_{{\parallel}} = W\sin\theta = {W} \times \sin {theta_deg}° = {_r1(W_par)}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"\text{{Resultant}} = ma = {m} \times {a} = {_r1(ma)}\ \mathrm{{N}}"},
-        {"type": "text",  "content": "F drives the object up the slope, opposed by both W∥ and friction:"},
-        {"type": "latex", "content": r"F = \text{Resultant} + W_{\parallel} + \text{friction}"},
-        {"type": "latex", "content": rf"\text{{Friction}} = F - \text{{Resultant}} - W_{{\parallel}} = {F:.0f} - {_r1(ma)} - {_r1(W_par)} = {friction}\ \mathrm{{N}}"},
+        {"type": "text",  "content": "The applied force drives the object up the slope, opposed by both W∥ and friction:"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{F:.0f} - {_r1(W_par)} - \text{{friction}} = {m} \times {a}"},
+        {"type": "latex", "content": rf"\text{{friction}} = {F:.0f} - {_r1(W_par)} - {_r1(ma)} = {friction}\ \mathrm{{N}}"},
     ]
     options_data = [
         {"value": friction, "mistake": None, "working": working},
@@ -1413,10 +1450,11 @@ def gen_rf_l8_const_force_find_angle(level="Higher"):
     )
     working = [
         {"type": "latex", "content": rf"W = mg = {m} \times 9.8 = {W}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"\text{{Resultant}} = ma = {m} \times {a} = {_r1(ma)}\ \mathrm{{N}}"},
-        {"type": "latex", "content": r"F = \text{Resultant} + W_{\parallel} + \text{friction} \;\Rightarrow\; W_{\parallel} = F - \text{Resultant} - \text{friction}"},
+        {"type": "text",  "content": "The unbalanced force up the slope is the applied force minus W∥ and friction:"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{F} - W_{{\parallel}} - {friction} = {m} \times {a}"},
         {"type": "latex", "content": rf"W_{{\parallel}} = {F} - {_r1(ma)} - {friction} = {W_par}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"\sin\theta = \dfrac{{W_{{\parallel}}}}{{W}} = \dfrac{{{W_par}}}{{{W}}} = {sin_theta}"},
+        *_angle_steps(W_par, W, sin_theta),
         {"type": "latex", "content": rf"\theta = \sin^{{-1}}({sin_theta}) = {theta_calc}°"},
     ]
     options_data = [

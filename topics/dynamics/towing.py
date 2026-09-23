@@ -56,9 +56,9 @@ def _l1_scenario(level="Higher"):
 
     working_a = [
         {"type": "text",  "content": "Apply Newton's second law to the whole system (vehicle + trailer):"},
-        {"type": "latex", "content": r"F = (m_c + m_t)\,a"},
-        {"type": "latex", "content": rf"a = \frac{{F}}{{m_c + m_t}} = \frac{{{F}}}{{{m_c} + {m_t}}}"},
-        {"type": "latex", "content": rf"a = {a}\ \mathrm{{m/s^2}}"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{F} = ({m_c} + {m_t}) \times a"},
+        {"type": "latex", "content": rf"a = \frac{{{F}}}{{{total}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     part_a = PhysicsQuestion(
         question_text=f"Calculate the acceleration of the {obj} and trailer.",
@@ -89,7 +89,7 @@ def _l1_scenario(level="Higher"):
         {"type": "text",  "content": "Consider the trailer on its own. The only horizontal "
                                      "force acting on it is the tension T in the tow bar "
                                      "(there is no friction):"},
-        {"type": "latex", "content": r"T = m_t\,a"},
+        {"type": "latex", "content": r"F = ma"},
         {"type": "latex", "content": rf"T = {m_t} \times {a}"},
         {"type": "latex", "content": rf"T = {T}\ \mathrm{{N}}"},
     ]
@@ -155,9 +155,10 @@ def _l2_scenario(level="Higher"):
     working_a = [
         {"type": "text",  "content": "Apply Newton's second law to the whole system. The "
                                      "unbalanced force is the driving force minus the total friction:"},
-        {"type": "latex", "content": r"F_{\text{unbalanced}} = F - f_c - f_t"},
         {"type": "latex", "content": rf"F_{{\text{{unbalanced}}}} = {F} - {f_c} - {f_t} = {net}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"a = \frac{{F_{{\text{{unbalanced}}}}}}{{m_c + m_t}} = \frac{{{net}}}{{{total}}} = {a}\ \mathrm{{m/s^2}}"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{net} = ({m_c} + {m_t}) \times a"},
+        {"type": "latex", "content": rf"a = \frac{{{net}}}{{{total}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     part_a = PhysicsQuestion(
         question_text=f"Calculate the acceleration of the {obj} and trailer.",
@@ -188,9 +189,9 @@ def _l2_scenario(level="Higher"):
     working_b = [
         {"type": "text",  "content": "Consider the trailer on its own. Two horizontal forces "
                                      "act on it: the tension T (forward) and friction f_t (backward):"},
-        {"type": "latex", "content": r"T - f_t = m_t\,a"},
-        {"type": "latex", "content": r"T = m_t\,a + f_t"},
-        {"type": "latex", "content": rf"T = ({m_t} \times {a}) + {f_t} = {T}\ \mathrm{{N}}"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"T - {f_t} = {m_t} \times {a}"},
+        {"type": "latex", "content": rf"T = {round(m_t * a, 2)} + {f_t} = {T}\ \mathrm{{N}}"},
     ]
     part_b = PhysicsQuestion(
         question_text="Calculate the tension in the tow bar connecting the "
@@ -253,9 +254,9 @@ def _l3_scenario(level="Higher"):
     working_a = [
         {"type": "text",  "content": "Apply Newton's second law to the whole system "
                                      "(vehicle + both trailers):"},
-        {"type": "latex", "content": r"F = (m_c + m_{t1} + m_{t2})\,a"},
-        {"type": "latex", "content": rf"a = \frac{{F}}{{m_c + m_{{t1}} + m_{{t2}}}} = \frac{{{F}}}{{{total}}}"},
-        {"type": "latex", "content": rf"a = {a}\ \mathrm{{m/s^2}}"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{F} = ({m_c} + {m_t1} + {m_t2}) \times a"},
+        {"type": "latex", "content": rf"a = \frac{{{F}}}{{{total}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     part_a = PhysicsQuestion(
         question_text=f"Calculate the acceleration of the {obj} and trailers.",
@@ -286,7 +287,7 @@ def _l3_scenario(level="Higher"):
         {"type": "text",  "content": "Consider the towed vehicles — trailer 1 AND trailer 2 "
                                      "together — as a single group. The only horizontal force "
                                      "on this group is the tension T in the tow bar pulling them:"},
-        {"type": "latex", "content": r"T = (m_{t1} + m_{t2})\,a"},
+        {"type": "latex", "content": r"F = ma"},
         {"type": "latex", "content": rf"T = ({m_t1} + {m_t2}) \times {a}"},
         {"type": "latex", "content": rf"T = {T1}\ \mathrm{{N}}"},
     ]
@@ -356,9 +357,10 @@ def _l4_scenario(level="Higher"):
     working_a = [
         {"type": "text",  "content": "Apply Newton's second law to the whole system. The "
                                      "unbalanced force is the driving force minus the total friction:"},
-        {"type": "latex", "content": r"F_{\text{unbalanced}} = F - f_c - f_{t1} - f_{t2}"},
         {"type": "latex", "content": rf"F_{{\text{{unbalanced}}}} = {F} - {f_c} - {f_t1} - {f_t2} = {net}\ \mathrm{{N}}"},
-        {"type": "latex", "content": rf"a = \frac{{F_{{\text{{unbalanced}}}}}}{{m_c + m_{{t1}} + m_{{t2}}}} = \frac{{{net}}}{{{total}}} = {a}\ \mathrm{{m/s^2}}"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{net} = ({m_c} + {m_t1} + {m_t2}) \times a"},
+        {"type": "latex", "content": rf"a = \frac{{{net}}}{{{total}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     part_a = PhysicsQuestion(
         question_text=f"Calculate the acceleration of the {obj} and trailers.",
@@ -390,9 +392,9 @@ def _l4_scenario(level="Higher"):
                                      "together — as a single group. Two forces act on this "
                                      "group: the tension T (forward) and both trailers' "
                                      "friction (backward):"},
-        {"type": "latex", "content": r"T - f_{t1} - f_{t2} = (m_{t1} + m_{t2})\,a"},
-        {"type": "latex", "content": r"T = (m_{t1} + m_{t2})\,a + f_{t1} + f_{t2}"},
-        {"type": "latex", "content": rf"T = (({m_t1} + {m_t2}) \times {a}) + {f_t1} + {f_t2} = {T1}\ \mathrm{{N}}"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"T - {f_t1} - {f_t2} = ({m_t1} + {m_t2}) \times {a}"},
+        {"type": "latex", "content": rf"T = {round((m_t1 + m_t2) * a, 2)} + {f_t1} + {f_t2} = {T1}\ \mathrm{{N}}"},
     ]
     part_b = PhysicsQuestion(
         question_text=f"Calculate the tension in the tow bar connecting the {obj} to the trailers.",
@@ -465,7 +467,8 @@ def gen_exam_style(level="Higher"):
     working = [
         {"type": "text", "content": f"Consider {trailer_desc}. The forces on it are the "
                                     "tension T (forward) and friction (backward):"},
-        {"type": "latex", "content": r"T - F_{\text{friction}} = m\,a"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": r"T - F_{\text{friction}} = ma"},
         {"type": "text", "content": f"The acceleration a is fixed at {a} m/s² and the mass "
                                     "doesn't change, so the right-hand side (m × a) stays "
                                     f"constant. If {friction_desc} friction increases, T must "

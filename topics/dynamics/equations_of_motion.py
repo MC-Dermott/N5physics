@@ -108,10 +108,10 @@ def gen_u_from_vat(level="Higher"):
         f"What was its initial velocity?"
     )
     working = [
-        {"type": "text",  "content": "Rearrange v = u + at for u:"},
-        {"type": "latex", "content": r"u = v - at"},
-        {"type": "latex", "content": rf"u = {v} - ({a}) \times {t}"},
-        {"type": "latex", "content": rf"u = {u}\ \mathrm{{m/s}}"},
+        {"type": "text",  "content": "Identify the equation connecting u, a, t and v:"},
+        {"type": "latex", "content": r"v = u + at"},
+        {"type": "latex", "content": rf"{v} = u + ({a}) \times {t}"},
+        {"type": "latex", "content": rf"u = {v} - ({a}) \times {t} = {u}\ \mathrm{{m/s}}"},
     ]
     options_data = [
         {"value": u,               "mistake": None, "working": working},
@@ -147,10 +147,10 @@ def gen_a_from_vut(level="Higher"):
         f"Calculate its acceleration."
     )
     working = [
-        {"type": "text",  "content": "Rearrange v = u + at for a:"},
-        {"type": "latex", "content": r"a = \frac{v - u}{t}"},
-        {"type": "latex", "content": rf"a = \frac{{{v} - {u}}}{{{t}}}"},
-        {"type": "latex", "content": rf"a = {a}\ \mathrm{{m/s^2}}"},
+        {"type": "text",  "content": "Identify the equation connecting u, a, t and v:"},
+        {"type": "latex", "content": r"v = u + at"},
+        {"type": "latex", "content": rf"{v} = {u} + a \times {t}"},
+        {"type": "latex", "content": rf"a = \frac{{{v} - {u}}}{{{t}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     options_data = [
         {"value": a,                       "mistake": None, "working": working},
@@ -186,10 +186,10 @@ def gen_t_from_vua(level="Higher"):
         f"How long does this take?"
     )
     working = [
-        {"type": "text",  "content": "Rearrange v = u + at for t:"},
-        {"type": "latex", "content": r"t = \frac{v - u}{a}"},
-        {"type": "latex", "content": rf"t = \frac{{{v} - {u}}}{{{a}}}"},
-        {"type": "latex", "content": rf"t = {t}\ \mathrm{{s}}"},
+        {"type": "text",  "content": "Identify the equation connecting u, a, t and v:"},
+        {"type": "latex", "content": r"v = u + at"},
+        {"type": "latex", "content": rf"{v} = {u} + ({a}) \times t"},
+        {"type": "latex", "content": rf"t = \frac{{{v} - {u}}}{{{a}}} = {t}\ \mathrm{{s}}"},
     ]
     options_data = [
         {"value": t,                        "mistake": None, "working": working},
@@ -263,9 +263,9 @@ def gen_s_from_vua_sq(level="Higher"):
         f"Calculate the distance travelled."
     )
     working = [
-        {"type": "text",  "content": "Rearrange v² = u² + 2as for s:"},
-        {"type": "latex", "content": r"s = \frac{v^2 - u^2}{2a}"},
-        {"type": "latex", "content": rf"s = \frac{{{v}^2 - {u}^2}}{{2 \times ({a})}}"},
+        {"type": "text",  "content": "Use v² = u² + 2as:"},
+        {"type": "latex", "content": r"v^2 = u^2 + 2as"},
+        {"type": "latex", "content": rf"{v}^2 = {u}^2 + 2 \times ({a}) \times s"},
         {"type": "latex", "content": rf"s = \frac{{{round(v*v,2)} - {u*u}}}{{{2*a}}}"},
         {"type": "latex", "content": rf"s = {s}\ \mathrm{{m}}"},
     ]
@@ -298,9 +298,9 @@ def gen_a_from_vus(level="Higher"):
         f"Calculate the acceleration."
     )
     working = [
-        {"type": "text",  "content": "Rearrange v² = u² + 2as for a:"},
-        {"type": "latex", "content": r"a = \frac{v^2 - u^2}{2s}"},
-        {"type": "latex", "content": rf"a = \frac{{{v}^2 - {u}^2}}{{2 \times {s}}}"},
+        {"type": "text",  "content": "Use v² = u² + 2as:"},
+        {"type": "latex", "content": r"v^2 = u^2 + 2as"},
+        {"type": "latex", "content": rf"{v}^2 = {u}^2 + 2 \times a \times {s}"},
         {"type": "latex", "content": rf"a = \frac{{{v2} - {u*u}}}{{{2*s}}}"},
         {"type": "latex", "content": rf"a = {a}\ \mathrm{{m/s^2}}"},
     ]
@@ -378,9 +378,9 @@ def gen_a_from_sut_sq(level="Higher"):
         f"Calculate the acceleration."
     )
     working = [
-        {"type": "text",  "content": "Rearrange s = ut + ½at² for a:"},
-        {"type": "latex", "content": r"a = \frac{2(s - ut)}{t^2}"},
-        {"type": "latex", "content": rf"a = \frac{{2({s} - {u} \times {t})}}{{{t}^2}}"},
+        {"type": "text",  "content": "Use s = ut + ½at²:"},
+        {"type": "latex", "content": r"s = ut + \frac{1}{2}at^2"},
+        {"type": "latex", "content": rf"{s} = {u} \times {t} + \frac{{1}}{{2}} \times a \times {t}^2"},
         {"type": "latex", "content": rf"a = \frac{{2 \times {round(s - u*t, 2)}}}{{{t*t}}}"},
         {"type": "latex", "content": rf"a = {a}\ \mathrm{{m/s^2}}"},
     ]
@@ -412,9 +412,9 @@ def gen_u_from_sat_sq(level="Higher"):
         f"What was its initial velocity?"
     )
     working = [
-        {"type": "text",  "content": "Rearrange s = ut + ½at² for u:"},
-        {"type": "latex", "content": r"u = \frac{s - \frac{1}{2}at^2}{t}"},
-        {"type": "latex", "content": rf"u = \frac{{{s} - \frac{{1}}{{2}} \times {a} \times {t}^2}}{{{t}}}"},
+        {"type": "text",  "content": "Use s = ut + ½at²:"},
+        {"type": "latex", "content": r"s = ut + \frac{1}{2}at^2"},
+        {"type": "latex", "content": rf"{s} = u \times {t} + \frac{{1}}{{2}} \times ({a}) \times {t}^2"},
         {"type": "latex", "content": rf"u = \frac{{{s} - {round(0.5*a*t*t,2)}}}{{{t}}}"},
         {"type": "latex", "content": rf"u = {u}\ \mathrm{{m/s}}"},
     ]
@@ -487,9 +487,9 @@ def gen_t_from_uvs(level="Higher"):
         f"How long does this take?"
     )
     working = [
-        {"type": "text",  "content": "Rearrange s = ½(u + v)t for t:"},
-        {"type": "latex", "content": r"t = \frac{2s}{u + v}"},
-        {"type": "latex", "content": rf"t = \frac{{2 \times {s}}}{{{u} + {v}}}"},
+        {"type": "text",  "content": "Use s = ½(u + v)t:"},
+        {"type": "latex", "content": r"s = \frac{1}{2}(u + v)t"},
+        {"type": "latex", "content": rf"{s} = \frac{{1}}{{2}} \times ({u} + {v}) \times t"},
         {"type": "latex", "content": rf"t = \frac{{{2*s}}}{{{u+v}}}"},
         {"type": "latex", "content": rf"t = {t}\ \mathrm{{s}}"},
     ]
@@ -521,9 +521,9 @@ def gen_u_from_svt(level="Higher"):
         f"What was its initial velocity?"
     )
     working = [
-        {"type": "text",  "content": "Rearrange s = ½(u + v)t for u:"},
-        {"type": "latex", "content": r"u = \frac{2s}{t} - v"},
-        {"type": "latex", "content": rf"u = \frac{{2 \times {s}}}{{{t}}} - {v}"},
+        {"type": "text",  "content": "Use s = ½(u + v)t:"},
+        {"type": "latex", "content": r"s = \frac{1}{2}(u + v)t"},
+        {"type": "latex", "content": rf"{s} = \frac{{1}}{{2}} \times (u + {v}) \times {t}"},
         {"type": "latex", "content": rf"u = {round(2*s/t, 2)} - {v}"},
         {"type": "latex", "content": rf"u = {u}\ \mathrm{{m/s}}"},
     ]

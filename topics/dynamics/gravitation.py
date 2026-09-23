@@ -15,7 +15,10 @@ _NOTES = """
 $$F = \\frac{GMm}{r^2}$$
 
 **Gravitational Field Strength:**
-$$g = \\frac{GM}{r^2} \\qquad \\text{or equivalently} \\qquad g = \\frac{F}{m}$$
+$$g = \\frac{GM}{r^2}$$
+
+or equivalently
+$$g = \\frac{F}{m}$$
 
 | Symbol | Quantity | Unit |
 |---|---|---|
@@ -100,7 +103,7 @@ def generate_orbital_gravitation(level="Higher"):
     hm_ltx = _ltx(h_m)
     r_ltx  = _ltx(r)
     F_ltx  = _ltx(F)
-    g_ltx  = _ltx(g)
+    g_ltx  = f"{g:g}" if 0.01 <= g < 1000 else _ltx(g)
 
     # ── Scenario context ───────────────────────────────────────────────────────
     context = (
@@ -120,18 +123,16 @@ def generate_orbital_gravitation(level="Higher"):
 
     working_a = step_r + [
         {"type": "text",  "content": "Step 2 — apply Newton's Law of Gravitation:"},
-        {"type": "latex", "content": r"F = \frac{GMm}{r^2}"},
-        {"type": "latex", "content": rf"F = \frac{{6.67 \times 10^{{-11}} \times {M_ltx} \times {probe_mass}}}{{{r_ltx}^2}}"},
+        {"type": "latex", "content": r"F = G\frac{m_1 m_2}{r^2}"},
+        {"type": "latex", "content": rf"F = 6.67 \times 10^{{-11}} \times \frac{{{M_ltx} \times {probe_mass}}}{{({r_ltx})^2}}"},
         {"type": "latex", "content": rf"F = {F_ltx}\ \mathrm{{N}}"},
     ]
 
     working_b = [
-        {"type": "text",  "content": f"Using r = {_disp(r)} m from part (a):"},
-        {"type": "latex", "content": r"g = \frac{GM}{r^2}"},
-        {"type": "latex", "content": rf"g = \frac{{6.67 \times 10^{{-11}} \times {M_ltx}}}{{{r_ltx}^2}}"},
-        {"type": "latex", "content": rf"g = {g_ltx}\ \mathrm{{N\ kg^{{-1}}}}"},
-        {"type": "text",  "content": "Or equivalently using the force from part (a):"},
-        {"type": "latex", "content": rf"g = \frac{{F}}{{m}} = \frac{{{F_ltx}}}{{{probe_mass}}} = {g_ltx}\ \mathrm{{N\ kg^{{-1}}}}"},
+        {"type": "text",  "content": "The gravitational force from part (a) is the probe's weight at this height:"},
+        {"type": "latex", "content": r"W = mg"},
+        {"type": "latex", "content": rf"{F_ltx} = {probe_mass} \times g"},
+        {"type": "latex", "content": rf"g = \frac{{{F_ltx}}}{{{probe_mass}}} = {g_ltx}\ \mathrm{{N\ kg^{{-1}}}}"},
     ]
 
     # ── Part (a): gravitational force ──────────────────────────────────────────
@@ -146,9 +147,9 @@ def generate_orbital_gravitation(level="Higher"):
             {
                 "value": F_no_R,
                 "mistake": (
-                    f"You appear to have used r = h = {h_m:.2e} m instead of r = R + h. "
+                    f"You appear to have used r = h = {_disp(h_m)} m instead of r = R + h. "
                     f"The orbital radius is measured from the **centre** of {name}: "
-                    f"r = R + h = {R:.2e} + {h_m:.2e} = {r:.2e} m."
+                    f"r = R + h = {_disp(R)} + {_disp(h_m)} = {_disp(r)} m."
                 ),
                 "working": working_a,
             },
@@ -157,7 +158,7 @@ def generate_orbital_gravitation(level="Higher"):
                 "mistake": (
                     f"You appear to have used the height in km without converting to metres. "
                     f"{h_km:,} km = {h_m:,} m. "
-                    f"Using km values directly gives r ≈ {r_km_as_m:g} m instead of {r:.2e} m — "
+                    f"Using km values directly gives r ≈ {r_km_as_m:g} m instead of {_disp(r)} m — "
                     f"a factor of 1000 error in r, causing a 10⁶ error in F."
                 ),
                 "working": working_a,
@@ -183,9 +184,9 @@ def generate_orbital_gravitation(level="Higher"):
             {
                 "value": g_no_R,
                 "mistake": (
-                    f"You appear to have used r = h = {h_m:.2e} m. "
+                    f"You appear to have used r = h = {_disp(h_m)} m. "
                     f"Remember r is measured from the centre of {name}: "
-                    f"r = R + h = {r:.2e} m."
+                    f"r = R + h = {_disp(r)} m."
                 ),
                 "working": working_b,
             },

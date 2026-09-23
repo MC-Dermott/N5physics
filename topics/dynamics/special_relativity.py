@@ -18,10 +18,10 @@ _NOTES = """
   travel, as observed by someone it is moving relative to.
 
 **Time dilation** — a moving clock runs slow:
-$$t' = \\frac{t}{\\sqrt{1 - \\frac{v^2}{c^2}}}$$
+$$t' = \\frac{t}{\\sqrt{1 - \\left(\\frac{v}{c}\\right)^2}}$$
 
 **Length contraction** — a moving object appears shorter:
-$$l' = l\\sqrt{1 - \\frac{v^2}{c^2}}$$
+$$l' = l\\sqrt{1 - \\left(\\frac{v}{c}\\right)^2}$$
 
 | Symbol | Quantity | Unit |
 |---|---|---|
@@ -34,7 +34,7 @@ $$l' = l\\sqrt{1 - \\frac{v^2}{c^2}}$$
 
 > **Important:** t' > t (stationary observer measures a longer time).
 > l' < l (stationary observer measures a shorter length).
-> Both formulae use the same factor √(1 − v²/c²).
+> Both formulae use the same factor √(1 − (v/c)²).
 
 **Before relativity — simple (Newtonian) relative velocity:** at everyday speeds,
 velocities in different frames simply add or subtract.
@@ -48,7 +48,7 @@ velocities in different frames simply add or subtract.
 
 _C = 3.00e8  # speed of light, m/s
 
-# (v/c fraction, display string, √(1−v²/c²))
+# (v/c fraction, display string, √(1−(v/c)²))
 _VELOCITIES = [
     (0.6, "0.6c", 0.8),
     (0.8, "0.8c", 0.6),
@@ -73,7 +73,7 @@ def _ship():
     return random.choice(_SHIP_CONTEXTS)
 
 
-# ── Time dilation: t' = t / √(1 − v²/c²) ────────────────────────────────────
+# ── Time dilation: t' = t / √(1 − (v/c)²) ────────────────────────────────────
 
 def gen_t_prime(level="Higher"):
     v_frac, v_str, lor = random.choice(_VELOCITIES)
@@ -90,21 +90,21 @@ def gen_t_prime(level="Higher"):
     )
     working = [
         {"type": "text",  "content": "Use the time dilation formula:"},
-        {"type": "latex", "content": r"t' = \frac{t}{\sqrt{1 - \frac{v^2}{c^2}}}"},
-        {"type": "latex", "content": rf"t' = \frac{{{t}}}{{\sqrt{{1 - {v_frac}^2}}}}"},
+        {"type": "latex", "content": r"t' = \frac{t}{\sqrt{1 - \left(\frac{v}{c}\right)^2}}"},
+        {"type": "latex", "content": rf"t' = \frac{{{t}}}{{\sqrt{{1 - \left(\frac{{{v_str}}}{{c}}\right)^2}}}}"},
         {"type": "latex", "content": rf"t' = \frac{{{t}}}{{\sqrt{{1 - {round(v_frac**2,2)}}}}}"},
         {"type": "latex", "content": rf"t' = \frac{{{t}}}{{{lor}}}"},
         {"type": "latex", "content": rf"t' = {t_prime}\ \mathrm{{s}}"},
     ]
     options_data = [
         {"value": t_prime,              "mistake": None, "working": working},
-        {"value": round(t * lor, 4),    "mistake": "You multiplied by √(1−v²/c²) instead of dividing — that is the length contraction formula, not time dilation.", "working": working},
-        {"value": round(t / lor**2, 4), "mistake": "Divide by √(1−v²/c²), not by (1−v²/c²) — don't forget the square root.", "working": working},
+        {"value": round(t * lor, 4),    "mistake": "You multiplied by √(1−(v/c)²) instead of dividing — that is the length contraction formula, not time dilation.", "working": working},
+        {"value": round(t / lor**2, 4), "mistake": "Divide by √(1−(v/c)²), not by (1−(v/c)²) — don't forget the square root.", "working": working},
         {"value": t,                    "mistake": "You must apply the time dilation formula — the Earth observer measures a longer time than the astronaut.", "working": working},
     ]
     options_data = _dedup(options_data, t_prime)
     scaffold = [
-        {"question": "What is √(1 − v²/c²)?", "answer": lor},
+        {"question": "What is √(1 − (v/c)²)?", "answer": lor},
         {"question": "What is the dilated time t′ measured by the Earth observer?", "answer": t_prime},
     ]
     return make_question(question, t_prime, options_data, "s",
@@ -124,21 +124,21 @@ def gen_t_proper(level="Higher"):
         f"What time does the astronaut's clock show for the journey?"
     )
     working = [
-        {"type": "text",  "content": "Rearrange t' = t / √(1 − v²/c²) for t:"},
-        {"type": "latex", "content": r"t = t'\sqrt{1 - \frac{v^2}{c^2}}"},
-        {"type": "latex", "content": rf"t = {t_prime} \times \sqrt{{1 - {v_frac}^2}}"},
-        {"type": "latex", "content": rf"t = {t_prime} \times {lor}"},
-        {"type": "latex", "content": rf"t = {t}\ \mathrm{{s}}"},
+        {"type": "text",  "content": "Use the time dilation formula:"},
+        {"type": "latex", "content": r"t' = \frac{t}{\sqrt{1 - \left(\frac{v}{c}\right)^2}}"},
+        {"type": "latex", "content": rf"{t_prime} = \frac{{t}}{{\sqrt{{1 - \left(\frac{{{v_str}}}{{c}}\right)^2}}}}"},
+        {"type": "latex", "content": rf"{t_prime} = \frac{{t}}{{{lor}}}"},
+        {"type": "latex", "content": rf"t = {t_prime} \times {lor} = {t}\ \mathrm{{s}}"},
     ]
     options_data = [
         {"value": t,                        "mistake": None, "working": working},
-        {"value": round(t_prime / lor, 4),  "mistake": "Divide by √(1−v²/c²) only when going from proper time to dilated time — here you need to multiply.", "working": working},
-        {"value": round(t_prime * lor**2, 4),"mistake": "Multiply by √(1−v²/c²), not by (1−v²/c²) — don't forget the square root.", "working": working},
+        {"value": round(t_prime / lor, 4),  "mistake": "Divide by √(1−(v/c)²) only when going from proper time to dilated time — here you need to multiply.", "working": working},
+        {"value": round(t_prime * lor**2, 4),"mistake": "Multiply by √(1−(v/c)²), not by (1−(v/c)²) — don't forget the square root.", "working": working},
         {"value": t_prime,                  "mistake": "The astronaut's clock runs slow — their time is shorter than the Earth observer's time.", "working": working},
     ]
     options_data = _dedup(options_data, t)
     scaffold = [
-        {"question": "What is √(1 − v²/c²)?", "answer": lor},
+        {"question": "What is √(1 − (v/c)²)?", "answer": lor},
         {"question": "What is the proper time t shown on the astronaut's clock?", "answer": t},
     ]
     return make_question(question, t, options_data, "s",
@@ -159,17 +159,17 @@ def gen_v_from_time_dilation(level="Higher"):
         f"relative to the Earth observer."
     )
     working = [
-        {"type": "text",  "content": "Rearrange t' = t / √(1 − v²/c²) for v:"},
-        {"type": "latex", "content": r"\sqrt{1 - \frac{v^2}{c^2}} = \frac{t}{t'}"},
-        {"type": "latex", "content": rf"\sqrt{{1 - \frac{{v^2}}{{c^2}}}} = \frac{{{t}}}{{{t_prime}}} = {lor}"},
-        {"type": "latex", "content": r"v = c\sqrt{1 - \left(\frac{t}{t'}\right)^2}"},
+        {"type": "text",  "content": "Use the time dilation formula:"},
+        {"type": "latex", "content": r"t' = \frac{t}{\sqrt{1 - \left(\frac{v}{c}\right)^2}}"},
+        {"type": "latex", "content": rf"{t_prime} = \frac{{{t}}}{{\sqrt{{1 - \left(\frac{{v}}{{3.00\times10^8}}\right)^2}}}}"},
+        {"type": "latex", "content": rf"\sqrt{{1 - \left(\frac{{v}}{{3.00\times10^8}}\right)^2}} = \frac{{{t}}}{{{t_prime}}} = {lor}"},
         {"type": "latex", "content": rf"v = (3.00\times10^8) \times \sqrt{{1 - {lor}^2}}"},
         {"type": "latex", "content": rf"v = (3.00\times10^8) \times {v_frac}"},
         {"type": "latex", "content": rf"v = {_v_sci(v)}\ \mathrm{{m/s}}"},
     ]
     options_data = [
         {"value": v,                          "mistake": None, "working": working},
-        {"value": round(lor * _C, 4),         "mistake": "You found √(1−v²/c²) = t/t′ but then treated that value as v/c itself — you need v = c√(1−(t/t′)²).", "working": working},
+        {"value": round(lor * _C, 4),         "mistake": "You found √(1−(v/c)²) = t/t′ but then treated that value as v/c itself — you need v = c√(1−(t/t′)²).", "working": working},
         {"value": round((1 - lor ** 2) * _C, 4), "mistake": "You forgot to take the square root when finding v from 1 − (t/t′)².", "working": working},
         {"value": round((t_prime / t - 1) * _C, 4), "mistake": "That isn't how the time dilation formula rearranges for v — use v = c√(1−(t/t′)²).", "working": working},
     ]
@@ -183,7 +183,7 @@ def gen_v_from_time_dilation(level="Higher"):
                          question_type="Special Relativity", level=level, scaffold=scaffold)
 
 
-# ── Length contraction: l' = l × √(1 − v²/c²) ────────────────────────────────
+# ── Length contraction: l' = l × √(1 − (v/c)²) ────────────────────────────────
 
 def gen_l_prime(level="Higher"):
     v_frac, v_str, lor = random.choice(_VELOCITIES)
@@ -199,20 +199,20 @@ def gen_l_prime(level="Higher"):
     )
     working = [
         {"type": "text",  "content": "Use the length contraction formula:"},
-        {"type": "latex", "content": r"l' = l\sqrt{1 - \frac{v^2}{c^2}}"},
-        {"type": "latex", "content": rf"l' = {l} \times \sqrt{{1 - {v_frac}^2}}"},
+        {"type": "latex", "content": r"l' = l\sqrt{1 - \left(\frac{v}{c}\right)^2}"},
+        {"type": "latex", "content": rf"l' = {l} \times \sqrt{{1 - \left(\frac{{{v_str}}}{{c}}\right)^2}}"},
         {"type": "latex", "content": rf"l' = {l} \times {lor}"},
         {"type": "latex", "content": rf"l' = {l_prime}\ \mathrm{{m}}"},
     ]
     options_data = [
         {"value": l_prime,              "mistake": None, "working": working},
-        {"value": round(l / lor, 4),    "mistake": "You divided by √(1−v²/c²) instead of multiplying — that is the time dilation rearrangement, not length contraction.", "working": working},
-        {"value": round(l * lor**2, 4), "mistake": "Multiply by √(1−v²/c²), not by (1−v²/c²) — don't forget the square root.", "working": working},
+        {"value": round(l / lor, 4),    "mistake": "You divided by √(1−(v/c)²) instead of multiplying — that is the time dilation rearrangement, not length contraction.", "working": working},
+        {"value": round(l * lor**2, 4), "mistake": "Multiply by √(1−(v/c)²), not by (1−(v/c)²) — don't forget the square root.", "working": working},
         {"value": l,                    "mistake": "You must apply the length contraction formula — the Earth observer measures a shorter length.", "working": working},
     ]
     options_data = _dedup(options_data, l_prime)
     scaffold = [
-        {"question": "What is √(1 − v²/c²)?", "answer": lor},
+        {"question": "What is √(1 − (v/c)²)?", "answer": lor},
         {"question": "What is the contracted length l′ measured by the Earth observer?", "answer": l_prime},
     ]
     return make_question(question, l_prime, options_data, "m",
@@ -231,21 +231,21 @@ def gen_l_proper(level="Higher"):
         f"What is the proper length of the spacecraft?"
     )
     working = [
-        {"type": "text",  "content": "Rearrange l' = l√(1 − v²/c²) for l:"},
-        {"type": "latex", "content": r"l = \frac{l'}{\sqrt{1 - \frac{v^2}{c^2}}}"},
-        {"type": "latex", "content": rf"l = \frac{{{l_prime}}}{{\sqrt{{1 - {v_frac}^2}}}}"},
-        {"type": "latex", "content": rf"l = \frac{{{l_prime}}}{{{lor}}}"},
-        {"type": "latex", "content": rf"l = {l}\ \mathrm{{m}}"},
+        {"type": "text",  "content": "Use the length contraction formula:"},
+        {"type": "latex", "content": r"l' = l\sqrt{1 - \left(\frac{v}{c}\right)^2}"},
+        {"type": "latex", "content": rf"{l_prime} = l \times \sqrt{{1 - \left(\frac{{{v_str}}}{{c}}\right)^2}}"},
+        {"type": "latex", "content": rf"{l_prime} = l \times {lor}"},
+        {"type": "latex", "content": rf"l = \frac{{{l_prime}}}{{{lor}}} = {l}\ \mathrm{{m}}"},
     ]
     options_data = [
         {"value": l,                        "mistake": None, "working": working},
-        {"value": round(l_prime * lor, 4),  "mistake": "Multiply by √(1−v²/c²) only when going from proper length to contracted length — here you need to divide.", "working": working},
-        {"value": round(l_prime / lor**2, 4),"mistake": "Divide by √(1−v²/c²), not by (1−v²/c²) — don't forget the square root.", "working": working},
-        {"value": l_prime,                  "mistake": "The proper length is always longer than the contracted length — divide l' by √(1−v²/c²).", "working": working},
+        {"value": round(l_prime * lor, 4),  "mistake": "Multiply by √(1−(v/c)²) only when going from proper length to contracted length — here you need to divide.", "working": working},
+        {"value": round(l_prime / lor**2, 4),"mistake": "Divide by √(1−(v/c)²), not by (1−(v/c)²) — don't forget the square root.", "working": working},
+        {"value": l_prime,                  "mistake": "The proper length is always longer than the contracted length — divide l' by √(1−(v/c)²).", "working": working},
     ]
     options_data = _dedup(options_data, l)
     scaffold = [
-        {"question": "What is √(1 − v²/c²)?", "answer": lor},
+        {"question": "What is √(1 − (v/c)²)?", "answer": lor},
         {"question": "What is the proper length l of the spacecraft?", "answer": l},
     ]
     return make_question(question, l, options_data, "m",
@@ -265,17 +265,17 @@ def gen_v_from_length_contraction(level="Higher"):
         f"to the Earth observer."
     )
     working = [
-        {"type": "text",  "content": "Rearrange l' = l√(1 − v²/c²) for v:"},
-        {"type": "latex", "content": r"\sqrt{1 - \frac{v^2}{c^2}} = \frac{l'}{l}"},
-        {"type": "latex", "content": rf"\sqrt{{1 - \frac{{v^2}}{{c^2}}}} = \frac{{{l_prime}}}{{{l}}} = {lor}"},
-        {"type": "latex", "content": r"v = c\sqrt{1 - \left(\frac{l'}{l}\right)^2}"},
+        {"type": "text",  "content": "Use the length contraction formula:"},
+        {"type": "latex", "content": r"l' = l\sqrt{1 - \left(\frac{v}{c}\right)^2}"},
+        {"type": "latex", "content": rf"{l_prime} = {l} \times \sqrt{{1 - \left(\frac{{v}}{{3.00\times10^8}}\right)^2}}"},
+        {"type": "latex", "content": rf"\sqrt{{1 - \left(\frac{{v}}{{3.00\times10^8}}\right)^2}} = \frac{{{l_prime}}}{{{l}}} = {lor}"},
         {"type": "latex", "content": rf"v = (3.00\times10^8) \times \sqrt{{1 - {lor}^2}}"},
         {"type": "latex", "content": rf"v = (3.00\times10^8) \times {v_frac}"},
         {"type": "latex", "content": rf"v = {_v_sci(v)}\ \mathrm{{m/s}}"},
     ]
     options_data = [
         {"value": v,                             "mistake": None, "working": working},
-        {"value": round(lor * _C, 4),            "mistake": "You found √(1−v²/c²) = l′/l but then treated that value as v/c itself — you need v = c√(1−(l′/l)²).", "working": working},
+        {"value": round(lor * _C, 4),            "mistake": "You found √(1−(v/c)²) = l′/l but then treated that value as v/c itself — you need v = c√(1−(l′/l)²).", "working": working},
         {"value": round((1 - lor ** 2) * _C, 4), "mistake": "You forgot to take the square root when finding v from 1 − (l′/l)².", "working": working},
         {"value": round((1 - l_prime / l) * _C, 4), "mistake": "That isn't how the length contraction formula rearranges for v — use v = c√(1−(l′/l)²).", "working": working},
     ]

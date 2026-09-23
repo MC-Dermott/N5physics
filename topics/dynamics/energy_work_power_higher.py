@@ -146,10 +146,10 @@ def gen_work_find_f(level="Higher"):
 
     question = f"A {ctx} does {ew} J of work moving an object a distance of {d} m. Calculate the force applied."
     working = [
-        {"type": "text",  "content": "Rearrange EW = Fd for F:"},
-        {"type": "latex", "content": r"F = \frac{E_W}{d}"},
-        {"type": "latex", "content": rf"F = \frac{{{ew}}}{{{d}}}"},
-        {"type": "latex", "content": rf"F = {F}\ \mathrm{{N}}"},
+        {"type": "text",  "content": "Use the equation:"},
+        {"type": "latex", "content": r"E_W = Fd"},
+        {"type": "latex", "content": rf"{ew} = F \times {d}"},
+        {"type": "latex", "content": rf"F = \frac{{{ew}}}{{{d}}} = {F}\ \mathrm{{N}}"},
     ]
     options_data = [
         {"value": float(F), "mistake": None, "working": working},
@@ -169,10 +169,10 @@ def gen_work_find_d(level="Higher"):
 
     question = f"A {ctx} applies a force of {F} N, doing {ew} J of work. Calculate the distance moved."
     working = [
-        {"type": "text",  "content": "Rearrange EW = Fd for d:"},
-        {"type": "latex", "content": r"d = \frac{E_W}{F}"},
-        {"type": "latex", "content": rf"d = \frac{{{ew}}}{{{F}}}"},
-        {"type": "latex", "content": rf"d = {d}\ \mathrm{{m}}"},
+        {"type": "text",  "content": "Use the equation:"},
+        {"type": "latex", "content": r"E_W = Fd"},
+        {"type": "latex", "content": rf"{ew} = {F} \times d"},
+        {"type": "latex", "content": rf"d = \frac{{{ew}}}{{{F}}} = {d}\ \mathrm{{m}}"},
     ]
     options_data = [
         {"value": float(d), "mistake": None, "working": working},
@@ -231,10 +231,10 @@ def gen_gpe_find_h(level="Higher"):
     if is_g:
         working.append({"type": "text", "content": f"Convert the mass to kg: {disp_m:g} g = {m_kg} kg"})
     working += [
-        {"type": "text",  "content": "Rearrange Ep = mgh for h:"},
-        {"type": "latex", "content": r"h = \frac{E_p}{mg}"},
-        {"type": "latex", "content": rf"h = \frac{{{ep}}}{{{m_kg} \times 9.8}}"},
-        {"type": "latex", "content": rf"h = {h}\ \mathrm{{m}}"},
+        {"type": "text",  "content": "Use the equation:"},
+        {"type": "latex", "content": r"E_p = mgh"},
+        {"type": "latex", "content": rf"{ep} = {m_kg} \times 9.8 \times h"},
+        {"type": "latex", "content": rf"h = \frac{{{ep}}}{{{m_kg} \times 9.8}} = {h}\ \mathrm{{m}}"},
     ]
     options_data = [
         {"value": float(h), "mistake": None, "working": working},
@@ -261,10 +261,10 @@ def gen_gpe_find_m(level="Higher"):
 
     question = f"A {ctx} raises an object through a height of {h:g} m, giving it {ep} J of gravitational potential energy. Calculate the mass of the object."
     working = [
-        {"type": "text",  "content": "Rearrange Ep = mgh for m:"},
-        {"type": "latex", "content": r"m = \frac{E_p}{gh}"},
-        {"type": "latex", "content": rf"m = \frac{{{ep}}}{{9.8 \times {h}}}"},
-        {"type": "latex", "content": rf"m = {m_kg}\ \mathrm{{kg}}"},
+        {"type": "text",  "content": "Use the equation:"},
+        {"type": "latex", "content": r"E_p = mgh"},
+        {"type": "latex", "content": rf"{ep} = m \times 9.8 \times {h}"},
+        {"type": "latex", "content": rf"m = \frac{{{ep}}}{{9.8 \times {h}}} = {m_kg}\ \mathrm{{kg}}"},
     ]
     options_data = [
         {"value": m_kg, "mistake": None, "working": working},
@@ -335,10 +335,10 @@ def gen_ke_find_v(level="Higher"):
     if is_g:
         working.append({"type": "text", "content": f"Convert the mass to kg: {disp_m:g} g = {m_kg} kg"})
     working += [
-        {"type": "text",  "content": "Rearrange Ek = ½mv² for v:"},
-        {"type": "latex", "content": r"v = \sqrt{\frac{2E_k}{m}}"},
-        {"type": "latex", "content": rf"v = \sqrt{{\frac{{2 \times {ek}}}{{{m_kg}}}}}"},
-        {"type": "latex", "content": rf"v = {v}\ \mathrm{{m/s}}"},
+        {"type": "text",  "content": "Use the equation:"},
+        {"type": "latex", "content": r"E_k = \tfrac{1}{2}mv^2"},
+        {"type": "latex", "content": rf"{ek} = \tfrac{{1}}{{2}} \times {m_kg} \times v^2"},
+        {"type": "latex", "content": rf"v = \sqrt{{\frac{{2 \times {ek}}}{{{m_kg}}}}} = {v}\ \mathrm{{m/s}}"},
     ]
     options_data = [
         {"value": v, "mistake": None, "working": working},
@@ -365,10 +365,10 @@ def gen_ke_find_m(level="Higher"):
 
     question = f"A {ctx} has a kinetic energy of {ek} J while travelling at a speed of {v} m/s. Calculate its mass."
     working = [
-        {"type": "text",  "content": "Rearrange Ek = ½mv² for m:"},
-        {"type": "latex", "content": r"m = \frac{2E_k}{v^2}"},
-        {"type": "latex", "content": rf"m = \frac{{2 \times {ek}}}{{{v}^2}}"},
-        {"type": "latex", "content": rf"m = {m_kg}\ \mathrm{{kg}}"},
+        {"type": "text",  "content": "Use the equation:"},
+        {"type": "latex", "content": r"E_k = \tfrac{1}{2}mv^2"},
+        {"type": "latex", "content": rf"{ek} = \tfrac{{1}}{{2}} \times m \times {v}^2"},
+        {"type": "latex", "content": rf"m = \frac{{2 \times {ek}}}{{{v}^2}} = {m_kg}\ \mathrm{{kg}}"},
     ]
     options_data = [
         {"value": m_kg, "mistake": None, "working": working},
@@ -448,10 +448,10 @@ def gen_power_find_e(level="Higher"):
     if unit != "s":
         working.append({"type": "text", "content": f"Convert the time to seconds: {t_disp} {unit} = {t_s} s"})
     working += [
-        {"type": "text",  "content": "Rearrange P = E/t for E:"},
-        {"type": "latex", "content": r"E = Pt"},
-        {"type": "latex", "content": rf"E = {P:g} \times {t_s}"},
-        {"type": "latex", "content": rf"E = {E}\ \mathrm{{J}}"},
+        {"type": "text",  "content": "Use the equation:"},
+        {"type": "latex", "content": r"P = \frac{E}{t}"},
+        {"type": "latex", "content": rf"{P:g} = \frac{{E}}{{{t_s}}}"},
+        {"type": "latex", "content": rf"E = {P:g} \times {t_s} = {E}\ \mathrm{{J}}"},
     ]
     options_data = [
         {"value": E, "mistake": None, "working": working},
@@ -476,10 +476,10 @@ def gen_power_find_t(level="Higher"):
 
     question = f"A {ctx} does {E:g} J of work. If they have a power output of {P:g} W, calculate the time taken."
     working = [
-        {"type": "text",  "content": "Rearrange P = E/t for t:"},
-        {"type": "latex", "content": r"t = \frac{E}{P}"},
-        {"type": "latex", "content": rf"t = \frac{{{E:g}}}{{{P:g}}}"},
-        {"type": "latex", "content": rf"t = {t_s}\ \mathrm{{s}}"},
+        {"type": "text",  "content": "Use the equation:"},
+        {"type": "latex", "content": r"P = \frac{E}{t}"},
+        {"type": "latex", "content": rf"{P:g} = \frac{{{E:g}}}{{t}}"},
+        {"type": "latex", "content": rf"t = \frac{{{E:g}}}{{{P:g}}} = {t_s}\ \mathrm{{s}}"},
     ]
     options_data = [
         {"value": t_s, "mistake": None, "working": working},
@@ -508,10 +508,10 @@ def gen_energy_freefall_speed(level="Higher"):
         f"it hits the ground."
     )
     working = [
-        {"type": "text",  "content": "All Ep converts to Ek (no air resistance):"},
-        {"type": "latex", "content": r"mgh = \tfrac{1}{2}mv^2 \;\Rightarrow\; v = \sqrt{2gh}"},
-        {"type": "latex", "content": rf"v = \sqrt{{2 \times 9.8 \times {h}}}"},
-        {"type": "latex", "content": rf"v = {v}\ \mathrm{{m/s}}"},
+        {"type": "text",  "content": "All Ep converts to Ek (no air resistance), so Ep = Ek:"},
+        {"type": "latex", "content": r"mgh = \tfrac{1}{2}mv^2"},
+        {"type": "latex", "content": rf"{m_kg} \times 9.8 \times {h} = \tfrac{{1}}{{2}} \times {m_kg} \times v^2"},
+        {"type": "latex", "content": rf"v = \sqrt{{2 \times 9.8 \times {h}}} = {v}\ \mathrm{{m/s}}"},
     ]
     options_data = [
         {"value": v, "mistake": None, "working": working},
@@ -536,10 +536,11 @@ def gen_energy_max_height(level="Higher"):
         f"energy is lost to air resistance, calculate the maximum height reached by the ball."
     )
     working = [
-        {"type": "text",  "content": "All Ek converts to Ep at maximum height:"},
-        {"type": "latex", "content": r"\tfrac{1}{2}mv^2 = mgh \;\Rightarrow\; h = \frac{v^2}{2g}"},
-        {"type": "latex", "content": rf"h = \frac{{{v}^2}}{{2 \times 9.8}}"},
-        {"type": "latex", "content": rf"h = {h}\ \mathrm{{m}}"},
+        {"type": "text",  "content": "All Ek converts to Ep at maximum height, so Ek = Ep:"},
+        {"type": "latex", "content": r"\tfrac{1}{2}mv^2 = mgh"},
+        {"type": "text",  "content": "Substitute (the mass appears on both sides, so it cancels):"},
+        {"type": "latex", "content": rf"\tfrac{{1}}{{2}} \times {v}^2 = 9.8 \times h"},
+        {"type": "latex", "content": rf"h = \frac{{{v}^2}}{{2 \times 9.8}} = {h}\ \mathrm{{m}}"},
     ]
     options_data = [
         {"value": h, "mistake": None, "working": working},
@@ -658,7 +659,7 @@ def _power_lift(level):
         {"type": "text",  "content": "The energy change here is a gain in gravitational potential energy:"},
         {"type": "latex", "content": rf"E_p = mgh = {m_kg:g} \times 9.8 \times {h} = {ep}\ \mathrm{{J}}"},
         {"type": "text",  "content": "Average power = energy change ÷ time:"},
-        {"type": "latex", "content": r"P = \frac{E_p}{t}"},
+        {"type": "latex", "content": r"P = \frac{E}{t}"},
         {"type": "latex", "content": rf"P = \frac{{{ep}}}{{{t:g}}}"},
         {"type": "latex", "content": rf"P = {P}\ \mathrm{{W}}"},
     ]
@@ -693,7 +694,7 @@ def _power_engine(level):
         {"type": "text",  "content": "At constant speed, the energy change here is the work done against the resistive forces:"},
         {"type": "latex", "content": rf"E_W = Fd = {F} \times {d:g} = {ew}\ \mathrm{{J}}"},
         {"type": "text",  "content": "Average power = energy change ÷ time:"},
-        {"type": "latex", "content": r"P = \frac{E_W}{t}"},
+        {"type": "latex", "content": r"P = \frac{E}{t}"},
         {"type": "latex", "content": rf"P = \frac{{{ew}}}{{{t:g}}}"},
         {"type": "latex", "content": rf"P = {P}\ \mathrm{{W}}"},
     ]
@@ -740,7 +741,7 @@ def _power_accelerate(level):
         {"type": "latex", "content": rf"E_{{k,f}} = \tfrac{{1}}{{2}}mv^2 = \tfrac{{1}}{{2}} \times {m_kg} \times {v}^2 = {ek_f}\ \mathrm{{J}}"},
         {"type": "latex", "content": rf"\Delta E_k = {ek_f} - {ek_i} = {delta_ek}\ \mathrm{{J}}"},
         {"type": "text",  "content": "Average power = energy change ÷ time:"},
-        {"type": "latex", "content": r"P = \frac{\Delta E_k}{t}"},
+        {"type": "latex", "content": r"P = \frac{E}{t}"},
         {"type": "latex", "content": rf"P = \frac{{{delta_ek}}}{{{t:g}}}"},
         {"type": "latex", "content": rf"P = {P}\ \mathrm{{W}}"},
     ]
@@ -789,7 +790,7 @@ def _power_decelerate(level):
     working += [
         {"type": "latex", "content": rf"\Delta E_k = {ek_i} - {ek_f} = {delta_ek}\ \mathrm{{J}}"},
         {"type": "text",  "content": "Average power = energy change ÷ time:"},
-        {"type": "latex", "content": r"P = \frac{\Delta E_k}{t}"},
+        {"type": "latex", "content": r"P = \frac{E}{t}"},
         {"type": "latex", "content": rf"P = \frac{{{delta_ek}}}{{{t:g}}}"},
         {"type": "latex", "content": rf"P = {P}\ \mathrm{{W}}"},
     ]
@@ -834,9 +835,10 @@ def _power_hydro(level):
         working.append({"type": "text", "content": f"Convert the flow rate to kg/s: {fmt_num(rate_disp)} kg/min ÷ 60 = {fmt_num(rate_s)} kg/s"})
     working += [
         {"type": "text",  "content": "The energy change here is the gravitational potential energy lost by the mass of water falling each second:"},
-        {"type": "latex", "content": rf"E_p = mgh = {fmt_num(rate_s)} \times 9.8 \times {h:g}"},
+        {"type": "latex", "content": rf"E_p = mgh = {fmt_num(rate_s)} \times 9.8 \times {h:g} = {fmt_num(P)}\ \mathrm{{J}}"},
         {"type": "text",  "content": "Average power = energy change ÷ time (here, per 1 s):"},
-        {"type": "latex", "content": rf"P = {fmt_num(P)}\ \mathrm{{W}}"},
+        {"type": "latex", "content": r"P = \frac{E}{t}"},
+        {"type": "latex", "content": rf"P = \frac{{{fmt_num(P)}}}{{1}} = {fmt_num(P)}\ \mathrm{{W}}"},
     ]
     options_data = [{"value": P, "mistake": None, "working": working}]
     if use_minutes:
@@ -894,7 +896,7 @@ def _power_slope(level):
         {"type": "latex", "content": rf"E_{{W,friction}} = Fd = {f_friction:g} \times {d_m:g} = {work_friction}\ \mathrm{{J}}"},
         {"type": "latex", "content": rf"E_{{W,total}} = {ep} + {work_friction} = {total_work}\ \mathrm{{J}}"},
         {"type": "text",  "content": "Average power = energy change ÷ time:"},
-        {"type": "latex", "content": r"P = \frac{E_{W,total}}{t}"},
+        {"type": "latex", "content": r"P = \frac{E}{t}"},
         {"type": "latex", "content": rf"P = \frac{{{total_work}}}{{{t_s:g}}}"},
         {"type": "latex", "content": rf"P = {P}\ \mathrm{{W}}"},
     ]

@@ -26,9 +26,11 @@ $$W = mg$$
 object's true weight — it depends on whether the object is accelerating.
 
 - **Upwards acceleration → increase in effective weight** (reading > weight): \
-$$R - mg = ma \\implies R = mg + ma$$
+$$R - mg = ma$$
+$$R = mg + ma$$
 - **Downwards acceleration → decrease in effective weight** (reading < weight): \
-$$mg - R = ma \\implies R = mg - ma$$
+$$mg - R = ma$$
+$$R = mg - ma$$
 - **Constant velocity (a = 0) → reading equals true weight:** $$R = mg$$
 
 **Which way does the acceleration act?** Compare the direction of *motion* with whether the
@@ -121,12 +123,14 @@ def gen_ew_find_reading(level="Higher"):
         f"Calculate the reading R on the scales."
     )
     working = [
-        {"type": "text", "content": f"The resultant force acts {'upwards' if accel_up else 'downwards'}:"},
-        {"type": "latex", "content": r"R - mg = ma" if accel_up else r"mg - R = ma"},
-        {"type": "latex", "content": r"R = mg + ma" if accel_up else r"R = mg - ma"},
-        {"type": "latex", "content": rf"R = ({m} \times {_G}) {'+' if accel_up else '-'} ({m} \times {a})"},
-        {"type": "latex", "content": rf"R = {W} {'+' if accel_up else '-'} {F}"},
-        {"type": "latex", "content": rf"R = {R}\ \mathrm{{N}}"},
+        {"type": "latex", "content": r"W = mg"},
+        {"type": "latex", "content": rf"W = {m} \times {_G} = {W}\ \mathrm{{N}}"},
+        {"type": "latex", "content": r"W = mg"},
+        {"type": "latex", "content": rf"W = {m} \times {_G} = {W}\ \mathrm{{N}}"},
+        {"type": "text", "content": f"The resultant force acts {'upwards' if accel_up else 'downwards'}, so the unbalanced force is " + ("R − W:" if accel_up else "W − R:")},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"R - {W} = {m} \times {a}" if accel_up else rf"{W} - R = {m} \times {a}"},
+        {"type": "latex", "content": rf"R = {W} {'+' if accel_up else '-'} {F} = {R}\ \mathrm{{N}}"},
     ]
     wrong_sign = _r1(W - F) if accel_up else _r1(W + F)
     options_data = [
@@ -171,11 +175,14 @@ def gen_ew_find_acceleration(level="Higher"):
         f"Calculate the rate at which the lift is {change}."
     )
     working = [
-        {"type": "text", "content": f"The resultant force acts {'upwards' if accel_up else 'downwards'}:"},
-        {"type": "latex", "content": r"R - mg = ma" if accel_up else r"mg - R = ma"},
-        {"type": "latex", "content": rf"a = \frac{{R - mg}}{{m}}" if accel_up else rf"a = \frac{{mg - R}}{{m}}"},
-        {"type": "latex", "content": rf"a = \frac{{{R} - {W}}}{{{m}}}" if accel_up else rf"a = \frac{{{W} - {R}}}{{{m}}}"},
-        {"type": "latex", "content": rf"a = {a}\ \mathrm{{m/s^2}}"},
+        {"type": "latex", "content": r"W = mg"},
+        {"type": "latex", "content": rf"W = {m} \times {_G} = {W}\ \mathrm{{N}}"},
+        {"type": "latex", "content": r"W = mg"},
+        {"type": "latex", "content": rf"W = {m} \times {_G} = {W}\ \mathrm{{N}}"},
+        {"type": "text", "content": f"The resultant force acts {'upwards' if accel_up else 'downwards'}, so the unbalanced force is " + ("R − W:" if accel_up else "W − R:")},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{R} - {W} = {m} \times a" if accel_up else rf"{W} - {R} = {m} \times a"},
+        {"type": "latex", "content": rf"a = \frac{{{abs(_r1(R - W))}}}{{{m}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     diff = abs(_r1(R - W))
     options_data = [
@@ -216,11 +223,11 @@ def gen_ew_find_mass(level="Higher"):
         f"at a rate of {a} m/s². The scales read {R} N. Calculate the mass of the {name}."
     )
     working = [
-        {"type": "text", "content": f"The resultant force acts {'upwards' if accel_up else 'downwards'}:"},
-        {"type": "latex", "content": r"R = m(g + a)" if accel_up else r"R = m(g - a)"},
-        {"type": "latex", "content": rf"m = \frac{{R}}{{g + a}}" if accel_up else rf"m = \frac{{R}}{{g - a}}"},
-        {"type": "latex", "content": rf"m = \frac{{{R}}}{{{_G} + {a}}}" if accel_up else rf"m = \frac{{{R}}}{{{_G} - {a}}}"},
-        {"type": "latex", "content": rf"m = {m_calc}\ \mathrm{{kg}}"},
+        {"type": "text", "content": f"The resultant force acts {'upwards' if accel_up else 'downwards'}, so the unbalanced force is " + ("R − W, where W = mg:" if accel_up else "W − R, where W = mg:")},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{R} - (m \times {_G}) = m \times {a}" if accel_up else rf"(m \times {_G}) - {R} = m \times {a}"},
+        {"type": "latex", "content": rf"{R} = m \times ({_G} + {a})" if accel_up else rf"{R} = m \times ({_G} - {a})"},
+        {"type": "latex", "content": rf"m = \frac{{{R}}}{{{_r2(_G + a) if accel_up else _r2(_G - a)}}} = {m_calc}\ \mathrm{{kg}}"},
     ]
     options_data = [
         {"value": m_calc, "mistake": None, "working": working},
@@ -275,10 +282,12 @@ def gen_ew_uniform_accel_scenario(level="Higher"):
         correct_answer=R, unit="N",
         topic="Our Dynamic Universe", question_type="Effective Weight", level=level,
         working=[
+            {"type": "latex", "content": r"W = mg"},
+            {"type": "latex", "content": rf"W = {m} \times {_G} = {W}\ \mathrm{{N}}"},
             {"type": "text", "content": f"The resultant force acts {'upwards' if accel_up else 'downwards'}:"},
-            {"type": "latex", "content": r"R = mg + ma" if accel_up else r"R = mg - ma"},
-            {"type": "latex", "content": rf"R = ({m} \times {_G}) {'+' if accel_up else '-'} ({m} \times {a})"},
-            {"type": "latex", "content": rf"R = {R}\ \mathrm{{N}}"},
+            {"type": "latex", "content": r"F = ma"},
+            {"type": "latex", "content": rf"R - {W} = {m} \times {a}" if accel_up else rf"{W} - R = {m} \times {a}"},
+            {"type": "latex", "content": rf"R = {W} {'+' if accel_up else '-'} {F} = {R}\ \mathrm{{N}}"},
         ],
         notes=_NOTES,
         scaffold=[
@@ -326,8 +335,9 @@ def gen_ew_constant_velocity(level="Higher"):
         topic="Our Dynamic Universe", question_type="Effective Weight", level=level,
         working=[
             {"type": "text", "content": "With zero acceleration, the resultant force is zero, so the reading equals the true weight:"},
-            {"type": "latex", "content": r"R = mg"},
-            {"type": "latex", "content": rf"R = {m} \times {_G} = {W}\ \mathrm{{N}}"},
+            {"type": "latex", "content": r"W = mg"},
+            {"type": "latex", "content": rf"W = {m} \times {_G}"},
+            {"type": "latex", "content": rf"R = W = {W}\ \mathrm{{N}}"},
         ],
         notes=_NOTES,
     )
@@ -354,16 +364,22 @@ def gen_beyond_find_force(level="Higher"):
     F = _r1(m * a)
     force = _r1(W + F) if accel_up else _r1(W - F)
 
+    sym = "T" if ("tension" in force_name or "thrust" in force_name) else "R"
+
     question = (
         f"{noun} of mass {m} kg {clause}. It is moving {motion} and {change} at a rate of "
         f"{a} m/s²{note}. Calculate {force_name}."
     )
     working = [
-        {"type": "text", "content": f"The resultant force acts {'upwards' if accel_up else 'downwards'}:"},
+        {"type": "latex", "content": r"W = mg"},
+        {"type": "latex", "content": rf"W = {m} \times {g} = {W}\ \mathrm{{N}}"},
+        {"type": "latex", "content": r"W = mg"},
+        {"type": "latex", "content": rf"W = {m} \times {g} = {W}\ \mathrm{{N}}"},
+        {"type": "text", "content": f"Let {sym} be {force_name}. The resultant force acts {'upwards' if accel_up else 'downwards'}, so the unbalanced force is "
+                                    + (f"{sym} − W:" if accel_up else f"W − {sym}:")},
         {"type": "latex", "content": r"F = ma"},
-        {"type": "latex", "content": rf"{force_name} = mg {'+' if accel_up else '-'} ma"},
-        {"type": "latex", "content": rf"= ({m} \times {g}) {'+' if accel_up else '-'} ({m} \times {a})"},
-        {"type": "latex", "content": rf"= {force}\ \mathrm{{N}}"},
+        {"type": "latex", "content": rf"{sym} - {W} = {m} \times {a}" if accel_up else rf"{W} - {sym} = {m} \times {a}"},
+        {"type": "latex", "content": rf"{sym} = {W} {'+' if accel_up else '-'} {F} = {force}\ \mathrm{{N}}"},
     ]
     wrong_sign = _r1(W - F) if accel_up else _r1(W + F)
     options_data = [
@@ -404,10 +420,12 @@ def gen_beyond_find_accel(level="Higher"):
         f"{_cap(force_name)} is {force} N. Calculate the rate at which it is {change}."
     )
     working = [
+        {"type": "latex", "content": r"W = mg"},
+        {"type": "latex", "content": rf"W = {m} \times {g} = {W}\ \mathrm{{N}}"},
         {"type": "text", "content": f"The resultant force acts {'upwards' if accel_up else 'downwards'}:"},
-        {"type": "latex", "content": r"a = \frac{F}{m}"},
-        {"type": "latex", "content": rf"a = \frac{{{force} - {W}}}{{{m}}}" if accel_up else rf"a = \frac{{{W} - {force}}}{{{m}}}"},
-        {"type": "latex", "content": rf"a = {a}\ \mathrm{{m/s^2}}"},
+        {"type": "latex", "content": r"F = ma"},
+        {"type": "latex", "content": rf"{force} - {W} = {m} \times a" if accel_up else rf"{W} - {force} = {m} \times a"},
+        {"type": "latex", "content": rf"a = \frac{{{abs(_r1(force - W))}}}{{{m}}} = {a}\ \mathrm{{m/s^2}}"},
     ]
     diff = abs(_r1(force - W))
     options_data = [

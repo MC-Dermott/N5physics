@@ -22,7 +22,10 @@ _NOTES = """
   due to gravity (air resistance ignored).
 - At the top of its flight, an object thrown upward has a vertical velocity of exactly 0 m/s.
 
-$$v = u + at \\qquad v^2 = u^2 + 2as \\qquad s = ut + \\frac{1}{2}at^2 \\qquad s = \\frac{1}{2}(u+v)t$$
+$$v = u + at$$
+$$v^2 = u^2 + 2as$$
+$$s = ut + \\frac{1}{2}at^2$$
+$$s = \\frac{1}{2}(u+v)t$$
 
 | Symbol | Quantity | Unit |
 |---|---|---|
@@ -69,9 +72,9 @@ def gen_drop_time_from_height(level="Higher"):
     question = f"{obj} is dropped from rest from {start}, {s} m above {end}. Calculate the time taken to fall."
     working = [
         {"type": "text",  "content": "The object starts from rest (u = 0):"},
-        {"type": "latex", "content": r"s = ut + \tfrac{1}{2}gt^2 = \tfrac{1}{2}gt^2"},
-        {"type": "latex", "content": rf"t = \sqrt{{\dfrac{{2s}}{{g}}}} = \sqrt{{\dfrac{{2\times{s}}}{{9.8}}}}"},
-        {"type": "latex", "content": rf"t = {t}\ \mathrm{{s}}"},
+        {"type": "latex", "content": r"s = ut + \tfrac{1}{2}at^2"},
+        {"type": "latex", "content": rf"{s} = (0 \times t) + \tfrac{{1}}{{2}}\times9.8\times t^2"},
+        {"type": "latex", "content": rf"t = \sqrt{{\dfrac{{2\times{s}}}{{9.8}}}} = {t}\ \mathrm{{s}}"},
     ]
     options_data = [
         {"value": t, "mistake": None, "working": working},
@@ -102,9 +105,9 @@ def gen_drop_velocity_from_height(level="Higher"):
     question = f"{obj} is dropped from rest from {start}, {s} m above {end}. Calculate its velocity just before it reaches {end}."
     working = [
         {"type": "text",  "content": "The object starts from rest (u = 0):"},
-        {"type": "latex", "content": r"v^2 = u^2 + 2gs = 2gs"},
-        {"type": "latex", "content": rf"v = \sqrt{{2\times9.8\times{s}}}"},
-        {"type": "latex", "content": rf"v = {v}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": r"v^2 = u^2 + 2as"},
+        {"type": "latex", "content": rf"v^2 = 0^2 + 2\times9.8\times{s}"},
+        {"type": "latex", "content": rf"v = \sqrt{{2\times9.8\times{s}}} = {v}\ \mathrm{{m/s}}"},
     ]
     options_data = [
         {"value": v, "mistake": None, "working": working},
@@ -135,8 +138,8 @@ def gen_drop_height_from_time(level="Higher"):
     question = f"{obj} is dropped from rest from {start} and takes {t} s to reach {end}. Calculate how high above {end} it was dropped from."
     working = [
         {"type": "text",  "content": "The object starts from rest (u = 0):"},
-        {"type": "latex", "content": r"s = ut + \tfrac{1}{2}gt^2 = \tfrac{1}{2}gt^2"},
-        {"type": "latex", "content": rf"s = \tfrac{{1}}{{2}}\times9.8\times{t}^2"},
+        {"type": "latex", "content": r"s = ut + \tfrac{1}{2}at^2"},
+        {"type": "latex", "content": rf"s = (0 \times {t}) + \tfrac{{1}}{{2}}\times9.8\times{t}^2"},
         {"type": "latex", "content": rf"s = {s}\ \mathrm{{m}}"},
     ]
     options_data = [
@@ -169,10 +172,10 @@ def gen_throw_time_to_top(level="Higher"):
 
     question = f"{ctx} at {u} m/s. Calculate the time taken to reach its maximum height."
     working = [
-        {"type": "text",  "content": "At maximum height, the vertical velocity is zero:"},
-        {"type": "latex", "content": r"v = u - gt \;\Rightarrow\; 0 = u - gt"},
-        {"type": "latex", "content": rf"t = \dfrac{{u}}{{g}} = \dfrac{{{u}}}{{9.8}}"},
-        {"type": "latex", "content": rf"t = {t}\ \mathrm{{s}}"},
+        {"type": "text",  "content": "Taking upwards as positive, a = −9.8 m/s². At maximum height, the vertical velocity is zero:"},
+        {"type": "latex", "content": r"v = u + at"},
+        {"type": "latex", "content": rf"0 = {u} + (-9.8) \times t"},
+        {"type": "latex", "content": rf"t = \dfrac{{{u}}}{{9.8}} = {t}\ \mathrm{{s}}"},
     ]
     options_data = [
         {"value": t, "mistake": None, "working": working},
@@ -198,10 +201,10 @@ def gen_throw_max_height(level="Higher"):
 
     question = f"{ctx} at {u} m/s. Calculate the maximum height reached above its starting point."
     working = [
-        {"type": "text",  "content": "At maximum height, the vertical velocity is zero:"},
-        {"type": "latex", "content": r"v^2 = u^2 - 2gs \;\Rightarrow\; 0 = u^2 - 2gh"},
-        {"type": "latex", "content": rf"h = \dfrac{{u^2}}{{2g}} = \dfrac{{{u}^2}}{{2\times9.8}}"},
-        {"type": "latex", "content": rf"h = {h}\ \mathrm{{m}}"},
+        {"type": "text",  "content": "Taking upwards as positive, a = −9.8 m/s². At maximum height, the vertical velocity is zero:"},
+        {"type": "latex", "content": r"v^2 = u^2 + 2as"},
+        {"type": "latex", "content": rf"0^2 = {u}^2 + 2 \times (-9.8) \times s"},
+        {"type": "latex", "content": rf"s = \dfrac{{{u}^2}}{{2\times9.8}} = {h}\ \mathrm{{m}}"},
     ]
     options_data = [
         {"value": h, "mistake": None, "working": working},
@@ -231,10 +234,10 @@ def gen_throw_initial_velocity_from_height(level="Higher"):
 
     question = f"{ctx}, reaching a maximum height of {h} m above its starting point. Calculate its initial velocity."
     working = [
-        {"type": "text",  "content": "At maximum height, the vertical velocity is zero:"},
-        {"type": "latex", "content": r"v^2 = u^2 - 2gh \;\Rightarrow\; 0 = u^2 - 2gh"},
-        {"type": "latex", "content": rf"u = \sqrt{{2gh}} = \sqrt{{2\times9.8\times{h}}}"},
-        {"type": "latex", "content": rf"u = {u}\ \mathrm{{m/s}}"},
+        {"type": "text",  "content": "Taking upwards as positive, a = −9.8 m/s². At maximum height, the vertical velocity is zero:"},
+        {"type": "latex", "content": r"v^2 = u^2 + 2as"},
+        {"type": "latex", "content": rf"0^2 = u^2 + 2 \times (-9.8) \times {h}"},
+        {"type": "latex", "content": rf"u = \sqrt{{2\times9.8\times{h}}} = {u}\ \mathrm{{m/s}}"},
     ]
     options_data = [
         {"value": u, "mistake": None, "working": working},
@@ -267,10 +270,10 @@ def gen_throw_initial_velocity_from_total_time(level="Higher"):
         {"type": "text",  "content": "Since it lands at the same height it was launched from, the rise and fall take equal time:"},
         {"type": "latex", "content": r"t_{\text{up}} = \tfrac{T}{2}"},
         {"type": "latex", "content": rf"t_{{\text{{up}}}} = \tfrac{{{T}}}{{2}} = {_r2(T/2)}\ \mathrm{{s}}"},
-        {"type": "text",  "content": "At maximum height, vertical velocity = 0:"},
-        {"type": "latex", "content": r"v = u - g\,t_{\text{up}} \;\Rightarrow\; 0 = u - g\,t_{\text{up}}"},
-        {"type": "latex", "content": rf"u = g\,t_{{\text{{up}}}} = 9.8 \times {_r2(T/2)}"},
-        {"type": "latex", "content": rf"u = {u}\ \mathrm{{m/s}}"},
+        {"type": "text",  "content": "Taking upwards as positive, a = −9.8 m/s². At maximum height, vertical velocity = 0:"},
+        {"type": "latex", "content": r"v = u + at"},
+        {"type": "latex", "content": rf"0 = u + (-9.8) \times {_r2(T/2)}"},
+        {"type": "latex", "content": rf"u = 9.8 \times {_r2(T/2)} = {u}\ \mathrm{{m/s}}"},
     ]
     options_data = [
         {"value": u, "mistake": None, "working": working},
