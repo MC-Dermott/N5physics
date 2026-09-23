@@ -1198,7 +1198,7 @@ the *component* of weight along the slope (W sin θ, which does) — these expla
 whether you know which quantities depend on the angle and which don't.
 """,
 
-    ("Our Dynamic Universe", "Projectile Motion", "Same Height"): r"""
+    ("Our Dynamic Universe", "Projectile Motion", "5 — Exam Style: Same Height"): r"""
 **Example:** An athlete takes off with an initial velocity of 9.1 m/s at 24° to the
 horizontal, and lands at the same height.
 
@@ -1242,7 +1242,7 @@ $$R = 6.31\ \mathrm{m}$$
 when calculating the range.
 """,
 
-    ("Our Dynamic Universe", "Projectile Motion", "Given Height and Time"): r"""
+    ("Our Dynamic Universe", "Projectile Motion", "5 — Exam Style: Given Height and Time"): r"""
 **Example:** A shot is released at 12 m/s at 40° above the horizontal, at a height of 1.8 m
 above the ground. The maximum height reached is 4.70 m above the ground. The time between
 release and reaching this height is 0.76 s.
@@ -1288,7 +1288,7 @@ $$R = 16.0\ \mathrm{m}$$
 and giving only $t_{\text{down}}$ as the final answer.
 """,
 
-    ("Our Dynamic Universe", "Projectile Motion", "Time to Peak, then Range"): r"""
+    ("Our Dynamic Universe", "Projectile Motion", "5 — Exam Style: Time to Peak, then Range"): r"""
 **Example:** A skier leaves a ramp with a launch velocity of 16.0 m/s at 42.0° to the
 horizontal, landing on ground below the ramp. The skier takes a further 1.40 s to travel
 from the maximum height to the ground.
@@ -1333,7 +1333,7 @@ $$R = 29.7\ \mathrm{m}$$
 the range — this leaves out the horizontal distance covered while still rising.
 """,
 
-    ("Our Dynamic Universe", "Projectile Motion", "Time to Peak, then Height"): r"""
+    ("Our Dynamic Universe", "Projectile Motion", "5 — Exam Style: Time to Peak, then Height"): r"""
 **Example:** A student throws a wet sponge at a teacher, at 7.4 m/s at 30° above the
 horizontal, from a height of 1.5 m. The sponge takes a further 0.45 s to fall from its
 maximum height until it hits the teacher.
@@ -1381,7 +1381,7 @@ the quadratic formula, since vertical velocity = 0 at the top makes the fall fro
 simple $s = \tfrac{1}{2}gt^2$ calculation.
 """,
 
-    ("Our Dynamic Universe", "Projectile Motion", "Horizontal Distance Target"): r"""
+    ("Our Dynamic Universe", "Projectile Motion", "5 — Exam Style: Horizontal Distance Target"): r"""
 **Example:** A footballer kicks a ball from flat ground with an initial velocity of
 17.0 m/s at 24.0° to the horizontal, towards a crossbar 11 m away.
 
@@ -1426,7 +1426,7 @@ the ball is then kicked with a lower speed at the same angle, it is lower at *ev
 horizontal distance than before — so it would now pass **under** the crossbar.)
 """,
 
-    ("Our Dynamic Universe", "Projectile Motion", "Given Flight Time"): r"""
+    ("Our Dynamic Universe", "Projectile Motion", "5 — Exam Style: Given Flight Time"): r"""
 **Example:** A student throws a ball to a friend at 11.0 m/s at 36.0° above the horizontal,
 releasing it from a height of 1.60 m. The ball takes 1.53 s to travel from release to
 landing.
