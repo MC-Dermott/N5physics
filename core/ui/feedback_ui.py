@@ -1,5 +1,7 @@
 import streamlit as st
 
+from utils.notes import format_math, split_equations
+
 
 def _within_tolerance(user_val, target, tolerance=0.02):
     try:
@@ -43,9 +45,11 @@ def render_working(working):
     """Render a list of {type, content} working steps."""
     for step in working:
         if step["type"] == "latex":
-            st.latex(step["content"])
+            # One equation per line: split "A \Rightarrow B" / "A \qquad B" steps.
+            for equation in split_equations(step["content"]):
+                st.latex(equation)
         else:
-            st.write(step["content"])
+            st.markdown(format_math(step["content"]))
 
 
 def render_feedback(result, distractor, question, show_working=True):

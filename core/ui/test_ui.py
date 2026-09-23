@@ -7,6 +7,7 @@ import streamlit.components.v1 as components
 from core.engine.session_manager import reset_test
 from core.ui.feedback_ui import check_answer, render_feedback, render_working
 from core.ui.graph_mcq_ui import render_main_graph, render_option_grid
+from utils.notes import format_math
 
 _NUM_QUESTIONS = 5
 
@@ -43,7 +44,7 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None, 
 
         if example:
             with st.expander("💡 Example"):
-                st.markdown(example)
+                st.markdown(format_math(example))
         return
 
     # --- Summary screen ---

@@ -5,12 +5,13 @@ from core.ui.scaffold_ui import render_scaffold, render_widget
 from core.ui.graph_mcq_ui import render_main_graph, render_option_grid, render_correct_option
 from core.db.tracker import save_practice_attempt
 from core.data.examples import notes_for
+from utils.notes import format_math
 
 
 def _render_notes(question, label="📚 Notes"):
     if question.notes:
         with st.expander(label):
-            st.markdown(question.notes)
+            st.markdown(format_math(question.notes))
 
 
 _UNIT_HINT = "Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive."
@@ -230,7 +231,7 @@ def render_practice(topic, question_type, qualification, generate_fn, user_id=No
 
     if example:
         with st.expander("💡 Example"):
-            st.markdown(example)
+            st.markdown(format_math(example))
 
     question = quiz.get("current_question")
     if not question:

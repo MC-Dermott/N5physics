@@ -12,6 +12,7 @@ from core.ui.reports_ui import render_teacher_report
 from core.ui.student_dashboard_ui import render_student_dashboard
 from core.data.backgrounds import get_background_videos
 from core.data.examples import get_examples, get_canonical_question, notes_for, format_example
+from utils.notes import format_math
 
 st.set_page_config(page_title="Physics Practice", layout="centered")
 
@@ -265,7 +266,7 @@ canonical_question = get_canonical_question(generate_fn)
 notes = notes_for(canonical_question)
 if notes:
     with st.expander("📚 Notes"):
-        st.markdown(notes)
+        st.markdown(format_math(notes))
 
 example = get_examples(topic, question_type, sub_type=sub_type) or format_example(canonical_question)
 

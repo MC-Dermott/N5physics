@@ -436,7 +436,8 @@ _NOTES_VELOCITY = """
 - Velocity is a vector: the resultant displacement ÷ time taken. It has both a size
   and a direction.
 
-$$\\text{speed} = \\frac{\\text{distance}}{\\text{time}} \\qquad \\text{velocity} = \\frac{\\text{displacement}}{\\text{time}}$$
+$$\\text{speed} = \\frac{\\text{distance}}{\\text{time}}$$
+$$\\text{velocity} = \\frac{\\text{displacement}}{\\text{time}}$$
 
 For a journey made of more than one leg, the *distance* is the total length of the
 path travelled (simple addition), but the *displacement* is the straight-line

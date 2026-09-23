@@ -1,3 +1,5 @@
+import re
+
 NOTES = {
 
     "speed_distance_time": """
@@ -15,7 +17,8 @@ $$d = vt$$
 | t | Time | s (seconds) |
 
 **Rearrangements:**
-$$v = \\frac{d}{t} \\qquad t = \\frac{d}{v}$$
+$$v = \\frac{d}{t}$$
+$$t = \\frac{d}{v}$$
 
 **Unit conversions:**
 
@@ -85,7 +88,8 @@ $$V = IR$$
 | R | Resistance | Ω (Ohms) |
 
 **Rearrangements:**
-$$I = \\frac{V}{R} \\qquad R = \\frac{V}{I}$$
+$$I = \\frac{V}{R}$$
+$$R = \\frac{V}{I}$$
 
 **Prefix conversions:**
 
@@ -115,10 +119,12 @@ $$A = \\frac{N}{t}$$
 | t | Time | s (seconds) |
 
 **Rearrangements:**
-$$N = At \\qquad t = \\frac{N}{A}$$
+$$N = At$$
+$$t = \\frac{N}{A}$$
 
 **Time conversions:**
-$$1\\ \\text{minute} = 60\\ \\text{s} \\qquad 1\\ \\text{hour} = 3600\\ \\text{s}$$
+$$1\\ \\text{minute} = 60\\ \\text{s}$$
+$$1\\ \\text{hour} = 3600\\ \\text{s}$$
 
 **Worked Example:** A source undergoes 3000 nuclear decays in 60 s. Calculate its activity.
 $$A = \\frac{N}{t} = \\frac{3000}{60} = 50\\ \\mathrm{Bq}$$
@@ -136,8 +142,8 @@ $$\\text{distance travelled} = \\text{area between the line and the time-axis}$$
 This area is usually a rectangle, a triangle, or a shape made up of several rectangles and
 triangles added together.
 
-$$\\text{Area of rectangle} = \\text{length} \\times \\text{width} \\qquad
-\\text{Area of triangle} = \\tfrac{1}{2} \\times \\text{base} \\times \\text{height}$$
+$$\\text{Area of rectangle} = \\text{length} \\times \\text{width}$$
+$$\\text{Area of triangle} = \\tfrac{1}{2} \\times \\text{base} \\times \\text{height}$$
 
 **Worked Example (simple triangle):** A(0, 0), B(4, 8) — speeding up from rest.
 $$\\text{distance} = \\tfrac{1}{2} \\times 4 \\times 8 = 16\\ \\mathrm{m}$$
@@ -162,7 +168,8 @@ $$\\text{distance} = 18 + 48 + 18 = 84\\ \\mathrm{m}$$
 ## Acceleration from Speed-Time Graphs
 
 **The acceleration of an object is equal to the gradient (slope) of its speed-time graph.**
-$$a = \\frac{\\Delta v}{t} \\qquad \\Delta v = v - u$$
+$$a = \\frac{\\Delta v}{t}$$
+$$\\Delta v = v - u$$
 
 The steeper the line, the greater the size of the acceleration. A line sloping **upward**
 means the object is speeding up (positive acceleration); a line sloping **downward** means
@@ -170,11 +177,13 @@ it's slowing down (negative acceleration). A **flat, horizontal** section means 
 speed — zero acceleration.
 
 **Worked Example:** A(0, 0), B(4, 12).
-$$\\Delta v = v - u = 12 - 0 = 12\\ \\mathrm{m/s} \\qquad t = 4\\ \\mathrm{s}$$
+$$\\Delta v = v - u = 12 - 0 = 12\\ \\mathrm{m/s}$$
+$$t = 4\\ \\mathrm{s}$$
 $$a = \\frac{\\Delta v}{t} = \\frac{12}{4} = 3\\ \\mathrm{m/s^2}$$
 
 **Worked Example (slowing down):** A(0, 20), B(5, 0).
-$$\\Delta v = v - u = 0 - 20 = -20\\ \\mathrm{m/s} \\qquad t = 5\\ \\mathrm{s}$$
+$$\\Delta v = v - u = 0 - 20 = -20\\ \\mathrm{m/s}$$
+$$t = 5\\ \\mathrm{s}$$
 $$a = \\frac{\\Delta v}{t} = \\frac{-20}{5} = -4\\ \\mathrm{m/s^2}$$
 
 > **Important:** Always read the two points straight off the graph — the initial speed *u* is
@@ -192,10 +201,14 @@ $$a = \\frac{\\Delta v}{t} = \\frac{-20}{5} = -4\\ \\mathrm{m/s^2}$$
 the object moves at a constant velocity (or stays at rest) — Newton's First Law.
 
 **Key equations:**
-$$F_{\\text{unbalanced}} = F_{\\text{applied}} - F_{\\text{opposing}} \\qquad F = ma$$
+$$F_{\\text{unbalanced}} = F_{\\text{applied}} - F_{\\text{opposing}}$$
+$$F = ma$$
 
 For an object launching or lifting **vertically**, the opposing force is its own weight:
-$$F_{\\text{unbalanced}} = F_{\\text{applied}} - W \\qquad \\text{where } W = mg$$
+$$F_{\\text{unbalanced}} = F_{\\text{applied}} - W$$
+
+where
+$$W = mg$$
 
 **Worked Example:** A 500 kg rocket's engines produce 6000 N of thrust.
 $$W = mg = 500 \\times 9.8 = 4900\\ \\mathrm{N}$$
@@ -227,7 +240,9 @@ $$W = mg$$
 | m | Mass | kg |
 | g | Gravitational field strength | N/kg |
 
-**Rearrangements:** $$m = \\frac{W}{g} \\qquad g = \\frac{W}{m}$$
+**Rearrangements:**
+$$m = \\frac{W}{g}$$
+$$g = \\frac{W}{m}$$
 
 **Worked Example:** An object has a mass of 10 kg on Earth (g = 9.8 N/kg).
 $$W = mg = 10 \\times 9.8 = 98\\ \\mathrm{N}$$
@@ -300,7 +315,9 @@ $$a = \\frac{v - u}{t}$$
 | t | Time | s |
 
 **Rearrangements:**
-$$v - u = at \\qquad v = u + at \\qquad u = v - at$$
+$$v - u = at$$
+$$v = u + at$$
+$$u = v - at$$
 
 **Worked Example:** A car speeds up from 5 m/s to 20 m/s in 5 s. Calculate its acceleration.
 $$a = \\frac{v - u}{t} = \\frac{20 - 5}{5} = 3\\ \\mathrm{m/s^2}$$
@@ -331,7 +348,8 @@ $$F = ma$$
 | a | Acceleration | m/s² |
 
 **Rearrangements:**
-$$a = \\frac{F}{m} \\qquad m = \\frac{F}{a}$$
+$$a = \\frac{F}{m}$$
+$$m = \\frac{F}{a}$$
 
 **Worked Example:** Calculate the force needed to accelerate an 8 kg object at 3 m/s².
 $$F = ma = 8 \\times 3 = 24\\ \\mathrm{N}$$
@@ -356,7 +374,8 @@ $$W = mg$$
 | g | Gravitational field strength | N/kg |
 
 **Rearrangements:**
-$$m = \\frac{W}{g} \\qquad g = \\frac{W}{m}$$
+$$m = \\frac{W}{g}$$
+$$g = \\frac{W}{m}$$
 
 **Worked Example:** Calculate the weight of a 5 kg object on Earth ($g = 9.8$ N/kg).
 $$W = mg = 5 \\times 9.8 = 49\\ \\mathrm{N}$$
@@ -381,7 +400,8 @@ $$E_p = mgh$$
 | h | Height | m |
 
 **Rearrangements:**
-$$m = \\frac{E_p}{gh} \\qquad h = \\frac{E_p}{mg}$$
+$$m = \\frac{E_p}{gh}$$
+$$h = \\frac{E_p}{mg}$$
 
 **Worked Example:** A 2 kg object is raised 10 m ($g = 9.8$ N/kg). Calculate the gain in gravitational potential energy.
 $$E_p = mgh = 2 \\times 9.8 \\times 10 = 196\\ \\mathrm{J}$$
@@ -404,7 +424,8 @@ $$E_k = \\frac{1}{2}mv^2$$
 | v | Speed/velocity | m/s |
 
 **Rearrangements:**
-$$m = \\frac{2E_k}{v^2} \\qquad v = \\sqrt{\\frac{2E_k}{m}}$$
+$$m = \\frac{2E_k}{v^2}$$
+$$v = \\sqrt{\\frac{2E_k}{m}}$$
 
 **Worked Example:** A 3 kg ball moves at 4 m/s. Calculate its kinetic energy.
 $$E_k = \\frac{1}{2}mv^2 = \\frac{1}{2} \\times 3 \\times 4^2 = 24\\ \\mathrm{J}$$
@@ -437,7 +458,8 @@ $$E_W = Fd$$
 | d | Distance moved in direction of force | m |
 
 **Rearrangements:**
-$$F = \\frac{E_W}{d} \\qquad d = \\frac{E_W}{F}$$
+$$F = \\frac{E_W}{d}$$
+$$d = \\frac{E_W}{F}$$
 
 **Worked Example:** A 50 N force pushes an object 4 m in the direction of the force. Calculate the work done.
 $$E_W = Fd = 50 \\times 4 = 200\\ \\mathrm{J}$$
@@ -464,7 +486,8 @@ $$v = f\\lambda$$
 | $\\lambda$ | Wavelength | m |
 
 **Rearrangements:**
-$$f = \\frac{v}{\\lambda} \\qquad \\lambda = \\frac{v}{f}$$
+$$f = \\frac{v}{\\lambda}$$
+$$\\lambda = \\frac{v}{f}$$
 
 **Key values:**
 - Speed of light (all EM waves): $c = 3 \\times 10^8$ m/s
@@ -484,7 +507,8 @@ $$v = f\\lambda = 50 \\times 2 = 100\\ \\mathrm{m/s}$$
 - Frequency is the number of complete waves (cycles) per second.
 
 **Key equation:**
-$$T = \\frac{1}{f} \\qquad f = \\frac{1}{T}$$
+$$T = \\frac{1}{f}$$
+$$f = \\frac{1}{T}$$
 
 | Symbol | Quantity | Unit |
 |---|---|---|
@@ -522,7 +546,8 @@ $$I = \\frac{Q}{t}$$
 | t | Time | s (seconds) |
 
 **Rearrangements:**
-$$Q = It \\qquad t = \\frac{Q}{I}$$
+$$Q = It$$
+$$t = \\frac{Q}{I}$$
 
 **Worked Example:** 12 C of charge flows past a point in 4 s. Calculate the current.
 $$I = \\frac{Q}{t} = \\frac{12}{4} = 3\\ \\mathrm{A}$$
@@ -538,7 +563,9 @@ time, per second).
 
 **Three forms of the power equation:**
 
-$$P = VI \\qquad P = \\frac{V^2}{R} \\qquad P = I^2 R$$
+$$P = VI$$
+$$P = \\frac{V^2}{R}$$
+$$P = I^2 R$$
 
 | Symbol | Quantity | Unit |
 |---|---|---|
@@ -550,13 +577,16 @@ $$P = VI \\qquad P = \\frac{V^2}{R} \\qquad P = I^2 R$$
 **Useful rearrangements:**
 
 From $P = VI$:
-$$V = \\frac{P}{I} \\qquad I = \\frac{P}{V}$$
+$$V = \\frac{P}{I}$$
+$$I = \\frac{P}{V}$$
 
 From $P = \\frac{V^2}{R}$:
-$$V = \\sqrt{PR} \\qquad R = \\frac{V^2}{P}$$
+$$V = \\sqrt{PR}$$
+$$R = \\frac{V^2}{P}$$
 
 From $P = I^2 R$:
-$$I = \\sqrt{\\frac{P}{R}} \\qquad R = \\frac{P}{I^2}$$
+$$I = \\sqrt{\\frac{P}{R}}$$
+$$R = \\frac{P}{I^2}$$
 
 **Prefix conversions:**
 
@@ -588,7 +618,8 @@ $$P = \\frac{E}{t}$$
 | t | Time | s (seconds) |
 
 **Rearrangements:**
-$$E = Pt \\qquad t = \\frac{E}{P}$$
+$$E = Pt$$
+$$t = \\frac{E}{P}$$
 
 **Prefix conversions:**
 
@@ -598,7 +629,8 @@ $$E = Pt \\qquad t = \\frac{E}{P}$$
 | mega | MJ, MW | $\\times 10^{6}$ |
 
 **Time conversions:**
-$$1\\ \\text{minute} = 60\\ \\text{s} \\qquad 1\\ \\text{hour} = 3600\\ \\text{s}$$
+$$1\\ \\text{minute} = 60\\ \\text{s}$$
+$$1\\ \\text{hour} = 3600\\ \\text{s}$$
 
 **Worked Example:** A 100 W device runs for 60 s. Calculate the energy it transfers.
 $$E = Pt = 100 \\times 60 = 6000\\ \\mathrm{J}$$
@@ -710,7 +742,8 @@ $$\\frac{P_1}{T_1} = \\frac{P_2}{T_2}$$
 $$T(K) = T(°C) + 273$$
 
 **Worked Example:** A gas at 100 kPa occupies 2 m³. It is compressed at constant temperature to 1 m³. Calculate the new pressure.
-$$P_1 V_1 = P_2 V_2 \\quad\\Rightarrow\\quad P_2 = \\frac{P_1 V_1}{V_2} = \\frac{100 \\times 2}{1} = 200\\ \\mathrm{kPa}$$
+$$P_1 V_1 = P_2 V_2$$
+$$P_2 = \\frac{P_1 V_1}{V_2} = \\frac{100 \\times 2}{1} = 200\\ \\mathrm{kPa}$$
 
 > **Important:** Temperature MUST be in Kelvin for Charles's and Gay-Lussac's laws. Adding 273, not subtracting.
 """,
@@ -721,7 +754,8 @@ $$P_1 V_1 = P_2 V_2 \\quad\\Rightarrow\\quad P_2 = \\frac{P_1 V_1}{V_2} = \\frac
 **Definition:** Pressure is the force exerted per unit area.
 
 **Key equations:**
-$$P = \\frac{F}{A} \\qquad W = mg$$
+$$P = \\frac{F}{A}$$
+$$W = mg$$
 
 | Symbol | Quantity | Unit |
 |---|---|---|
@@ -733,7 +767,8 @@ $$P = \\frac{F}{A} \\qquad W = mg$$
 | g | Gravitational field strength | 9.8 N/kg |
 
 **Rearrangements:**
-$$F = PA \\qquad A = \\frac{F}{P}$$
+$$F = PA$$
+$$A = \\frac{F}{P}$$
 
 **Worked Example:** A force of 800 N acts on an area of 2 m². Calculate the pressure.
 $$P = \\frac{F}{A} = \\frac{800}{2} = 400\\ \\mathrm{Pa}$$
@@ -865,3 +900,51 @@ $$s_H = v_H \\times t = 10 \\times 2 = 20\\ \\mathrm{m}$$
 > **Important:** Horizontal speed stays constant throughout. Vertical speed starts at 0 and increases. Use area under v-t graph (triangle) for height: $s = \\frac{1}{2} \\times t \\times v_v$.
 """,
 }
+
+
+_DISPLAY_MATH = re.compile(r"\$\$(.+?)\$\$", re.S)
+
+# Separators that join two equations on one line: \qquad, "\Rightarrow" /
+# "\implies" chains, and ", \quad". A lone \quad (e.g. before a unit label) is
+# left alone.
+_EQUATION_SEPARATOR = re.compile(
+    r"\s*(?:,\s*)?(?:\\quad|\\;)?\s*\\(?:Rightarrow|implies)\s*(?:\\quad|\\;)?\s*"
+    r"|\s*,?\s*(?:\\qquad\s*)+"
+    r"|\s*,\s*\\quad\s*"
+)
+
+
+def split_equations(body):
+    """Split one display-math body into separate equations at top-level
+    separators (never inside {...}, so \text{...} labels stay intact)."""
+    parts, last = [], 0
+    for m in _EQUATION_SEPARATOR.finditer(body):
+        prefix = body[:m.start()]
+        if prefix.count("{") - prefix.count("\\{") != prefix.count("}") - prefix.count("\\}"):
+            continue
+        parts.append(body[last:m.start()])
+        last = m.end()
+    parts.append(body[last:])
+    return [p.strip() for p in parts if p.strip()]
+
+
+def format_math(md):
+    """Put every $$...$$ equation on its own fenced lines — one equation per
+    line — so st.markdown renders each as a centred display equation rather
+    than inline beside the preceding label or run together with the next.
+    Used for notes and worked examples."""
+    md = _DISPLAY_MATH.sub(lambda m: "$$" + " ".join(m.group(1).split()) + "$$", md)
+    out = []
+    for line in md.split("\n"):
+        if "$$" not in line:
+            out.append(line)
+            continue
+        prefix = "> " if line.lstrip().startswith(">") else ""
+        content = line.lstrip()[1:] if prefix else line
+        for seg in re.split(r"(\$\$.+?\$\$)", content):
+            if seg.startswith("$$") and seg.endswith("$$") and len(seg) > 4:
+                for eq in split_equations(seg[2:-2]):
+                    out += [prefix + "$$", prefix + eq, prefix + "$$"]
+            elif seg.strip():
+                out.append(prefix + seg.strip())
+    return "\n".join(out)

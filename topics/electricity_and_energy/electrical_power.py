@@ -19,7 +19,8 @@ $$P = \\frac{E}{t}$$
 > A 1000 W appliance uses 1000 J of electrical energy every second.
 
 **Rearrangements:**
-$$E = P \\times t \\qquad t = \\frac{E}{P}$$
+$$E = P \\times t$$
+$$t = \\frac{E}{P}$$
 """
 
 # All powers are multiples of 100 so E = P×t stays a clean integer.
