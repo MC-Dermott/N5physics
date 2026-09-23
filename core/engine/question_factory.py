@@ -62,7 +62,13 @@ from topics.dynamics.vectors_scalars       import gen_identify, gen_pairs
 from topics.dynamics.equations_of_motion   import generate_equations_of_motion
 from topics.dynamics.equations_of_motion_vertical import generate_equations_of_motion_vertical
 from topics.dynamics.graphs_of_motion      import generate_graphs_of_motion, generate_at_graph_velocity
-from topics.dynamics.special_relativity    import generate_special_relativity
+from topics.dynamics.special_relativity    import (
+    generate_special_relativity,
+    generate_relativity_velocity,
+    generate_relativity_time_dilation,
+    generate_relativity_length_contraction,
+    generate_relativity_definitions,
+)
 from topics.dynamics.gravitation           import generate_orbital_gravitation
 from topics.dynamics.projectile_higher     import (
     generate_projectile_a_same_height,
@@ -363,7 +369,12 @@ QUAL_REGISTRY = {
                 "Explain":                    generate_projectile_explain,
             },
             "Gravitation":         generate_orbital_gravitation,
-            "Special Relativity":  generate_special_relativity,
+            "Special Relativity": {
+                "Newtonian Relative Velocity": generate_relativity_velocity,
+                "Time Dilation":               generate_relativity_time_dilation,
+                "Length Contraction":          generate_relativity_length_contraction,
+                "Definitions and Explain":     generate_relativity_definitions,
+            },
         },
         "Particles and Waves": {
             "Standard Model": {

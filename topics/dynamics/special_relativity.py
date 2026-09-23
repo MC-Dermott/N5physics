@@ -704,3 +704,42 @@ def generate_special_relativity(level="Higher"):
     q = random.choice(_ALL_GENS)(level=level)
     q.metadata["widget_html"] = _WIDGET_HTML
     return q
+
+
+# ── Grouped generators, one per selectable sub-type in the app ──────────────
+
+_VELOCITY_GENS = [gen_relative_velocity_parallel, gen_relative_velocity_perpendicular]
+_TIME_DILATION_GENS = [gen_t_prime, gen_t_proper, gen_v_from_time_dilation]
+_LENGTH_CONTRACTION_GENS = [gen_l_prime, gen_l_proper, gen_v_from_length_contraction]
+_DEFINITIONS_GENS = [
+    gen_inertial_frame,
+    gen_postulate_light_speed,
+    gen_light_speed_moving_observer,
+    gen_einstein_postulates,
+    gen_who_is_right_clocks,
+    gen_who_is_right_muon,
+]
+
+
+def generate_relativity_velocity(level="Higher"):
+    q = random.choice(_VELOCITY_GENS)(level=level)
+    q.metadata["widget_html"] = _WIDGET_HTML
+    return q
+
+
+def generate_relativity_time_dilation(level="Higher"):
+    q = random.choice(_TIME_DILATION_GENS)(level=level)
+    q.metadata["widget_html"] = _WIDGET_HTML
+    return q
+
+
+def generate_relativity_length_contraction(level="Higher"):
+    q = random.choice(_LENGTH_CONTRACTION_GENS)(level=level)
+    q.metadata["widget_html"] = _WIDGET_HTML
+    return q
+
+
+def generate_relativity_definitions(level="Higher"):
+    q = random.choice(_DEFINITIONS_GENS)(level=level)
+    q.metadata["widget_html"] = _WIDGET_HTML
+    return q
