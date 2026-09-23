@@ -644,11 +644,11 @@ PAST_PAPERS = {
 
 
 def get_past_paper_entries(topic, question_type):
-    return PAST_PAPERS.get((topic, question_type), [])
+    return PAST_PAPERS.get((canonical_unit(topic), question_type), [])
 
 
 def has_past_papers(topic, question_type):
-    return bool(PAST_PAPERS.get((topic, question_type)))
+    return bool(get_past_paper_entries(topic, question_type))
 
 
 # ── Unit-level MCQ quiz ─────────────────────────────────────────────────────

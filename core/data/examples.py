@@ -12,10 +12,16 @@
 # isn't already the subject) give the answer. Purely conceptual/classification
 # examples (no equation to substitute into) are just explained in prose.
 #
+# Topics are keyed by the real SQA unit name (e.g. "Our Dynamic Universe"),
+# not the app's pacing split ("Our Dynamic Universe (Part 1)"/"(Part 2)") —
+# get_examples() strips that suffix via canonical_unit() before looking up.
+#
 # Question types with no hand-authored entry here fall back to derive_example()
 # below, which generates one automatically from the generator itself.
 
 import random
+
+from core.data.past_papers import canonical_unit
 
 EXAMPLES = {
     ("Our Dynamic Universe", "Towing", "Level 1 — One Trailer, No Friction"): r"""
@@ -23,24 +29,26 @@ EXAMPLES = {
 
 **(a) Calculate the acceleration.**
 
+Apply Newton's second law to the whole system (car + trailer):
+
 *Equation:*
-$$a = \frac{F}{m_c + m_t}$$
+$$F = ma$$
 
 *Substitute:*
-$$a = \frac{2500}{1000 + 250}$$
+$$2500 = (1000 + 250) \times a$$
 
-*Answer:*
-$$a = 2\ \mathrm{m/s^2}$$
+*Rearrange and solve:*
+$$a = \frac{2500}{1250} = 2.0\ \mathrm{m/s^2}$$
 
 **(b) Calculate the tension in the tow bar.**
 
-Considering the trailer alone (the only force on it is the tension):
+Consider the trailer alone — the only horizontal force on it is the tension T:
 
 *Equation:*
-$$T = m_t \times a$$
+$$F = ma$$
 
 *Substitute:*
-$$T = 250 \times 2$$
+$$T = 250 \times 2.0$$
 
 *Answer:*
 $$T = 500\ \mathrm{N}$$
@@ -52,27 +60,32 @@ on the car with 200 N and on the trailer with 100 N.
 
 **(a) Calculate the acceleration.**
 
+For the whole system, the unbalanced force is the driving force minus the total friction:
+
+$$F_{\text{unbalanced}} = 3000 - 200 - 100 = 2700\ \mathrm{N}$$
+
 *Equation:*
-$$a = \frac{F - f_c - f_t}{m_c + m_t}$$
+$$F = ma$$
 
 *Substitute:*
-$$a = \frac{3000 - 200 - 100}{1000 + 250}$$
+$$2700 = (1000 + 250) \times a$$
 
-*Answer:*
-$$a = 2.16\ \mathrm{m/s^2}$$
+*Rearrange and solve:*
+$$a = \frac{2700}{1250} = 2.16\ \mathrm{m/s^2}$$
 
 **(b) Calculate the tension in the tow bar.**
 
-Considering the trailer alone (tension forward, friction backward):
+Consider the trailer alone — tension T forward, friction backward, so the unbalanced force on it
+is $T - 100$:
 
 *Equation:*
-$$T = (m_t \times a) + f_t$$
+$$F = ma$$
 
 *Substitute:*
-$$T = (250 \times 2.16) + 100$$
+$$T - 100 = 250 \times 2.16$$
 
-*Answer:*
-$$T = 640\ \mathrm{N}$$
+*Rearrange and solve:*
+$$T = 540 + 100 = 640\ \mathrm{N}$$
 """,
 
     ("Our Dynamic Universe", "Towing", "Level 3 — Multiple Trailers, No Friction"): r"""
@@ -82,13 +95,13 @@ of 3000 N and no friction.
 **(a) Calculate the acceleration of the whole collection (car + both trailers).**
 
 *Equation:*
-$$a = \frac{F}{m_c + m_{t1} + m_{t2}}$$
+$$F = ma$$
 
 *Substitute:*
-$$a = \frac{3000}{1000 + 300 + 200}$$
+$$3000 = (1000 + 300 + 200) \times a$$
 
-*Answer:*
-$$a = 2\ \mathrm{m/s^2}$$
+*Rearrange and solve:*
+$$a = \frac{3000}{1500} = 2.0\ \mathrm{m/s^2}$$
 
 **(b) Calculate the tension in the tow bar connecting the car to the trailers.**
 
@@ -96,10 +109,10 @@ Treat the towed vehicles (trailer 1 + trailer 2) as a single group — the tow b
 **both** of them:
 
 *Equation:*
-$$T = (m_{t1} + m_{t2}) \times a$$
+$$F = ma$$
 
 *Substitute:*
-$$T = (300 + 200) \times 2$$
+$$T = (300 + 200) \times 2.0$$
 
 *Answer:*
 $$T = 1000\ \mathrm{N}$$
@@ -111,28 +124,32 @@ of 4000 N. Friction: 200 N on the car, 100 N on trailer 1, 50 N on trailer 2.
 
 **(a) Calculate the acceleration of the whole collection (car + both trailers).**
 
+The unbalanced force is the driving force minus the total friction:
+
+$$F_{\text{unbalanced}} = 4000 - 200 - 100 - 50 = 3650\ \mathrm{N}$$
+
 *Equation:*
-$$a = \frac{F - f_c - f_{t1} - f_{t2}}{m_c + m_{t1} + m_{t2}}$$
+$$F = ma$$
 
 *Substitute:*
-$$a = \frac{4000 - 200 - 100 - 50}{1000 + 300 + 200}$$
+$$3650 = (1000 + 300 + 200) \times a$$
 
-*Answer:*
-$$a = 2.43\ \mathrm{m/s^2}$$
+*Rearrange and solve:*
+$$a = \frac{3650}{1500} = 2.43\ \mathrm{m/s^2}$$
 
 **(b) Calculate the tension in the tow bar connecting the car to the trailers.**
 
 Treat the towed vehicles (trailer 1 + trailer 2) as a single group, opposed by both their
-friction forces:
+friction forces, so the unbalanced force on the group is $T - 100 - 50$:
 
 *Equation:*
-$$T = ((m_{t1} + m_{t2}) \times a) + f_{t1} + f_{t2}$$
+$$F = ma$$
 
 *Substitute:*
-$$T = (500 \times 2.43) + 100 + 50$$
+$$T - 100 - 50 = (300 + 200) \times 2.43$$
 
-*Answer:*
-$$T = 1365\ \mathrm{N}$$
+*Rearrange and solve:*
+$$T = 1215 + 150 = 1365\ \mathrm{N}$$
 """,
 
     ("Our Dynamic Universe", "Towing", "Level 5 — Exam Style"): r"""
@@ -521,13 +538,14 @@ constant acceleration of 2 m/s² for 4 s.
 
 *Calculate the final velocity.*
 
-The change in velocity equals the **area under** the acceleration-time graph:
+The **area under** the acceleration–time graph ($a \times t$) is the change in velocity, which
+is exactly the $at$ term in:
 
 *Equation:*
-$$\Delta v = a \times t \qquad v = u + \Delta v$$
+$$v = u + at$$
 
 *Substitute:*
-$$\Delta v = 2 \times 4 = 8\ \mathrm{m/s} \qquad v = 5 + 8$$
+$$v = 5 + (2 \times 4)$$
 
 *Answer:*
 $$v = 13\ \mathrm{m/s}$$
@@ -537,40 +555,79 @@ graph only gives the *change* in velocity, not the final velocity itself. If the
 than one stage, find the change in velocity for each stage in turn and add them on one at a time.
 """,
 
-    ("Our Dynamic Universe", "Special Relativity"): r"""
-**Example:** A spacecraft moves at $v = 0.6c$. An observer on board measures a proper time of
-10 s between two events.
+    ("Our Dynamic Universe", "Special Relativity", "Time Dilation"): r"""
+**Example:** A spacecraft moves at $v = 0.6c$ relative to an observer on Earth. An astronaut on
+board measures a time of 10 s between two events.
 
-*Calculate the dilated time measured by a stationary observer.*
+*Calculate the time between the events measured by the observer on Earth.*
 
 *Equation:*
-$$t' = \frac{t}{\sqrt{1 - \frac{v^2}{c^2}}}$$
+$$t' = \frac{t}{\sqrt{1 - \left(\frac{v}{c}\right)^2}}$$
 
 *Substitute:*
-$$t' = \frac{10}{\sqrt{1 - 0.6^2}}$$
+$$t' = \frac{10}{\sqrt{1 - \left(\frac{0.6c}{c}\right)^2}}$$
 
 *Answer:*
 $$t' = \frac{10}{0.8} = 12.5\ \mathrm{s}$$
 
-**Important:** t' > t (stationary observer measures a longer time), and l' < l (stationary
-observer measures a shorter length) — both formulae use the same factor √(1 − v²/c²).
+**Important:** t is the time measured by the observer moving *with* the events (the astronaut's
+own clock), so the stationary observer always measures the longer time: t' > t.
+""",
+
+    ("Our Dynamic Universe", "Special Relativity", "Length Contraction"): r"""
+**Example:** A spacecraft is 120 m long when measured at rest. It travels past the Earth at
+$v = 0.8c$.
+
+*Calculate the length of the spacecraft measured by an observer on Earth.*
+
+*Equation:*
+$$l' = l\sqrt{1 - \left(\frac{v}{c}\right)^2}$$
+
+*Substitute:*
+$$l' = 120 \times \sqrt{1 - \left(\frac{0.8c}{c}\right)^2}$$
+
+*Answer:*
+$$l' = 120 \times 0.6 = 72\ \mathrm{m}$$
+
+**Important:** l is the length measured at rest relative to the object, so the moving
+observer always measures the shorter length: l' < l. Both relativity equations use the same
+factor $\sqrt{1 - (v/c)^2}$ — it divides in time dilation and multiplies in length contraction.
 """,
 
     ("Our Dynamic Universe", "Gravitation"): r"""
-**Example:** Calculate the gravitational field strength at the surface of a planet with mass
-$M = 5.97 \times 10^{24}$ kg and radius $R = 6.37 \times 10^{6}$ m.
+**Example:** A satellite of mass 1200 kg orbits the Earth at a height of 400 km above the
+surface. The Earth has mass $5.97 \times 10^{24}$ kg and radius $6.37 \times 10^{6}$ m.
+
+**(a) Calculate the gravitational force between the satellite and the Earth.**
+
+r is measured from the **centre** of the Earth, so add the height (in metres) to the radius:
+
+$$r = 6.37 \times 10^{6} + 4.00 \times 10^{5} = 6.77 \times 10^{6}\ \mathrm{m}$$
 
 *Equation:*
-$$g = \frac{GM}{r^2}$$
+$$F = G\frac{m_1 m_2}{r^2}$$
 
 *Substitute:*
-$$g = \frac{6.674 \times 10^{-11} \times 5.97 \times 10^{24}}{(6.37 \times 10^{6})^2}$$
+$$F = 6.67 \times 10^{-11} \times \frac{5.97 \times 10^{24} \times 1200}{(6.77 \times 10^{6})^2}$$
 
 *Answer:*
-$$g = 9.8\ \mathrm{N/kg}$$
+$$F = 1.04 \times 10^{4}\ \mathrm{N}$$
 
-**Important:** r is measured from the **centre of the planet** ($r = R + h$), not the orbital
-height — always convert distances to metres before substituting.
+**(b) Calculate the gravitational field strength at this height.**
+
+The gravitational force is the satellite's weight at this height:
+
+*Equation:*
+$$W = mg$$
+
+*Substitute:*
+$$1.04 \times 10^{4} = 1200 \times g$$
+
+*Rearrange and solve:*
+$$g = 8.7\ \mathrm{N/kg}$$
+
+**Important:** always convert the height to metres and add the planet's radius before
+substituting — using the height alone for r is the most common mistake.
 """,
 
     ("Our Dynamic Universe", "Momentum and Impulse", "Momentum"): r"""
@@ -846,16 +903,16 @@ equation rearranges to find E ($E = Pt$) or t ($t = E \div P$).
 **Example:** An object is dropped from a height of 8.0 m. Assuming no energy is lost to air
 resistance, calculate the speed of the object just before it hits the ground.
 
-All the gravitational potential energy converts to kinetic energy:
+All the gravitational potential energy converts to kinetic energy, so $E_p = E_k$:
 
 *Equation:*
-$$mgh = \tfrac{1}{2}mv^2 \implies v = \sqrt{2gh}$$
+$$mgh = \tfrac{1}{2}mv^2$$
 
-*Substitute:*
-$$v = \sqrt{2 \times 9.8 \times 8.0}$$
+*Substitute* (the mass appears on both sides, so it cancels):
+$$9.8 \times 8.0 = \tfrac{1}{2}v^2$$
 
-*Answer:*
-$$v = 12.5\ \mathrm{m/s}$$
+*Rearrange and solve:*
+$$v = \sqrt{2 \times 9.8 \times 8.0} = 12.5\ \mathrm{m/s}$$
 
 **Important:** the mass cancels out of the equation entirely — the final speed of a
 free-falling object doesn't depend on its mass.
@@ -865,16 +922,17 @@ free-falling object doesn't depend on its mass.
 **Example:** A ball is thrown vertically upwards with an initial speed of 14 m/s. Assuming no
 energy is lost to air resistance, calculate the maximum height reached by the ball.
 
-All the kinetic energy converts to gravitational potential energy at maximum height:
+All the kinetic energy converts to gravitational potential energy at maximum height, so
+$E_k = E_p$:
 
 *Equation:*
-$$\tfrac{1}{2}mv^2 = mgh \implies h = \frac{v^2}{2g}$$
+$$\tfrac{1}{2}mv^2 = mgh$$
 
-*Substitute:*
-$$h = \frac{14^2}{2 \times 9.8}$$
+*Substitute* (the mass appears on both sides, so it cancels):
+$$\tfrac{1}{2} \times 14^2 = 9.8 \times h$$
 
-*Answer:*
-$$h = 10.0\ \mathrm{m}$$
+*Rearrange and solve:*
+$$h = \frac{98}{9.8} = 10.0\ \mathrm{m}$$
 
 **Important:** the mass cancels out of the equation, and at maximum height the ball's vertical
 velocity is momentarily zero — all its kinetic energy has been converted.
@@ -923,47 +981,39 @@ $$F = \frac{246}{8.0} = 31\ \mathrm{N}$$
 friction, and that lost energy equals the work done against the resistive force.
 """,
 
-    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Useful Power"): r"""
+    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Power"): r"""
 **Example:** A goods lift carries a load of mass 80 kg through a vertical height of 6.0 m in a
 time of 15 s, moving at constant speed.
 
 *Calculate the useful power developed.*
 
-At constant speed, the useful power equals the gravitational potential energy gained divided
-by the time taken:
+**Step 1 — identify and calculate the energy change.** At constant speed the load gains
+gravitational potential energy:
 
 *Equation:*
-$$E_p = mgh \qquad P = \frac{E_p}{t}$$
+$$E_p = mgh$$
 
 *Substitute:*
-$$E_p = 80 \times 9.8 \times 6.0 = 4704\ \mathrm{J} \qquad P = \frac{4704}{15}$$
+$$E_p = 80 \times 9.8 \times 6.0$$
 
 *Answer:*
-$$P = 313.6\ \mathrm{W}$$
+$$E_p = 4704\ \mathrm{J}$$
 
-**Important:** work out the GPE gained first, then divide by time — don't forget the height
-when calculating Ep.
-""",
-
-    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Engine Power"): r"""
-**Example:** A car's engine produces a driving force of 900 N while travelling at a constant
-speed of 15 m/s along a level road.
-
-*Calculate the power developed by the engine.*
-
-At constant speed, $E_W = Fd = F(vt)$, so $P = E_W \div t = Fv$:
+**Step 2 — power = energy change ÷ time:**
 
 *Equation:*
-$$P = Fv$$
+$$P = \frac{E}{t}$$
 
 *Substitute:*
-$$P = 900 \times 15$$
+$$P = \frac{4704}{15}$$
 
 *Answer:*
-$$P = 13\,500\ \mathrm{W}$$
+$$P = 314\ \mathrm{W}$$
 
-**Important:** this shortcut ($P = Fv$) only applies at **constant speed**, where the driving
-force exactly balances the resistive forces.
+**Important:** every power question here follows the same two steps — only *what* the energy
+change is differs. It might be a gain in $E_p$ (lifting), a change in $E_k$ (speeding up or
+slowing down), or the work done against friction ($E_W = Fd$, e.g. an engine at constant speed).
+Work that out first, then divide by the time.
 """,
 
     ("Our Dynamic Universe", "Effective Weight", "Lifts"): r"""
@@ -972,14 +1022,25 @@ upwards but slowing down at a rate of 1.5 m/s².
 
 *Calculate the reading R on the scales.*
 
-The lift moves upwards but is slowing down, so its acceleration acts downwards — the reading R
-is less than the weight W:
+**Step 1 — weight:**
 
 *Equation:*
-$$mg - R = ma$$
+$$W = mg$$
 
 *Substitute:*
-$$(70 \times 9.8) - R = 70 \times 1.5$$
+$$W = 70 \times 9.8$$
+
+*Answer:*
+$$W = 686\ \mathrm{N}$$
+
+**Step 2 — reading.** The lift moves upwards but is slowing down, so the acceleration (and the
+unbalanced force) acts **downwards**: the unbalanced force is $W - R$.
+
+*Equation:*
+$$F = ma$$
+
+*Substitute:*
+$$686 - R = 70 \times 1.5$$
 
 *Rearrange and solve:*
 $$R = 686 - 105 = 581\ \mathrm{N}$$
@@ -1020,22 +1081,33 @@ different from mg.
 **Example:** A rocket of mass 500 kg is launched vertically. It is moving upwards and speeding
 up at a rate of 6.0 m/s². Calculate the thrust force needed.
 
-The resultant force acts upwards (in the direction of the acceleration), so the thrust must
-overcome the weight *and* provide the extra force for the acceleration:
+**Step 1 — weight:**
 
 *Equation:*
-$$F = mg + ma$$
+$$W = mg$$
 
 *Substitute:*
-$$F = (500 \times 9.8) + (500 \times 6.0)$$
+$$W = 500 \times 9.8$$
 
 *Answer:*
-$$F = 4900 + 3000 = 7900\ \mathrm{N}$$
+$$W = 4900\ \mathrm{N}$$
+
+**Step 2 — thrust.** The acceleration acts upwards, so the unbalanced force is the thrust
+minus the weight:
+
+*Equation:*
+$$F = ma$$
+
+*Substitute:*
+$$\text{Thrust} - 4900 = 500 \times 6.0$$
+
+*Rearrange and solve:*
+$$\text{Thrust} = 4900 + 3000 = 7900\ \mathrm{N}$$
 
 **Important:** this is the same reasoning as a lift, applied to any supporting or driving
 force — a crane cable, a rocket's thrust, or the force a drone's platform exerts on a parcel.
-Work out the weight first, then add or subtract ma depending on which way the resultant force
-(and so the acceleration) acts.
+Work out the weight first, then decide which way the unbalanced force (and so the
+acceleration) acts.
 """,
 
     ("Our Dynamic Universe", "Effective Weight", "Beyond Lifts — Explain Free Fall"): r"""
@@ -1081,13 +1153,13 @@ horizontal component exactly balances the pull of Rope A.
 Since the ropes balance, the horizontal component of Rope B's tension equals Rope A's pull:
 
 *Equation:*
-$$F_x = T\cos\theta \implies T = \frac{F_x}{\cos\theta}$$
+$$F_x = T\cos\theta$$
 
 *Substitute:*
-$$T = \frac{120}{\cos35°}$$
+$$120 = T\cos35°$$
 
-*Answer:*
-$$T = 146.5\ \mathrm{N}$$
+*Rearrange and solve:*
+$$T = \frac{120}{\cos35°} = 146.5\ \mathrm{N}$$
 
 **Example (force from acceleration):** A trailer of mass 200 kg is pulled across level ground
 by a horizontal force of 300 N.
@@ -1095,16 +1167,16 @@ by a horizontal force of 300 N.
 *Calculate the acceleration of the trailer.*
 
 *Equation:*
-$$F = ma \implies a = \frac{F}{m}$$
+$$F = ma$$
 
 *Substitute:*
-$$a = \frac{300}{200}$$
+$$300 = 200 \times a$$
 
-*Answer:*
+*Rearrange and solve:*
 $$a = 1.5\ \mathrm{m/s^2}$$
 
-**Important:** the same F = ma reasoning also applies vertically — e.g. a crane lifting a load
-that is accelerating upwards needs $T = W + ma$, where W = mg is the weight.
+**Important:** the same F = ma reasoning also applies vertically — e.g. for a crane lifting a
+load that is accelerating upwards, the unbalanced force is $T - W$, where W = mg is the weight.
 """,
 
     ("Our Dynamic Universe", "Components of Vectors", "Level 3 — Weight on a Slope"): r"""
@@ -1143,15 +1215,22 @@ with a force of 20 N, opposing the motion.
 
 *Calculate the acceleration of the crate.*
 
+**Step 1 — weight and its component down the slope:**
+
+$$W = mg = 15 \times 9.8 = 147\ \mathrm{N}$$
+$$W_{\parallel} = W\sin\theta = 147 \times \sin30° = 73.5\ \mathrm{N}$$
+
+**Step 2 — acceleration.** Down the slope, the unbalanced force is $W_{\parallel}$ minus
+friction:
+
 *Equation:*
-$$W = mg \qquad W_{\parallel} = W\sin\theta \qquad a = \frac{W_{\parallel} - \text{friction}}{m}$$
+$$F = ma$$
 
 *Substitute:*
-$$W = 15 \times 9.8 = 147\ \mathrm{N} \qquad W_{\parallel} = 147 \times \sin30° = 73.5\ \mathrm{N}$$
-$$a = \frac{73.5 - 20}{15}$$
+$$73.5 - 20 = 15 \times a$$
 
-*Answer:*
-$$a = 3.57\ \mathrm{m/s^2}$$
+*Rearrange and solve:*
+$$a = \frac{53.5}{15} = 3.57\ \mathrm{m/s^2}$$
 
 **Important:** sliding *down* a slope, friction acts *up* the slope (opposing the motion), so
 it is subtracted from W∥. The same setup can instead ask for the friction force (rearranging,
@@ -1164,18 +1243,22 @@ slides up, a friction force of 15 N acts on the crate, opposing the motion.
 
 *Calculate the deceleration of the crate.*
 
-Moving up the slope, both the parallel weight component **and** friction act down the slope,
-opposing the motion, so they add together:
+**Step 1 — weight and its component down the slope:**
+
+$$W = mg = 12 \times 9.8 = 117.6\ \mathrm{N}$$
+$$W_{\parallel} = W\sin\theta = 117.6 \times \sin20° = 40.2\ \mathrm{N}$$
+
+**Step 2 — deceleration.** Moving up the slope, both $W_{\parallel}$ **and** friction act down
+the slope, opposing the motion, so they add together to give the unbalanced force:
 
 *Equation:*
-$$W = mg \qquad W_{\parallel} = W\sin\theta \qquad a = \frac{W_{\parallel} + \text{friction}}{m}$$
+$$F = ma$$
 
 *Substitute:*
-$$W = 12 \times 9.8 = 117.6\ \mathrm{N} \qquad W_{\parallel} = 117.6 \times \sin20° = 40.2\ \mathrm{N}$$
-$$a = \frac{40.2 + 15}{12}$$
+$$40.2 + 15 = 12 \times a$$
 
-*Answer:*
-$$a = 4.6\ \mathrm{m/s^2}$$
+*Rearrange and solve:*
+$$a = \frac{55.2}{12} = 4.6\ \mathrm{m/s^2}$$
 
 **Common exam trap:** the direction friction acts depends on which way the object is *moving*,
 not which way it's accelerating — sliding up, friction always acts down the slope, whether the
@@ -1215,28 +1298,31 @@ $$v_H = 9.1\cos24° \qquad v_V = 9.1\sin24°$$
 *Answer:*
 $$v_H = 8.31\ \mathrm{m/s} \qquad v_V = 3.70\ \mathrm{m/s}$$
 
-**Step 2 — total time of flight.** Landing and launch heights are equal, so descent takes
-just as long as ascent:
+**Step 2 — total time of flight.** Vertically, up to the highest point: $u = 3.70$ m/s,
+$v = 0$, $a = -9.8$ m/s².
 
 *Equation:*
-$$t_{\text{up}} = \frac{v_V}{g} \qquad t_{\text{total}} = 2t_{\text{up}}$$
+$$v = u + at$$
 
 *Substitute:*
-$$t_{\text{up}} = \frac{3.70}{9.8} \qquad t_{\text{total}} = 2 \times 0.38$$
+$$0 = 3.70 + (-9.8) \times t_{\text{up}}$$
 
-*Answer:*
-$$t_{\text{total}} = 0.76\ \mathrm{s}$$
+*Rearrange and solve:*
+$$t_{\text{up}} = 0.378\ \mathrm{s}$$
 
-**Step 3 — range:**
+Landing and launch heights are equal, so the descent takes just as long as the ascent:
+$$t_{\text{total}} = 2 \times 0.378 = 0.756\ \mathrm{s}$$
+
+**Step 3 — range.** Horizontal velocity is constant:
 
 *Equation:*
-$$R = v_H \times t_{\text{total}}$$
+$$s = vt$$
 
 *Substitute:*
-$$R = 8.31 \times 0.76$$
+$$s = 8.31 \times 0.756$$
 
 *Answer:*
-$$R = 6.31\ \mathrm{m}$$
+$$s = 6.28\ \mathrm{m}$$
 
 **Most common mistake:** using $t_{\text{up}}$ instead of $t_{\text{total}} = 2t_{\text{up}}$
 when calculating the range.
@@ -1244,8 +1330,8 @@ when calculating the range.
 
     ("Our Dynamic Universe", "Projectile Motion", "5 — Exam Style: Given Height and Time"): r"""
 **Example:** A shot is released at 12 m/s at 40° above the horizontal, at a height of 1.8 m
-above the ground. The maximum height reached is 4.70 m above the ground. The time between
-release and reaching this height is 0.76 s.
+above the ground. The maximum height reached is 4.84 m above the ground. The time between
+release and reaching this height is 0.79 s.
 
 *Calculate the total time between release and hitting the ground, then the range.*
 
@@ -1261,28 +1347,31 @@ $$v_H = 12\cos40° \qquad v_V = 12\sin40°$$
 $$v_H = 9.19\ \mathrm{m/s} \qquad v_V = 7.71\ \mathrm{m/s}$$
 
 **Step 2 — total time.** Both the maximum height and the time to reach it are *given* — no
-need to derive either. At the top, vertical velocity = 0, so use $s = \tfrac{1}{2}gt^2$ to
-find the time to fall the given 4.70 m, then add the given rise time:
+need to derive either. From the highest point the vertical velocity is zero, so falling the
+given 4.84 m: $u = 0$, $s = -4.84$ m, $a = -9.8$ m/s².
 
 *Equation:*
-$$t_{\text{down}} = \sqrt{\frac{2H_{\text{top}}}{g}} \qquad t_{\text{total}} = t_{\text{up}} + t_{\text{down}}$$
+$$s = ut + \tfrac{1}{2}at^2$$
 
 *Substitute:*
-$$t_{\text{down}} = \sqrt{\frac{2 \times 4.70}{9.8}} \qquad t_{\text{total}} = 0.76 + 0.98$$
+$$-4.84 = (0 \times t) + \tfrac{1}{2} \times (-9.8) \times t_{\text{down}}^2$$
 
-*Answer:*
-$$t_{\text{total}} = 1.74\ \mathrm{s}$$
+*Rearrange and solve:*
+$$t_{\text{down}} = 0.99\ \mathrm{s}$$
 
-**Step 3 — range:**
+Add the given rise time:
+$$t_{\text{total}} = 0.79 + 0.99 = 1.78\ \mathrm{s}$$
+
+**Step 3 — range.** Horizontal velocity is constant:
 
 *Equation:*
-$$R = v_H \times t_{\text{total}}$$
+$$s = vt$$
 
 *Substitute:*
-$$R = 9.19 \times 1.74$$
+$$s = 9.19 \times 1.78$$
 
 *Answer:*
-$$R = 16.0\ \mathrm{m}$$
+$$s = 16.4\ \mathrm{m}$$
 
 **Most common mistake:** forgetting to add the given rise time to the calculated fall time,
 and giving only $t_{\text{down}}$ as the final answer.
@@ -1306,28 +1395,30 @@ $$v_H = 16.0\cos42.0° \qquad v_V = 16.0\sin42.0°$$
 *Answer:*
 $$v_H = 11.9\ \mathrm{m/s} \qquad v_V = 10.7\ \mathrm{m/s}$$
 
-**Step 2 — time to reach maximum height:**
+**Step 2 — time to reach maximum height.** Vertically: $u = 10.7$ m/s, $v = 0$,
+$a = -9.8$ m/s².
 
 *Equation:*
-$$v = u + at \implies 0 = v_V - gt_{\text{up}}$$
+$$v = u + at$$
 
 *Substitute:*
-$$0 = 10.7 - 9.8\,t_{\text{up}}$$
+$$0 = 10.7 + (-9.8) \times t_{\text{up}}$$
 
-*Answer:*
+*Rearrange and solve:*
 $$t_{\text{up}} = 1.09\ \mathrm{s}$$
 
 **Step 3 — horizontal distance**, using the total time of flight (the 1.40 s falling from
 the top is given, so just add it to $t_{\text{up}}$):
+$$t_{\text{total}} = 1.09 + 1.40 = 2.49\ \mathrm{s}$$
 
 *Equation:*
-$$R = v_H \times (t_{\text{up}} + t_2)$$
+$$s = vt$$
 
 *Substitute:*
-$$R = 11.9 \times (1.09 + 1.40)$$
+$$s = 11.9 \times 2.49$$
 
 *Answer:*
-$$R = 29.7\ \mathrm{m}$$
+$$s = 29.6\ \mathrm{m}$$
 
 **Most common mistake:** using only the given 1.40 s (instead of $t_{\text{up}} + t_2$) for
 the range — this leaves out the horizontal distance covered while still rising.
@@ -1351,34 +1442,46 @@ $$v_H = 7.4\cos30° \qquad v_V = 7.4\sin30°$$
 *Answer:*
 $$v_H = 6.41\ \mathrm{m/s} \qquad v_V = 3.7\ \mathrm{m/s}$$
 
-**Step 2 — time to reach maximum height:**
+**Step 2 — time to reach maximum height.** Vertically: $u = 3.7$ m/s, $v = 0$,
+$a = -9.8$ m/s².
 
 *Equation:*
-$$t_{\text{up}} = \frac{v_V}{g}$$
+$$v = u + at$$
 
 *Substitute:*
-$$t_{\text{up}} = \frac{3.7}{9.8}$$
+$$0 = 3.7 + (-9.8) \times t_{\text{up}}$$
 
-*Answer:*
+*Rearrange and solve:*
 $$t_{\text{up}} = 0.38\ \mathrm{s}$$
 
-**Step 3 — height above the ground.** The sponge rises $v_V^2 \div 2g = 0.70\ \mathrm{m}$
-above the launch point, so its height above the ground at the top is
-$H_{\text{top}} = 1.5 + 0.70 = 2.20\ \mathrm{m}$. In the given 0.45 s falling from there:
+**Step 3 — height of the highest point above the ground.** Rising to the top: $u = 3.7$ m/s,
+$v = 0$, $a = -9.8$ m/s².
 
 *Equation:*
-$$s = \tfrac{1}{2}gt_2^2 \qquad h = H_{\text{top}} - s$$
+$$v^2 = u^2 + 2as$$
 
 *Substitute:*
-$$s = \tfrac{1}{2} \times 9.8 \times 0.45^2 \qquad h = 2.20 - 0.99$$
+$$0^2 = 3.7^2 + 2 \times (-9.8) \times s$$
+
+*Rearrange and solve:*
+$$s = 0.70\ \mathrm{m} \quad\Rightarrow\quad H_{\text{top}} = 1.5 + 0.70 = 2.20\ \mathrm{m}$$
+
+**Step 4 — height after the given 0.45 s falling.** From the top: $u = 0$, $t = 0.45$ s,
+$a = -9.8$ m/s².
+
+*Equation:*
+$$s = ut + \tfrac{1}{2}at^2$$
+
+*Substitute:*
+$$s = (0 \times 0.45) + \tfrac{1}{2} \times (-9.8) \times 0.45^2$$
 
 *Answer:*
-$$h = 1.21\ \mathrm{m}$$
+$$s = -0.99\ \mathrm{m} \quad\Rightarrow\quad h = 2.20 + (-0.99) = 1.21\ \mathrm{m}$$
 
 **Most common mistake:** forgetting to add the launch height when finding $H_{\text{top}}$,
-or solving $h = v_V t - \tfrac{1}{2}gt^2$ directly for $t$ — Higher Physics never requires
-the quadratic formula, since vertical velocity = 0 at the top makes the fall from there a
-simple $s = \tfrac{1}{2}gt^2$ calculation.
+or trying to solve $s = ut + \tfrac{1}{2}at^2$ from launch directly for $t$ — Higher Physics
+never requires the quadratic formula, since vertical velocity = 0 at the top makes the fall
+from there a simple calculation with $u = 0$.
 """,
 
     ("Our Dynamic Universe", "Projectile Motion", "5 — Exam Style: Horizontal Distance Target"): r"""
@@ -1398,32 +1501,33 @@ $$v_H = 17.0\cos24.0° \qquad v_V = 17.0\sin24.0°$$
 *Answer:*
 $$v_H = 15.5\ \mathrm{m/s} \qquad v_V = 6.91\ \mathrm{m/s}$$
 
-**Step 2 — time to reach the crossbar** (horizontal velocity is constant):
+**Step 2 — time to reach the crossbar.** Horizontal velocity is constant:
 
 *Equation:*
-$$t = \frac{x}{v_H}$$
+$$s = vt$$
 
 *Substitute:*
-$$t = \frac{11}{15.5}$$
+$$11 = 15.5 \times t$$
 
-*Answer:*
-$$t = 0.71\ \mathrm{s}$$
+*Rearrange and solve:*
+$$t = 0.710\ \mathrm{s}$$
 
-**Step 3 — height at this time:**
+**Step 3 — height at this time.** Vertically: $u = 6.91$ m/s, $t = 0.710$ s,
+$a = -9.8$ m/s².
 
 *Equation:*
-$$s = v_V t - \tfrac{1}{2}gt^2$$
+$$s = ut + \tfrac{1}{2}at^2$$
 
 *Substitute:*
-$$s = 6.91 \times 0.71 - \tfrac{1}{2} \times 9.8 \times 0.71^2$$
+$$s = (6.91 \times 0.710) + \tfrac{1}{2} \times (-9.8) \times 0.710^2$$
 
 *Answer:*
-$$s = 2.43\ \mathrm{m}$$
+$$s = 2.44\ \mathrm{m}$$
 
 **Most common mistake:** using the full initial speed instead of $v_H$ when finding the time
-to reach the target, or forgetting the $-\tfrac{1}{2}gt^2$ term when finding the height. (If
-the ball is then kicked with a lower speed at the same angle, it is lower at *every*
-horizontal distance than before — so it would now pass **under** the crossbar.)
+to reach the target, or forgetting that $a = -9.8$ m/s² makes the $\tfrac{1}{2}at^2$ term
+negative. (If the ball is then kicked with a lower speed at the same angle, it is lower at
+*every* horizontal distance than before — so it would now pass **under** the crossbar.)
 """,
 
     ("Our Dynamic Universe", "Projectile Motion", "5 — Exam Style: Given Flight Time"): r"""
@@ -1446,31 +1550,37 @@ $$v_H = 11.0\cos36.0° \qquad v_V = 11.0\sin36.0°$$
 *Answer:*
 $$v_H = 8.90\ \mathrm{m/s} \qquad v_V = 6.47\ \mathrm{m/s}$$
 
-**Step 2 — horizontal distance.** The total flight time is given directly, so:
+**Step 2 — horizontal distance.** The total flight time is given directly, and horizontal
+velocity is constant:
 
 *Equation:*
-$$R = v_H \times T$$
+$$s = vt$$
 
 *Substitute:*
-$$R = 8.90 \times 1.53$$
+$$s = 8.90 \times 1.53$$
 
 *Answer:*
-$$R = 13.6\ \mathrm{m}$$
+$$s = 13.6\ \mathrm{m}$$
 
 **Step 3 — height above the friend's reach**, using the *different* given time (measured
-from release, not from the peak):
+from release, not from the peak). Vertically: $u = 6.47$ m/s, $t = 0.95$ s, $a = -9.8$ m/s².
 
 *Equation:*
-$$s = h + v_V t - \tfrac{1}{2}gt^2 \qquad h_{\text{gap}} = s - \text{reach}$$
+$$s = ut + \tfrac{1}{2}at^2$$
 
 *Substitute:*
-$$s = 1.60 + 6.47 \times 0.95 - \tfrac{1}{2} \times 9.8 \times 0.95^2 \qquad h_{\text{gap}} = 3.32 - 2.10$$
+$$s = (6.47 \times 0.95) + \tfrac{1}{2} \times (-9.8) \times 0.95^2$$
 
 *Answer:*
-$$h_{\text{gap}} = 1.22\ \mathrm{m}$$
+$$s = 1.72\ \mathrm{m}$$
+
+This is the displacement above the release point, so the ball's height above the ground is
+$1.60 + 1.72 = 3.32$ m, and the gap above the friend's reach is:
+$$h = 3.32 - 2.10 = 1.22\ \mathrm{m}$$
 
 **Most common mistake:** giving the ball's height above the *ground* as the final answer,
-forgetting to subtract the friend's reach to get the height above their outstretched hand.
+forgetting to subtract the friend's reach to get the height above their outstretched hand —
+or forgetting to add the release height to the displacement first.
 """,
 
     ("Particles and Waves", "Standard Model", "Particle Classification"): r"""
@@ -1579,6 +1689,7 @@ permanent magnet cannot be turned off.
 
 
 def get_examples(topic, question_type, sub_type=None):
+    topic = canonical_unit(topic)
     if sub_type is not None:
         example = EXAMPLES.get((topic, question_type, sub_type))
         if example is not None:
