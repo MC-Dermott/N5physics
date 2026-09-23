@@ -812,6 +812,34 @@ _EXPLAIN_CASES = [
         "at the second hill, so it cannot reach the same height (the Ep available is less).",
     ),
     (
+        "A ball is dropped onto the ground and bounces. Why does it not bounce back up to the height it "
+        "was dropped from?",
+        "Some energy is converted into heat and sound when it hits the ground, so there is less energy to become Ep.",
+        ["The ball's mass decreases when it bounces.",
+         "Gravitational field strength is stronger on the way up.",
+         "All of the kinetic energy is converted back into Ep, but gravity pulls it down early."],
+        "Energy is converted into heat and sound in the collision with the ground (and by air resistance). "
+        "The ball has less energy after the bounce, so less can be converted back into Ep — it cannot "
+        "reach its original height.",
+    ),
+    (
+        "A {mover} doubles its speed. The same braking force is used to stop it. What happens to the "
+        "braking distance?",
+        "It is four times longer",
+        ["It doubles", "It stays the same", "It halves"],
+        "Ek = ½mv², so doubling v makes Ek four times bigger. The brakes must do four times as much work "
+        "(Ew = Fd). F is the same, so d must be four times bigger.",
+    ),
+    (
+        "A cyclist freewheels down a hill. Which change would reduce the energy lost on the way down?",
+        "Crouching into a streamlined position to reduce air resistance.",
+        ["Sitting upright to catch more air.",
+         "Letting some air out of the tyres.",
+         "Carrying a heavier rucksack."],
+        "Less air resistance (streamlining) and less friction (oiled chain, pumped-up tyres) mean less energy "
+        "is converted into heat, so more of the Ep becomes Ek.",
+    ),
+    (
         "A ball is thrown vertically upwards. What is its kinetic energy at the maximum height?",
         "Zero",
         ["At its greatest value", "Equal to its kinetic energy at launch"],
