@@ -65,8 +65,12 @@ from topics.dynamics.graphs_of_motion      import generate_graphs_of_motion, gen
 from topics.dynamics.special_relativity    import generate_special_relativity
 from topics.dynamics.gravitation           import generate_orbital_gravitation
 from topics.dynamics.projectile_higher     import (
-    generate_projectile_height,
-    generate_projectile_time,
+    generate_projectile_a_same_height,
+    generate_projectile_b_given_height_time,
+    generate_projectile_c_time_then_range,
+    generate_projectile_d_time_then_height,
+    generate_projectile_e_horizontal_backwards,
+    generate_projectile_f_given_time_clearance,
     generate_projectile_explain,
 )
 from topics.dynamics.towing                import (
@@ -350,9 +354,13 @@ QUAL_REGISTRY = {
         },
         "Our Dynamic Universe (Part 2)": {
             "Projectile Motion": {
-                "Height Above the Ground": generate_projectile_height,
-                "Time to Fall a Distance": generate_projectile_time,
-                "Explain":                 generate_projectile_explain,
+                "Same Height":                generate_projectile_a_same_height,
+                "Given Height and Time":      generate_projectile_b_given_height_time,
+                "Time to Peak, then Range":   generate_projectile_c_time_then_range,
+                "Time to Peak, then Height":  generate_projectile_d_time_then_height,
+                "Horizontal Distance Target": generate_projectile_e_horizontal_backwards,
+                "Given Flight Time":          generate_projectile_f_given_time_clearance,
+                "Explain":                    generate_projectile_explain,
             },
             "Gravitation":         generate_orbital_gravitation,
             "Special Relativity":  generate_special_relativity,

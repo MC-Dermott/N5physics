@@ -1198,11 +1198,11 @@ the *component* of weight along the slope (W sin θ, which does) — these expla
 whether you know which quantities depend on the angle and which don't.
 """,
 
-    ("Our Dynamic Universe", "Projectile Motion", "Height Above the Ground"): r"""
-**Example:** A ball is thrown at 20 m/s at 40° above the horizontal from a height of 15 m.
+    ("Our Dynamic Universe", "Projectile Motion", "Same Height"): r"""
+**Example:** An athlete takes off with an initial velocity of 9.1 m/s at 24° to the
+horizontal, and lands at the same height.
 
-*The ball takes a further 2.20 s to fall from its maximum height to the ground. Calculate
-the maximum height reached above the ground.*
+*Calculate the total time of flight, then the range.*
 
 **Step 1 — resolve into components:**
 
@@ -1210,47 +1210,44 @@ the maximum height reached above the ground.*
 $$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
 
 *Substitute:*
-$$v_H = 20\cos40° \qquad v_V = 20\sin40°$$
+$$v_H = 9.1\cos24° \qquad v_V = 9.1\sin24°$$
 
 *Answer:*
-$$v_H = 15.3\ \mathrm{m/s} \qquad v_V = 12.9\ \mathrm{m/s}$$
+$$v_H = 8.31\ \mathrm{m/s} \qquad v_V = 3.70\ \mathrm{m/s}$$
 
-**Step 2 — time to rise to maximum height:**
+**Step 2 — total time of flight.** Landing and launch heights are equal, so descent takes
+just as long as ascent:
 
 *Equation:*
-$$t_{\text{up}} = \frac{v_V}{g}$$
+$$t_{\text{up}} = \frac{v_V}{g} \qquad t_{\text{total}} = 2t_{\text{up}}$$
 
 *Substitute:*
-$$t_{\text{up}} = \frac{12.9}{9.8}$$
+$$t_{\text{up}} = \frac{3.70}{9.8} \qquad t_{\text{total}} = 2 \times 0.38$$
 
 *Answer:*
-$$t_{\text{up}} = 1.31\ \mathrm{s}$$
+$$t_{\text{total}} = 0.76\ \mathrm{s}$$
 
-**Step 3 — maximum height above the ground.** At the top, vertical velocity = 0, so use the
-given falling time in $s = \tfrac{1}{2}gt^2$:
+**Step 3 — range:**
 
 *Equation:*
-$$H_{\text{top}} = \tfrac{1}{2}g\,t_{\text{down}}^2$$
+$$R = v_H \times t_{\text{total}}$$
 
 *Substitute:*
-$$H_{\text{top}} = \tfrac{1}{2} \times 9.8 \times 2.20^2$$
+$$R = 8.31 \times 0.76$$
 
 *Answer:*
-$$H_{\text{top}} = 23.7\ \mathrm{m}$$
+$$R = 6.31\ \mathrm{m}$$
 
-**Most common mistake:** solving $h = v_V t - \tfrac{1}{2}gt^2$ directly for the height fallen
-from launch — this needs the quadratic formula, which Higher Physics never requires. Because
-vertical velocity = 0 at the top, the height fallen in the *given* time is a simple
-$s = \tfrac{1}{2}gt^2$ calculation, with no quadratic involved. (If instead you're given a
-time that *isn't* the full time to the ground, the same equation gives the height fallen by
-then — subtract it from the maximum height to get the height still above the ground.)
+**Most common mistake:** using $t_{\text{up}}$ instead of $t_{\text{total}} = 2t_{\text{up}}$
+when calculating the range.
 """,
 
-    ("Our Dynamic Universe", "Projectile Motion", "Time to Fall a Distance"): r"""
-**Example:** A ball is thrown at 20 m/s at 40° above the horizontal from a height of 15 m.
-The ball reaches a maximum height of 23.7 m above the ground.
+    ("Our Dynamic Universe", "Projectile Motion", "Given Height and Time"): r"""
+**Example:** A shot is released at 12 m/s at 40° above the horizontal, at a height of 1.8 m
+above the ground. The maximum height reached is 4.70 m above the ground. The time between
+release and reaching this height is 0.76 s.
 
-*Calculate the time it takes to fall from this height to the ground.*
+*Calculate the total time between release and hitting the ground, then the range.*
 
 **Step 1 — resolve into components:**
 
@@ -1258,38 +1255,222 @@ The ball reaches a maximum height of 23.7 m above the ground.
 $$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
 
 *Substitute:*
-$$v_H = 20\cos40° \qquad v_V = 20\sin40°$$
+$$v_H = 12\cos40° \qquad v_V = 12\sin40°$$
 
 *Answer:*
-$$v_H = 15.3\ \mathrm{m/s} \qquad v_V = 12.9\ \mathrm{m/s}$$
+$$v_H = 9.19\ \mathrm{m/s} \qquad v_V = 7.71\ \mathrm{m/s}$$
 
-**Step 2 — time to rise to maximum height:**
+**Step 2 — total time.** Both the maximum height and the time to reach it are *given* — no
+need to derive either. At the top, vertical velocity = 0, so use $s = \tfrac{1}{2}gt^2$ to
+find the time to fall the given 4.70 m, then add the given rise time:
+
+*Equation:*
+$$t_{\text{down}} = \sqrt{\frac{2H_{\text{top}}}{g}} \qquad t_{\text{total}} = t_{\text{up}} + t_{\text{down}}$$
+
+*Substitute:*
+$$t_{\text{down}} = \sqrt{\frac{2 \times 4.70}{9.8}} \qquad t_{\text{total}} = 0.76 + 0.98$$
+
+*Answer:*
+$$t_{\text{total}} = 1.74\ \mathrm{s}$$
+
+**Step 3 — range:**
+
+*Equation:*
+$$R = v_H \times t_{\text{total}}$$
+
+*Substitute:*
+$$R = 9.19 \times 1.74$$
+
+*Answer:*
+$$R = 16.0\ \mathrm{m}$$
+
+**Most common mistake:** forgetting to add the given rise time to the calculated fall time,
+and giving only $t_{\text{down}}$ as the final answer.
+""",
+
+    ("Our Dynamic Universe", "Projectile Motion", "Time to Peak, then Range"): r"""
+**Example:** A skier leaves a ramp with a launch velocity of 16.0 m/s at 42.0° to the
+horizontal, landing on ground below the ramp. The skier takes a further 1.40 s to travel
+from the maximum height to the ground.
+
+*Calculate the horizontal distance travelled from leaving the ramp until landing.*
+
+**Step 1 — resolve into components:**
+
+*Equation:*
+$$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
+
+*Substitute:*
+$$v_H = 16.0\cos42.0° \qquad v_V = 16.0\sin42.0°$$
+
+*Answer:*
+$$v_H = 11.9\ \mathrm{m/s} \qquad v_V = 10.7\ \mathrm{m/s}$$
+
+**Step 2 — time to reach maximum height:**
+
+*Equation:*
+$$v = u + at \implies 0 = v_V - gt_{\text{up}}$$
+
+*Substitute:*
+$$0 = 10.7 - 9.8\,t_{\text{up}}$$
+
+*Answer:*
+$$t_{\text{up}} = 1.09\ \mathrm{s}$$
+
+**Step 3 — horizontal distance**, using the total time of flight (the 1.40 s falling from
+the top is given, so just add it to $t_{\text{up}}$):
+
+*Equation:*
+$$R = v_H \times (t_{\text{up}} + t_2)$$
+
+*Substitute:*
+$$R = 11.9 \times (1.09 + 1.40)$$
+
+*Answer:*
+$$R = 29.7\ \mathrm{m}$$
+
+**Most common mistake:** using only the given 1.40 s (instead of $t_{\text{up}} + t_2$) for
+the range — this leaves out the horizontal distance covered while still rising.
+""",
+
+    ("Our Dynamic Universe", "Projectile Motion", "Time to Peak, then Height"): r"""
+**Example:** A student throws a wet sponge at a teacher, at 7.4 m/s at 30° above the
+horizontal, from a height of 1.5 m. The sponge takes a further 0.45 s to fall from its
+maximum height until it hits the teacher.
+
+*Calculate the height above the ground at which the sponge hits the teacher.*
+
+**Step 1 — resolve into components:**
+
+*Equation:*
+$$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
+
+*Substitute:*
+$$v_H = 7.4\cos30° \qquad v_V = 7.4\sin30°$$
+
+*Answer:*
+$$v_H = 6.41\ \mathrm{m/s} \qquad v_V = 3.7\ \mathrm{m/s}$$
+
+**Step 2 — time to reach maximum height:**
 
 *Equation:*
 $$t_{\text{up}} = \frac{v_V}{g}$$
 
 *Substitute:*
-$$t_{\text{up}} = \frac{12.9}{9.8}$$
+$$t_{\text{up}} = \frac{3.7}{9.8}$$
 
 *Answer:*
-$$t_{\text{up}} = 1.31\ \mathrm{s}$$
+$$t_{\text{up}} = 0.38\ \mathrm{s}$$
 
-**Step 3 — time to fall to the ground.** At the top, vertical velocity = 0, so use
-$s = \tfrac{1}{2}gt^2$, rearranged for $t$:
+**Step 3 — height above the ground.** The sponge rises $v_V^2 \div 2g = 0.70\ \mathrm{m}$
+above the launch point, so its height above the ground at the top is
+$H_{\text{top}} = 1.5 + 0.70 = 2.20\ \mathrm{m}$. In the given 0.45 s falling from there:
 
 *Equation:*
-$$t = \sqrt{\frac{2H_{\text{top}}}{g}}$$
+$$s = \tfrac{1}{2}gt_2^2 \qquad h = H_{\text{top}} - s$$
 
 *Substitute:*
-$$t = \sqrt{\frac{2 \times 23.7}{9.8}}$$
+$$s = \tfrac{1}{2} \times 9.8 \times 0.45^2 \qquad h = 2.20 - 0.99$$
 
 *Answer:*
-$$t = 2.20\ \mathrm{s}$$
+$$h = 1.21\ \mathrm{m}$$
 
-**Most common mistake:** leaving out the factor of 2 under the square root, or treating this
-as a constant-velocity relationship ($t = H_{\text{top}} \div g$) — falling from rest needs
-$s = \tfrac{1}{2}gt^2$, not $s = gt$. (If a *distance* less than the full maximum height is
-given instead, the same rearranged equation finds the time to fall that distance.)
+**Most common mistake:** forgetting to add the launch height when finding $H_{\text{top}}$,
+or solving $h = v_V t - \tfrac{1}{2}gt^2$ directly for $t$ — Higher Physics never requires
+the quadratic formula, since vertical velocity = 0 at the top makes the fall from there a
+simple $s = \tfrac{1}{2}gt^2$ calculation.
+""",
+
+    ("Our Dynamic Universe", "Projectile Motion", "Horizontal Distance Target"): r"""
+**Example:** A footballer kicks a ball from flat ground with an initial velocity of
+17.0 m/s at 24.0° to the horizontal, towards a crossbar 11 m away.
+
+*Calculate the time taken to reach the crossbar, then the height at which it gets there.*
+
+**Step 1 — resolve into components:**
+
+*Equation:*
+$$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
+
+*Substitute:*
+$$v_H = 17.0\cos24.0° \qquad v_V = 17.0\sin24.0°$$
+
+*Answer:*
+$$v_H = 15.5\ \mathrm{m/s} \qquad v_V = 6.91\ \mathrm{m/s}$$
+
+**Step 2 — time to reach the crossbar** (horizontal velocity is constant):
+
+*Equation:*
+$$t = \frac{x}{v_H}$$
+
+*Substitute:*
+$$t = \frac{11}{15.5}$$
+
+*Answer:*
+$$t = 0.71\ \mathrm{s}$$
+
+**Step 3 — height at this time:**
+
+*Equation:*
+$$s = v_V t - \tfrac{1}{2}gt^2$$
+
+*Substitute:*
+$$s = 6.91 \times 0.71 - \tfrac{1}{2} \times 9.8 \times 0.71^2$$
+
+*Answer:*
+$$s = 2.43\ \mathrm{m}$$
+
+**Most common mistake:** using the full initial speed instead of $v_H$ when finding the time
+to reach the target, or forgetting the $-\tfrac{1}{2}gt^2$ term when finding the height. (If
+the ball is then kicked with a lower speed at the same angle, it is lower at *every*
+horizontal distance than before — so it would now pass **under** the crossbar.)
+""",
+
+    ("Our Dynamic Universe", "Projectile Motion", "Given Flight Time"): r"""
+**Example:** A student throws a ball to a friend at 11.0 m/s at 36.0° above the horizontal,
+releasing it from a height of 1.60 m. The ball takes 1.53 s to travel from release to
+landing.
+
+*Calculate the horizontal distance travelled. The ball is directly above the friend 0.95 s
+after release; the friend has a maximum reach of 2.10 m — find the height between the
+friend's reach and the ball.*
+
+**Step 1 — resolve into components:**
+
+*Equation:*
+$$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
+
+*Substitute:*
+$$v_H = 11.0\cos36.0° \qquad v_V = 11.0\sin36.0°$$
+
+*Answer:*
+$$v_H = 8.90\ \mathrm{m/s} \qquad v_V = 6.47\ \mathrm{m/s}$$
+
+**Step 2 — horizontal distance.** The total flight time is given directly, so:
+
+*Equation:*
+$$R = v_H \times T$$
+
+*Substitute:*
+$$R = 8.90 \times 1.53$$
+
+*Answer:*
+$$R = 13.6\ \mathrm{m}$$
+
+**Step 3 — height above the friend's reach**, using the *different* given time (measured
+from release, not from the peak):
+
+*Equation:*
+$$s = h + v_V t - \tfrac{1}{2}gt^2 \qquad h_{\text{gap}} = s - \text{reach}$$
+
+*Substitute:*
+$$s = 1.60 + 6.47 \times 0.95 - \tfrac{1}{2} \times 9.8 \times 0.95^2 \qquad h_{\text{gap}} = 3.32 - 2.10$$
+
+*Answer:*
+$$h_{\text{gap}} = 1.22\ \mathrm{m}$$
+
+**Most common mistake:** giving the ball's height above the *ground* as the final answer,
+forgetting to subtract the friend's reach to get the height above their outstretched hand.
 """,
 
     ("Particles and Waves", "Standard Model", "Particle Classification"): r"""
