@@ -406,7 +406,7 @@ $$h = \\frac{E_p}{mg}$$
 **Worked Example:** A 2 kg object is raised 10 m ($g = 9.8$ N/kg). Calculate the gain in gravitational potential energy.
 $$E_p = mgh = 2 \\times 9.8 \\times 10 = 196\\ \\mathrm{J}$$
 
-> **Important:** Convert grams to kg ($\\div 1000$). Use $g = 9.8$ or $10$ N/kg as given.
+> **Important:** Mass must be in kg. On Earth use $g = 9.8$ N/kg.
 """,
 
     "energy_ke": """
@@ -430,7 +430,10 @@ $$v = \\sqrt{\\frac{2E_k}{m}}$$
 **Worked Example:** A 3 kg ball moves at 4 m/s. Calculate its kinetic energy.
 $$E_k = \\frac{1}{2}mv^2 = \\frac{1}{2} \\times 3 \\times 4^2 = 24\\ \\mathrm{J}$$
 
-> **Important:** Don't forget the $\\frac{1}{2}$ factor. Square root when finding $v$.
+> **Units:** Ek must use **kg**, **m/s** and **J** — convert first:
+> grams → kg ($\\div 1000$), tonnes → kg ($\\times 1000$), kJ → J ($\\times 1000$), MJ → J ($\\times 1\\,000\\,000$).
+>
+> **Important:** Don't forget the $\\frac{1}{2}$ factor. Only $v$ is squared. Square root when finding $v$.
 """,
 
     "energy_work": """
@@ -464,7 +467,9 @@ $$d = \\frac{E_W}{F}$$
 **Worked Example:** A 50 N force pushes an object 4 m in the direction of the force. Calculate the work done.
 $$E_W = Fd = 50 \\times 4 = 200\\ \\mathrm{J}$$
 
-> **Important:** The distance must be in the same direction as the force.
+> **Important:** The distance must be in the same direction as the force, in **m** (and force in **N**).
+>
+> **Time is not needed.** $E_W = Fd$ has no $t$ in it — if a question gives you a time, ignore it.
 """,
 
     "energy_conservation": """
@@ -475,7 +480,10 @@ into another. The total energy stays the same.
 
 **Falling objects (no air resistance):** all the gravitational potential energy lost becomes
 kinetic energy gained.
-$$E_p \\text{ lost} = E_k \\text{ gained} \\qquad mgh = \\frac{1}{2}mv^2$$
+$$E_p \\text{ lost} = E_k \\text{ gained}$$
+
+**Method:** calculate the **initial energy** first, as a number in J. Then use that value as the
+energy at the end and solve for the missing quantity (the mass is always given — use it).
 
 **Objects thrown upwards:** at the maximum height the object is momentarily stopped, so all of
 its kinetic energy has become gravitational potential energy.
@@ -491,7 +499,10 @@ $$\\frac{1}{2}mv^2 = Fd$$
 **Worked Example:** A 2 kg ball is dropped from 5 m ($g = 9.8$ N/kg). Calculate its speed just
 before it hits the ground.
 $$E_p = mgh = 2 \\times 9.8 \\times 5 = 98\\ \\mathrm{J}$$
-$$E_k = 98\\ \\mathrm{J} \\qquad 98 = \\frac{1}{2} \\times 2 \\times v^2 \\qquad v = 9.9\\ \\mathrm{m/s}$$
+$$E_k = 98\\ \\mathrm{J}$$
+$$E_k = \\frac{1}{2}mv^2$$
+$$98 = \\frac{1}{2} \\times 2 \\times v^2$$
+$$v = 9.9\\ \\mathrm{m/s}$$
 
 > **Important:** In real life the speed (or height) is always **less** than calculated, because
 > some energy is converted into heat due to friction / air resistance.

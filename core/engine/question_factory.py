@@ -246,8 +246,8 @@ QUAL_REGISTRY = {
             "Energy": {
                 "Gravitational Potential Energy": generate_energy_gpe,
                 "Kinetic Energy":                 generate_energy_ke,
-                "Work Done":                      generate_energy_work,
                 "Conservation of Energy":         generate_energy_conservation,
+                "Work Done":                      generate_energy_work,
                 "Explain":                        gen_energy_explain,
             },
             "Projectile Motion": {

@@ -29,47 +29,100 @@ def _distinct_options(gen):
         for _ in range(20):
             q = gen(level=level)
             vals = [round(float(d["value"]), 6) for d in q.distractors]
-            if len(vals) == 3 and len(set(vals)) == 3:
+            ca = float(q.correct_answer) if not isinstance(q.correct_answer, str) else None
+            near = ca is not None and any(abs(v - ca) <= 0.02 * abs(ca) for v in vals)
+            if len(vals) == 3 and len(set(vals)) == 3 and not near:
                 break
         return q
     wrapped.__name__ = gen.__name__
     return wrapped
 
 
-def _mass_and_text():
-    if random.choice([True, False]):
-        m = random.choice(range(5, 105, 5))
-        return m, m, False, f"{m} kg"
-    g = random.choice(range(100, 1000, 100))
-    return g, g / 1000, True, f"{g}g"
+G = 9.8   # N/kg — N5 data sheet value for Earth
+
+
+def _num(x, sf=3):
+    """Pupil-facing number: rounded to sf, never in scientific notation."""
+    x = float(f"{x:.{sf}g}")
+    return f"{int(x)}" if x == int(x) else f"{x:f}".rstrip("0").rstrip(".")
+
+
+def _big(x, sf=3):
+    """_num for question text, with SQA-style space grouping (4 500 000)."""
+    t = _num(x, sf)
+    whole, _, frac = t.partition(".")
+    if len(whole) > 4:
+        whole = f"{int(whole):,}".replace(",", " ")
+    return whole + ("." + frac if frac else "")
+
+
+def _mass(ctx):
+    """ctx = (name, unit, lo, hi, step) with unit "g", "kg" or "tonnes".
+    Returns (mass_kg, mass_text, unit_as_given, value_as_given)."""
+    name, unit, lo, hi, step = ctx[:5]
+    val = round(random.choice([lo + i * step for i in range(int(round((hi - lo) / step)) + 1)]), 3)
+    kg = {"g": val / 1000, "kg": val, "tonnes": val * 1000}[unit]
+    return round(kg, 6), f"{_big(val)} {unit}", unit, val
+
+
+def _to_kg_step(unit, val, kg):
+    """Working/scaffold line converting a given mass to kg (None if already kg)."""
+    if unit == "g":
+        return f"m = {_num(val)}\\ \\mathrm{{g}} \\div 1000 = {_num(kg)}\\ \\mathrm{{kg}}"
+    if unit == "tonnes":
+        return f"m = {_num(val)}\\ \\mathrm{{tonnes}} \\times 1000 = {_num(kg)}\\ \\mathrm{{kg}}"
+    return None
+
+
+def _unit_mistake(unit):
+    return {"g": "You did not convert grams into kilograms (÷ 1000).",
+            "tonnes": "You did not convert tonnes into kilograms (× 1000)."}.get(unit)
 
 
 # =========================================================
 # GPE — Ep = mgh
+# Context tuples tie each object to a sensible mass (kg) and height (m) range.
 # =========================================================
 
-def gen_gpe(level="N5"):
-    disp_m, mass_kg, is_g, mass_text = _mass_and_text()
-    gravity = random.choice([9.8, 10])
-    height  = random.randint(2, 50)
-    correct = round_sf(mass_kg * gravity * height)
-    grams_err = round_sf(disp_m * gravity * height) if is_g else round_sf(mass_kg + gravity + height)
+_GPE_CTX = [
+    # (object, unit, m_lo, m_hi, m_step, h_lo, h_hi, h_step, sentence)
+    ("box of books",       "kg", 2, 8, 0.5, 1.0, 2.0, 0.1, "is lifted onto a shelf {h} m high"),
+    ("bag of seed potatoes", "kg", 10, 25, 5, 0.8, 1.5, 0.1, "is lifted onto a trailer {h} m high"),
+    ("hillwalker",         "kg", 50, 90, 1, 200, 800, 10, "climbs a hill, gaining {h} m in height"),
+    ("pupil",              "kg", 40, 70, 1, 3.0, 12.0, 0.5, "climbs a flight of stairs {h} m high"),
+    ("shipping container", "kg", 1000, 3000, 100, 5, 20, 1, "is lifted {h} m by a harbour crane"),
+    ("drone",              "kg", 0.8, 3.0, 0.1, 20, 120, 5, "rises vertically through {h} m"),
+    ("football",           "kg", 0.40, 0.45, 0.05, 3.0, 8.0, 0.5, "lands on a roof {h} m above the ground"),
+]
 
+
+def _gpe_ctx():
+    c = random.choice(_GPE_CTX)
+    obj, _, mlo, mhi, mstep, hlo, hhi, hstep, sentence = c
+    m, m_txt, _, _ = _mass((obj, "kg", mlo, mhi, mstep))
+    n_h = int(round((hhi - hlo) / hstep))
+    h = round(hlo + random.randint(0, n_h) * hstep, 2)
+    return obj, m, m_txt, h, sentence.format(h=_num(h))
+
+
+def gen_gpe(level="N5"):
+    obj, m, m_txt, h, action = _gpe_ctx()
+    correct = round_sf(m * G * h)
     working = [
-        {"type": "text",  "content": "Use the equation:"},
         {"type": "latex", "content": r"E_p = mgh"},
-        {"type": "latex", "content": rf"E_p = {round_sf(mass_kg)} \times {gravity} \times {height}"},
-        {"type": "latex", "content": rf"E_p = {fmt_J(correct)}"},
+        {"type": "latex", "content": rf"E_p = {_num(m)} \times {G} \times {_num(h)}"},
+        {"type": "latex", "content": rf"E_p = {_num(correct)}\ \mathrm{{J}}"},
     ]
-    question = f"What is the gravitational potential energy of a {mass_text} object raised {height} m?\n\n{_g_table(gravity)}"
+    question = (f"A {obj} of mass {m_txt} {action}. Calculate the gravitational potential energy gained."
+                f"\n\n{_g_table(G)}")
     options_data = [
-        {"value": correct,                           "display": fmt_J(correct),                           "summary": "Correct!", "mistake": None, "working": working},
-        {"value": round_sf(mass_kg / (gravity*height)), "display": fmt_J(round_sf(mass_kg / (gravity*height))), "summary": "Incorrect.", "mistake": "You rearranged the equation incorrectly. Ep = mgh.", "working": working},
-        {"value": grams_err,                         "display": fmt_J(grams_err),                         "summary": "Incorrect.", "mistake": "You did not convert grams into kilograms.", "working": working},
-        {"value": round_sf(mass_kg * gravity + height), "display": fmt_J(round_sf(mass_kg * gravity + height)), "summary": "Incorrect.", "mistake": "You used the equation incorrectly. Ep = m × g × h.", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(m / (G * h)), "mistake": "You rearranged the equation incorrectly. Ep = mgh.", "working": working},
+        {"value": round_sf(m * h), "mistake": "You forgot to multiply by g (9.8 N/kg).", "working": working},
+        {"value": round_sf(m * G + h), "mistake": "You used the equation incorrectly. Ep = m × g × h.", "working": working},
     ]
     scaffold = [
-        {"question": "What is m × g?", "answer": round_sf(mass_kg * gravity)},
+        {"question": "What is m × g?", "answer": round_sf(m * G)},
         {"question": "What is the gravitational potential energy Ep?", "answer": correct},
     ]
     return make_question(question, correct, options_data, "J", notes=NOTES["energy_gpe"],
@@ -77,26 +130,25 @@ def gen_gpe(level="N5"):
 
 
 def gen_gpe_mass(level="N5"):
-    gravity = random.choice([9.8, 10])
-    height  = random.randint(2, 50)
-    energy  = random.choice(range(50, 5001, 50))
-    correct = round_sf(energy / (gravity * height))
-
+    obj, m, _, h, action = _gpe_ctx()
+    energy = round_sf(m * G * h, 4)
+    correct = round_sf(energy / (G * h))
     working = [
-        {"type": "text",  "content": "Rearrange the equation:"},
-        {"type": "latex", "content": r"m = \frac{E_p}{gh}"},
-        {"type": "latex", "content": rf"m = \frac{{{fmt_J(energy)}}}{{{gravity} \times {height}}}"},
-        {"type": "latex", "content": rf"m = {correct}\ \mathrm{{kg}}"},
+        {"type": "latex", "content": r"E_p = mgh"},
+        {"type": "latex", "content": rf"{_num(energy, 4)} = m \times {G} \times {_num(h)}"},
+        {"type": "latex", "content": rf"m = \frac{{{_num(energy, 4)}}}{{{G} \times {_num(h)}}}"},
+        {"type": "latex", "content": rf"m = {_num(correct)}\ \mathrm{{kg}}"},
     ]
-    question = f"What is the mass of an object with gravitational potential energy {fmt_J(energy)} raised {height} m?\n\n{_g_table(gravity)}"
+    question = (f"A {obj} {action} and gains {_big(energy, 4)} J of gravitational potential energy. "
+                f"Calculate the mass of the {obj}.\n\n{_g_table(G)}")
     options_data = [
-        {"value": correct,                              "summary": "Correct!", "mistake": None, "working": working},
-        {"value": round_sf(energy * gravity * height),  "summary": "Incorrect.", "mistake": "You rearranged the equation incorrectly. m = Ep ÷ (g × h).", "working": working},
-        {"value": round_sf(correct * 1000),             "summary": "Incorrect.", "mistake": "You gave the answer in grams, not kilograms.", "working": working},
-        {"value": round_sf(energy / gravity),           "summary": "Incorrect.", "mistake": "You forgot to divide by h as well as g.", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(energy * G * h), "mistake": "You rearranged the equation incorrectly. m = Ep ÷ (g × h).", "working": working},
+        {"value": round_sf(correct * 1000), "mistake": "You gave the answer in grams, not kilograms.", "working": working},
+        {"value": round_sf(energy / G), "mistake": "You forgot to divide by h as well as g.", "working": working},
     ]
     scaffold = [
-        {"question": "What is g × h?", "answer": round_sf(gravity * height)},
+        {"question": "What is g × h?", "answer": round_sf(G * h)},
         {"question": "What is the mass m?", "answer": correct},
     ]
     return make_question(question, correct, options_data, "kg", notes=NOTES["energy_gpe"],
@@ -104,27 +156,25 @@ def gen_gpe_mass(level="N5"):
 
 
 def gen_gpe_height(level="N5"):
-    disp_m, mass_kg, is_g, mass_text = _mass_and_text()
-    gravity = random.choice([9.8, 10])
-    energy  = random.choice(range(50, 5001, 50))
-    correct = round_sf(energy / (mass_kg * gravity))
-    grams_err = round_sf(energy / (disp_m * gravity)) if is_g else round_sf(correct + gravity)
-
+    obj, m, m_txt, h, action = _gpe_ctx()
+    energy = round_sf(m * G * h, 4)
+    correct = round_sf(energy / (m * G))
     working = [
-        {"type": "text",  "content": "Rearrange the equation:"},
-        {"type": "latex", "content": r"h = \frac{E_p}{mg}"},
-        {"type": "latex", "content": rf"h = \frac{{{fmt_J(energy)}}}{{{round_sf(mass_kg)} \times {gravity}}}"},
-        {"type": "latex", "content": rf"h = {correct}\ \mathrm{{m}}"},
+        {"type": "latex", "content": r"E_p = mgh"},
+        {"type": "latex", "content": rf"{_num(energy, 4)} = {_num(m)} \times {G} \times h"},
+        {"type": "latex", "content": rf"h = \frac{{{_num(energy, 4)}}}{{{_num(m)} \times {G}}}"},
+        {"type": "latex", "content": rf"h = {_num(correct)}\ \mathrm{{m}}"},
     ]
-    question = f"An object with mass {mass_text} has gravitational potential energy {fmt_J(energy)}. What height was it raised?\n\n{_g_table(gravity)}"
+    question = (f"A {obj} of mass {m_txt} gains {_big(energy, 4)} J of gravitational potential energy "
+                f"as it is raised. Calculate the height it is raised.\n\n{_g_table(G)}")
     options_data = [
-        {"value": correct,                             "summary": "Correct!", "mistake": None, "working": working},
-        {"value": round_sf(energy * mass_kg * gravity),"summary": "Incorrect.", "mistake": "You rearranged the equation incorrectly. h = Ep ÷ (m × g).", "working": working},
-        {"value": grams_err,                           "summary": "Incorrect.", "mistake": "You did not convert grams into kilograms.", "working": working},
-        {"value": round_sf(energy / mass_kg),          "summary": "Incorrect.", "mistake": "You forgot to divide by g as well.", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(energy * m * G), "mistake": "You rearranged the equation incorrectly. h = Ep ÷ (m × g).", "working": working},
+        {"value": round_sf(energy / m), "mistake": "You forgot to divide by g as well.", "working": working},
+        {"value": round_sf(energy / G), "mistake": "You forgot to divide by m as well.", "working": working},
     ]
     scaffold = [
-        {"question": "What is m × g?", "answer": round_sf(mass_kg * gravity)},
+        {"question": "What is m × g?", "answer": round_sf(m * G)},
         {"question": "What is the height h?", "answer": correct},
     ]
     return make_question(question, correct, options_data, "m", notes=NOTES["energy_gpe"],
@@ -132,236 +182,439 @@ def gen_gpe_height(level="N5"):
 
 
 # =========================================================
-# KE — Ek = ½mv²
+# KE — Ek = ½mv²  (tests units: g → kg, tonnes → kg, kJ / MJ)
+# Context tuples: (object, mass unit, lo, hi, step, v_lo, v_hi)
 # =========================================================
 
-def gen_ke(level="N5"):
-    disp_m, mass_kg, is_g, mass_text = _mass_and_text()
-    v = random.randint(2, 30)
-    correct = round_sf(0.5 * mass_kg * v**2)
-    grams_err = round_sf(0.5 * disp_m * v**2) if is_g else round_sf(mass_kg + v)
+_KE_CTX = [
+    ("golf ball",          "g",      44, 46, 1,     40, 70),
+    ("tennis ball",        "g",      56, 58, 1,     20, 50),
+    ("cricket ball",       "g",      155, 165, 5,   20, 35),
+    ("football",           "g",      400, 450, 10,  10, 25),
+    ("hockey ball",        "g",      150, 165, 5,   10, 30),
+    ("cyclist and bike",   "kg",     70, 100, 5,    5, 12),
+    ("runner",             "kg",     50, 80, 1,     4, 9),
+    ("car",                "tonnes", 1.0, 1.8, 0.1, 10, 30),
+    ("van",                "tonnes", 2.0, 3.5, 0.1, 10, 25),
+    ("lorry",              "tonnes", 10, 20, 1,     10, 25),
+    ("CalMac ferry",       "tonnes", 3000, 5000, 100, 6, 9),
+]
 
-    working = [
-        {"type": "text",  "content": "Use the equation:"},
+
+def _ke_ctx():
+    c = random.choice(_KE_CTX)
+    m, m_txt, unit, val = _mass(c)
+    v = random.randint(c[5], c[6])
+    return c[0], m, m_txt, unit, val, v
+
+
+def _energy_unit_for(ek):
+    """Pick the unit a 'give your answer in …' question asks for."""
+    if ek >= 1e6:
+        return "MJ", 1e6
+    if ek >= 1e4:
+        return "kJ", 1e3
+    return "J", 1
+
+
+def gen_ke(level="N5"):
+    obj, m, m_txt, unit, val, v = _ke_ctx()
+    ek = 0.5 * m * v ** 2
+    e_unit, e_div = _energy_unit_for(ek)
+    correct = round_sf(ek / e_div)
+    conv = _to_kg_step(unit, val, m)
+
+    working = ([{"type": "latex", "content": conv}] if conv else []) + [
         {"type": "latex", "content": r"E_k = \frac{1}{2}mv^2"},
-        {"type": "latex", "content": rf"E_k = \frac{{1}}{{2}} \times {round_sf(mass_kg)} \times {v}^2"},
-        {"type": "latex", "content": rf"E_k = {fmt_J(correct)}"},
+        {"type": "latex", "content": rf"E_k = \frac{{1}}{{2}} \times {_num(m)} \times {v}^2"},
+        {"type": "latex", "content": rf"E_k = {_num(ek, 4)}\ \mathrm{{J}}"},
     ]
-    question = f"What is the kinetic energy of a {mass_text} object moving at {v} m/s?"
+    if e_div != 1:
+        working.append({"type": "latex", "content": rf"E_k = {_num(correct)}\ \mathrm{{{e_unit}}}"})
+    ask = f" Give your answer in {e_unit}." if e_div != 1 else ""
+    question = (f"A {obj} of mass {m_txt} is moving at {v} m/s. Calculate its kinetic energy.{ask}"
+                + ("\n\n(1 tonne = 1000 kg)" if unit == "tonnes" else ""))
+
+    unit_err = round_sf(0.5 * val * v ** 2 / e_div) if unit != "kg" else round_sf(ek)  # ek (J) when asked kJ/MJ
     options_data = [
-        {"value": correct,                   "display": fmt_J(correct),   "summary": "Correct!", "mistake": None, "working": working},
-        {"value": round_sf(mass_kg * v**2),  "display": fmt_J(round_sf(mass_kg * v**2)),  "summary": "Incorrect.", "mistake": "You forgot the ½ in the equation. Ek = ½mv².", "working": working},
-        {"value": grams_err,                 "display": fmt_J(grams_err), "summary": "Incorrect.", "mistake": "You did not convert grams into kilograms.", "working": working},
-        {"value": round_sf((2*correct)/v**2),"display": fmt_J(round_sf((2*correct)/v**2)), "summary": "Incorrect.", "mistake": "You rearranged the equation incorrectly.", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(m * v ** 2 / e_div), "mistake": "You forgot the ½ in the equation. Ek = ½mv².", "working": working},
+        {"value": round_sf(0.5 * m * v / e_div), "mistake": "You forgot to square the speed. Ek = ½mv².", "working": working},
+        {"value": unit_err,
+         "mistake": _unit_mistake(unit) or f"You gave the answer in J. Divide by {int(e_div)} to convert to {e_unit}.",
+         "working": working},
     ]
-    scaffold = [
-        {"question": "What is v² ?", "answer": v ** 2},
-        {"question": "What is the kinetic energy Ek?", "answer": correct},
+    scaffold = ([{"question": "What is the mass in kg?", "answer": m, "unit": "kg"}] if conv else []) + [
+        {"question": "What is v²?", "answer": v ** 2},
+        {"question": "What is the kinetic energy in J?", "answer": round_sf(ek), "unit": "J"},
     ]
-    return make_question(question, correct, options_data, "J", notes=NOTES["energy_ke"],
+    if e_div != 1:
+        scaffold.append({"question": f"What is the kinetic energy in {e_unit}?", "answer": correct, "unit": e_unit})
+    return make_question(question, correct, options_data, e_unit, notes=NOTES["energy_ke"],
                          topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
 
 
 def gen_ke_mass(level="N5"):
-    v = random.randint(2, 30)
-    energy = random.choice(range(50, 5001, 50))
-    correct = round_sf((2 * energy) / v**2)
+    obj, m, _, _, _, v = _ke_ctx()
+    ek = 0.5 * m * v ** 2
+    e_unit, e_div = _energy_unit_for(ek)
+    e_given = round_sf(ek / e_div, 3)
+    ek_j = e_given * e_div
+    correct = round_sf(2 * ek_j / v ** 2)
 
-    working = [
-        {"type": "text",  "content": "Rearrange the equation:"},
-        {"type": "latex", "content": r"m = \frac{2E_k}{v^2}"},
-        {"type": "latex", "content": rf"m = \frac{{2 \times {fmt_J(energy)}}}{{{v}^2}}"},
-        {"type": "latex", "content": rf"m = {correct}\ \mathrm{{kg}}"},
+    conv = [{"type": "latex", "content": rf"E_k = {_num(e_given)}\ \mathrm{{{e_unit}}} = {_num(ek_j)}\ \mathrm{{J}}"}] if e_div != 1 else []
+    working = conv + [
+        {"type": "latex", "content": r"E_k = \frac{1}{2}mv^2"},
+        {"type": "latex", "content": rf"{_num(ek_j)} = \frac{{1}}{{2}} \times m \times {v}^2"},
+        {"type": "latex", "content": rf"m = \frac{{{_num(ek_j)}}}{{\frac{{1}}{{2}} \times {v}^2}}"},
+        {"type": "latex", "content": rf"m = {_num(correct)}\ \mathrm{{kg}}"},
     ]
-    question = f"What is the mass of an object with kinetic energy {fmt_J(energy)} moving at {v} m/s?"
+    question = f"A {obj} moving at {v} m/s has {_num(e_given)} {e_unit} of kinetic energy. Calculate the mass of the {obj} in kg."
     options_data = [
-        {"value": correct,                         "summary": "Correct!", "mistake": None, "working": working},
-        {"value": round_sf((energy * v**2) / 2),   "summary": "Incorrect.", "mistake": "You rearranged the equation incorrectly. m = 2Ek ÷ v².", "working": working},
-        {"value": round_sf(correct * 1000),        "summary": "Incorrect.", "mistake": "You gave the answer in grams, not kilograms.", "working": working},
-        {"value": round_sf(energy / v**2),         "summary": "Incorrect.", "mistake": "You forgot to multiply by 2. m = 2Ek ÷ v².", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(ek_j * v ** 2 / 2), "mistake": "You rearranged the equation incorrectly. m = 2Ek ÷ v².", "working": working},
+        {"value": round_sf(ek_j / v ** 2), "mistake": "You forgot to multiply by 2. m = 2Ek ÷ v².", "working": working},
+        {"value": round_sf(2 * e_given / v ** 2) if e_div != 1 else round_sf(2 * ek_j / v),
+         "mistake": (f"You did not convert {e_unit} into J before substituting." if e_div != 1
+                     else "You forgot to square the speed. m = 2Ek ÷ v²."), "working": working},
     ]
-    scaffold = [
-        {"question": "What is v² ?", "answer": v ** 2},
-        {"question": "What is the mass m?", "answer": correct},
+    scaffold = ([{"question": "What is the kinetic energy in J?", "answer": ek_j, "unit": "J"}] if e_div != 1 else []) + [
+        {"question": "What is v²?", "answer": v ** 2},
+        {"question": "What is the mass m?", "answer": correct, "unit": "kg"},
     ]
     return make_question(question, correct, options_data, "kg", notes=NOTES["energy_ke"],
                          topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
 
 
 def gen_ke_velocity(level="N5"):
-    disp_m, mass_kg, is_g, mass_text = _mass_and_text()
-    energy = random.choice(range(50, 5001, 50))
-    correct = round_sf(((2 * energy) / mass_kg) ** 0.5)
-    grams_err = round_sf(((2 * energy) / disp_m) ** 0.5) if is_g else round_sf(correct + mass_kg)
+    obj, m, m_txt, unit, val, v = _ke_ctx()
+    ek = 0.5 * m * v ** 2
+    e_unit, e_div = _energy_unit_for(ek)
+    e_given = round_sf(ek / e_div, 3)
+    ek_j = e_given * e_div
+    v2 = 2 * ek_j / m
+    correct = round_sf(math.sqrt(v2))
 
-    working = [
-        {"type": "text",  "content": "Rearrange the equation:"},
-        {"type": "latex", "content": r"v = \sqrt{\frac{2E_k}{m}}"},
-        {"type": "latex", "content": rf"v = \sqrt{{\frac{{2 \times {fmt_J(energy)}}}{{{round_sf(mass_kg)}}}}}"},
-        {"type": "latex", "content": rf"v = {correct}\ \mathrm{{m/s}}"},
+    conv = _to_kg_step(unit, val, m)
+    working = ([{"type": "latex", "content": conv}] if conv else []) + (
+        [{"type": "latex", "content": rf"E_k = {_num(e_given)}\ \mathrm{{{e_unit}}} = {_num(ek_j)}\ \mathrm{{J}}"}]
+        if e_div != 1 else []) + [
+        {"type": "latex", "content": r"E_k = \frac{1}{2}mv^2"},
+        {"type": "latex", "content": rf"{_num(ek_j)} = \frac{{1}}{{2}} \times {_num(m)} \times v^2"},
+        {"type": "latex", "content": rf"v^2 = {_num(v2, 4)}"},
+        {"type": "latex", "content": rf"v = {_num(correct)}\ \mathrm{{m/s}}"},
     ]
-    question = f"An object with mass {mass_text} has kinetic energy {fmt_J(energy)}. What is its velocity?"
+    question = (f"A {obj} of mass {m_txt} has {_num(e_given)} {e_unit} of kinetic energy. Calculate its speed."
+                + ("\n\n(1 tonne = 1000 kg)" if unit == "tonnes" else ""))
+    if unit != "kg":
+        unit_err = round_sf(math.sqrt(2 * ek_j / val))
+        unit_msg = _unit_mistake(unit)
+    elif e_div != 1:
+        unit_err = round_sf(math.sqrt(2 * e_given / m))
+        unit_msg = f"You did not convert {e_unit} into J before substituting."
+    else:
+        unit_err = round_sf(2 * ek_j / m)
+        unit_msg = "You found v² — remember to take the square root."
     options_data = [
-        {"value": correct,                           "summary": "Correct!", "mistake": None, "working": working},
-        {"value": round_sf(energy / (0.5 * mass_kg)),"summary": "Incorrect.", "mistake": "You forgot to take the square root. v = √(2Ek ÷ m).", "working": working},
-        {"value": grams_err,                         "summary": "Incorrect.", "mistake": "You did not convert grams into kilograms.", "working": working},
-        {"value": round_sf((energy / mass_kg) ** 0.5),"summary": "Incorrect.", "mistake": "You forgot to multiply by 2 before square rooting. v = √(2Ek ÷ m).", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(math.sqrt(ek_j / m)), "mistake": "You forgot the ½ — multiply Ek by 2 before dividing by m.", "working": working},
+        {"value": round_sf(ek_j / (0.5 * m)) if unit_err != round_sf(2 * ek_j / m) else round_sf(math.sqrt(2 * ek_j)),
+         "mistake": ("You found v² — remember to take the square root." if unit_err != round_sf(2 * ek_j / m)
+                     else "You forgot to divide by the mass."), "working": working},
+        {"value": unit_err, "mistake": unit_msg, "working": working},
     ]
-    scaffold = [
-        {"question": "What is 2Ek ÷ m?", "answer": round_sf((2 * energy) / mass_kg)},
-        {"question": "What is the velocity v?", "answer": correct},
+    scaffold = ([{"question": "What is the mass in kg?", "answer": m, "unit": "kg"}] if conv else []) + (
+        [{"question": "What is the kinetic energy in J?", "answer": ek_j, "unit": "J"}] if e_div != 1 else []) + [
+        {"question": "What is v²?", "answer": round_sf(v2)},
+        {"question": "What is the speed v?", "answer": correct, "unit": "m/s"},
     ]
     return make_question(question, correct, options_data, "m/s", notes=NOTES["energy_ke"],
                          topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
 
 
 # =========================================================
-# Work Done — W = Fd
+# Work Done — Ew = Fd   (a time is usually given as a distractor)
+# Each context ties the object to sensible force/distance/time ranges and has
+# its own wording for each of the three question forms.
 # =========================================================
 
-def gen_workdone(level="N5"):
-    force    = random.choice(range(5, 105, 5))
-    distance = random.randint(2, 50)
-    correct  = round_sf(force * distance)
+_WORK_CTX = [
+    dict(F=(20, 60, 5), d=(10, 40, 1), t=(10, 40), fu="N", du="m",
+         fwd="A pupil pushes a trolley with a force of {F} for {d}{t}. Calculate the work done by the pupil.",
+         find_F="A pupil does {E} of work pushing a trolley {d}{t}. Calculate the force the pupil exerts on the trolley.",
+         find_d="A pupil pushes a trolley with a force of {F}, doing {E} of work{t}. Calculate the distance the trolley moves."),
+    dict(F=(500, 1000, 50), d=(100, 500, 10), t=(120, 420), fu="N", du="m",
+         fwd="A horse pulls a cart with a force of {F} for {d}{t}. Calculate the work done by the horse.",
+         find_F="A horse does {E} of work pulling a cart {d}{t}. Calculate the force the horse exerts.",
+         find_d="A horse pulls a cart with a force of {F}, doing {E} of work{t}. Calculate the distance the cart is pulled."),
+    dict(F=(1000, 2500, 100), d=(100, 400, 10), t=(30, 120), fu="N", du="m",
+         fwd="A tractor pulls a trailer of hay along a croft track with a force of {F} for {d}{t}. Calculate the work done by the tractor.",
+         find_F="A tractor does {E} of work pulling a trailer of hay {d} along a croft track{t}. Calculate the force exerted by the tractor.",
+         find_d="A tractor pulls a trailer of hay with a force of {F}, doing {E} of work{t}. Calculate the distance travelled."),
+    dict(F=(200, 800, 50), d=(5, 25, 1), t=(10, 60), fu="N", du="m",
+         fwd="A winch pulls a boat {d} up a slipway with a force of {F}{t}. Calculate the work done by the winch.",
+         find_F="A winch does {E} of work pulling a boat {d} up a slipway{t}. Calculate the force exerted by the winch.",
+         find_d="A winch pulls a boat up a slipway with a force of {F}, doing {E} of work{t}. Calculate the distance the boat is pulled."),
+    dict(F=(30, 80, 5), d=(20, 100, 5), t=(30, 150), fu="N", du="m",
+         fwd="A child pulls a sledge with a force of {F} for {d}{t}. Calculate the work done by the child.",
+         find_F="A child does {E} of work pulling a sledge {d}{t}. Calculate the force the child exerts.",
+         find_d="A child pulls a sledge with a force of {F}, doing {E} of work{t}. Calculate the distance the sledge is pulled."),
+    dict(F=(100, 200, 10), d=(1.0, 3.0, 0.1), t=(120, 480), fu="kN", du="km",
+         fwd="The engines of a CalMac ferry provide a forward force of {F}. The ferry travels {d}{t}. Calculate the work done by the engines.",
+         find_F="The engines of a CalMac ferry do {E} of work as the ferry travels {d}{t}. Calculate the forward force provided by the engines in N.",
+         find_d="The engines of a CalMac ferry provide a forward force of {F} and do {E} of work{t}. Calculate the distance the ferry travels in m."),
+    dict(F=(3, 8, 0.5), d=(0.5, 2.0, 0.1), t=(30, 120), fu="kN", du="km",
+         fwd="A lorry's engine provides a driving force of {F} over a distance of {d}{t}. Calculate the work done by the engine.",
+         find_F="A lorry's engine does {E} of work driving the lorry {d}{t}. Calculate the driving force in N.",
+         find_d="A lorry's engine provides a driving force of {F} and does {E} of work{t}. Calculate the distance travelled in m."),
+]
 
-    working = [
-        {"type": "text",  "content": "Use the equation:"},
-        {"type": "latex", "content": r"W = Fd"},
-        {"type": "latex", "content": rf"W = {force} \times {distance}"},
-        {"type": "latex", "content": rf"W = {fmt_J(correct)}"},
+
+def _pick(lo, hi, step):
+    return round(lo + random.randint(0, int(round((hi - lo) / step))) * step, 3)
+
+
+def _work_ctx():
+    c = random.choice(_WORK_CTX)
+    F_val, d_val = _pick(*c["F"]), _pick(*c["d"])
+    F = F_val * (1000 if c["fu"] == "kN" else 1)
+    d = d_val * (1000 if c["du"] == "km" else 1)
+    t_s = random.choice([x for x in range(c["t"][0], c["t"][1] + 1) if x % 5 == 0])
+    if t_s >= 120 and t_s % 60 == 0:
+        t_txt = f"{t_s // 60} minutes"
+    else:
+        t_txt = f"{t_s} s"
+    if random.random() >= 0.8:          # most, but not all, questions include a time distractor
+        t_s, t_txt = None, None
+    return dict(c=c, F=F, d=d, F_val=F_val, d_val=d_val,
+                F_txt=f"{_num(F_val)} {c['fu']}", d_txt=f"{_num(d_val)} {c['du']}",
+                t_s=t_s, t_txt=t_txt, t_clause=f" in {t_txt}" if t_txt else "")
+
+
+def _work_notes(w, need_F=True, need_d=True):
+    lines = []
+    if w["t_txt"]:
+        lines.append({"type": "text", "content": f"The time ({w['t_txt']}) is not needed — $E_W = Fd$ does not involve time."})
+    if need_F and w["c"]["fu"] == "kN":
+        lines.append({"type": "latex", "content": rf"F = {_num(w['F_val'])}\ \mathrm{{kN}} = {_num(w['F'])}\ \mathrm{{N}}"})
+    if need_d and w["c"]["du"] == "km":
+        lines.append({"type": "latex", "content": rf"d = {_num(w['d_val'])}\ \mathrm{{km}} = {_num(w['d'])}\ \mathrm{{m}}"})
+    return lines
+
+
+def _work_scaffold(w, final_q, final_ans, final_unit, need_F=True, need_d=True):
+    """Unit-conversion checkpoints only. A plain single-step Ew = Fd with nothing
+    to convert gets no scaffold."""
+    steps = []
+    if need_F and w["c"]["fu"] == "kN":
+        steps.append({"question": "What is the force in N?", "answer": w["F"], "unit": "N"})
+    if need_d and w["c"]["du"] == "km":
+        steps.append({"question": "What is the distance in m?", "answer": w["d"], "unit": "m"})
+    return steps + [{"question": final_q, "answer": final_ans, "unit": final_unit}] if steps else None
+
+
+def _converted(w, need_F=True, need_d=True):
+    return (need_F and w["c"]["fu"] == "kN") or (need_d and w["c"]["du"] == "km")
+
+
+def gen_workdone(level="N5"):
+    w = _work_ctx()
+    correct = round_sf(w["F"] * w["d"])
+    working = _work_notes(w) + [
+        {"type": "latex", "content": r"E_W = Fd"},
+        {"type": "latex", "content": rf"E_W = {_num(w['F'])} \times {_num(w['d'])}"},
+        {"type": "latex", "content": rf"E_W = {_num(correct)}\ \mathrm{{J}}"},
     ]
-    question = f"What is the work done when a force of {force} N moves an object {distance} m?"
+    question = w["c"]["fwd"].format(F=w["F_txt"], d=w["d_txt"], t=w["t_clause"])
+    t_s = w["t_s"]
     options_data = [
-        {"value": correct,              "display": fmt_J(correct),              "summary": "Correct!", "mistake": None, "working": working},
-        {"value": round_sf(force/distance), "display": fmt_J(round_sf(force/distance)), "summary": "Incorrect.", "mistake": "You divided instead of multiplying. W = F × d.", "working": working},
-        {"value": round_sf(force+distance), "display": fmt_J(round_sf(force+distance)), "summary": "Incorrect.", "mistake": "You added instead of multiplying. W = F × d.", "working": working},
-        {"value": round_sf(distance/force), "display": fmt_J(round_sf(distance/force)), "summary": "Incorrect.", "mistake": "You divided the wrong way around.", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(w["F"] / w["d"]), "mistake": "You divided instead of multiplying. Ew = F × d.", "working": working},
+        {"value": round_sf(w["F_val"] * w["d_val"]) if _converted(w) else round_sf(w["F"] + w["d"]),
+         "mistake": ("You did not convert kN to N and/or km to m before substituting." if _converted(w)
+                     else "You added instead of multiplying. Ew = F × d."), "working": working},
+        {"value": round_sf(w["F"] * w["d"] / t_s) if t_s else round_sf(w["d"] / w["F"]),
+         "mistake": ("You divided by the time. Ew = Fd — time is not needed (that would be power)." if t_s
+                     else "You divided the wrong way around."), "working": working},
     ]
     return make_question(question, correct, options_data, "J", notes=NOTES["energy_work"],
-                         topic="Dynamics", question_type="Energy", level=level)
+                         topic="Dynamics", question_type="Energy", level=level,
+                         scaffold=_work_scaffold(w, "What is the work done Ew?", correct, "J"))
 
 
 def gen_work_force(level="N5"):
-    workdone = random.choice(range(50, 5001, 50))
-    distance = random.randint(2, 50)
-    correct  = round_sf(workdone / distance)
-
-    working = [
-        {"type": "text",  "content": "Rearrange the equation:"},
-        {"type": "latex", "content": r"F = \frac{W}{d}"},
-        {"type": "latex", "content": rf"F = \frac{{{fmt_J(workdone)}}}{{{distance}}}"},
-        {"type": "latex", "content": rf"F = {correct}\ \mathrm{{N}}"},
+    w = _work_ctx()
+    ew = round_sf(w["F"] * w["d"], 4)
+    correct = round_sf(ew / w["d"])
+    working = _work_notes(w, need_F=False) + [
+        {"type": "latex", "content": r"E_W = Fd"},
+        {"type": "latex", "content": rf"{_num(ew, 4)} = F \times {_num(w['d'])}"},
+        {"type": "latex", "content": rf"F = \frac{{{_num(ew, 4)}}}{{{_num(w['d'])}}}"},
+        {"type": "latex", "content": rf"F = {_num(correct)}\ \mathrm{{N}}"},
     ]
-    question = f"What force is needed to do {fmt_J(workdone)} of work over a distance of {distance} m?"
+    question = w["c"]["find_F"].format(E=f"{_big(ew, 4)} J", d=w["d_txt"], t=w["t_clause"])
+    t_s = w["t_s"]
+    km = w["c"]["du"] == "km"
     options_data = [
-        {"value": correct,                     "summary": "Correct!", "mistake": None, "working": working},
-        {"value": round_sf(workdone * distance),"summary": "Incorrect.", "mistake": "You multiplied W × d instead of dividing. F = W ÷ d.", "working": working},
-        {"value": round_sf(workdone + distance),"summary": "Incorrect.", "mistake": "You added instead of dividing. F = W ÷ d.", "working": working},
-        {"value": round_sf(distance / workdone),"summary": "Incorrect.", "mistake": "You divided the wrong way around.", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(ew * w["d"]), "mistake": "You multiplied instead of dividing. F = Ew ÷ d.", "working": working},
+        {"value": round_sf(ew / w["d_val"]) if km else round_sf(w["d"] / ew),
+         "mistake": ("You did not convert km to m before substituting." if km
+                     else "You divided the wrong way around. F = Ew ÷ d."), "working": working},
+        {"value": round_sf(ew / t_s) if t_s else round_sf(ew - w["d"]),
+         "mistake": ("You divided by the time. Ew = Fd — time is not needed." if t_s
+                     else "You subtracted instead of dividing. F = Ew ÷ d."), "working": working},
     ]
     return make_question(question, correct, options_data, "N", notes=NOTES["energy_work"],
-                         topic="Dynamics", question_type="Energy", level=level)
+                         topic="Dynamics", question_type="Energy", level=level,
+                         scaffold=_work_scaffold(w, "What is the force F?", correct, "N", need_F=False))
 
 
 def gen_work_distance(level="N5"):
-    workdone = random.choice(range(50, 5001, 50))
-    force    = random.choice(range(5, 105, 5))
-    correct  = round_sf(workdone / force)
-
-    working = [
-        {"type": "text",  "content": "Rearrange the equation:"},
-        {"type": "latex", "content": r"d = \frac{W}{F}"},
-        {"type": "latex", "content": rf"d = \frac{{{fmt_J(workdone)}}}{{{force}}}"},
-        {"type": "latex", "content": rf"d = {correct}\ \mathrm{{m}}"},
+    w = _work_ctx()
+    ew = round_sf(w["F"] * w["d"], 4)
+    correct = round_sf(ew / w["F"])
+    working = _work_notes(w, need_d=False) + [
+        {"type": "latex", "content": r"E_W = Fd"},
+        {"type": "latex", "content": rf"{_num(ew, 4)} = {_num(w['F'])} \times d"},
+        {"type": "latex", "content": rf"d = \frac{{{_num(ew, 4)}}}{{{_num(w['F'])}}}"},
+        {"type": "latex", "content": rf"d = {_num(correct)}\ \mathrm{{m}}"},
     ]
-    question = f"How far does an object move if {fmt_J(workdone)} of work is done using a force of {force} N?"
+    question = w["c"]["find_d"].format(E=f"{_big(ew, 4)} J", F=w["F_txt"], t=w["t_clause"])
+    t_s = w["t_s"]
+    kn = w["c"]["fu"] == "kN"
     options_data = [
-        {"value": correct,                     "summary": "Correct!", "mistake": None, "working": working},
-        {"value": round_sf(workdone * force),  "summary": "Incorrect.", "mistake": "You multiplied W × F instead of dividing. d = W ÷ F.", "working": working},
-        {"value": round_sf(workdone + force),  "summary": "Incorrect.", "mistake": "You added instead of dividing. d = W ÷ F.", "working": working},
-        {"value": round_sf(force / workdone),  "summary": "Incorrect.", "mistake": "You divided the wrong way around.", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(ew * w["F"]), "mistake": "You multiplied instead of dividing. d = Ew ÷ F.", "working": working},
+        {"value": round_sf(ew / w["F_val"]) if kn else round_sf(w["F"] / ew),
+         "mistake": ("You did not convert kN to N before substituting." if kn
+                     else "You divided the wrong way around. d = Ew ÷ F."), "working": working},
+        {"value": round_sf(ew / t_s) if t_s else round_sf(ew - w["F"]),
+         "mistake": ("You divided by the time. Ew = Fd — time is not needed." if t_s
+                     else "You subtracted instead of dividing. d = Ew ÷ F."), "working": working},
     ]
     return make_question(question, correct, options_data, "m", notes=NOTES["energy_work"],
-                         topic="Dynamics", question_type="Energy", level=level)
+                         topic="Dynamics", question_type="Energy", level=level,
+                         scaffold=_work_scaffold(w, "What is the distance d?", correct, "m", need_d=False))
 
 
 # =========================================================
 # Conservation of Energy — Ep ⇄ Ek, energy lost to friction
 # =========================================================
 
-_DROP_OBJECTS  = ["stone", "ball", "rock", "box", "bag of sand"]
-_THROW_OBJECTS = ["ball", "stone", "bean bag", "tennis ball"]
 _SLIDE_OBJECTS = ["sledge", "skateboarder", "go-kart", "toboggan", "trolley"]
 _BRAKE_OBJECTS = ["car", "van", "cyclist", "motorbike"]
 
+# Ep → Ek. (sentence, mass unit, m_lo, m_hi, m_step, h_lo, h_hi, h_step, ending)
+# The mass is always given — solutions calculate the initial Ep first and then
+# use that value as Ek, rather than cancelling m algebraically.
+_FALL_CTX = [
+    ("A ball of mass {m} is dropped from a height of {h}.", "kg", 0.2, 0.6, 0.05, 2, 12, 0.5,
+     "Calculate the speed of the ball just before it hits the ground."),
+    ("A rock of mass {m} breaks off a sea cliff at Mangersta and falls {h} into the sea.", "kg", 1.0, 5.0, 0.5, 10, 40, 1,
+     "Calculate the speed of the rock just before it hits the water."),
+    ("A gannet of mass {m} folds its wings and dives from rest, {h} above the sea off St Kilda.", "kg", 2.5, 3.5, 0.1, 15, 40, 1,
+     "Calculate the speed of the gannet as it enters the water."),
+    ("A child on a swing has a total mass of {m}. The swing is released from rest {h} above its lowest point.",
+     "kg", 20, 45, 1, 0.3, 1.2, 0.05, "Calculate the speed of the swing at its lowest point."),
+    ("A sledge and rider of total mass {m} start from rest at the top of a snowy slope with a vertical height of {h}.",
+     "kg", 30, 90, 5, 3, 15, 0.5, "Calculate the speed of the sledge at the bottom of the slope."),
+    ("A roller-coaster car of mass {m} is released from rest at the top of a drop with a vertical height of {h}.",
+     "kg", 300, 800, 50, 10, 40, 1, "Calculate the speed of the car at the bottom of the drop."),
+    ("An apple of mass {m} falls from a branch {h} above the ground.", "g", 100, 300, 10, 1.5, 6, 0.5,
+     "Calculate the speed of the apple just before it hits the ground."),
+]
+
+# Ek → Ep. (object, mass unit, m_lo, m_hi, m_step, v_lo, v_hi, launch phrase, height phrase)
+_UP_CTX = [
+    ("ball", "kg", 0.15, 0.6, 0.05, 5, 16, "is thrown vertically upwards at {v}", "maximum height reached by the ball"),
+    ("tennis ball", "g", 56, 58, 1, 10, 25, "is hit vertically upwards at {v}", "maximum height reached by the tennis ball"),
+    ("cricket ball", "g", 155, 165, 5, 6, 15, "is thrown vertically upwards at {v}", "maximum height reached by the cricket ball"),
+    ("skateboarder", "kg", 40, 75, 1, 3, 8, "rolls towards a ramp at {v} and rolls up it until they stop",
+     "maximum vertical height the skateboarder reaches"),
+    ("cyclist and bike", "kg", 70, 100, 5, 4, 10, "freewheel at {v} towards the bottom of a hill and coast up it until they stop",
+     "maximum vertical height the cyclist reaches"),
+]
+
+
+def _cons_mass(unit, lo, hi, step):
+    m_val = _pick(lo, hi, step)
+    m = m_val / 1000 if unit == "g" else m_val
+    return m, m_val, f"{_num(m_val)} {unit}"
+
 
 def gen_cons_falling_speed(level="N5"):
-    obj     = random.choice(_DROP_OBJECTS)
-    mass_kg = random.choice([0.2, 0.4, 1.5, 2, 2.5, 3, 4, 5])
-    gravity = random.choice([9.8, 10])
-    height  = random.randint(2, 40)
-    ep      = round_sf(mass_kg * gravity * height)
-    correct = round_sf(math.sqrt(2 * ep / mass_kg))
+    sent, unit, mlo, mhi, mstep, hlo, hhi, hstep, ending = random.choice(_FALL_CTX)
+    m, m_val, m_txt = _cons_mass(unit, mlo, mhi, mstep)
+    h = _pick(hlo, hhi, hstep)
+    ep = round_sf(m * G * h, 4)
+    v2 = 2 * ep / m
+    correct = round_sf(math.sqrt(v2))
 
-    working = [
-        {"type": "text",  "content": "Calculate the gravitational potential energy lost:"},
+    conv = [{"type": "latex", "content": _to_kg_step("g", m_val, m)}] if unit == "g" else []
+    working = conv + [
+        {"type": "text",  "content": "Step 1 — calculate the initial energy (all Ep at the top):"},
         {"type": "latex", "content": r"E_p = mgh"},
-        {"type": "latex", "content": rf"E_p = {mass_kg} \times {gravity} \times {height} = {fmt_J(ep)}"},
-        {"type": "text",  "content": "No energy is lost, so all the Ep lost becomes Ek gained:"},
-        {"type": "latex", "content": rf"E_k = {fmt_J(ep)}"},
+        {"type": "latex", "content": rf"E_p = {_num(m)} \times {G} \times {_num(h)}"},
+        {"type": "latex", "content": rf"E_p = {_num(ep, 4)}\ \mathrm{{J}}"},
+        {"type": "text",  "content": "Step 2 — no energy is lost, so all the Ep lost becomes Ek:"},
+        {"type": "latex", "content": rf"E_k = {_num(ep, 4)}\ \mathrm{{J}}"},
         {"type": "latex", "content": r"E_k = \frac{1}{2}mv^2"},
-        {"type": "latex", "content": rf"{ep:g} = \frac{{1}}{{2}} \times {mass_kg} \times v^2"},
-        {"type": "latex", "content": rf"v = {correct}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": rf"{_num(ep, 4)} = \frac{{1}}{{2}} \times {_num(m)} \times v^2"},
+        {"type": "latex", "content": rf"v^2 = {_num(v2, 4)}"},
+        {"type": "latex", "content": rf"v = {_num(correct)}\ \mathrm{{m/s}}"},
     ]
-    question = (f"A {mass_kg} kg {obj} is dropped from a height of {height} m. Assuming no energy "
-                f"is lost to air resistance, calculate the speed of the {obj} just before it hits "
-                f"the ground.\n\n{_g_table(gravity)}")
+    question = (sent.format(m=m_txt, h=f"{_num(h)} m") + " Friction and air resistance can be ignored. "
+                + ending + f"\n\n{_g_table(G)}")
     options_data = [
-        {"value": correct,                              "mistake": None, "working": working},
-        {"value": round_sf(math.sqrt(ep / mass_kg)),    "mistake": "You forgot the ½ in Ek = ½mv². v = √(2Ek ÷ m).", "working": working},
-        {"value": round_sf(2 * ep / mass_kg),           "mistake": "You found v² — remember to take the square root.", "working": working},
-        {"value": round_sf(math.sqrt(2 * ep)),          "mistake": "You forgot to divide by the mass. v = √(2Ek ÷ m).", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(math.sqrt(ep / m)), "mistake": "You forgot the ½ in Ek = ½mv². v² = Ek ÷ (½ × m).", "working": working},
+        {"value": round_sf(v2), "mistake": "You found v² — remember to take the square root.", "working": working},
+        {"value": round_sf(math.sqrt(2 * ep)), "mistake": "You forgot to divide by the mass. v² = Ek ÷ (½ × m).", "working": working},
     ]
-    scaffold = [
-        {"question": "What is the gravitational potential energy lost, Ep?", "answer": ep},
-        {"question": "What is the kinetic energy gained, Ek?", "answer": ep},
-        {"question": "What is the speed v?", "answer": correct},
+    scaffold = ([{"question": "What is the mass in kg?", "answer": m, "unit": "kg"}] if unit == "g" else []) + [
+        {"question": "What is the initial gravitational potential energy, Ep?", "answer": ep, "unit": "J"},
+        {"question": "What is the kinetic energy at the bottom, Ek?", "answer": ep, "unit": "J"},
+        {"question": "What is v²?", "answer": round_sf(v2)},
+        {"question": "What is the speed v?", "answer": correct, "unit": "m/s"},
     ]
     return make_question(question, correct, options_data, "m/s", notes=NOTES["energy_conservation"],
                          topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
 
 
 def gen_cons_max_height(level="N5"):
-    obj     = random.choice(_THROW_OBJECTS)
-    mass_kg = random.choice([0.1, 0.2, 0.25, 0.4, 0.5, 0.6])
-    gravity = random.choice([9.8, 10])
-    v       = random.randint(4, 25)
-    ek      = round_sf(0.5 * mass_kg * v ** 2)
-    correct = round_sf(ek / (mass_kg * gravity))
+    obj, unit, mlo, mhi, mstep, vlo, vhi, launch, target = random.choice(_UP_CTX)
+    m, m_val, m_txt = _cons_mass(unit, mlo, mhi, mstep)
+    v = random.randint(vlo, vhi)
+    ek = round_sf(0.5 * m * v ** 2, 4)
+    correct = round_sf(ek / (m * G))
 
-    working = [
-        {"type": "text",  "content": "Calculate the kinetic energy at launch:"},
+    conv = [{"type": "latex", "content": _to_kg_step("g", m_val, m)}] if unit == "g" else []
+    working = conv + [
+        {"type": "text",  "content": "Step 1 — calculate the initial energy (all Ek at the start):"},
         {"type": "latex", "content": r"E_k = \frac{1}{2}mv^2"},
-        {"type": "latex", "content": rf"E_k = \frac{{1}}{{2}} \times {mass_kg} \times {v}^2 = {fmt_J(ek)}"},
-        {"type": "text",  "content": "At maximum height all the Ek has become Ep:"},
-        {"type": "latex", "content": rf"E_p = {fmt_J(ek)}"},
+        {"type": "latex", "content": rf"E_k = \frac{{1}}{{2}} \times {_num(m)} \times {v}^2"},
+        {"type": "latex", "content": rf"E_k = {_num(ek, 4)}\ \mathrm{{J}}"},
+        {"type": "text",  "content": "Step 2 — at the maximum height all the Ek has become Ep:"},
+        {"type": "latex", "content": rf"E_p = {_num(ek, 4)}\ \mathrm{{J}}"},
         {"type": "latex", "content": r"E_p = mgh"},
-        {"type": "latex", "content": rf"{ek:g} = {mass_kg} \times {gravity} \times h"},
-        {"type": "latex", "content": rf"h = {correct}\ \mathrm{{m}}"},
+        {"type": "latex", "content": rf"{_num(ek, 4)} = {_num(m)} \times {G} \times h"},
+        {"type": "latex", "content": rf"h = {_num(correct)}\ \mathrm{{m}}"},
     ]
-    question = (f"A {mass_kg} kg {obj} is thrown vertically upwards at {v} m/s. Assuming no energy "
-                f"is lost to air resistance, calculate the maximum height reached by the {obj}."
-                f"\n\n{_g_table(gravity)}")
+    subject = f"A {obj}" if obj != "cyclist and bike" else "A cyclist and bike"
+    question = (f"{subject} of {'total ' if obj == 'cyclist and bike' else ''}mass {m_txt} "
+                f"{launch.format(v=f'{v} m/s')}. Friction and air resistance can be ignored. "
+                f"Calculate the {target}.\n\n{_g_table(G)}")
     options_data = [
-        {"value": correct,                              "mistake": None, "working": working},
-        {"value": round_sf(mass_kg * v ** 2 / (mass_kg * gravity)), "mistake": "You forgot the ½ in Ek = ½mv².", "working": working},
-        {"value": round_sf(0.5 * mass_kg * v / (mass_kg * gravity)), "mistake": "You forgot to square the speed in Ek = ½mv².", "working": working},
-        {"value": round_sf(ek / gravity),               "mistake": "You forgot to divide by the mass. h = Ep ÷ (m × g).", "working": working},
+        {"value": correct, "mistake": None, "working": working},
+        {"value": round_sf(m * v ** 2 / (m * G)), "mistake": "You forgot the ½ in Ek = ½mv².", "working": working},
+        {"value": round_sf(0.5 * m * v / (m * G)), "mistake": "You forgot to square the speed in Ek = ½mv².", "working": working},
+        {"value": round_sf(ek / G), "mistake": "You forgot to divide by the mass. h = Ep ÷ (m × g).", "working": working},
     ]
-    scaffold = [
-        {"question": "What is the kinetic energy at launch, Ek?", "answer": ek},
-        {"question": "What is the gravitational potential energy at maximum height, Ep?", "answer": ek},
-        {"question": "What is the maximum height h?", "answer": correct},
+    scaffold = ([{"question": "What is the mass in kg?", "answer": m, "unit": "kg"}] if unit == "g" else []) + [
+        {"question": "What is the initial kinetic energy, Ek?", "answer": ek, "unit": "J"},
+        {"question": "What is the gravitational potential energy at maximum height, Ep?", "answer": ek, "unit": "J"},
+        {"question": "What is the maximum height h?", "answer": correct, "unit": "m"},
     ]
     return make_question(question, correct, options_data, "m", notes=NOTES["energy_conservation"],
                          topic="Dynamics", question_type="Energy", level=level, scaffold=scaffold)
@@ -370,7 +623,7 @@ def gen_cons_max_height(level="N5"):
 def gen_cons_energy_lost(level="N5"):
     obj     = random.choice(_SLIDE_OBJECTS)
     mass_kg = random.choice(range(20, 85, 5))
-    gravity = random.choice([9.8, 10])
+    gravity = G
     height  = random.randint(3, 20)
     v_ideal = math.sqrt(2 * gravity * height)
     v       = round(random.uniform(0.5, 0.85) * v_ideal, 1)
