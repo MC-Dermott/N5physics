@@ -31,11 +31,6 @@
   .jbtn{font:inherit;font-size:12px;background:#122036;color:var(--ink);border:1px solid var(--line);border-radius:12px;
     padding:4px 10px;cursor:pointer;}
   .jbtn:hover{border-color:var(--amber);}
-  .readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;margin-top:10px;}
-  .ro{background:#122036;border:1px solid var(--line);border-radius:5px;padding:6px 9px;}
-  .ro .k{font-size:11.5px;color:var(--muted);}
-  .ro .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;margin-top:2px;}
-  .ro.h .v{color:var(--teal);} .ro.vv .v{color:var(--amber);}
   .toggles{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12.5px;color:var(--muted);}
   .toggles label{display:flex;gap:5px;align-items:center;cursor:pointer;}
 </style>
@@ -57,7 +52,6 @@
       <button class="tbtn" id="play">▶ Play</button>
       <button class="tbtn secondary" id="reset">↺ Reset</button>
       <input type="range" class="scrub" id="scrub" min="0" max="1000" value="0">
-      <span class="small" id="tlabel">t = 0.00 s</span>
       <select id="speed" class="tbtn secondary" style="padding:5px 6px;">
         <option value="0.25">0.25× speed</option><option value="0.5">0.5× speed</option>
         <option value="1" selected>1× speed</option><option value="2">2× speed</option>
@@ -66,16 +60,8 @@
     <div class="jumps" id="jumps"></div>
   </div>
 
-  <div class="readouts">
-    <div class="ro"><div class="k">time since launch, t</div><div class="v" id="r-t"></div></div>
-    <div class="ro h"><div class="k">horizontal velocity, v<sub>H</sub></div><div class="v" id="r-vh"></div></div>
-    <div class="ro vv"><div class="k">vertical velocity, v<sub>V</sub> (+ up)</div><div class="v" id="r-vv"></div></div>
-    <div class="ro h"><div class="k">horizontal displacement from launch</div><div class="v" id="r-sh"></div></div>
-    <div class="ro vv"><div class="k">vertical displacement from launch</div><div class="v" id="r-sv"></div></div>
-    <div class="ro vv"><div class="k" id="r-hk">height above the ground</div><div class="v" id="r-h"></div></div>
-  </div>
   <div class="toggles">
-    <label><input type="checkbox" id="tStrobe" checked> equal-time marks (every 0.2 s)</label>
+    <label><input type="checkbox" id="tStrobe" checked> equal-time marks</label>
     <label><input type="checkbox" id="tVec" checked> velocity arrows</label>
     <label><input type="checkbox" id="tPath" checked> full ground-frame path</label>
   </div>
@@ -105,7 +91,6 @@
 
   const esc = s => s.replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c]));
   document.getElementById("scenario").innerHTML = esc(C.title || "").replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-  document.getElementById("r-hk").textContent = "height above " + LEVEL;
 
   const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
   const W = cv.width, PAD = 34;
@@ -184,12 +169,10 @@
     for (let x = Math.ceil((VB.x0 + dx) / step) * step; x <= VB.x1 + dx; x += step){
       const [sx] = P(x, 0); ctx.strokeStyle = "#15253a";
       ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, H); ctx.stroke();
-      if (frame === "ground" && x >= 0){ ctx.fillStyle = "#56688a"; ctx.fillText(`${+x.toFixed(2)} m`, sx + 3, H - 8); }
     }
     for (let y = Math.ceil((VB.y0 + dy) / step) * step; y <= VB.y1 + dy; y += step){
       const [, sy] = P(0, y); ctx.strokeStyle = "#15253a";
       ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(W, sy); ctx.stroke();
-      if (frame === "ground" && y > 0){ ctx.fillStyle = "#56688a"; ctx.fillText(`${+y.toFixed(2)} m`, 4, sy - 3); }
     }
   }
 
@@ -347,8 +330,8 @@
       // velocity relative to the current frame
       const k = Math.min(70 / Math.max(C.v, 1), 5);
       const vh = frame === "vert" ? 0 : VH, vv = frame === "horiz" ? 0 : vvAt(t);
-      if (vh) arrow(sx, sy, vh * k, 0, "#2fd6c2", `${VH.toFixed(1)} m/s`);
-      if (Math.abs(vv) > 0.05) arrow(sx, sy, 0, -vv * k, "#ffb020", `${vv.toFixed(1)} m/s`);
+      if (vh) arrow(sx, sy, vh * k, 0, "#2fd6c2", "v_H");
+      if (Math.abs(vv) > 0.05) arrow(sx, sy, 0, -vv * k, "#ffb020", "v_V");
       if (vh && Math.abs(vv) > 0.05) arrow(sx, sy, vh * k, -vv * k, "#f4f0e680", "");
     }
     ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(sx, sy, 6, 0, 2 * Math.PI); ctx.fill();
@@ -362,15 +345,15 @@
       const [sx, sy] = frame === "vert" ? Pf(0, yAt(m.t)) : frame === "horiz" ? Pf(xAt(m.t), H0) : P(xAt(m.t), yAt(m.t));
       ctx.strokeStyle = "#ff6b5e"; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(sx, sy, 8, 0, 2 * Math.PI); ctx.stroke();
-      label(`${m.label} · ${m.t.toFixed(2)} s`, sx + 10, sy - 10, "#ff9b91");
+      label(m.label, sx + 10, sy - 10, "#ff9b91");
     }
   }
 
   function drawBadge(){
     let a, b;
     if (frame === "ground"){ a = "Camera fixed to the ground"; b = "both motions together"; }
-    else if (frame === "horiz"){ a = `Camera moving vertically at ${vvAt(t).toFixed(1)} m/s (+ up)`; b = `projectile only moves sideways, ${VH.toFixed(1)} m/s`; }
-    else { a = `Camera moving sideways at ${VH.toFixed(1)} m/s`; b = "projectile only moves up and down"; }
+    else if (frame === "horiz"){ a = "Camera moving up and down with the projectile"; b = "projectile only moves sideways"; }
+    else { a = "Camera moving sideways at the projectile's v_H"; b = "projectile only moves up and down"; }
     ctx.fillStyle = "#0a1626dd"; ctx.fillRect(W - 300, 8, 292, 44);
     ctx.strokeStyle = "#24344a"; ctx.strokeRect(W - 300, 8, 292, 44);
     label(a, W - 290, 26, "#e7ecf5"); label(b, W - 290, 44, "#8a99b5");
@@ -381,13 +364,6 @@
     setView(); placed = [];
     ctx.fillStyle = "#0a1626"; ctx.fillRect(0, 0, W, H);
     drawGrid(); drawTerrain(); drawScene(); drawPath(); drawMarks(); drawTrail(); drawProjectile(); drawBadge();
-    $("r-t").textContent = `${t.toFixed(2)} s`;
-    $("r-vh").textContent = `${VH.toFixed(2)} m/s`;
-    $("r-vv").textContent = `${vvAt(t).toFixed(2)} m/s`;
-    $("r-sh").textContent = `${xAt(t).toFixed(2)} m`;
-    $("r-sv").textContent = `${(yAt(t) - H0).toFixed(2)} m`;
-    $("r-h").textContent = `${yAt(t).toFixed(2)} m`;
-    $("tlabel").textContent = `t = ${t.toFixed(2)} s`;
     $("scrub").value = Math.round(1000 * t / T_LAND);
   }
 
@@ -404,7 +380,7 @@
     $("frameNote").textContent = notes[f];
     render();
   }
-  function stop(){ playing = false; $("play").textContent = "▶ Play"; }
+  function stop(){ playing = false; last = null; $("play").textContent = "▶ Play"; }
   function tick(now){
     if (!playing){ last = null; return; }
     if (last != null) t += (now - last) / 1000 * speed;
@@ -416,7 +392,7 @@
   $("play").onclick = () => {
     if (playing){ stop(); return; }
     if (t >= T_LAND - 1e-6) t = 0;
-    playing = true; $("play").textContent = "❚❚ Pause"; requestAnimationFrame(tick);
+    playing = true; last = null; $("play").textContent = "❚❚ Pause"; requestAnimationFrame(tick);
   };
   $("reset").onclick = () => { stop(); t = 0; render(); };
   $("scrub").oninput = e => { stop(); t = T_LAND * e.target.value / 1000; render(); };
@@ -433,7 +409,7 @@
     .sort((a, b) => a.t - b.t)
     .forEach(m => {
       const b = document.createElement("button");
-      b.className = "jbtn"; b.textContent = `${m.label} · ${m.t.toFixed(2)} s`;
+      b.className = "jbtn"; b.textContent = m.label;
       b.onclick = () => { stop(); t = Math.min(m.t, T_LAND); render(); };
       $("jumps").appendChild(b);
     });
