@@ -1,3 +1,4 @@
+import json
 import random
 import math
 import pathlib
@@ -10,9 +11,28 @@ _PROJECTILE_WIDGET_HTML = (
 ).read_text(encoding="utf-8")
 
 
-def _with_projectile_widget(question):
-    question.metadata["widget_html"] = _PROJECTILE_WIDGET_HTML
-    question.metadata["widget_height"] = 950
+def _widget_config(v, theta_deg, h=0, context="", objects=None, marks=None, compare_theta=None):
+    """This question's scene for the projectile widget: launch, launcher, landing
+    level, any other objects (people, crossbar, target...) and the moments the
+    question asks about (marks: [{"t": seconds after launch, "label": str}])."""
+    c = context.lower()
+    launcher = ("cliff" if "cliff" in c else "platform" if "platform" in c
+                else "building" if "building" in c else "person" if h else "ground")
+    return {
+        "v": v, "theta": theta_deg, "h": h, "launcher": launcher,
+        "landing": "sea" if " sea" in c else "ground",
+        "objects": objects or [], "marks": marks or [],
+        "compare_theta": compare_theta, "title": context,
+    }
+
+
+def _with_projectile_widget(question, config=None):
+    """Attach the widget, with this question's scene injected when given."""
+    html = _PROJECTILE_WIDGET_HTML
+    if config is not None:
+        html = html.replace("/*__PROJECTILE_CONFIG__*/null", json.dumps(config), 1)
+    question.metadata["widget_html"] = html
+    question.metadata["widget_height"] = 1000
     return question
 
 _NOTES_PROJECTILE = """
@@ -218,7 +238,7 @@ def _l2_part_time_to_peak(v, v_H, v_V, t_up, theta_deg, level):
 _TOPIC = "Our Dynamic Universe"
 
 
-def _scenario(context, parts, level):
+def _scenario(context, parts, level, config=None):
     return _with_projectile_widget(PhysicsQuestion(
         question_text="",
         correct_answer=0,
@@ -229,7 +249,7 @@ def _scenario(context, parts, level):
         is_scenario=True,
         scenario_context=context,
         parts=parts,
-    ))
+    ), config)
 
 
 def _distinct(answer, distractors):
@@ -317,6 +337,9 @@ def generate_projectile_vertical_displacement(level="Higher"):
             {"value": _r2(L["v"] * t - 0.5 * g * t ** 2), "mistake": f"Use the vertical component ({v_V} m/s) as u, not the launch speed: s = {s} m."},
         ]
 
+    t_mark = (L["v_V"] / g + t) if from_top else t
+    cfg = _widget_config(L["v"], L["theta_deg"], h, L["context"],
+                         marks=[{"t": round(t_mark, 3), "label": "time in the question"}])
     working = [
         {"type": "text",  "content": lead},
         {"type": "latex", "content": r"s = ut + \tfrac{1}{2}at^2"},
@@ -332,7 +355,7 @@ def generate_projectile_vertical_displacement(level="Higher"):
             text = (f"Calculate the vertical displacement of the projectile from the launch point {when} "
                     f"(a negative answer means below the launch point).")
         parts.append(_part(text, s, "m", working, s_mistakes, level))
-        return _scenario(L["context"], parts, level)
+        return _scenario(L["context"], parts, level, cfg)
 
     H = _r2(base + s)
     if from_top:
@@ -342,7 +365,7 @@ def generate_projectile_vertical_displacement(level="Higher"):
     if base == 0:
         working.append({"type": "text", "content": "Launched from the ground, so its height is its vertical displacement from launch."})
         parts.append(_part(text, H, "m", working, s_mistakes, level))
-        return _scenario(L["context"], parts, level)
+        return _scenario(L["context"], parts, level, cfg)
     base_text = f"{base:g}" if base == h else f"{base}"
     working.append({"type": "text", "content": f"Add the displacement to the height of {base_name} above {where}:"})
     working.append({"type": "latex", "content": rf"h = {base_text} + ({s}) = {H}\ \mathrm{{m}}"})
@@ -356,7 +379,7 @@ def generate_projectile_vertical_displacement(level="Higher"):
             {"prompt": f"What is the vertical displacement from {base_name} (negative = below)?", "answer": s},
             {"prompt": f"What is the height above {where}?", "answer": H},
         ]))
-    return _scenario(L["context"], parts, level)
+    return _scenario(L["context"], parts, level, cfg)
 
 
 def generate_projectile_vertical_time_from_top(level="Higher"):
@@ -409,7 +432,9 @@ def generate_projectile_vertical_time_from_top(level="Higher"):
             {"prompt": "What vertical distance does it fall from the highest point?", "answer": drop},
             {"prompt": "What is the time taken?", "answer": t},
         ] if mode == "height" else None)
-    return _scenario(L["context"], [part_v, part_up, part_c], level)
+    cfg = _widget_config(L["v"], L["theta_deg"], L["h"], L["context"],
+                         marks=[{"t": round(v_V / g + t, 3), "label": "end of the fall"}])
+    return _scenario(L["context"], [part_v, part_up, part_c], level, cfg)
 
 
 # Type 3 targets: (text, speeds, angles, fraction of the flat-ground range)
@@ -467,7 +492,15 @@ def generate_projectile_horizontal(level="Higher"):
             {"value": _r3(x / v_V), "mistake": f"Horizontal distance is covered at the horizontal velocity: t = {x} ÷ {v_H} = {t} s."},
             {"value": _r3(x / v_H / 2), "mistake": f"No halving — the horizontal velocity is constant over the whole {x} m: t = {x} ÷ {v_H} = {t} s."},
         ], level)
-        return _scenario(L["context"], [part_h, part_2], level)
+        kind = "crossbar" if "crossbar" in text else "target" if "archer" in text else "flag"
+        obj = {"type": kind, "x": x}
+        if kind == "crossbar":
+            obj["height"] = 2.44
+        elif kind == "target":
+            obj["height"] = round(max(0.3, v_V * t - 0.5 * g * t ** 2), 2)
+        cfg = _widget_config(v, theta_deg, 0, L["context"], objects=[obj],
+                             marks=[{"t": t, "label": f"reaches the {kind}"}])
+        return _scenario(L["context"], [part_h, part_2], level, cfg)
 
     L = _angled_launch()
     part_h, _ = _component_parts(L, level)
@@ -501,7 +534,9 @@ def generate_projectile_horizontal(level="Higher"):
     else:
         t = round(random.uniform(0.2, 0.9) * T, 2)
         part_2 = _s_vt_part(L, t, f"Calculate the horizontal distance the projectile has travelled {t} s after launch.", level)
-    return _scenario(L["context"], [part_h, part_2], level)
+    marks = [{"t": t, "label": "time in the question"}] if mode == "at_time" else []
+    cfg = _widget_config(L["v"], L["theta_deg"], L["h"], L["context"], marks=marks)
+    return _scenario(L["context"], [part_h, part_2], level, cfg)
 
 
 # ── Pattern A — Same height: symmetric total time, then range ────────────────
@@ -613,7 +648,7 @@ def generate_projectile_a_same_height(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part_a, part_b, part_c, part_d],
-    ))
+    ), _widget_config(v, theta_deg, 0, context))
 
 
 # ── Pattern B — Given max height & time to peak, find total time, then range ─
@@ -732,7 +767,7 @@ def generate_projectile_b_given_height_time(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part_a, part_b, part_c, part_d],
-    ))
+    ), _widget_config(v, theta_deg, h, context))
 
 
 # ── Pattern C — Time to peak (calculated), given further time, then range ────
@@ -751,7 +786,8 @@ def generate_projectile_c_time_then_range(level="Higher"):
     part_a, part_b = _l2_parts_ab(v, theta_deg, theta, v_H, v_V, level)
     part_c = _l2_part_time_to_peak(v, v_H, v_V, t_up, theta_deg, level)
 
-    t2      = round(random.uniform(0.5, 2.0) * t_up, 2)
+    # the real fall time from the highest point, so it matches the launch height
+    t2      = _r2(math.sqrt(2 * (h + v_V ** 2 / (2 * g)) / g))
     t_total = _r2(t_up + t2)
     R       = _r2(v_H * t_total)
 
@@ -812,7 +848,7 @@ def generate_projectile_c_time_then_range(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part_a, part_b, part_c, part_d],
-    ))
+    ), _widget_config(v, theta_deg, h, context))
 
 
 # ── Pattern D — Time to peak (calculated), given further time, then height ───
@@ -898,7 +934,7 @@ def generate_projectile_d_time_then_height(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part_a, part_b, part_c, part_d],
-    ))
+    ), _widget_config(v, theta_deg, h, context, marks=[{"t": round(t_up + t2, 3), "label": "further time ends"}]))
 
 
 # ── Pattern E — Horizontal distance to a target: find time, then height ──────
@@ -1062,7 +1098,7 @@ def generate_projectile_e_horizontal_backwards(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part_a, part_b, part_c, part_d, part_e],
-    ))
+    ), _widget_config(v, theta_deg, 0, context, objects=[{"type": "crossbar", "x": x_target, "height": 2.44}], marks=[{"t": t, "label": "reaches the crossbar"}]))
 
 
 # ── Pattern F — Given total flight time, then a clearance height ─────────────
@@ -1194,7 +1230,7 @@ def generate_projectile_f_given_time_clearance(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part_a, part_b, part_c, part_d],
-    ))
+    ), _widget_config(v, theta_deg, h, context, objects=[{"type": "person", "x": round(v_H * t3, 2), "reach": reach_height, "label": "teammate" if "teammate" in context else "friend"}], marks=[{"t": t3, "label": "directly above"}]))
 
 
 # ── Exam style (mixed) — one of the six past-paper patterns A–F at random ────
@@ -1264,7 +1300,7 @@ def _exam_angle_symmetry(level="Higher"):
                     "v_H and v_V between the two angles that keeps the range the same.",
          "working": working},
     ]
-    return context, question_text, correct, distractors
+    return context, question_text, correct, distractors, _widget_config(v, theta_deg, 0, context, compare_theta=other_deg)
 
 
 def _exam_air_resistance(level="Higher"):
@@ -1313,12 +1349,12 @@ def _exam_air_resistance(level="Higher"):
                     "height is reduced too, not just the range.",
          "working": working},
     ]
-    return context, question_text, correct, distractors
+    return context, question_text, correct, distractors, _widget_config(v, theta_deg, 0, context)
 
 
 def generate_projectile_explain(level="Higher"):
     builder = random.choice([_exam_angle_symmetry, _exam_air_resistance])
-    context, question_text, correct, distractors = builder(level)
+    context, question_text, correct, distractors, cfg = builder(level)
 
     options = [correct] + [d["value"] for d in distractors]
     random.shuffle(options)
@@ -1346,4 +1382,4 @@ def generate_projectile_explain(level="Higher"):
         is_scenario=True,
         scenario_context=context,
         parts=[part],
-    ))
+    ), cfg)

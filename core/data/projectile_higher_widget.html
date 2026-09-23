@@ -3,799 +3,442 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Projectile Lab — Angled Launch</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<title>Projectile Frames</title>
 <style>
-  :root{
-    --bg-app:#0c1420;
-    --bg-panel:#f4f0e6;
-    --scope-bg:#0a1626;
-    --scope-grid:#1b2b42;
-    --scope-grid-major:#25405e;
-    --ink-dark:#1a2130;
-    --ink-dark-muted:#6b7385;
-    --ink-light:#e7ecf5;
-    --ink-light-muted:#7c8ba8;
-    --amber:#ffb020;
-    --amber-dim:#8a6220;
-    --teal:#2fd6c2;
-    --teal-dim:#1d6e66;
-    --line:#dcd5c2;
-    --line-dark:#24344a;
-    --danger:#ff6b5e;
-    --danger-dim:#8a2e26;
-  }
+  :root{ --bg:#0c1420; --line:#24344a; --ink:#e7ecf5; --muted:#8a99b5; --amber:#ffb020; --teal:#2fd6c2; }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg-app);
-    color:var(--ink-light);
-    font-family:'IBM Plex Sans',sans-serif;
-    min-height:100vh;
-    padding:28px 20px 60px;
-  }
-  .wrap{max-width:1180px;margin:0 auto;}
-
-  header{
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
-    gap:20px;
-    flex-wrap:wrap;
-    margin-bottom:22px;
-    padding-bottom:16px;
-    border-bottom:1px solid var(--line-dark);
-  }
-  .eyebrow{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    letter-spacing:.18em;
-    text-transform:uppercase;
-    color:var(--teal);
-    margin:0 0 6px;
-  }
-  h1{
-    margin:0;
-    font-family:'IBM Plex Sans Condensed',sans-serif;
-    font-weight:700;
-    font-size:34px;
-    letter-spacing:-.01em;
-    color:var(--ink-light);
-  }
-  h1 span{color:var(--amber);}
-  .subtitle{
-    font-size:13.5px;
-    color:var(--ink-light-muted);
-    max-width:440px;
-    line-height:1.5;
-    margin:0;
-  }
-
-  .mode-row{
-    display:flex;
-    gap:8px;
-    margin-bottom:18px;
-    flex-wrap:wrap;
-  }
-  .mode-btn{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12.5px;
-    letter-spacing:.04em;
-    background:transparent;
-    border:1px solid var(--line-dark);
-    color:var(--ink-light-muted);
-    padding:10px 16px;
-    border-radius:3px;
-    cursor:pointer;
-    transition:all .15s ease;
-  }
-  .mode-btn:hover{border-color:var(--teal-dim);color:var(--ink-light);}
-  .mode-btn.active{
-    background:var(--teal);
-    border-color:var(--teal);
-    color:#04211d;
-    font-weight:600;
-  }
-
-  .grid{
-    display:grid;
-    grid-template-columns:1.55fr 1fr;
-    gap:18px;
-  }
-  @media (max-width:880px){
-    .grid{grid-template-columns:1fr;}
-  }
-
-  .card{
-    border-radius:6px;
-    overflow:hidden;
-  }
-
-  .scope{
-    background:var(--scope-bg);
-    border:1px solid var(--line-dark);
-    position:relative;
-  }
-  .scope-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:10px 14px;
-    border-bottom:1px solid var(--line-dark);
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    color:var(--ink-light-muted);
-    letter-spacing:.06em;
-  }
-  .scope-head .dot{
-    display:inline-block;width:7px;height:7px;border-radius:50%;
-    background:var(--amber);margin-right:7px;
-    box-shadow:0 0 6px var(--amber);
-  }
-  #canvasHolder{width:100%;display:block;line-height:0;}
-  canvas{width:100%;height:auto;display:block;}
-
-  .landed-banner{
-    position:absolute;
-    top:44px;left:14px;right:14px;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    color:var(--amber);
-    background:rgba(10,22,38,.88);
-    border:1px solid var(--amber-dim);
-    padding:8px 12px;
-    border-radius:3px;
-    display:none;
-  }
-  .landed-banner.show{display:block;}
-
-  .transport{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:12px 14px;
-    background:#0e1c2e;
-    border-top:1px solid var(--line-dark);
-    flex-wrap:wrap;
-  }
-  .tbtn{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    background:var(--amber);
-    color:#231602;
-    border:none;
-    padding:8px 14px;
-    border-radius:3px;
-    cursor:pointer;
-    font-weight:600;
-    letter-spacing:.03em;
-  }
-  .tbtn.secondary{
-    background:transparent;
-    border:1px solid var(--line-dark);
-    color:var(--ink-light-muted);
-  }
-  .tbtn:hover{filter:brightness(1.08);}
-  .speedctl{
-    margin-left:auto;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    color:var(--ink-light-muted);
-  }
-  .speedctl input{width:80px;accent-color:var(--teal);}
-
-  .panel{
-    background:var(--bg-panel);
-    color:var(--ink-dark);
-    border-radius:6px;
-    padding:18px 18px 8px;
-  }
-  .panel h2{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    letter-spacing:.16em;
-    text-transform:uppercase;
-    color:var(--ink-dark-muted);
-    margin:0 0 14px;
-    padding-bottom:8px;
-    border-bottom:1px solid var(--line);
-  }
-  .field{margin-bottom:16px;}
-  .field-label{
-    display:flex;
-    justify-content:space-between;
-    font-size:12.5px;
-    font-weight:600;
-    margin-bottom:6px;
-  }
-  .field-label .val{
-    font-family:'IBM Plex Mono',monospace;
-    color:var(--teal-dim);
-    font-weight:600;
-  }
-  input[type=range]{
-    width:100%;
-    accent-color:var(--amber-dim);
-  }
-
-  .readout-tag{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:10px;
-    letter-spacing:.1em;
-    text-transform:uppercase;
-    margin:14px 0 8px;
-    display:flex;
-    align-items:center;
-    gap:6px;
-  }
-  .readout-tag .swatch{width:9px;height:9px;border-radius:2px;display:inline-block;}
-  .readout-tag.h{color:var(--teal-dim);}
-  .readout-tag.h .swatch{background:var(--teal);}
-  .readout-tag.v{color:var(--danger-dim);}
-  .readout-tag.v .swatch{background:var(--danger);}
-  .readout-tag.c{color:var(--ink-dark-muted);}
-  .readout-tag.c .swatch{background:var(--ink-dark-muted);}
-
-  .suvat-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-    margin-bottom:6px;
-  }
-  .suvat-item{
-    border:1px solid var(--line);
-    border-radius:4px;
-    padding:9px 10px;
-    background:#fbf9f3;
-  }
-  .suvat-item .top{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:3px;
-  }
-  .suvat-letter{
-    font-family:'IBM Plex Mono',monospace;
-    font-weight:700;
-    font-size:13px;
-    color:var(--ink-dark);
-  }
-  .suvat-name{
-    font-size:9.5px;
-    letter-spacing:.03em;
-    text-transform:uppercase;
-    color:var(--ink-dark-muted);
-  }
-  .suvat-value{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:15px;
-    font-weight:600;
-    color:var(--teal-dim);
-  }
-  .suvat-item.vert .suvat-value{color:var(--danger-dim);}
-
-  .extra-readout{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11.5px;
-    color:var(--ink-dark-muted);
-    line-height:1.8;
-    padding-top:6px;
-    border-top:1px solid var(--line);
-    margin-top:4px;
-  }
-  .extra-readout b{color:var(--ink-dark);}
-
-  .toggles{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-top:14px;
-    padding-top:12px;
-    border-top:1px solid var(--line);
-  }
-  .toggle{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-size:12px;
-    color:var(--ink-dark-muted);
-  }
-  .toggle input{accent-color:var(--teal-dim);}
-
-  footer.note{
-    margin-top:18px;
-    font-size:11.5px;
-    color:var(--ink-light-muted);
-    font-family:'IBM Plex Mono',monospace;
-    line-height:1.7;
-  }
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{padding:12px 12px 16px;max-width:1100px;margin:0 auto;}
+  .scenario{font-size:14px;line-height:1.45;background:#122036;border:1px solid var(--line);
+    border-radius:6px;padding:10px 12px;margin-bottom:10px;}
+  .scenario b{color:var(--amber);font-weight:600;}
+  .frames{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+  .fbtn{font:inherit;font-size:13px;background:transparent;border:1px solid var(--line);color:var(--muted);
+    padding:8px 12px;border-radius:4px;cursor:pointer;text-align:left;}
+  .fbtn:hover{color:var(--ink);border-color:#35506f;}
+  .fbtn.active{background:var(--teal);border-color:var(--teal);color:#04211d;font-weight:600;}
+  .frame-note{font-size:12.5px;color:var(--muted);margin:0 0 8px;min-height:18px;line-height:1.4;}
+  .scope{background:#0a1626;border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+  canvas{display:block;width:100%;height:auto;}
+  .transport{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-top:1px solid var(--line);}
+  .tbtn{font:inherit;font-size:13px;background:var(--amber);color:#1a1200;border:none;padding:7px 14px;border-radius:4px;
+    cursor:pointer;font-weight:600;}
+  .tbtn.secondary{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500;}
+  .scrub{flex:1;min-width:160px;accent-color:var(--amber);}
+  .small{font-size:12px;color:var(--muted);}
+  .jumps{display:flex;gap:6px;flex-wrap:wrap;padding:0 10px 10px;}
+  .jbtn{font:inherit;font-size:12px;background:#122036;color:var(--ink);border:1px solid var(--line);border-radius:12px;
+    padding:4px 10px;cursor:pointer;}
+  .jbtn:hover{border-color:var(--amber);}
+  .readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;margin-top:10px;}
+  .ro{background:#122036;border:1px solid var(--line);border-radius:5px;padding:6px 9px;}
+  .ro .k{font-size:11.5px;color:var(--muted);}
+  .ro .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;margin-top:2px;}
+  .ro.h .v{color:var(--teal);} .ro.vv .v{color:var(--amber);}
+  .toggles{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12.5px;color:var(--muted);}
+  .toggles label{display:flex;gap:5px;align-items:center;cursor:pointer;}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="scenario" id="scenario"></div>
 
-  <header>
-    <div>
-      <p class="eyebrow">Kinematics Instrument · Higher</p>
-      <h1>Projectile <span>Lab</span></h1>
-      <p class="subtitle">A projectile is launched at an angle, from a chosen height above the ground. Resolve the launch velocity into horizontal and vertical components, watch each act on its own, then see them combine into the flight path.</p>
+  <div class="frames">
+    <button class="fbtn active" data-frame="ground">Ground frame</button>
+    <button class="fbtn" data-frame="horiz">Frame moving vertically with the projectile<br><small>→ horizontal motion only</small></button>
+    <button class="fbtn" data-frame="vert">Frame moving horizontally with the projectile<br><small>↕ vertical motion only</small></button>
+  </div>
+  <p class="frame-note" id="frameNote"></p>
+
+  <div class="scope">
+    <canvas id="cv" width="960" height="520"></canvas>
+    <div class="transport">
+      <button class="tbtn" id="play">▶ Play</button>
+      <button class="tbtn secondary" id="reset">↺ Reset</button>
+      <input type="range" class="scrub" id="scrub" min="0" max="1000" value="0">
+      <span class="small" id="tlabel">t = 0.00 s</span>
+      <select id="speed" class="tbtn secondary" style="padding:5px 6px;">
+        <option value="0.25">0.25× speed</option><option value="0.5">0.5× speed</option>
+        <option value="1" selected>1× speed</option><option value="2">2× speed</option>
+      </select>
     </div>
-  </header>
-
-  <div class="mode-row" id="viewRow">
-    <button class="mode-btn" data-view="combined">⤴ Combined flight path</button>
-    <button class="mode-btn" data-view="horizontal">→ Horizontal motion only</button>
-    <button class="mode-btn" data-view="vertical">↕ Vertical motion only</button>
+    <div class="jumps" id="jumps"></div>
   </div>
 
-  <div class="grid">
-
-    <div class="card scope">
-      <div class="scope-head">
-        <span><span class="dot"></span>LIVE TRAJECTORY</span>
-        <span id="viewLabel">COMBINED FLIGHT PATH</span>
-      </div>
-      <div id="canvasHolder">
-        <canvas id="scopeCanvas" width="900" height="560"></canvas>
-        <div class="landed-banner" id="landedBanner"></div>
-      </div>
-      <div class="transport">
-        <button class="tbtn" id="playBtn">▶ Play</button>
-        <button class="tbtn secondary" id="resetBtn">↺ Reset</button>
-        <div class="speedctl">
-          <span>SPEED</span>
-          <input type="range" id="speedRange" min="0.25" max="3" step="0.25" value="1">
-          <span id="speedVal">1.0×</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="card panel">
-      <h2>Launch parameters</h2>
-
-      <div class="field">
-        <div class="field-label"><span>Resultant velocity, v</span><span class="val" id="vVal">20.0 m/s</span></div>
-        <input type="range" id="vRange" min="5" max="40" step="0.5" value="20">
-      </div>
-
-      <div class="field">
-        <div class="field-label"><span>Launch angle, θ</span><span class="val" id="angleVal">40°</span></div>
-        <input type="range" id="angleRange" min="0" max="85" step="1" value="40">
-      </div>
-
-      <div class="field">
-        <div class="field-label"><span>Initial vertical displacement, s₀</span><span class="val" id="s0Val">0.0 m</span></div>
-        <input type="range" id="s0Range" min="0" max="60" step="1" value="0">
-      </div>
-
-      <h2 style="margin-top:4px;">Component readout</h2>
-
-      <div class="readout-tag h"><span class="swatch"></span>Horizontal component</div>
-      <div class="suvat-grid">
-        <div class="suvat-item">
-          <div class="top"><span class="suvat-letter">v<sub>H</sub></span><span class="suvat-name">= v cos θ (const.)</span></div>
-          <div class="suvat-value" id="val-vh">0.0 m/s</div>
-        </div>
-        <div class="suvat-item">
-          <div class="top"><span class="suvat-letter">s<sub>H</sub></span><span class="suvat-name">Distance so far</span></div>
-          <div class="suvat-value" id="val-sh">0.0 m</div>
-        </div>
-      </div>
-
-      <div class="readout-tag v"><span class="swatch"></span>Vertical component</div>
-      <div class="suvat-grid">
-        <div class="suvat-item vert">
-          <div class="top"><span class="suvat-letter">v<sub>V</sub></span><span class="suvat-name">= v sin θ at t=0</span></div>
-          <div class="suvat-value" id="val-vv0">0.0 m/s</div>
-        </div>
-        <div class="suvat-item vert">
-          <div class="top"><span class="suvat-letter">v<sub>V</sub>(t)</span><span class="suvat-name">Current (+up / −down)</span></div>
-          <div class="suvat-value" id="val-vvt">0.0 m/s</div>
-        </div>
-        <div class="suvat-item vert" style="grid-column:1/3;">
-          <div class="top"><span class="suvat-letter">s<sub>V</sub></span><span class="suvat-name">Height above ground</span></div>
-          <div class="suvat-value" id="val-sv">0.0 m</div>
-        </div>
-      </div>
-
-      <div class="readout-tag c"><span class="swatch"></span>Combined</div>
-      <div class="suvat-grid">
-        <div class="suvat-item">
-          <div class="top"><span class="suvat-letter">v</span><span class="suvat-name">Resultant speed</span></div>
-          <div class="suvat-value" id="val-vres">0.0 m/s</div>
-        </div>
-        <div class="suvat-item">
-          <div class="top"><span class="suvat-letter">t</span><span class="suvat-name">Elapsed time</span></div>
-          <div class="suvat-value" id="val-t">0.00 s</div>
-        </div>
-      </div>
-
-      <div class="extra-readout" id="extraReadout"></div>
-
-      <div class="toggles" id="toggles">
-        <label class="toggle"><input type="checkbox" id="showStrobe" checked> equal-time marks</label>
-        <label class="toggle"><input type="checkbox" id="showVector" checked> velocity vectors</label>
-        <label class="toggle"><input type="checkbox" id="showGraph" checked> s–t / v–t graphs</label>
-      </div>
-    </div>
-
+  <div class="readouts">
+    <div class="ro"><div class="k">time since launch, t</div><div class="v" id="r-t"></div></div>
+    <div class="ro h"><div class="k">horizontal velocity, v<sub>H</sub></div><div class="v" id="r-vh"></div></div>
+    <div class="ro vv"><div class="k">vertical velocity, v<sub>V</sub> (+ up)</div><div class="v" id="r-vv"></div></div>
+    <div class="ro h"><div class="k">horizontal displacement from launch</div><div class="v" id="r-sh"></div></div>
+    <div class="ro vv"><div class="k">vertical displacement from launch</div><div class="v" id="r-sv"></div></div>
+    <div class="ro vv"><div class="k" id="r-hk">height above the ground</div><div class="v" id="r-h"></div></div>
   </div>
-
-  <footer class="note">
-    v<sub>H</sub> = v cos θ stays constant all flight · v<sub>V</sub> = v sin θ at launch, then changes at −g = −9.8 m/s² (up positive) · s₀ &gt; 0 launches from a raised point (e.g. a cliff or a shot-putter's hand) and the projectile falls further than it rose
-  </footer>
-
+  <div class="toggles">
+    <label><input type="checkbox" id="tStrobe" checked> equal-time marks (every 0.2 s)</label>
+    <label><input type="checkbox" id="tVec" checked> velocity arrows</label>
+    <label><input type="checkbox" id="tPath" checked> full ground-frame path</label>
+  </div>
 </div>
 
 <script>
 (function(){
-  const canvas = document.getElementById('scopeCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+  // The app replaces the null below with this question's launch and scene.
+  const INJECTED = /*__PROJECTILE_CONFIG__*/null;
+  const C = Object.assign({
+    v: 20, theta: 40, h: 0, launcher: "ground", landing: "ground",
+    objects: [], marks: [], compare_theta: null,
+    title: "A ball is kicked from flat ground at **20 m/s** at **40°** above the horizontal.",
+  }, INJECTED || {});
+
   const G = 9.8;
+  const rad = C.theta * Math.PI / 180;
+  const VH = C.v * Math.cos(rad), VV0 = C.v * Math.sin(rad), H0 = C.h;
+  const T_UP = VV0 / G;
+  const H_TOP = H0 + VV0 * VV0 / (2 * G);
+  const T_LAND = (VV0 + Math.sqrt(VV0 * VV0 + 2 * G * H0)) / G;
+  const RANGE = VH * T_LAND;
+  const LEVEL = C.landing === "sea" ? "the sea" : "the ground";
+  const xAt = t => VH * t;
+  const yAt = t => H0 + VV0 * t - 0.5 * G * t * t;
+  const vvAt = t => VV0 - G * t;
 
-  // ---------- state ----------
-  let view = 'combined'; // combined | horizontal | vertical
-  let v = 20, angleDeg = 40, s0 = 0;
-  let t = 0, playing = false, speedMult = 1;
-  let landed = false, tFlight = null, hApex = 0;
-  let showStrobe = true, showVector = true, showGraph = true;
-  let scalePxPerM = 6;
-  let strobeMarks = [];
-  let sHist = [], vHist = [];
-  const DT_SAMPLE = 0.15;
+  const esc = s => s.replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c]));
+  document.getElementById("scenario").innerHTML = esc(C.title || "").replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  document.getElementById("r-hk").textContent = "height above " + LEVEL;
 
-  const els = {
-    vRange: document.getElementById('vRange'),
-    vVal: document.getElementById('vVal'),
-    angleRange: document.getElementById('angleRange'),
-    angleVal: document.getElementById('angleVal'),
-    s0Range: document.getElementById('s0Range'),
-    s0Val: document.getElementById('s0Val'),
-    playBtn: document.getElementById('playBtn'),
-    resetBtn: document.getElementById('resetBtn'),
-    speedRange: document.getElementById('speedRange'),
-    speedVal: document.getElementById('speedVal'),
-    viewLabel: document.getElementById('viewLabel'),
-    landedBanner: document.getElementById('landedBanner'),
-    extraReadout: document.getElementById('extraReadout'),
-    showStrobe: document.getElementById('showStrobe'),
-    showVector: document.getElementById('showVector'),
-    showGraph: document.getElementById('showGraph'),
-  };
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  const W = cv.width, PAD = 34;
+  let H = cv.height;
+  let frame = "ground", t = 0, playing = false, speed = 1, last = null;
+  let showStrobe = true, showVec = true, showPath = true;
 
-  // ---------- physics ----------
-  function vH(){ return v*Math.cos(angleDeg*Math.PI/180); }
-  function vV0(){ return v*Math.sin(angleDeg*Math.PI/180); }
-  function yAt(tt){ return s0 + vV0()*tt - 0.5*G*tt*tt; }
-  function vVAt(tt){ return vV0() - G*tt; }
-  function xAt(tt){ return vH()*tt; }
+  // ── view box in metres (equal scale on both axes, so the path is not distorted) ──
+  const objMaxH = Math.max(0, ...C.objects.map(o => o.height || o.reach || 1.8));
+  const objMaxX = Math.max(0, ...C.objects.map(o => o.x || 0));
+  const elevated = ["cliff", "platform", "building"].includes(C.launcher);
+  const leftExtra = elevated ? Math.max(5, 0.15 * RANGE) : Math.max(2.5, 0.07 * RANGE);
+  const gx0 = -leftExtra, gx1 = Math.max(RANGE, objMaxX) * 1.06 + 1;
+  const gy0 = C.landing === "sea" ? -Math.max(1.5, 0.06 * H_TOP) : -0.5;
+  const H_TOP2 = C.compare_theta != null ? H0 + Math.pow(C.v * Math.sin(C.compare_theta * Math.PI / 180), 2) / (2 * G) : 0;
+  const gy1 = Math.max(H_TOP, H_TOP2, objMaxH, H0 + 2) * 1.12 + 0.5;
+  // canvas height to suit the scene's shape (a long flat flight needs less height)
+  H = cv.height = Math.round(Math.min(560, Math.max(320, (gy1 - gy0) / (gx1 - gx0) * (W - 2 * PAD) + 2 * PAD + 60)));
 
-  function recompute(){
-    const U = vV0();
-    const disc = Math.max(U*U + 2*G*s0, 0);
-    tFlight = Math.max((U + Math.sqrt(disc)) / G, 0.05);
-    hApex = s0 + (U>0 ? (U*U)/(2*G) : 0);
+  function viewBox(){
+    if (frame === "ground") return {x0: gx0, x1: gx1, y0: gy0, y1: gy1};
+    if (frame === "vert"){                       // camera slides sideways with v_H
+      const w = gx1 - gx0;
+      return {x0: -0.3 * w, x1: 0.7 * w, y0: gy0, y1: gy1};
+    }
+    // camera rises and falls with the projectile, which stays at launch height
+    return {x0: gx0, x1: gx1, y0: Math.min(gy0, H0 - H_TOP + gy0), y1: Math.max(gy1, H0 + objMaxH + 0.5)};
+  }
+  // how far the camera has moved (in the ground's coordinates) by time tt
+  function shift(tt){
+    if (frame === "vert") return [xAt(tt), 0];
+    if (frame === "horiz") return [0, yAt(tt) - H0];
+    return [0, 0];
+  }
+  let VB, S;
+  function setView(){
+    VB = viewBox();
+    S = Math.min((W - 2 * PAD) / (VB.x1 - VB.x0), (H - 2 * PAD) / (VB.y1 - VB.y0));
+  }
+  // a point fixed to the ground → screen, as seen from the current frame now
+  function P(xw, yw){
+    const [dx, dy] = shift(t);
+    return [PAD + (xw - dx - VB.x0) * S, H - PAD - (yw - dy - VB.y0) * S];
+  }
+  // a point already in the current frame's coordinates → screen
+  function Pf(xf, yf){ return [PAD + (xf - VB.x0) * S, H - PAD - (yf - VB.y0) * S]; }
+
+  const fmtNum = n => (+n).toFixed(Math.abs(n) >= 10 ? 1 : 2).replace(/\.?0+$/, "");
+  // Labels are nudged upwards until they don't overlap one already drawn this frame.
+  let placed = [];
+  function label(text, x, y, color, align){
+    ctx.font = "12px -apple-system,Segoe UI,Roboto,sans-serif";
+    const w = ctx.measureText(text).width;
+    // keep the label inside the canvas
+    if (align === "right") x = Math.max(x, w + 4); else if (align === "center") x = Math.min(Math.max(x, w / 2 + 4), W - w / 2 - 4);
+    else x = Math.min(Math.max(x, 4), W - w - 4);
+    const x0 = align === "center" ? x - w / 2 : align === "right" ? x - w : x;
+    const hit = yy => placed.some(r => x0 < r.x + r.w && x0 + w > r.x && yy - 12 < r.y && yy > r.y - 12);
+    let tries = 0;
+    while (hit(y) && tries++ < 12) y -= 14;
+    placed.push({x: x0, y, w});
+    ctx.fillStyle = color || "#e7ecf5"; ctx.textAlign = align || "left";
+    ctx.fillText(text, x, y); ctx.textAlign = "left";
+  }
+  function niceStep(span){
+    const raw = span / 8, p = Math.pow(10, Math.floor(Math.log10(raw)));
+    for (const m of [1, 2, 5, 10]) if (m * p >= raw) return m * p;
+    return 10 * p;
   }
 
-  function fmt(n, d=1){ return (Math.abs(n)<0.05?0:n).toFixed(d); }
-
-  // ---------- scale / layout ----------
-  function groundY(){ return H - 60; }
-
-  function originX(){
-    if(view==='horizontal') return 70;
-    if(view==='vertical') return W/2;
-    return 150;
-  }
-
-  function recalcScale(){
-    const maxH = Math.max(hApex, s0, 1);
-    const maxX = Math.max(vH()*tFlight, 1);
-    const padTop = 60, padBottom = 60, padLeft = 70, padRight = 40;
-    const availH = H - padTop - padBottom;
-    const availW = W - padLeft - padRight - (view==='combined'?90:0);
-    const scaleH = availH / maxH;
-    const scaleW = availW / maxX;
-    if(view==='vertical') scalePxPerM = scaleH;
-    else if(view==='horizontal') scalePxPerM = scaleW;
-    else scalePxPerM = Math.min(scaleH, scaleW);
-  }
-
-  function worldToScreen(xm, ym){
-    return { x: originX() + xm*scalePxPerM, y: groundY() - ym*scalePxPerM };
-  }
-
-  // ---------- UI sync ----------
-  function updateViewUI(){
-    document.querySelectorAll('.mode-btn').forEach(b=>{
-      b.classList.toggle('active', b.dataset.view===view);
-    });
-    const labels = {combined:'COMBINED FLIGHT PATH', horizontal:'HORIZONTAL MOTION ONLY', vertical:'VERTICAL MOTION ONLY'};
-    els.viewLabel.textContent = labels[view];
-  }
-
-  function updateReadout(){
-    document.getElementById('val-vh').textContent = fmt(vH()) + ' m/s';
-    document.getElementById('val-sh').textContent = fmt(xAt(t)) + ' m';
-    document.getElementById('val-vv0').textContent = fmt(vV0()) + ' m/s';
-    document.getElementById('val-vvt').textContent = (vVAt(t)>=0?'+':'') + fmt(vVAt(t)) + ' m/s';
-    document.getElementById('val-sv').textContent = fmt(yAt(t)) + ' m';
-    document.getElementById('val-vres').textContent = fmt(Math.sqrt(vH()*vH() + vVAt(t)*vVAt(t))) + ' m/s';
-    document.getElementById('val-t').textContent = t.toFixed(2) + ' s';
-
-    let extra = `time of flight: <b>${tFlight.toFixed(2)} s</b><br>`;
-    extra += `range: <b>${fmt(vH()*tFlight)} m</b><br>`;
-    extra += `max height above ground: <b>${fmt(hApex)} m</b>`;
-    els.extraReadout.innerHTML = extra;
-  }
-
-  // ---------- drawing ----------
+  // Grid lines are fixed to the ground, so they visibly move in the moving frames.
   function drawGrid(){
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle = '#0a1626';
-    ctx.fillRect(0,0,W,H);
-
-    const gy = groundY();
-    ctx.strokeStyle = '#1b2b42';
-    ctx.lineWidth = 1;
-    ctx.font = "10px 'IBM Plex Mono', monospace";
-    ctx.fillStyle = '#4b6584';
-
-    if(view!=='horizontal'){
-      const maxH = Math.max(hApex, s0, 1);
-      let step = 5;
-      if(maxH>60) step=20; else if(maxH>25) step=10;
-      for(let m=0; m*scalePxPerM < gy-40; m+=step){
-        const y = gy - m*scalePxPerM;
-        ctx.beginPath(); ctx.moveTo(50,y); ctx.lineTo(W-20,y); ctx.stroke();
-        ctx.fillText(m+'m', 12, y+3);
-      }
+    const [dx, dy] = shift(t);
+    const step = niceStep(Math.max(VB.x1 - VB.x0, VB.y1 - VB.y0));
+    ctx.lineWidth = 1; ctx.font = "11px ui-monospace,Menlo,monospace";
+    for (let x = Math.ceil((VB.x0 + dx) / step) * step; x <= VB.x1 + dx; x += step){
+      const [sx] = P(x, 0); ctx.strokeStyle = "#15253a";
+      ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, H); ctx.stroke();
+      if (frame === "ground" && x >= 0){ ctx.fillStyle = "#56688a"; ctx.fillText(`${+x.toFixed(2)} m`, sx + 3, H - 8); }
     }
-    if(view!=='vertical'){
-      const maxX = Math.max(vH()*tFlight,1);
-      let step = 5;
-      if(maxX>80) step=20; else if(maxX>30) step=10;
-      const ox = originX();
-      for(let m=0; ox+m*scalePxPerM < W-10; m+=step){
-        const x = ox+m*scalePxPerM;
-        ctx.beginPath(); ctx.moveTo(x,20); ctx.lineTo(x,gy); ctx.stroke();
-        if(view==='horizontal'){ ctx.fillText(m+'m', x-6, gy+34); }
-      }
-    }
-
-    // ground
-    ctx.strokeStyle = '#3a5a80';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke();
-    ctx.fillStyle = '#7c8ba8';
-    ctx.font = "10px 'IBM Plex Mono', monospace";
-    ctx.fillText('GROUND', W-70, gy+16);
-
-    // launch platform (combined view, only when raised above ground)
-    if(view==='combined' && s0>0){
-      const top = worldToScreen(0, s0);
-      ctx.fillStyle = '#3c2e1f';
-      ctx.fillRect(0, top.y, originX(), gy-top.y);
-      ctx.strokeStyle = '#5a4632';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(0, top.y); ctx.lineTo(originX(), top.y); ctx.stroke();
-      ctx.fillStyle = '#c9b896';
-      ctx.font = "10px 'IBM Plex Mono', monospace";
-      ctx.fillText('PLATFORM  s₀ = '+fmt(s0)+'m', 10, top.y-8);
-    }
-    if(view==='vertical'){
-      const top = worldToScreen(0, s0);
-      ctx.fillStyle = s0>0 ? '#3c2e1f' : '#3a5a80';
-      ctx.fillRect(originX()-60, top.y-(s0>0?0:2), 120, s0>0?8:2);
-      ctx.fillStyle = '#c9b896';
-      ctx.font = "10px 'IBM Plex Mono', monospace";
-      ctx.fillText('launch point', originX()-34, top.y-8);
+    for (let y = Math.ceil((VB.y0 + dy) / step) * step; y <= VB.y1 + dy; y += step){
+      const [, sy] = P(0, y); ctx.strokeStyle = "#15253a";
+      ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(W, sy); ctx.stroke();
+      if (frame === "ground" && y > 0){ ctx.fillStyle = "#56688a"; ctx.fillText(`${+y.toFixed(2)} m`, 4, sy - 3); }
     }
   }
 
-  function drawVectorArrow(fromX, fromY, dx, dy, color){
-    if(Math.abs(dx)<0.5 && Math.abs(dy)<0.5) return;
-    const toX = fromX+dx, toY = fromY+dy;
-    ctx.strokeStyle = color; ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.moveTo(fromX,fromY); ctx.lineTo(toX,toY); ctx.stroke();
-    const ang = Math.atan2(dy,dx);
+  function fillPoly(pts, color){
+    ctx.fillStyle = color; ctx.beginPath();
+    pts.forEach((p, i) => { const [sx, sy] = P(...p); i ? ctx.lineTo(sx, sy) : ctx.moveTo(sx, sy); });
+    ctx.closePath(); ctx.fill();
+  }
+
+  function drawTerrain(){
+    const big = 1e4;
+    const sea = C.landing === "sea";
+    fillPoly([[-big, 0], [big, 0], [big, -big], [-big, -big]], sea ? "#1d4f7a" : "#2c3a24");
+    ctx.strokeStyle = sea ? "#5fa8d8" : "#6b8a4a"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(...P(-big, 0)); ctx.lineTo(...P(big, 0)); ctx.stroke();
+    if (C.launcher === "cliff"){
+      fillPoly([[-big, H0], [0, H0], [0.04 * H0, 0], [0.04 * H0, -big], [-big, -big]], "#5b5146");
+      ctx.strokeStyle = "#6b8a4a"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(...P(-big, H0)); ctx.lineTo(...P(0, H0)); ctx.stroke();
+      const [lx, ly] = P(-leftExtra * 0.45, H0 * 0.5);
+      label(`cliff ${fmtNum(H0)} m`, lx, ly, "#e9dfcf", "center");
+    } else if (C.launcher === "platform" || C.launcher === "building"){
+      const wdt = C.launcher === "building" ? 0.8 * leftExtra : 0.6 * leftExtra;
+      fillPoly([[-wdt, H0], [0.2, H0], [0.2, 0], [-wdt, 0]], C.launcher === "building" ? "#4a5568" : "#6b5b45");
+      if (C.launcher === "building"){
+        const rows = Math.max(2, Math.floor(H0 / 3.5));
+        for (let i = 0; i < 3; i++) for (let j = 0; j < rows; j++){
+          const x = -wdt + (i + 0.3) * wdt / 3, y = H0 - (j + 0.3) * H0 / rows;
+          fillPoly([[x, y], [x + 0.35 * wdt / 3, y], [x + 0.35 * wdt / 3, y - 0.35 * H0 / rows], [x, y - 0.35 * H0 / rows]], "#e6c36a66");
+        }
+      }
+      const [lx, ly] = P(-wdt / 2, H0 / 2);
+      label(`${C.launcher} ${fmtNum(H0)} m`, lx, ly, "#e7ecf5", "center");
+    }
+  }
+
+  // Stick figure with feet at (xw, feetY) and a given height (m). If handY is
+  // given, one arm reaches up to that height (a release point or a reach).
+  function person(xw, feetY, heightM, handY, color, tag){
+    const minPx = 34;                                  // keep figures visible when zoomed out
+    const hPx = Math.max(heightM * S, minPx);
+    const [fx, fy] = P(xw, feetY);
+    const top = fy - hPx, headR = 0.11 * hPx;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(fx, top + headR, headR, 0, 2 * Math.PI); ctx.fill();
+    const neck = top + 2 * headR, hip = fy - 0.47 * hPx, sh = neck + 0.05 * hPx;
     ctx.beginPath();
-    ctx.moveTo(toX,toY);
-    ctx.lineTo(toX-9*Math.cos(ang-0.4), toY-9*Math.sin(ang-0.4));
-    ctx.lineTo(toX-9*Math.cos(ang+0.4), toY-9*Math.sin(ang+0.4));
-    ctx.closePath();
-    ctx.fillStyle = color; ctx.fill();
-  }
-
-  function drawBall(){
-    let p;
-    if(view==='horizontal'){
-      p = { x: originX() + xAt(t)*scalePxPerM, y: H/2 };
-    } else if(view==='vertical'){
-      p = worldToScreen(0, yAt(t));
+    ctx.moveTo(fx, neck); ctx.lineTo(fx, hip);
+    ctx.moveTo(fx, hip); ctx.lineTo(fx - 0.14 * hPx, fy);
+    ctx.moveTo(fx, hip); ctx.lineTo(fx + 0.14 * hPx, fy);
+    ctx.moveTo(fx, sh); ctx.lineTo(fx - 0.18 * hPx, sh + 0.25 * hPx);
+    if (handY != null){
+      const [hx, hy] = P(xw + 0.15, handY);
+      ctx.moveTo(fx, sh); ctx.lineTo(hx, Math.min(hy, sh));
     } else {
-      p = worldToScreen(xAt(t), yAt(t));
+      ctx.moveTo(fx, sh); ctx.lineTo(fx + 0.18 * hPx, sh + 0.25 * hPx);
     }
-
-    if(showStrobe){
-      strobeMarks.forEach(pt=>{
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI*2);
-        ctx.fillStyle = 'rgba(255,176,32,0.55)';
-        ctx.fill();
-      });
-    }
-
-    const scaleV = 3.2;
-    if(showVector){
-      if(view!=='vertical'){
-        drawVectorArrow(p.x, p.y, vH()*scaleV, 0, '#2fd6c2');
-      }
-      if(view!=='horizontal'){
-        drawVectorArrow(p.x, p.y, 0, -vVAt(t)*scaleV, '#ff6b5e');
-      }
-      if(view==='combined'){
-        drawVectorArrow(p.x, p.y, vH()*scaleV, -vVAt(t)*scaleV, '#e7ecf5');
-      }
-    }
-
-    const grad = ctx.createRadialGradient(p.x-4,p.y-4,2,p.x,p.y,12);
-    grad.addColorStop(0,'#ffe3a8');
-    grad.addColorStop(1,'#ffb020');
-    ctx.beginPath(); ctx.arc(p.x,p.y,10,0,Math.PI*2);
-    ctx.fillStyle = grad; ctx.fill();
-    ctx.strokeStyle = '#8a6220'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.stroke();
+    if (tag) label(tag, fx - 8, top - 4, color, "right");
   }
 
-  function drawGraphs(){
-    if(!showGraph) return;
-    const gw=230, gh=110, gx=W-gw-16, gy0=16;
-    ctx.fillStyle='rgba(10,22,38,0.85)';
-    ctx.strokeStyle='#24344a'; ctx.lineWidth=1;
-    ctx.fillRect(gx,gy0,gw,gh); ctx.strokeRect(gx,gy0,gw,gh);
-    ctx.font="9px 'IBM Plex Mono', monospace";
-    ctx.fillStyle='#2fd6c2'; ctx.fillText('s_H, s_V – t', gx+6, gy0+12);
-    ctx.fillStyle='#ff6b5e'; ctx.fillText('v_V – t', gx+90, gy0+12);
-    ctx.fillStyle='#2fd6c2'; ctx.fillText('v_H – t', gx+140, gy0+12);
+  function drawScene(){
+    // the launcher
+    if (C.launcher === "person") person(-0.3, 0, Math.max(1.4, H0 - 0.3), H0, "#9fd3ff", `release ${fmtNum(H0)} m`);
+    else if (elevated) person(-1.0, H0, 1.7, null, "#9fd3ff", "");
+    else person(-0.8, 0, 1.7, null, "#9fd3ff", "");
 
-    if(sHist.length<2) return;
-    const maxT = Math.max(tFlight||1, t, 0.1);
-    const maxS = Math.max(vH()*tFlight, hApex, 1);
-    const maxV = Math.max(vH(), Math.abs(vV0()), Math.abs(vVAt(tFlight)), 1)*1.15;
-
-    const plotX = (tt)=> gx+10 + (tt/maxT)*(gw-20);
-    const plotYs = (ss)=> gy0+gh-8 - (ss/maxS)*(gh-28);
-    const plotYv = (vv)=> gy0+gh-8 - ((vv+maxV)/(2*maxV))*(gh-28);
-
-    ctx.strokeStyle='#2a3a52';
-    ctx.beginPath(); ctx.moveTo(gx+10, plotYv(0)); ctx.lineTo(gx+gw-10, plotYv(0)); ctx.stroke();
-
-    ctx.strokeStyle='#2fd6c2'; ctx.lineWidth=1.5;
-    ctx.beginPath();
-    sHist.forEach((pt,i)=>{ const X=plotX(pt.t), Y=plotYs(pt.sh); i===0?ctx.moveTo(X,Y):ctx.lineTo(X,Y); });
-    ctx.stroke();
-
-    ctx.strokeStyle='#ffb020'; ctx.lineWidth=1.5; ctx.setLineDash([3,2]);
-    ctx.beginPath();
-    sHist.forEach((pt,i)=>{ const X=plotX(pt.t), Y=plotYs(pt.sv); i===0?ctx.moveTo(X,Y):ctx.lineTo(X,Y); });
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.strokeStyle='#2fd6c2'; ctx.lineWidth=1.5;
-    ctx.beginPath();
-    vHist.forEach((pt,i)=>{ const X=plotX(pt.t), Y=plotYv(pt.vh); i===0?ctx.moveTo(X,Y):ctx.lineTo(X,Y); });
-    ctx.stroke();
-
-    ctx.strokeStyle='#ff6b5e'; ctx.lineWidth=1.5;
-    ctx.beginPath();
-    vHist.forEach((pt,i)=>{ const X=plotX(pt.t), Y=plotYv(pt.vv); i===0?ctx.moveTo(X,Y):ctx.lineTo(X,Y); });
-    ctx.stroke();
+    for (const o of C.objects){
+      if (o.type === "person"){
+        person(o.x, 0, o.reach ? o.reach - 0.4 : 1.75, o.reach, "#c9b6ff", o.label || "");
+        if (o.reach){
+          const [ax, ay] = P(o.x - 1.5, o.reach), [bx] = P(o.x + 1.5, o.reach);
+          ctx.setLineDash([5, 4]); ctx.strokeStyle = "#c9b6ff"; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, ay); ctx.stroke(); ctx.setLineDash([]);
+          label(`reach ${fmtNum(o.reach)} m`, bx + 4, ay + 4, "#c9b6ff");
+        }
+      } else if (o.type === "crossbar"){
+        const [px, py] = P(o.x, 0), [, ty] = P(o.x, o.height);
+        ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, ty - 0.5 * S); ctx.stroke();
+        ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(px - 9, ty); ctx.lineTo(px + 9, ty); ctx.stroke();
+        label(`crossbar ${fmtNum(o.height)} m high, ${fmtNum(o.x)} m away`, px + 12, ty - 6, "#ffffff");
+      } else if (o.type === "target"){
+        const [px, py] = P(o.x, 0), [, cy] = P(o.x, o.height);
+        ctx.strokeStyle = "#8a6a45"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, cy); ctx.stroke();
+        const r = Math.max(9, 0.6 * S);
+        for (const [k, col] of [[1, "#f4f0e6"], [0.75, "#222"], [0.5, "#3a7bd5"], [0.3, "#d33"], [0.12, "#f5c518"]]){
+          ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px, cy, r * k, 0, 2 * Math.PI); ctx.fill();
+        }
+        label(`target ${fmtNum(o.x)} m away`, px + r + 4, cy - r, "#ffffff");
+      } else if (o.type === "flag"){
+        const [px, py] = P(o.x, 0), [, ty] = P(o.x, 2.2);
+        ctx.strokeStyle = "#ddd"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, ty); ctx.stroke();
+        ctx.fillStyle = "#ff5a5a"; ctx.beginPath();
+        ctx.moveTo(px, ty); ctx.lineTo(px + 14, ty + 6); ctx.lineTo(px, ty + 12); ctx.fill();
+        label(`flag ${fmtNum(o.x)} m away`, px + 16, ty + 10, "#ffffff");
+      }
+    }
   }
 
+  function drawPath(){
+    if (!showPath) return;
+    const curve = (vh, vv, tl, color, dash) => {
+      ctx.setLineDash(dash); ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.beginPath();
+      for (let i = 0; i <= 120; i++){
+        const tt = tl * i / 120, [sx, sy] = P(vh * tt, H0 + vv * tt - 0.5 * G * tt * tt);
+        i ? ctx.lineTo(sx, sy) : ctx.moveTo(sx, sy);
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+    };
+    curve(VH, VV0, T_LAND, "#ffffff35", [4, 5]);
+    if (C.compare_theta != null){
+      const r2 = C.compare_theta * Math.PI / 180, vh2 = C.v * Math.cos(r2), vv2 = C.v * Math.sin(r2);
+      const tl2 = (vv2 + Math.sqrt(vv2 * vv2 + 2 * G * H0)) / G;
+      curve(vh2, vv2, tl2, "#c9b6ffaa", [2, 4]);
+      const [lx, ly] = P(vh2 * tl2 * 0.5, H0 + vv2 * vv2 / (2 * G));
+      label(`${C.compare_theta}° at the same speed`, lx + 6, ly - 6, "#c9b6ff");
+    }
+  }
+
+  // The projectile's path so far as seen in this frame, plus equal-time dots.
+  function drawTrail(){
+    const pos = tt => frame === "vert" ? [0, yAt(tt)] : frame === "horiz" ? [xAt(tt), H0] : [xAt(tt), yAt(tt)];
+    ctx.strokeStyle = frame === "horiz" ? "#2fd6c2" : frame === "vert" ? "#ffb020" : "#f4f0e6";
+    ctx.lineWidth = 2; ctx.beginPath();
+    const n = Math.max(2, Math.ceil(t / 0.02));
+    for (let i = 0; i <= n; i++){
+      const [sx, sy] = Pf(...pos(t * i / n)); i ? ctx.lineTo(sx, sy) : ctx.moveTo(sx, sy);
+    }
+    ctx.stroke();
+    if (showStrobe){
+      ctx.fillStyle = "#ffffffaa";
+      for (let tt = 0; tt <= t + 1e-9; tt += 0.2){
+        const [sx, sy] = Pf(...pos(tt)); ctx.beginPath(); ctx.arc(sx, sy, 2.6, 0, 2 * Math.PI); ctx.fill();
+      }
+    }
+  }
+
+  function arrow(x, y, dx, dy, color, text){
+    if (Math.hypot(dx, dy) < 2) return;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx, y + dy); ctx.stroke();
+    const a = Math.atan2(dy, dx);
+    ctx.beginPath(); ctx.moveTo(x + dx, y + dy);
+    ctx.lineTo(x + dx - 9 * Math.cos(a - 0.4), y + dy - 9 * Math.sin(a - 0.4));
+    ctx.lineTo(x + dx - 9 * Math.cos(a + 0.4), y + dy - 9 * Math.sin(a + 0.4)); ctx.fill();
+    if (text) label(text, x + dx + 5, y + dy + (dy > 0 ? 13 : -4), color);
+  }
+
+  function drawProjectile(){
+    const [sx, sy] = P(xAt(t), yAt(t));
+    if (showVec){
+      // velocity relative to the current frame
+      const k = Math.min(70 / Math.max(C.v, 1), 5);
+      const vh = frame === "vert" ? 0 : VH, vv = frame === "horiz" ? 0 : vvAt(t);
+      if (vh) arrow(sx, sy, vh * k, 0, "#2fd6c2", `${VH.toFixed(1)} m/s`);
+      if (Math.abs(vv) > 0.05) arrow(sx, sy, 0, -vv * k, "#ffb020", `${vv.toFixed(1)} m/s`);
+      if (vh && Math.abs(vv) > 0.05) arrow(sx, sy, vh * k, -vv * k, "#f4f0e680", "");
+    }
+    ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(sx, sy, 6, 0, 2 * Math.PI); ctx.fill();
+    ctx.strokeStyle = "#ffb020"; ctx.lineWidth = 2; ctx.stroke();
+  }
+
+  // Circles where the projectile is at each moment the question mentions.
+  function drawMarks(){
+    for (const m of [{t: T_UP, label: "highest point"}, ...C.marks]){
+      if (m.t < 0 || m.t > T_LAND + 1e-6) continue;
+      const [sx, sy] = frame === "vert" ? Pf(0, yAt(m.t)) : frame === "horiz" ? Pf(xAt(m.t), H0) : P(xAt(m.t), yAt(m.t));
+      ctx.strokeStyle = "#ff6b5e"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(sx, sy, 8, 0, 2 * Math.PI); ctx.stroke();
+      label(`${m.label} · ${m.t.toFixed(2)} s`, sx + 10, sy - 10, "#ff9b91");
+    }
+  }
+
+  function drawBadge(){
+    let a, b;
+    if (frame === "ground"){ a = "Camera fixed to the ground"; b = "both motions together"; }
+    else if (frame === "horiz"){ a = `Camera moving vertically at ${vvAt(t).toFixed(1)} m/s (+ up)`; b = `projectile only moves sideways, ${VH.toFixed(1)} m/s`; }
+    else { a = `Camera moving sideways at ${VH.toFixed(1)} m/s`; b = "projectile only moves up and down"; }
+    ctx.fillStyle = "#0a1626dd"; ctx.fillRect(W - 300, 8, 292, 44);
+    ctx.strokeStyle = "#24344a"; ctx.strokeRect(W - 300, 8, 292, 44);
+    label(a, W - 290, 26, "#e7ecf5"); label(b, W - 290, 44, "#8a99b5");
+  }
+
+  const $ = id => document.getElementById(id);
   function render(){
-    drawGrid();
-    drawBall();
-    drawGraphs();
+    setView(); placed = [];
+    ctx.fillStyle = "#0a1626"; ctx.fillRect(0, 0, W, H);
+    drawGrid(); drawTerrain(); drawScene(); drawPath(); drawMarks(); drawTrail(); drawProjectile(); drawBadge();
+    $("r-t").textContent = `${t.toFixed(2)} s`;
+    $("r-vh").textContent = `${VH.toFixed(2)} m/s`;
+    $("r-vv").textContent = `${vvAt(t).toFixed(2)} m/s`;
+    $("r-sh").textContent = `${xAt(t).toFixed(2)} m`;
+    $("r-sv").textContent = `${(yAt(t) - H0).toFixed(2)} m`;
+    $("r-h").textContent = `${yAt(t).toFixed(2)} m`;
+    $("tlabel").textContent = `t = ${t.toFixed(2)} s`;
+    $("scrub").value = Math.round(1000 * t / T_LAND);
   }
 
-  // ---------- loop ----------
-  let lastTime = null, nextSample = 0;
-  function frame(now){
-    if(lastTime===null) lastTime = now;
-    const dt = (now-lastTime)/1000;
-    lastTime = now;
-
-    if(playing && !landed){
-      t += dt*speedMult;
-      if(t>=tFlight){
-        t = tFlight; landed = true; playing = false;
-        els.playBtn.textContent = '▶ Play';
-        showLanded();
-      }
-      while(nextSample <= t){
-        let p;
-        if(view==='horizontal') p = { x: originX()+xAt(nextSample)*scalePxPerM, y: H/2 };
-        else if(view==='vertical') p = worldToScreen(0, yAt(nextSample));
-        else p = worldToScreen(xAt(nextSample), yAt(nextSample));
-        strobeMarks.push(p);
-        nextSample += DT_SAMPLE;
-      }
-      sHist.push({t, sh: xAt(t), sv: yAt(t)});
-      vHist.push({t, vh: vH(), vv: vVAt(t)});
-      if(sHist.length>600){sHist.shift(); vHist.shift();}
-    }
-
-    updateReadout();
-    render();
-    requestAnimationFrame(frame);
-  }
-
-  function showLanded(){
-    els.landedBanner.classList.add('show');
-    els.landedBanner.textContent = `● Landed — t = ${tFlight.toFixed(2)} s, range = ${fmt(vH()*tFlight)} m, impact speed = ${fmt(Math.sqrt(vH()*vH()+vVAt(tFlight)*vVAt(tFlight)))} m/s`;
-  }
-
-  // ---------- controls ----------
-  function reset(){
-    recompute();
-    t = 0; landed = false; playing = false;
-    strobeMarks = []; sHist=[]; vHist=[]; nextSample = 0;
-    els.playBtn.textContent = '▶ Play';
-    els.landedBanner.classList.remove('show');
-    recalcScale();
-    updateReadout();
+  const notes = {
+    ground: "Seen from the ground: the horizontal and vertical motions combine to give a curved path.",
+    horiz: "The camera rises and falls with the projectile, so its vertical motion disappears: it moves sideways at a " +
+           "constant v_H (equal distances in equal times) while the ground moves up and down.",
+    vert: "The camera slides sideways at v_H, so the horizontal motion disappears: the projectile goes straight up, " +
+          "stops at its highest point and falls back, exactly like an object fired straight upwards, while the ground slides past.",
+  };
+  function setFrame(f){
+    frame = f;
+    document.querySelectorAll(".fbtn").forEach(b => b.classList.toggle("active", b.dataset.frame === f));
+    $("frameNote").textContent = notes[f];
     render();
   }
+  function stop(){ playing = false; $("play").textContent = "▶ Play"; }
+  function tick(now){
+    if (!playing){ last = null; return; }
+    if (last != null) t += (now - last) / 1000 * speed;
+    last = now;
+    if (t >= T_LAND){ t = T_LAND; stop(); }
+    render();
+    if (playing) requestAnimationFrame(tick);
+  }
+  $("play").onclick = () => {
+    if (playing){ stop(); return; }
+    if (t >= T_LAND - 1e-6) t = 0;
+    playing = true; $("play").textContent = "❚❚ Pause"; requestAnimationFrame(tick);
+  };
+  $("reset").onclick = () => { stop(); t = 0; render(); };
+  $("scrub").oninput = e => { stop(); t = T_LAND * e.target.value / 1000; render(); };
+  $("speed").onchange = e => { speed = +e.target.value; };
+  document.querySelectorAll(".fbtn").forEach(b => b.onclick = () => setFrame(b.dataset.frame));
+  $("tStrobe").onchange = e => { showStrobe = e.target.checked; render(); };
+  $("tVec").onchange = e => { showVec = e.target.checked; render(); };
+  $("tPath").onchange = e => { showPath = e.target.checked; render(); };
 
-  document.querySelectorAll('.mode-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      view = btn.dataset.view;
-      updateViewUI();
-      reset();
+  // jump-to buttons for the moments the question is about
+  [{t: 0, label: "launch"}, {t: T_UP, label: "highest point"}, ...C.marks,
+   {t: T_LAND, label: "lands on " + LEVEL.replace("the ", "")}]
+    .filter(m => m.t >= 0 && m.t <= T_LAND + 1e-6)
+    .sort((a, b) => a.t - b.t)
+    .forEach(m => {
+      const b = document.createElement("button");
+      b.className = "jbtn"; b.textContent = `${m.label} · ${m.t.toFixed(2)} s`;
+      b.onclick = () => { stop(); t = Math.min(m.t, T_LAND); render(); };
+      $("jumps").appendChild(b);
     });
-  });
 
-  els.vRange.addEventListener('input', ()=>{
-    v = parseFloat(els.vRange.value);
-    els.vVal.textContent = v.toFixed(1)+' m/s';
-    reset();
-  });
-  els.angleRange.addEventListener('input', ()=>{
-    angleDeg = parseFloat(els.angleRange.value);
-    els.angleVal.textContent = angleDeg+'°';
-    reset();
-  });
-  els.s0Range.addEventListener('input', ()=>{
-    s0 = parseFloat(els.s0Range.value);
-    els.s0Val.textContent = s0.toFixed(1)+' m';
-    reset();
-  });
-  els.speedRange.addEventListener('input', ()=>{
-    speedMult = parseFloat(els.speedRange.value);
-    els.speedVal.textContent = speedMult.toFixed(2)+'×';
-  });
-
-  els.playBtn.addEventListener('click', ()=>{
-    if(landed) return;
-    playing = !playing;
-    els.playBtn.textContent = playing ? '❚❚ Pause' : '▶ Play';
-  });
-  els.resetBtn.addEventListener('click', reset);
-
-  els.showStrobe.addEventListener('change', e=> showStrobe = e.target.checked);
-  els.showVector.addEventListener('change', e=> showVector = e.target.checked);
-  els.showGraph.addEventListener('change', e=> showGraph = e.target.checked);
-
-  // ---------- init ----------
-  document.querySelector('[data-view="combined"]').classList.add('active');
-  updateViewUI();
-  reset();
-  requestAnimationFrame(frame);
+  setFrame("ground");
 })();
 </script>
 </body>
