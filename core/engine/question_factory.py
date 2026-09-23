@@ -80,6 +80,7 @@ from topics.dynamics.gravitation           import generate_orbital_gravitation
 from topics.dynamics.projectile_higher     import (
     generate_projectile_vertical_displacement,
     generate_projectile_vertical_time_from_top,
+    generate_projectile_horizontal,
     generate_projectile_exam_mixed,
     generate_projectile_explain,
 )
@@ -364,10 +365,11 @@ QUAL_REGISTRY = {
         },
         "Our Dynamic Universe (Part 2)": {
             "Projectile Motion": {
-                "1 — Vertical Launch: Displacement and Height": generate_projectile_vertical_displacement,
-                "2 — Vertical Launch: Time from Highest Point":  generate_projectile_vertical_time_from_top,
-                "3 — Exam Style (Mixed)":                        generate_projectile_exam_mixed,
-                "4 — Explain":                                   generate_projectile_explain,
+                "1 — Vertical Motion: Displacement and Height": generate_projectile_vertical_displacement,
+                "2 — Vertical Motion: Time from Highest Point":  generate_projectile_vertical_time_from_top,
+                "3 — Horizontal Motion":                         generate_projectile_horizontal,
+                "4 — Exam Style (Mixed)":                        generate_projectile_exam_mixed,
+                "5 — Explain":                                   generate_projectile_explain,
             },
             "Gravitation":         generate_orbital_gravitation,
             "Special Relativity": {

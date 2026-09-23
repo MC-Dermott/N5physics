@@ -210,9 +210,10 @@ def _l2_part_time_to_peak(v, v_H, v_V, t_up, theta_deg, level):
     )
 
 
-# ══ Vertical launch (fired straight upwards) ═════════════════════════════════
-# Question types 1 and 2: all the motion is vertical, so u is the launch speed.
-# Upwards is positive throughout, so a = −9.8 m/s².
+# ══ Single-direction drills ═══════════════════════════════════════════════════
+# Types 1–2: resolve the launch velocity, then work only in the vertical
+# direction. Type 3: resolve, then work only in the horizontal direction.
+# Upwards is positive throughout, so a = −9.8 m/s² vertically.
 
 _TOPIC = "Our Dynamic Universe"
 
@@ -257,65 +258,63 @@ def _part(text, answer, unit, working, distractors, level, scaffold=None):
     )
 
 
-# (context, noun, speeds, launch heights above the landing level, landing level)
-# — speed and height are tied to the object, so no 50 m/s hand throws.
-_CONTEXTS_VERTICAL = [
-    ("A ball is thrown straight upwards at **{u} m/s** from the ground.",
-     "ball", range(6, 16), [0], "the ground"),
-    ("A tennis ball is hit straight upwards at **{u} m/s** from ground level.",
-     "ball", range(8, 19), [0], "the ground"),
-    ("A pupil throws a ball straight upwards at **{u} m/s**, releasing it **{h} m** above the ground.",
-     "ball", range(4, 11), [1.4, 1.5, 1.6, 1.7, 1.8], "the ground"),
-    ("A stone is thrown straight upwards at **{u} m/s** from the edge of a sea cliff **{h} m** above the sea, "
-     "and falls past the edge into the sea.",
-     "stone", range(5, 16), [15, 20, 25, 30, 40], "the sea"),
-    ("A distress flare is fired straight upwards at **{u} m/s** from a cliff top **{h} m** above the sea, "
-     "and falls past the cliff into the sea.",
-     "flare", range(30, 51, 5), [20, 30, 40, 50], "the sea"),
-]
+def _angled_launch():
+    """Tied angled launch: from flat ground (h = 0) or from a height (a human
+    release height, cliff, platform or building — see _l2_elevated_context)."""
+    theta_deg = random.choice(_ANGLES)
+    v = random.choice(_SPEEDS)
+    if random.random() < 0.4:
+        h, context = 0, random.choice(_CONTEXTS_L1).format(v=v, theta=theta_deg)
+    else:
+        h, context = _l2_elevated_context(v, theta_deg)
+    theta = math.radians(theta_deg)
+    v_H, v_V = _r2(v * math.cos(theta)), _r2(v * math.sin(theta))
+    return dict(v=v, theta_deg=theta_deg, theta=theta, v_H=v_H, v_V=v_V, h=h,
+                H_top=_r2(h + v_V ** 2 / (2 * g)), t_up=_r2(v_V / g),
+                where="the sea" if "sea" in context else "the ground", context=context)
 
 
-def _vertical_launch():
-    text, noun, speeds, heights, where = random.choice(_CONTEXTS_VERTICAL)
-    u, h = random.choice(list(speeds)), random.choice(heights)
-    H_top = _r2(h + u ** 2 / (2 * g))
-    context = text.format(u=u, h=f"{h:g}")
-    return u, h, H_top, context, noun, where
+def _component_parts(L, level):
+    part_h, part_v = _l2_parts_ab(L["v"], L["theta_deg"], L["theta"], L["v_H"], L["v_V"], level)
+    for p in (part_h, part_v):
+        p.distractors = _distinct(p.correct_answer, p.distractors)
+    return part_h, part_v
 
 
 def generate_projectile_vertical_displacement(level="Higher"):
-    """Type 1 — s = ut + ½at² for a vertical launch from the ground or from a height.
-    Time measured from launch or from the highest point; asks for the
-    displacement or the height above the ground/sea."""
-    u, h, H_top, context, noun, where = _vertical_launch()
-    t_up = u / g
+    """Type 1 — find v_V, then s = ut + ½at² vertically. Time measured from launch
+    or from the highest point; asks for the displacement or the height above the
+    ground/sea. Horizontal motion is never asked about."""
+    L = _angled_launch()
+    v_V, h, H_top, where = L["v_V"], L["h"], L["H_top"], L["where"]
+    _, part_v = _component_parts(L, level)
+    parts = [part_v]
     from_top = random.random() < 0.5
     ask_height = h == 0 and not from_top or random.random() < 0.5
 
     if from_top:
+        parts.append(_l2_part_time_to_peak(L["v"], L["v_H"], v_V, L["t_up"], L["theta_deg"], level))
         t = round(random.uniform(0.2, 0.9) * math.sqrt(2 * H_top / g), 2)
         u0, when = 0, f"{t} s after it passes its highest point"
         s = _r2(-0.5 * g * t ** 2)
         base, base_name = H_top, "the highest point"
-        if ask_height:
-            context += f" Its highest point is **{H_top} m** above {where}."
         lead = f"From the highest point the vertical velocity is zero: u = 0, t = {t} s, a = −9.8 m/s²."
         s_mistakes = [
             {"value": _r2(-s), "mistake": f"It is below its highest point, so the displacement is negative: s = {s} m."},
             {"value": _r2(-g * t ** 2), "mistake": f"You appear to have left out the ½: s = ½ × (−9.8) × {t}² = {s} m."},
-            {"value": _r2(u * t - 0.5 * g * t ** 2), "mistake": f"At the highest point u = 0, not the launch speed: s = {s} m."},
+            {"value": _r2(v_V * t - 0.5 * g * t ** 2), "mistake": f"At the highest point the vertical velocity is 0, not v_V: s = {s} m."},
         ]
     else:
-        t_land = t_up + math.sqrt(2 * H_top / g)
+        t_land = (v_V + math.sqrt(v_V ** 2 + 2 * g * h)) / g
         t = round(random.uniform(0.15, 0.9) * t_land, 2)
-        u0, when = u, f"{t} s after launch"
-        s = _r2(u * t - 0.5 * g * t ** 2)
+        u0, when = v_V, f"{t} s after launch"
+        s = _r2(v_V * t - 0.5 * g * t ** 2)
         base, base_name = h, "the launch point"
-        lead = f"Vertically, from launch: u = {u} m/s, t = {t} s, a = −9.8 m/s²."
+        lead = f"Vertically, from launch: u = v_V = {v_V} m/s, t = {t} s, a = −9.8 m/s²."
         s_mistakes = [
-            {"value": _r2(u * t + 0.5 * g * t ** 2), "mistake": f"Sign error — upwards is positive, so a = −9.8 m/s²: s = {s} m."},
-            {"value": _r2(u * t - g * t ** 2), "mistake": f"You appear to have left out the ½: s = {s} m."},
-            {"value": _r2(u * t), "mistake": f"You have left out gravity: s = ut + ½at² = {s} m."},
+            {"value": _r2(v_V * t + 0.5 * g * t ** 2), "mistake": f"Sign error — upwards is positive, so a = −9.8 m/s²: s = {s} m."},
+            {"value": _r2(v_V * t - g * t ** 2), "mistake": f"You appear to have left out the ½: s = {s} m."},
+            {"value": _r2(L["v"] * t - 0.5 * g * t ** 2), "mistake": f"Use the vertical component ({v_V} m/s) as u, not the launch speed: s = {s} m."},
         ]
 
     working = [
@@ -327,40 +326,47 @@ def generate_projectile_vertical_displacement(level="Higher"):
 
     if not ask_height:
         if from_top:
-            text = (f"Calculate the displacement of the {noun} from its highest point, {t} s after it "
+            text = (f"Calculate the vertical displacement of the projectile from its highest point, {t} s after it "
                     f"passes the highest point (a negative answer means below the highest point).")
         else:
-            text = (f"Calculate the displacement of the {noun} from the launch point {when} "
+            text = (f"Calculate the vertical displacement of the projectile from the launch point {when} "
                     f"(a negative answer means below the launch point).")
-        return _with_projectile_widget(_part(context + "\n\n" + text, s, "m", working, s_mistakes, level))
+        parts.append(_part(text, s, "m", working, s_mistakes, level))
+        return _scenario(L["context"], parts, level)
 
     H = _r2(base + s)
+    if from_top:
+        text = f"The highest point of the flight is {H_top} m above {where}. Calculate the height of the projectile above {where} {when}."
+    else:
+        text = f"Calculate the height of the projectile above {where} {when}."
     if base == 0:
-        working.append({"type": "text", "content": "Launched from the ground, so its height is its displacement from launch."})
-        return _with_projectile_widget(_part(
-            context + f"\n\nCalculate the height of the {noun} above {where} {when}.",
-            H, "m", working, s_mistakes, level))
+        working.append({"type": "text", "content": "Launched from the ground, so its height is its vertical displacement from launch."})
+        parts.append(_part(text, H, "m", working, s_mistakes, level))
+        return _scenario(L["context"], parts, level)
     base_text = f"{base:g}" if base == h else f"{base}"
     working.append({"type": "text", "content": f"Add the displacement to the height of {base_name} above {where}:"})
     working.append({"type": "latex", "content": rf"h = {base_text} + ({s}) = {H}\ \mathrm{{m}}"})
-    return _with_projectile_widget(_part(
-        context + f"\n\nCalculate the height of the {noun} above {where} {when}.",
-        H, "m", working,
+    parts.append(_part(
+        text, H, "m", working,
         [{"value": s, "mistake": f"That is the displacement from {base_name}. Add it to that point's height: {base_text} + ({s}) = {H} m."},
          {"value": _r2(base - s), "mistake": f"Add the displacement with its sign: {base_text} + ({s}) = {H} m."}]
         + [dict(m, value=_r2(base + m["value"])) for m in s_mistakes],
         level,
         scaffold=[
-            {"prompt": f"What is the displacement from {base_name} (negative = below)?", "answer": s},
+            {"prompt": f"What is the vertical displacement from {base_name} (negative = below)?", "answer": s},
             {"prompt": f"What is the height above {where}?", "answer": H},
         ]))
+    return _scenario(L["context"], parts, level)
 
 
 def generate_projectile_vertical_time_from_top(level="Higher"):
-    """Type 2 — time from the highest point to a given displacement. Measuring
-    from the highest point means u = 0, so s = ut + ½at² needs no quadratic."""
-    u, h, H_top, context, noun, where = _vertical_launch()
-    context += f" Its highest point is **{H_top} m** above {where}."
+    """Type 2 — find v_V and the time to the highest point, then the time from the
+    highest point to a given displacement (u = 0 there, so no quadratic)."""
+    L = _angled_launch()
+    v_V, H_top, where = L["v_V"], L["H_top"], L["where"]
+    _, part_v = _component_parts(L, level)
+    part_up = _l2_part_time_to_peak(L["v"], L["v_H"], v_V, L["t_up"], L["theta_deg"], level)
+
     mode = random.choice(["distance", "landing", "height"])
     if mode == "distance":
         drop = round(random.uniform(0.2, 0.9) * H_top, 1)
@@ -390,18 +396,112 @@ def generate_projectile_vertical_time_from_top(level="Higher"):
     distractors = [
         {"value": _r2(math.sqrt(drop / g)), "mistake": f"You appear to have left out the ½: −{drop_text} = ½ × (−9.8) × t² gives t = {t} s."},
         {"value": _r2(2 * drop / g), "mistake": f"You haven't square-rooted: t² = 2 × {drop_text} ÷ 9.8, so t = {t} s."},
-        {"value": _r2(u / g), "mistake": f"That is the time to rise to the highest point. The fall of {drop_text} m takes t = {t} s."},
+        {"value": L["t_up"], "mistake": f"That is the time to rise to the highest point. The fall of {drop_text} m takes t = {t} s."},
     ]
     if mode == "height":
         distractors.insert(0, {"value": _r2(math.sqrt(2 * y / g)),
-                               "mistake": f"The {noun} falls {H_top} − {y:g} = {drop_text} m, not {y:g} m: t = {t} s."})
-    return _with_projectile_widget(_part(
-        context + f"\n\nCalculate the time taken for the {noun} to {target}.",
+                               "mistake": f"The projectile falls {H_top} − {y:g} = {drop_text} m, not {y:g} m: t = {t} s."})
+    part_c = _part(
+        f"The highest point of the flight is {H_top} m above {where}. Calculate the time taken for the "
+        f"projectile to {target}.",
         t, "s", working, distractors, level,
         scaffold=[
             {"prompt": "What vertical distance does it fall from the highest point?", "answer": drop},
             {"prompt": "What is the time taken?", "answer": t},
-        ] if mode == "height" else None))
+        ] if mode == "height" else None)
+    return _scenario(L["context"], [part_v, part_up, part_c], level)
+
+
+# Type 3 targets: (text, speeds, angles, fraction of the flat-ground range)
+_CONTEXTS_TARGET = [
+    ("A player kicks a ball from the ground at **{v} m/s** at **{theta}°** above the horizontal, "
+     "towards a crossbar **{x} m** away.", [15, 18, 20, 22, 25], [25, 30, 35, 40], (0.4, 0.85)),
+    ("An archer fires an arrow at **{v} m/s** at **{theta}°** above the horizontal towards a target "
+     "**{x} m** away.", [40, 45, 50, 55, 60], [3, 4, 5, 6, 8], (0.4, 0.9)),
+    ("A golfer chips a ball at **{v} m/s** at **{theta}°** above the horizontal towards a flag "
+     "**{x} m** away.", [10, 12, 14, 16], [40, 50, 55, 60], (0.5, 0.95)),
+]
+
+
+def _s_vt_part(L, t, text, level, scaffold=None, extra=None):
+    v_H = L["v_H"]
+    s = _r2(v_H * t)
+    working = (extra or []) + [
+        {"type": "text",  "content": f"Horizontal velocity is constant: v = v_H = {v_H} m/s, t = {t} s."},
+        {"type": "latex", "content": r"s = vt"},
+        {"type": "latex", "content": rf"s = {v_H} \times {t}"},
+        {"type": "latex", "content": rf"s = {s}\ \mathrm{{m}}"},
+    ]
+    return _part(text, s, "m", working, [
+        {"value": _r2(L["v"] * t), "mistake": f"Use the horizontal component ({v_H} m/s), not the launch speed: s = {v_H} × {t} = {s} m."},
+        {"value": _r2(L["v_V"] * t), "mistake": f"Horizontal distance uses the horizontal component: s = {v_H} × {t} = {s} m."},
+        {"value": _r2(v_H * t / 2), "mistake": f"The horizontal velocity is constant, so no halving: s = {v_H} × {t} = {s} m."},
+    ], level, scaffold=scaffold)
+
+
+def generate_projectile_horizontal(level="Higher"):
+    """Type 3 — find v_H, then work only horizontally (s = vt), using the
+    horizontal steps from the exam-style patterns: range from a given flight
+    time (A/B/F), rise time + a further time (C), time to reach a target (E),
+    or the horizontal distance at a given time."""
+    mode = random.choice(["flight_time", "further_time", "target", "at_time"])
+    if mode == "target":
+        text, speeds, angles, (f_lo, f_hi) = random.choice(_CONTEXTS_TARGET)
+        v, theta_deg = random.choice(speeds), random.choice(angles)
+        theta = math.radians(theta_deg)
+        v_H, v_V = _r2(v * math.cos(theta)), _r2(v * math.sin(theta))
+        x = round(random.uniform(f_lo, f_hi) * v_H * 2 * v_V / g, 1)
+        x = int(x) if x >= 10 else x
+        L = dict(v=v, theta_deg=theta_deg, theta=theta, v_H=v_H, v_V=v_V,
+                 context=text.format(v=v, theta=theta_deg, x=x))
+        part_h, _ = _component_parts(L, level)
+        t = _r3(x / v_H)
+        working = [
+            {"type": "text",  "content": f"Horizontal velocity is constant: s = {x} m, v = v_H = {v_H} m/s."},
+            {"type": "latex", "content": r"s = vt"},
+            {"type": "latex", "content": rf"{x} = {v_H} \times t"},
+            {"type": "latex", "content": rf"t = \frac{{{x}}}{{{v_H}}} = {t}\ \mathrm{{s}}"},
+        ]
+        part_2 = _part(f"Calculate the time taken to travel the {x} m horizontally.", t, "s", working, [
+            {"value": _r3(x / v), "mistake": f"Use the horizontal component ({v_H} m/s), not the launch speed: t = {x} ÷ {v_H} = {t} s."},
+            {"value": _r3(x / v_V), "mistake": f"Horizontal distance is covered at the horizontal velocity: t = {x} ÷ {v_H} = {t} s."},
+            {"value": _r3(x * v_H), "mistake": f"Rearrange s = vt for t: t = s ÷ v = {x} ÷ {v_H} = {t} s."},
+        ], level)
+        return _scenario(L["context"], [part_h, part_2], level)
+
+    L = _angled_launch()
+    part_h, _ = _component_parts(L, level)
+    t_down = _r2(math.sqrt(2 * L["H_top"] / g))
+    T = _r2(L["t_up"] + t_down)
+    if mode == "flight_time":
+        text = random.choice([
+            f"The projectile lands {T} s after launch. Calculate the horizontal distance travelled.",
+            f"The total time of flight is {T} s. Calculate the range of the projectile.",
+        ])
+        part_2 = _s_vt_part(L, T, text, level)
+    elif mode == "further_time":
+        extra = [
+            {"type": "text",  "content": "Total time in the air:"},
+            {"type": "latex", "content": rf"t = {L['t_up']} + {t_down} = {T}\ \mathrm{{s}}"},
+        ]
+        part_2 = _s_vt_part(
+            L, T,
+            f"The projectile reaches its highest point {L['t_up']} s after launch, and lands a further "
+            f"{t_down} s after that. Calculate the horizontal distance from the launch point to the landing point.",
+            level, extra=extra,
+            scaffold=[
+                {"prompt": "What is the total time in the air?", "answer": T},
+                {"prompt": "What is the horizontal distance travelled?", "answer": _r2(L["v_H"] * T)},
+            ])
+        # Using only the further time is the classic slip here.
+        part_2.distractors = _distinct(part_2.correct_answer, part_2.distractors + [
+            {"value": _r2(L["v_H"] * t_down),
+             "mistake": f"Add the time already spent rising: t = {L['t_up']} + {t_down} = {T} s.",
+             "working": part_2.working}])
+    else:
+        t = round(random.uniform(0.2, 0.9) * T, 2)
+        part_2 = _s_vt_part(L, t, f"Calculate the horizontal distance the projectile has travelled {t} s after launch.", level)
+    return _scenario(L["context"], [part_h, part_2], level)
 
 
 # ── Pattern A — Same height: symmetric total time, then range ────────────────

@@ -1237,7 +1237,7 @@ the *component* of weight along the slope (W sin θ, which does) — these expla
 whether you know which quantities depend on the angle and which don't.
 """,
 
-    ("Our Dynamic Universe", "Projectile Motion", "3 — Exam Style (Mixed)"): r"""
+    ("Our Dynamic Universe", "Projectile Motion", "4 — Exam Style (Mixed)"): r"""
 **Example:** An athlete takes off with an initial velocity of 9.1 m/s at 24° to the
 horizontal, and lands at the same height.
 
