@@ -65,9 +65,8 @@ from topics.dynamics.graphs_of_motion      import generate_graphs_of_motion, gen
 from topics.dynamics.special_relativity    import generate_special_relativity
 from topics.dynamics.gravitation           import generate_orbital_gravitation
 from topics.dynamics.projectile_higher     import (
-    generate_projectile_l1,
-    generate_projectile_l2,
-    generate_projectile_exam_style,
+    generate_projectile_height,
+    generate_projectile_time,
     generate_projectile_explain,
 )
 from topics.dynamics.towing                import (
@@ -351,10 +350,9 @@ QUAL_REGISTRY = {
         },
         "Our Dynamic Universe (Part 2)": {
             "Projectile Motion": {
-                "Level 1 — Same Height":      generate_projectile_l1,
-                "Level 2 — Different Height": generate_projectile_l2,
-                "Level 3 — Exam Style":       generate_projectile_exam_style,
-                "Explain":                    generate_projectile_explain,
+                "Height Above the Ground": generate_projectile_height,
+                "Time to Fall a Distance": generate_projectile_time,
+                "Explain":                 generate_projectile_explain,
             },
             "Gravitation":         generate_orbital_gravitation,
             "Special Relativity":  generate_special_relativity,

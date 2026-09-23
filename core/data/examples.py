@@ -1198,107 +1198,7 @@ the *component* of weight along the slope (W sin θ, which does) — these expla
 whether you know which quantities depend on the angle and which don't.
 """,
 
-    ("Our Dynamic Universe", "Projectile Motion", "Level 1 — Same Height"): r"""
-**Example:** An object is launched at 20 m/s at 30° above the horizontal on flat ground.
-
-*Calculate the range.*
-
-**Step 1 — resolve into components:**
-
-*Equation:*
-$$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
-
-*Substitute:*
-$$v_H = 20\cos30° \qquad v_V = 20\sin30°$$
-
-*Answer:*
-$$v_H = 17.3\ \mathrm{m/s} \qquad v_V = 10\ \mathrm{m/s}$$
-
-**Step 2 — time of flight** (launch and landing heights are equal, so descent = ascent):
-
-*Equation:*
-$$t_{\text{up}} = \frac{v_V}{g} \qquad t_{\text{total}} = 2 \times t_{\text{up}}$$
-
-*Substitute:*
-$$t_{\text{up}} = \frac{10}{9.8} \qquad t_{\text{total}} = 2 \times 1.02$$
-
-*Answer:*
-$$t_{\text{up}} = 1.02\ \mathrm{s} \qquad t_{\text{total}} = 2.04\ \mathrm{s}$$
-
-**Step 3 — range:**
-
-*Equation:*
-$$R = v_H \times t_{\text{total}}$$
-
-*Substitute:*
-$$R = 17.3 \times 2.04$$
-
-*Answer:*
-$$R = 35.3\ \mathrm{m}$$
-
-**Most common mistake:** using $t_{\text{up}}$ (time to reach the top) instead of
-$t_{\text{total}} = 2t_{\text{up}}$ when calculating the range.
-""",
-
-    ("Our Dynamic Universe", "Projectile Motion", "Level 3 — Exam Style"): r"""
-**Example:** A student throws a wet sponge at a teacher, at 7.4 m/s at 30° above the
-horizontal, from a height of 1.5 m. The sponge takes a further 0.45 s to fall from its
-maximum height until it hits the teacher.
-
-*Calculate the height above the ground at which the sponge hits the teacher, then the
-horizontal range.*
-
-**Step 1 — resolve into components:**
-
-*Equation:*
-$$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
-
-*Substitute:*
-$$v_H = 7.4\cos30° \qquad v_V = 7.4\sin30°$$
-
-*Answer:*
-$$v_H = 6.41\ \mathrm{m/s} \qquad v_V = 3.7\ \mathrm{m/s}$$
-
-**Step 2 — time to reach maximum height:**
-
-*Equation:*
-$$t_{\text{up}} = \frac{v_V}{g}$$
-
-*Substitute:*
-$$t_{\text{up}} = \frac{3.7}{9.8}$$
-
-*Answer:*
-$$t_{\text{up}} = 0.38\ \mathrm{s}$$
-
-**Step 3 — height above the ground at this time.** The sponge rises $v_V^2 \div 2g = 0.70\
-\mathrm{m}$ above the launch point, so its height above the ground at the top is
-$H_{\text{top}} = 1.5 + 0.70 = 2.20\ \mathrm{m}$. In the given 0.45 s falling from there:
-
-*Equation:*
-$$s = \tfrac{1}{2}gt_2^2 \qquad h = H_{\text{top}} - s$$
-
-*Substitute:*
-$$s = \tfrac{1}{2} \times 9.8 \times 0.45^2 \qquad h = 2.20 - 0.99$$
-
-*Answer:*
-$$h = 1.21\ \mathrm{m}$$
-
-**Step 4 — horizontal range**, using the total time of flight $t_{\text{up}} + t_2$:
-
-*Equation:*
-$$R = v_H \times (t_{\text{up}} + t_2)$$
-
-*Substitute:*
-$$R = 6.41 \times (0.38 + 0.45)$$
-
-*Answer:*
-$$R = 5.32\ \mathrm{m}$$
-
-**Most common mistake:** forgetting to add the launch height when finding $H_{\text{top}}$,
-or using only the given 0.45 s (instead of $t_{\text{up}} + t_2$) for the range.
-""",
-
-    ("Our Dynamic Universe", "Projectile Motion", "Level 2 — Different Height"): r"""
+    ("Our Dynamic Universe", "Projectile Motion", "Height Above the Ground"): r"""
 **Example:** A ball is thrown at 20 m/s at 40° above the horizontal from a height of 15 m.
 
 *The ball takes a further 2.20 s to fall from its maximum height to the ground. Calculate
@@ -1341,9 +1241,55 @@ $$H_{\text{top}} = 23.7\ \mathrm{m}$$
 **Most common mistake:** solving $h = v_V t - \tfrac{1}{2}gt^2$ directly for the height fallen
 from launch — this needs the quadratic formula, which Higher Physics never requires. Because
 vertical velocity = 0 at the top, the height fallen in the *given* time is a simple
-$s = \tfrac{1}{2}gt^2$ calculation, with no quadratic involved. (If the maximum height were
-given instead, the falling time would be found the same way, rearranged: $t_{\text{down}} =
-\sqrt{2H_{\text{top}} \div g}$.)
+$s = \tfrac{1}{2}gt^2$ calculation, with no quadratic involved. (If instead you're given a
+time that *isn't* the full time to the ground, the same equation gives the height fallen by
+then — subtract it from the maximum height to get the height still above the ground.)
+""",
+
+    ("Our Dynamic Universe", "Projectile Motion", "Time to Fall a Distance"): r"""
+**Example:** A ball is thrown at 20 m/s at 40° above the horizontal from a height of 15 m.
+The ball reaches a maximum height of 23.7 m above the ground.
+
+*Calculate the time it takes to fall from this height to the ground.*
+
+**Step 1 — resolve into components:**
+
+*Equation:*
+$$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
+
+*Substitute:*
+$$v_H = 20\cos40° \qquad v_V = 20\sin40°$$
+
+*Answer:*
+$$v_H = 15.3\ \mathrm{m/s} \qquad v_V = 12.9\ \mathrm{m/s}$$
+
+**Step 2 — time to rise to maximum height:**
+
+*Equation:*
+$$t_{\text{up}} = \frac{v_V}{g}$$
+
+*Substitute:*
+$$t_{\text{up}} = \frac{12.9}{9.8}$$
+
+*Answer:*
+$$t_{\text{up}} = 1.31\ \mathrm{s}$$
+
+**Step 3 — time to fall to the ground.** At the top, vertical velocity = 0, so use
+$s = \tfrac{1}{2}gt^2$, rearranged for $t$:
+
+*Equation:*
+$$t = \sqrt{\frac{2H_{\text{top}}}{g}}$$
+
+*Substitute:*
+$$t = \sqrt{\frac{2 \times 23.7}{9.8}}$$
+
+*Answer:*
+$$t = 2.20\ \mathrm{s}$$
+
+**Most common mistake:** leaving out the factor of 2 under the square root, or treating this
+as a constant-velocity relationship ($t = H_{\text{top}} \div g$) — falling from rest needs
+$s = \tfrac{1}{2}gt^2$, not $s = gt$. (If a *distance* less than the full maximum height is
+given instead, the same rearranged equation finds the time to fall that distance.)
 """,
 
     ("Particles and Waves", "Standard Model", "Particle Classification"): r"""
