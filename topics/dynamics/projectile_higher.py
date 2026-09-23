@@ -465,7 +465,7 @@ def generate_projectile_horizontal(level="Higher"):
         part_2 = _part(f"Calculate the time taken to travel the {x} m horizontally.", t, "s", working, [
             {"value": _r3(x / v), "mistake": f"Use the horizontal component ({v_H} m/s), not the launch speed: t = {x} ÷ {v_H} = {t} s."},
             {"value": _r3(x / v_V), "mistake": f"Horizontal distance is covered at the horizontal velocity: t = {x} ÷ {v_H} = {t} s."},
-            {"value": _r3(x * v_H), "mistake": f"Rearrange s = vt for t: t = s ÷ v = {x} ÷ {v_H} = {t} s."},
+            {"value": _r3(x / v_H / 2), "mistake": f"No halving — the horizontal velocity is constant over the whole {x} m: t = {x} ÷ {v_H} = {t} s."},
         ], level)
         return _scenario(L["context"], [part_h, part_2], level)
 
