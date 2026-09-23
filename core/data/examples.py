@@ -845,42 +845,6 @@ $$E_W = 10\,000\ \mathrm{J}$$
 distance ($d = E_W \div F$) if either of those is the unknown instead.
 """,
 
-    ("Our Dynamic Universe", "Energy, Work and Power", "Gravitational Potential Energy"): r"""
-**Example:** A crane raises an object of mass 40 kg through a height of 12 m.
-
-*Calculate the gain in gravitational potential energy.*
-
-*Equation:*
-$$E_p = mgh$$
-
-*Substitute:*
-$$E_p = 40 \times 9.8 \times 12$$
-
-*Answer:*
-$$E_p = 4704\ \mathrm{J}$$
-
-**Important:** if the mass is given in grams, convert it to kilograms before substituting. The
-same equation rearranges to find h ($h = E_p \div mg$) or m ($m = E_p \div gh$).
-""",
-
-    ("Our Dynamic Universe", "Energy, Work and Power", "Kinetic Energy"): r"""
-**Example:** A car of mass 900 kg travels at a speed of 20 m/s.
-
-*Calculate the kinetic energy.*
-
-*Equation:*
-$$E_k = \tfrac{1}{2}mv^2$$
-
-*Substitute:*
-$$E_k = \tfrac{1}{2} \times 900 \times 20^2$$
-
-*Answer:*
-$$E_k = 180\,000\ \mathrm{J}$$
-
-**Common exam trap:** remember to square the velocity *before* halving and multiplying by the
-mass — the same equation rearranges to $v = \sqrt{2E_k \div m}$ or $m = 2E_k \div v^2$.
-""",
-
     ("Our Dynamic Universe", "Energy, Work and Power", "Power"): r"""
 **Example:** A motor transfers 24 000 J of energy in 60 s.
 
@@ -899,43 +863,35 @@ $$P = 400\ \mathrm{W}$$
 equation rearranges to find E ($E = Pt$) or t ($t = E \div P$).
 """,
 
-    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Free-Fall Speed"): r"""
-**Example:** An object is dropped from a height of 8.0 m. Assuming no energy is lost to air
-resistance, calculate the speed of the object just before it hits the ground.
+    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Ep and Ek"): r"""
+**Example:** A stone of mass 0.40 kg is dropped from a height of 8.0 m. Assuming no energy is
+lost to air resistance, calculate the speed of the stone just before it hits the ground.
 
-All the gravitational potential energy converts to kinetic energy, so $E_p = E_k$:
-
-*Equation:*
-$$mgh = \tfrac{1}{2}mv^2$$
-
-*Substitute* (the mass appears on both sides, so it cancels):
-$$9.8 \times 8.0 = \tfrac{1}{2}v^2$$
-
-*Rearrange and solve:*
-$$v = \sqrt{2 \times 9.8 \times 8.0} = 12.5\ \mathrm{m/s}$$
-
-**Important:** the mass cancels out of the equation entirely — the final speed of a
-free-falling object doesn't depend on its mass.
-""",
-
-    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Maximum Height"): r"""
-**Example:** A ball is thrown vertically upwards with an initial speed of 14 m/s. Assuming no
-energy is lost to air resistance, calculate the maximum height reached by the ball.
-
-All the kinetic energy converts to gravitational potential energy at maximum height, so
-$E_k = E_p$:
+**Step 1 — calculate the energy you can find:**
 
 *Equation:*
-$$\tfrac{1}{2}mv^2 = mgh$$
+$$E_p = mgh$$
 
-*Substitute* (the mass appears on both sides, so it cancels):
-$$\tfrac{1}{2} \times 14^2 = 9.8 \times h$$
+*Substitute:*
+$$E_p = 0.40 \times 9.8 \times 8.0$$
 
-*Rearrange and solve:*
-$$h = \frac{98}{9.8} = 10.0\ \mathrm{m}$$
+*Answer:*
+$$E_p = 31.4\ \mathrm{J}$$
 
-**Important:** the mass cancels out of the equation, and at maximum height the ball's vertical
-velocity is momentarily zero — all its kinetic energy has been converted.
+**Step 2 — no energy is lost, so all the Ep lost becomes Ek gained:**
+$$E_k = 31.4\ \mathrm{J}$$
+
+*Equation:*
+$$E_k = \tfrac{1}{2}mv^2$$
+
+*Substitute:*
+$$31.4 = \tfrac{1}{2} \times 0.40 \times v^2$$
+
+*Answer:*
+$$v = 12.5\ \mathrm{m/s}$$
+
+**Important:** the same two steps work the other way round — for an object thrown upwards,
+calculate $E_k$ first, then use that value as $E_p$ in $E_p = mgh$ to find the maximum height.
 """,
 
     ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Frictional Force"): r"""

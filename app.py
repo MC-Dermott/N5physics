@@ -1,7 +1,7 @@
 import streamlit as st
 
 from core.engine.session_manager import initialise_session, reset_test, reset_assessment, reset_past_paper_quiz
-from core.engine.question_factory import generate_question, get_topics, get_question_types, get_sub_types
+from core.engine.question_factory import generate_question, get_topics, get_question_types, get_sub_types, make_test_generator
 from core.ui.auth_ui import render_auth, render_change_password
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
@@ -275,6 +275,7 @@ st.divider()
 # ── Route to practice or test ─────────────────────────────────────────────────
 
 if mode == "Test":
-    render_test(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)
+    test_generate_fn = make_test_generator(qualification, topic, question_type)
+    render_test(topic, question_type, qualification, test_generate_fn, user_id=user_id, example=example)
 else:
     render_practice(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)

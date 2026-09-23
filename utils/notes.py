@@ -467,6 +467,36 @@ $$E_W = Fd = 50 \\times 4 = 200\\ \\mathrm{J}$$
 > **Important:** The distance must be in the same direction as the force.
 """,
 
+    "energy_conservation": """
+## Conservation of Energy
+
+**Definition:** Energy cannot be created or destroyed — it can only be changed from one form
+into another. The total energy stays the same.
+
+**Falling objects (no air resistance):** all the gravitational potential energy lost becomes
+kinetic energy gained.
+$$E_p \\text{ lost} = E_k \\text{ gained} \\qquad mgh = \\frac{1}{2}mv^2$$
+
+**Objects thrown upwards:** at the maximum height the object is momentarily stopped, so all of
+its kinetic energy has become gravitational potential energy.
+
+**When friction acts:** some energy is converted into **heat** (and sound). The energy lost is
+equal to the work done against friction.
+$$E_{lost} = E_p - E_k \\qquad E_W = Fd$$
+
+**Braking:** the kinetic energy of a vehicle is converted into heat in the brakes. The work done
+by the brakes equals the kinetic energy lost.
+$$\\frac{1}{2}mv^2 = Fd$$
+
+**Worked Example:** A 2 kg ball is dropped from 5 m ($g = 9.8$ N/kg). Calculate its speed just
+before it hits the ground.
+$$E_p = mgh = 2 \\times 9.8 \\times 5 = 98\\ \\mathrm{J}$$
+$$E_k = 98\\ \\mathrm{J} \\qquad 98 = \\frac{1}{2} \\times 2 \\times v^2 \\qquad v = 9.9\\ \\mathrm{m/s}$$
+
+> **Important:** In real life the speed (or height) is always **less** than calculated, because
+> some energy is converted into heat due to friction / air resistance.
+""",
+
     "waves_speed": """
 ## Wave Speed — $v = f\\lambda$
 

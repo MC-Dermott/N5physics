@@ -37,7 +37,14 @@ from topics.dynamics.vertical_forces       import (
     gen_parachute_deceleration,
 )
 from topics.dynamics.weight                import generate_weight
-from topics.dynamics.energy                import generate_energy
+from topics.dynamics.energy                import (
+    generate_energy,
+    generate_energy_gpe,
+    generate_energy_ke,
+    generate_energy_work,
+    generate_energy_conservation,
+    gen_energy_explain,
+)
 from topics.dynamics.projectiles           import (
     generate_projectiles,
     gen_free_fall_velocity_and_height,
@@ -120,11 +127,8 @@ from topics.dynamics.momentum_impulse      import (
 )
 from topics.dynamics.energy_work_power_higher import (
     generate_work_done as generate_work_done_higher,
-    generate_gpe as generate_gpe_higher,
-    generate_ke as generate_ke_higher,
     generate_power as generate_power_higher,
-    gen_energy_freefall_speed,
-    gen_energy_max_height,
+    gen_energy_ep_ek,
     gen_energy_friction_force,
     gen_conservation_power,
 )
@@ -254,7 +258,13 @@ QUAL_REGISTRY = {
                 "Parachute Deceleration": gen_parachute_deceleration,
             },
             "Weight":                 generate_weight,
-            "Energy":                 generate_energy,
+            "Energy": {
+                "Gravitational Potential Energy": generate_energy_gpe,
+                "Kinetic Energy":                 generate_energy_ke,
+                "Work Done":                      generate_energy_work,
+                "Conservation of Energy":         generate_energy_conservation,
+                "Explain":                        gen_energy_explain,
+            },
             "Projectile Motion": {
                 "Vertical Motion — Velocity & Height Fallen": gen_free_fall_velocity_and_height,
                 "Vertical Motion — Time to Fall": gen_free_fall_time,
@@ -356,11 +366,8 @@ QUAL_REGISTRY = {
             },
             "Energy, Work and Power": {
                 "Work Done":                   generate_work_done_higher,
-                "Gravitational Potential Energy": generate_gpe_higher,
-                "Kinetic Energy":               generate_ke_higher,
                 "Power":                        generate_power_higher,
-                "Conservation — Free-Fall Speed": gen_energy_freefall_speed,
-                "Conservation — Maximum Height": gen_energy_max_height,
+                "Conservation — Ep and Ek":     gen_energy_ep_ek,
                 "Conservation — Frictional Force": gen_energy_friction_force,
                 "Conservation — Power":  gen_conservation_power,
             },
@@ -458,9 +465,28 @@ def get_sub_types(qualification, topic, question_type):
     return None
 
 
+_LEVEL_MAP = {"S3": "S3", "National 4": "N4", "National 5": "N5", "Higher": "Higher"}
+
+
+def make_test_generator(qualification, topic, question_type):
+    """A generator for Test mode: deals every question style once (in random
+    order) before any repeats, so a test covers the whole topic."""
+    entry = QUAL_REGISTRY[qualification][topic][question_type]
+    if not isinstance(entry, dict):
+        return lambda: generate_question(qualification, topic, question_type)
+    level = _LEVEL_MAP.get(qualification, "N5")
+    deck = []
+
+    def generate():
+        if not deck:
+            deck.extend(random.sample(list(entry.values()), len(entry)))
+        return deck.pop()(level=level)
+
+    return generate
+
+
 def generate_question(qualification, topic, question_type, sub_type=None):
-    level_map = {"S3": "S3", "National 4": "N4", "National 5": "N5", "Higher": "Higher"}
-    level = level_map.get(qualification, "N5")
+    level = _LEVEL_MAP.get(qualification, "N5")
     entry = QUAL_REGISTRY[qualification][topic][question_type]
     if isinstance(entry, dict):
         fn = entry[sub_type] if sub_type in entry else random.choice(list(entry.values()))
