@@ -207,8 +207,9 @@ def generate_forces(level="N5"):
     return random.choice(_ALL_GENS)(level=level)
 
 
-def gen_finding_acceleration(level="N5"):
-    return random.choice([gen_missing_acceleration, gen_missing_acceleration_two_forces])(level=level)
+def gen_horizontal_forces(level="N5"):
+    """Finding acceleration, friction or driving force for horizontal motion."""
+    return generate_forces(level=level)
 
 
 # ── Explain: comparing forward and backward forces during a stage of motion ─

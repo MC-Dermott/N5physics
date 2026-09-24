@@ -1,5 +1,6 @@
 import random
 import pathlib
+from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
 from utils.notes import NOTES
 
@@ -58,37 +59,66 @@ def _draw_liftoff():
     return label, phrase, force_noun, mass, applied, weight
 
 
+def _weight_part(label, mass, weight, level):
+    """Part (a) of every lift-off scenario: calculate the weight, W = mg."""
+    working = [
+        {"type": "latex", "content": r"W = mg"},
+        {"type": "latex", "content": rf"W = {mass} \times {G}"},
+        {"type": "latex", "content": rf"W = {weight}\ \mathrm{{N}}"},
+    ]
+    return PhysicsQuestion(
+        question_text=f"Calculate the weight of the {label}.",
+        correct_answer=weight, unit="N",
+        topic="Dynamics", question_type="Vertical Forces", level=level,
+        working=working,
+        distractors=[
+            {"value": float(mass), "display": f"{mass} N",
+             "mistake": "That's the mass — weight is a force, so multiply the mass by g: W = mg.",
+             "working": working},
+            {"value": round(mass / G, 1), "display": f"{round(mass / G, 1)} N",
+             "mistake": "You divided by g instead of multiplying. W = mg.", "working": working},
+        ],
+        notes=NOTES["unbalanced_forces_s3"],
+    )
+
+
+def _liftoff_scenario(context, part_a, part_b, level):
+    return _with_fbd_widget(PhysicsQuestion(
+        question_text="", correct_answer=0, unit="",
+        topic="Dynamics", question_type="Vertical Forces", level=level,
+        is_scenario=True, scenario_context=context, parts=[part_a, part_b],
+    ))
+
+
 def gen_vertical_liftoff_accel(level="N5"):
     label, phrase, force_noun, mass, applied, weight = _draw_liftoff()
     net = round(applied - weight, 1)
     correct = round(net / mass, 2)
 
     working = [
-        {"type": "text",  "content": "Step 1: Find the weight"},
-        {"type": "latex", "content": rf"W = mg = {mass} \times {G} = {weight}\ \mathrm{{N}}"},
-        {"type": "text",  "content": "Step 2: Find the net (unbalanced) upward force"},
+        {"type": "text",  "content": "Step 1: Find the net (unbalanced) upward force, using the weight from part 1"},
         {"type": "latex", "content": rf"F_{{net}} = {applied} - {weight} = {net}\ \mathrm{{N}}"},
-        {"type": "text",  "content": "Step 3: Apply Newton's Second Law"},
+        {"type": "text",  "content": "Step 2: Apply Newton's Second Law"},
         {"type": "latex", "content": rf"a = \frac{{F_{{net}}}}{{m}} = \frac{{{net}}}{{{mass}}} = {correct}\ \mathrm{{m/s^2}}"},
     ]
-    question = (f"A {label} has a mass of {mass} kg. As it takes off vertically, "
-                f"{phrase} {applied} N. Calculate its acceleration. (g = {G} N/kg)")
+    context = (f"A {label} has a mass of {mass} kg. As it takes off vertically, "
+               f"{phrase} {applied} N. (g = {G} N/kg)")
     forgot_weight = round(applied / mass, 2)
-    swapped = round(abs(weight - applied) / mass, 2)
     options_data = [
         {"value": correct,        "mistake": None, "working": working},
         {"value": forgot_weight,  "mistake": "You divided the applied force straight by mass — first subtract the weight to find the net force.", "working": working},
         {"value": round(weight / mass, 2), "mistake": "That's g again, not the acceleration — you need the NET force (applied − weight) divided by mass.", "working": working},
+        {"value": round((applied + weight) / mass, 2), "mistake": "You added the weight — it acts downward, against the upward force, so subtract it.", "working": working},
     ]
     options_data = _dedup(options_data, correct)
     scaffold = [
-        {"question": "What is the weight?", "answer": weight, "unit": "N"},
         {"question": "What is the net (unbalanced) force?", "answer": net, "unit": "N"},
         {"question": "What is the acceleration?", "answer": correct, "unit": "m/s²"},
     ]
-    return _with_fbd_widget(make_question(question, correct, options_data, "m/s²", scaffold=scaffold,
-                         notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
-                         question_type="Vertical Forces", level=level))
+    part_b = make_question(f"Calculate the acceleration of the {label}.", correct, options_data,
+                           "m/s²", scaffold=scaffold, notes=NOTES["unbalanced_forces_s3"],
+                           topic="Dynamics", question_type="Vertical Forces", level=level)
+    return _liftoff_scenario(context, _weight_part(label, mass, weight, level), part_b, level)
 
 
 # (mass_lo, mass_hi, accel_lo, accel_hi) — target liftoff acceleration is drawn
@@ -104,16 +134,14 @@ def gen_vertical_liftoff_thrust(level="N5"):
     correct = round(weight + net, 1)
 
     working = [
-        {"type": "text",  "content": "Step 1: Find the weight"},
-        {"type": "latex", "content": rf"W = mg = {mass} \times {G} = {weight}\ \mathrm{{N}}"},
-        {"type": "text",  "content": "Step 2: Find the net (unbalanced) force needed for this acceleration"},
+        {"type": "text",  "content": "Step 1: Find the net (unbalanced) force needed for this acceleration"},
         {"type": "latex", "content": rf"F_{{net}} = ma = {mass} \times {accel} = {net}\ \mathrm{{N}}"},
-        {"type": "text",  "content": "Step 3: Add the weight back on — the upward force must overcome "
+        {"type": "text",  "content": "Step 2: Add the weight from part 1 — the upward force must overcome "
                                       "gravity as well as accelerate the object"},
         {"type": "latex", "content": rf"F = F_{{net}} + W = {net} + {weight} = {correct}\ \mathrm{{N}}"},
     ]
-    question = (f"A {label} has a mass of {mass} kg. It accelerates upward at {accel} m/s² as it "
-                f"takes off. Calculate the {force_noun} needed to produce this acceleration. (g = {G} N/kg)")
+    context = (f"A {label} has a mass of {mass} kg. It accelerates upward at {accel} m/s² as it "
+               f"takes off. (g = {G} N/kg)")
     forgot_weight = net
     subtracted = round(abs(weight - net), 1)
     options_data = [
@@ -128,13 +156,18 @@ def gen_vertical_liftoff_thrust(level="N5"):
     ]
     options_data = _dedup(options_data, correct)
     scaffold = [
-        {"question": "What is the weight?", "answer": weight, "unit": "N"},
         {"question": "What is the net (unbalanced) force needed?", "answer": net, "unit": "N"},
         {"question": f"What {force_noun} is needed?", "answer": correct, "unit": "N"},
     ]
-    return _with_fbd_widget(make_question(question, correct, options_data, "N", scaffold=scaffold,
-                         notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
-                         question_type="Vertical Forces", level=level))
+    part_b = make_question(f"Calculate the {force_noun} needed to produce this acceleration.",
+                           correct, options_data, "N", scaffold=scaffold,
+                           notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
+                           question_type="Vertical Forces", level=level)
+    return _liftoff_scenario(context, _weight_part(label, mass, weight, level), part_b, level)
+
+
+def gen_vertical_forces(level="N5"):
+    return random.choice([gen_vertical_liftoff_accel, gen_vertical_liftoff_thrust])(level=level)
 
 
 # (label, mass_lo, mass_hi) for the free-falling/parachute-deceleration scenarios.

@@ -31,13 +31,10 @@ from topics.dynamics.forces                import (
     generate_forces,
     gen_compare_forces,
     gen_resultant_force,
-    gen_finding_acceleration,
-    gen_missing_friction,
-    gen_missing_driving,
+    gen_horizontal_forces,
 )
 from topics.dynamics.vertical_forces       import (
-    gen_vertical_liftoff_accel,
-    gen_vertical_liftoff_thrust,
+    gen_vertical_forces,
     gen_freefall_acceleration,
     gen_parachute_deceleration,
 )
@@ -241,11 +238,8 @@ QUAL_REGISTRY = {
             "Forces": {
                 "Explain — Comparing Forces": gen_compare_forces,
                 "Resultant Force at Right Angles": gen_resultant_force,
-                "Finding Acceleration":  gen_finding_acceleration,
-                "Finding Friction":      gen_missing_friction,
-                "Finding Driving Force": gen_missing_driving,
-                "Vertical Forces — Finding Acceleration": gen_vertical_liftoff_accel,
-                "Vertical Forces — Finding Thrust or Lift Force": gen_vertical_liftoff_thrust,
+                "Horizontal Forces":     gen_horizontal_forces,
+                "Vertical Forces":       gen_vertical_forces,
             },
             "Vertical Motion": {
                 "Free-Fall Acceleration": gen_freefall_acceleration,
