@@ -6,6 +6,11 @@ from topics.dynamics.acceleration_s3       import (
     gen_initial_final_speed,
     generate_acceleration_basic,
 )
+from topics.dynamics.acceleration_n5       import (
+    generate_acceleration_equation,
+    generate_trolley_light_gates,
+    generate_trolley_explain,
+)
 from topics.dynamics.instantaneous_speed_s3 import gen_instantaneous_speed, gen_average_speed_light_gate
 from topics.dynamics.vt_graph_distance_s3   import (
     gen_vt_distance_simple,
@@ -228,7 +233,11 @@ QUAL_REGISTRY = {
     "National 5": {
         "Dynamics": {
             "Speed, Distance & Time": generate_sdt,
-            "Acceleration":           generate_acceleration,
+            "Acceleration": {
+                "Using a = (v − u) ÷ t":            generate_acceleration_equation,
+                "Trolley on a Slope — Light Gates":  generate_trolley_light_gates,
+                "Trolley on a Slope — Method":       generate_trolley_explain,
+            },
             "Forces": {
                 "Explain — Comparing Forces": gen_compare_forces,
                 "Resultant Force at Right Angles": gen_resultant_force,
