@@ -8,7 +8,7 @@ def _is_correct(user_input, expected, tolerance=0.02):
     try:
         student = float(str(user_input).replace(",", "").strip())
         exp = float(expected)
-        if abs(exp) < 1e-9:
+        if exp == 0:
             return abs(student) < 0.01
         return abs(student - exp) / abs(exp) <= tolerance
     except (ValueError, TypeError):

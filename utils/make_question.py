@@ -1,3 +1,5 @@
+import math
+
 from core.models.question_model import PhysicsQuestion
 
 
@@ -13,14 +15,16 @@ def make_question(question, correct_val, options_data, unit,
         summary  – ignored (kept for compatibility)
         display  – optional display string (stored in metadata)
     """
-    correct_float = round(float(correct_val), 6)
+    correct_float = float(correct_val)
 
     correct_working = []
     distractors = []
 
     for opt in options_data:
-        val = round(float(opt["value"]), 6)
-        if val == correct_float:
+        # relative, not round(…, 6): rounding made every value below ~1e-6
+        # (e.g. a 3e-11 N gravitational force) equal the answer, dropping all distractors
+        val = float(opt["value"])
+        if math.isclose(val, correct_float, rel_tol=1e-6, abs_tol=0.0):
             correct_working = opt.get("working", [])
         else:
             distractors.append({

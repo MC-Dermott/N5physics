@@ -6,7 +6,7 @@ from utils.notes import format_math, split_equations
 def _within_tolerance(user_val, target, tolerance=0.02):
     try:
         target = float(target)
-        if abs(target) < 1e-9:
+        if target == 0:
             return abs(user_val) < 0.01
         return abs(user_val - target) / abs(target) <= tolerance
     except (ValueError, TypeError):
