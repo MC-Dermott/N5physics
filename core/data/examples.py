@@ -213,7 +213,7 @@ both with the correct sign.
 — only a *constant* velocity (horizontal v–t line) gives a straight s–t graph.
 """,
 
-    ("Our Dynamic Universe", "Gravitation"): r"""
+    ("Our Dynamic Universe", "Gravitation", "3 — g at a Height"): r"""
 **Example:** A satellite of mass 1200 kg orbits the Earth at a height of 400 km above the
 surface. The Earth has mass $5.97 \times 10^{24}$ kg and radius $6.37 \times 10^{6}$ m.
 

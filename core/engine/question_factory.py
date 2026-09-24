@@ -79,6 +79,12 @@ from topics.dynamics.special_relativity    import (
     generate_relativity_definitions,
 )
 from topics.dynamics.gravitation           import generate_orbital_gravitation
+from topics.dynamics.newtons_law_gravitation_higher import (
+    gen_grav_force_mass_distance,
+    gen_grav_units_centre_distance,
+    gen_grav_field_at_height,
+    gen_grav_force_change,
+)
 from topics.dynamics.projectile_higher     import (
     generate_projectile_vertical_displacement,
     generate_projectile_vertical_time_from_top,
@@ -374,7 +380,12 @@ QUAL_REGISTRY = {
                 "4 — Exam Style (Mixed)":                        generate_projectile_exam_mixed,
                 "5 — Explain":                                   generate_projectile_explain,
             },
-            "Gravitation":         generate_orbital_gravitation,
+            "Gravitation": {
+                "1 — Force, Mass or Distance":              gen_grav_force_mass_distance,
+                "2 — Units and Centre-to-Centre Distance":  gen_grav_units_centre_distance,
+                "3 — g at a Height":                        gen_grav_field_at_height,
+                "4 — How Does the Force Change?":           gen_grav_force_change,
+            },
             "Special Relativity": {
                 "Newtonian Relative Velocity": generate_relativity_velocity,
                 "Time Dilation":               generate_relativity_time_dilation,
