@@ -79,6 +79,14 @@ from topics.dynamics.special_relativity    import (
     generate_relativity_definitions,
 )
 from topics.dynamics.gravitation           import generate_orbital_gravitation
+from topics.dynamics.expanding_universe_higher import (
+    gen_eu_doppler,
+    gen_eu_doppler_explain,
+    gen_eu_redshift,
+    gen_eu_hubble,
+    gen_eu_evidence,
+    gen_eu_stellar,
+)
 from topics.dynamics.newtons_law_gravitation_higher import (
     gen_grav_force_mass_distance,
     gen_grav_units_centre_distance,
@@ -389,6 +397,14 @@ QUAL_REGISTRY = {
                 "Time Dilation":               generate_relativity_time_dilation,
                 "Length Contraction":          generate_relativity_length_contraction,
                 "Definitions and Explain":     generate_relativity_definitions,
+            },
+            "The Expanding Universe": {
+                "1 — Doppler Effect Calculations":           gen_eu_doppler,
+                "2 — Explaining the Doppler Effect":         gen_eu_doppler_explain,
+                "3 — Redshift and Recessional Velocity":     gen_eu_redshift,
+                "4 — Hubble's Law and the Age of the Universe": gen_eu_hubble,
+                "5 — Evidence, Dark Matter and Dark Energy": gen_eu_evidence,
+                "6 — Stellar Temperature":                   gen_eu_stellar,
             },
         },
         "Particles and Waves": {
