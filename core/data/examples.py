@@ -16,10 +16,18 @@
 # not the app's pacing split ("Our Dynamic Universe (Part 1)"/"(Part 2)") —
 # get_examples() strips that suffix via canonical_unit() before looking up.
 #
-# Question types with no hand-authored entry here fall back to derive_example()
-# below, which generates one automatically from the generator itself.
+# Question types with no hand-authored entry here fall back to a worked example
+# generated from the generator itself — once a question has been generated, one
+# of the same variant (see matching_example()), so the example always shows the
+# same kind of question the student is answering.
+#
+# Only add a hand-authored entry when its generator always asks the same thing
+# (the same unknown, the same parts) and the example shows exactly that — for a
+# generator that randomises between variants (find a / find t / find Δv…), a
+# single fixed example can't match every question, so leave it to the fallback.
 
 import random
+import re
 
 from core.data.past_papers import canonical_unit
 
@@ -152,148 +160,6 @@ $$T - 100 - 50 = (300 + 200) \times 2.43$$
 $$T = 1215 + 150 = 1365\ \mathrm{N}$$
 """,
 
-    ("Our Dynamic Universe", "Towing", "Level 5 — Exam Style"): r"""
-**Example:** A bike tows a trailer. Parts (a) and (b) ask you to calculate the acceleration and
-the tension in the tow bar, exactly as in the earlier levels (equation → substitute → answer,
-as above).
-
-**Part (c):** As the speed of the bike and trailer increases, the friction forces on both the
-bike and the trailer increase. The acceleration remains 0.58 m/s². Which statement correctly
-describes what happens to the tension in the tow bar, and why?
-
-- Decreases — the extra friction on the trailer means less tension is needed to keep it moving.
-- Stays the same — since the acceleration doesn't change, none of the individual forces need to change either.
-- Increases — because the driving force from the bike's engine must increase to maintain the same acceleration.
-- **Increases — considering the trailer alone, T − F_friction = m × a. Since the acceleration stays constant, the extra friction must be balanced by extra tension.** ✓
-
-The correct option is the last one: friction opposes the tension, so for the equation
-$T - F_{\text{friction}} = m \times a$ to keep balancing with a fixed right-hand side, T must
-rise to match the extra friction. (The third option is a common trap — it's true of the
-*driving force*, but the question asks specifically about the *tow bar tension*.)
-""",
-
-    ("Dynamics", "Acceleration", "Acceleration, Time & Change in Speed"): r"""
-**Example:** A car has an acceleration of −4 m/s² for 6 s.
-
-*Calculate the change in speed.*
-
-*Equation:*
-$$a = \frac{v - u}{t}$$
-
-*Substitute:*
-$$-4 = \frac{v - u}{6}$$
-
-*Rearrange and solve:*
-$$v - u = -4 \times 6 = -24\ \mathrm{m/s}$$
-
-The change in speed is **−24 m/s** — the negative sign shows the acceleration is a
-deceleration, so the car's speed decreases by 24 m/s.
-""",
-
-    ("Dynamics", "Acceleration", "Initial & Final Speed"): r"""
-**Example:** A cyclist starts with a speed of 3 m/s and has an acceleration of 2 m/s² for 5 s.
-
-*Calculate the final speed.*
-
-*Equation:*
-$$v = u + at$$
-
-*Substitute:*
-$$v = 3 + (2 \times 5)$$
-
-*Answer:*
-$$v = 13\ \mathrm{m/s}$$
-
-**Example (finding the initial speed):** A runner has an acceleration of −1 m/s² for 4 s and
-reaches a final speed of 4 m/s.
-
-*Calculate the initial speed.*
-
-*Equation:*
-$$v = u + at$$
-
-*Substitute:*
-$$4 = u + (-1 \times 4)$$
-
-*Rearrange and solve:*
-$$u = 4 - (-1 \times 4) = 8\ \mathrm{m/s}$$
-""",
-
-    ("Dynamics", "Distance and Displacement", "Level 1 — 1D"): r"""
-**Example:** A cyclist travels 15 m east, then 22 m west, then 8 m east.
-
-**(a) Calculate the total distance travelled.**
-
-Distance adds up the magnitude of every leg, regardless of direction:
-
-*Equation:*
-$$d = d_1 + d_2 + d_3$$
-
-*Substitute:*
-$$d = 15 + 22 + 8$$
-
-*Answer:*
-$$d = 45\ \mathrm{m}$$
-
-**(b) Taking east as positive, calculate the resultant displacement.**
-
-Displacement adds the **signed** values, so legs in opposite directions partly cancel:
-
-*Equation:*
-$$s = s_1 + s_2 + s_3$$
-
-*Substitute:*
-$$s = (+15) + (-22) + (+8)$$
-
-*Answer:*
-$$s = +1\ \mathrm{m}$$
-
-The resultant displacement is **1 m east**.
-""",
-
-    ("Dynamics", "Distance and Displacement", "Level 2 — Two Displacements (2D)"): r"""
-**Example:** A boat travels 8 km north and 6 km east.
-
-*Calculate the magnitude and bearing of the resultant displacement.*
-
-**Magnitude** — combine the two perpendicular legs with Pythagoras:
-
-*Equation:*
-$$R = \sqrt{N^2 + E^2}$$
-
-*Substitute:*
-$$R = \sqrt{8^2 + 6^2}$$
-
-*Answer:*
-$$R = \sqrt{100} = 10\ \mathrm{km}$$
-
-**Bearing** — find the angle east of north:
-
-*Equation:*
-$$\theta = \tan^{-1}\left(\frac{E}{N}\right)$$
-
-*Substitute:*
-$$\theta = \tan^{-1}\left(\frac{6}{8}\right)$$
-
-*Answer:*
-$$\theta = 36.9°$$
-
-Both legs are positive (north and east), so the resultant lies in the NE quadrant, where bearing $= \theta$:
-$$\text{Bearing} = 037°$$
-""",
-
-    ("Dynamics", "Vectors and Scalars", "Identify Scalar or Vector"): r"""
-**Example:** Which of the following is a vector quantity — mass, energy, or acceleration?
-
-A scalar quantity has magnitude only. A vector quantity has magnitude **and** direction.
-
-- Mass has a size (e.g. 5 kg) but no direction → **scalar**
-- Energy has a size (e.g. 200 J) but no direction → **scalar**
-- Acceleration has a size (e.g. 3 m/s²) **and** a direction (e.g. downwards) → **vector**
-
-The answer is **acceleration**.
-""",
-
     ("Dynamics", "Vectors and Scalars", "Scalar & Vector Pairs"): r"""
 **Example:** Which of the following contains one scalar quantity and one vector quantity?
 
@@ -306,116 +172,6 @@ The answer is **acceleration**.
 | E | distance; force | Distance is a scalar, force is a vector ✓ |
 
 The answer is **E — distance; force**, since it is the only option with one of each type.
-""",
-
-    ("Dynamics", "Distance and Displacement", "Level 3 — Multiple Displacements (2D)"): r"""
-**Example:** A hiker walks 12 km north, then 9 km east, then 4 km south.
-
-*Calculate the magnitude and bearing of the resultant displacement from the start.*
-
-**Step 1 — resolve onto the N/E axes and sum each axis separately:**
-$$\Sigma N = 12 - 4 = 8\ \mathrm{km} \qquad \Sigma E = 9\ \mathrm{km}$$
-
-**Step 2 — magnitude:**
-
-*Equation:*
-$$R = \sqrt{(\Sigma N)^2 + (\Sigma E)^2}$$
-
-*Substitute:*
-$$R = \sqrt{8^2 + 9^2}$$
-
-*Answer:*
-$$R = \sqrt{145} = 12.04\ \mathrm{km}$$
-
-**Step 3 — bearing:**
-
-*Equation:*
-$$\theta = \tan^{-1}\left(\frac{\Sigma E}{\Sigma N}\right)$$
-
-*Substitute:*
-$$\theta = \tan^{-1}\left(\frac{9}{8}\right)$$
-
-*Answer:*
-$$\theta = 48.4°$$
-
-$\Sigma N$ and $\Sigma E$ are both positive, so the resultant lies in the NE quadrant, where bearing $= \theta$:
-$$\text{Bearing} = 048°$$
-""",
-
-    ("Dynamics", "Speed and Velocity", "From a Compound Displacement"): r"""
-**Example:** A hiker walks 400 m north, then 300 m east, taking 50 s.
-
-*Calculate the hiker's average speed and average velocity.*
-
-**(a) Speed:**
-
-*Equation:*
-$$\text{speed} = \frac{\text{distance}}{\text{time}}$$
-
-*Substitute:*
-$$\text{speed} = \frac{400 + 300}{50}$$
-
-*Answer:*
-$$\text{speed} = 14\ \mathrm{m/s}$$
-
-**(b) Velocity** — first find the resultant displacement (Pythagoras):
-
-*Equation:*
-$$R = \sqrt{N^2 + E^2}$$
-
-*Substitute:*
-$$R = \sqrt{400^2 + 300^2}$$
-
-*Answer:*
-$$R = 500\ \mathrm{m}$$
-
-Then:
-
-*Equation:*
-$$\text{velocity} = \frac{\text{displacement}}{\text{time}}$$
-
-*Substitute:*
-$$\text{velocity} = \frac{500}{50}$$
-
-*Answer:*
-$$\text{velocity} = 10\ \mathrm{m/s}$$
-
-**Common exam trap:** speed is always greater than (or equal to) the magnitude of velocity for
-the same journey, since the straight-line displacement can never be longer than the path
-actually walked.
-""",
-
-    ("Dynamics", "Speed and Velocity", "Resultant Velocity"): r"""
-**Example (same line):** A train travels at 25 m/s. A passenger walks towards the front of the
-train at 1.5 m/s.
-
-Both velocities act along the same line, so add them:
-
-*Equation:*
-$$v = v_1 + v_2$$
-
-*Substitute:*
-$$v = 25 + 1.5$$
-
-*Answer:*
-$$v = 26.5\ \mathrm{m/s}$$
-
-**Example (at an angle):** A boat's engine gives it 3.0 m/s directly across a river. The current
-flows at 4.0 m/s along the river.
-
-The two velocities are perpendicular, so combine with Pythagoras and trigonometry:
-
-*Equation:*
-$$v = \sqrt{v_1^2 + v_2^2} \qquad \theta = \tan^{-1}\left(\frac{v_2}{v_1}\right)$$
-
-*Substitute:*
-$$v = \sqrt{3.0^2 + 4.0^2} \qquad \theta = \tan^{-1}\left(\frac{4.0}{3.0}\right)$$
-
-*Answer:*
-$$v = 5.0\ \mathrm{m/s}, \quad \theta = 53.1°\ \text{from straight across}$$
-
-**Common exam trap:** if the two velocities act in *opposite* directions along the same line,
-subtract them rather than adding.
 """,
 
     ("Dynamics", "Velocity-Time Graphs", "Which Graph Matches?"): r"""
@@ -434,81 +190,6 @@ starting from the origin, with no direction change at all.
 **Common exam trap:** don't confuse this with a ball *thrown upward and caught* (a smooth,
 symmetric crossing through zero) or a ball that *bounces* (a graph with a sudden jump). Match
 the shape of the graph to what physically happens at each stage of the motion.
-""",
-
-    ("Dynamics", "Velocity-Time Graphs"): r"""
-**Example (distance & displacement):** A car accelerates from rest to 8 m/s over 4 s, then
-brakes and reverses, reaching −4 m/s after a further 4 s.
-
-**Stage 1 (0–4 s, triangle above the axis):**
-
-*Equation:*
-$$d = \tfrac{1}{2} \times \text{base} \times \text{height}$$
-
-*Substitute:*
-$$d = \tfrac{1}{2} \times 4 \times 8$$
-
-*Answer:*
-$$d = 16\ \mathrm{m}$$
-
-**Stage 2 (4–8 s, crosses zero at t = 6.67 s)** — split into the forward part (above the axis)
-and the reverse part (below the axis), then apply the same triangle-area equation to each:
-forward part ≈ ½ × 2.67 × 8 = 10.7 m; reverse part ≈ ½ × 1.33 × 4 = 2.7 m.
-
-*Answer:*
-$$\text{Distance} \approx 16 + 10.7 + 2.7 = 29.3\ \mathrm{m} \qquad \text{Displacement} \approx 16 + 10.7 - 2.7 = 24.0\ \mathrm{m}$$
-
-**Example (acceleration over an interval):** A graph shows a vehicle's velocity rising steadily
-from 0 to 20 m/s over the first 10 s. Between t = 2 s and t = 8 s: at t = 2 s, v = 4 m/s; at
-t = 8 s, v = 16 m/s.
-
-The gradient of a v-t graph gives the acceleration, using any two points on the same
-straight-line section:
-
-*Equation:*
-$$a = \frac{v_2 - v_1}{t_2 - t_1}$$
-
-*Substitute:*
-$$a = \frac{16 - 4}{8 - 2}$$
-
-*Answer:*
-$$a = 2\ \mathrm{m/s^2}$$
-
-**Common exam trap:** distance is the *area*, not a single velocity value read off the graph —
-always check whether the shape under the line is a rectangle, triangle, or trapezium, and
-whether any part of it lies below the time axis.
-""",
-
-    ("Our Dynamic Universe", "Equations of Motion", "Horizontal Motion"): r"""
-**Example:** A car travelling at 10 m/s accelerates uniformly at 2 m/s² for 5 s.
-
-*Calculate its final velocity.*
-
-*Equation:*
-$$v = u + at$$
-
-*Substitute:*
-$$v = 10 + (2 \times 5)$$
-
-*Answer:*
-$$v = 20\ \mathrm{m/s}$$
-""",
-
-    ("Our Dynamic Universe", "Equations of Motion", "Vertical Motion"): r"""
-**Example:** A stone is dropped from rest from a bridge and takes 3.0 s to reach the water.
-
-*Calculate the height of the bridge above the water.*
-
-An object dropped from rest has u = 0 and accelerates at g = 9.8 m/s²:
-
-*Equation:*
-$$s = ut + \frac{1}{2}at^2$$
-
-*Substitute:*
-$$s = (0 \times 3.0) + \frac{1}{2}\times 9.8\times 3.0^2$$
-
-*Answer:*
-$$s = 44.1\ \mathrm{m}$$
 """,
 
     ("Our Dynamic Universe", "Graphs of Motion", "Graph Matching"): r"""
@@ -530,68 +211,6 @@ both with the correct sign.
 
 **Common exam trap:** a straight-line v–t graph does *not* mean the s–t graph is also straight
 — only a *constant* velocity (horizontal v–t line) gives a straight s–t graph.
-""",
-
-    ("Our Dynamic Universe", "Graphs of Motion", "Velocity from a-t Graph"): r"""
-**Example:** A car has an initial velocity of 5 m/s. An acceleration–time graph shows a
-constant acceleration of 2 m/s² for 4 s.
-
-*Calculate the final velocity.*
-
-The **area under** the acceleration–time graph ($a \times t$) is the change in velocity, which
-is exactly the $at$ term in:
-
-*Equation:*
-$$v = u + at$$
-
-*Substitute:*
-$$v = 5 + (2 \times 4)$$
-
-*Answer:*
-$$v = 13\ \mathrm{m/s}$$
-
-**Common exam trap:** don't forget to add on the initial velocity u — the area under the a–t
-graph only gives the *change* in velocity, not the final velocity itself. If the graph has more
-than one stage, find the change in velocity for each stage in turn and add them on one at a time.
-""",
-
-    ("Our Dynamic Universe", "Special Relativity", "Time Dilation"): r"""
-**Example:** A spacecraft moves at $v = 0.6c$ relative to an observer on Earth. An astronaut on
-board measures a time of 10 s between two events.
-
-*Calculate the time between the events measured by the observer on Earth.*
-
-*Equation:*
-$$t' = \frac{t}{\sqrt{1 - \left(\frac{v}{c}\right)^2}}$$
-
-*Substitute:*
-$$t' = \frac{10}{\sqrt{1 - \left(\frac{0.6c}{c}\right)^2}}$$
-
-*Answer:*
-$$t' = \frac{10}{0.8} = 12.5\ \mathrm{s}$$
-
-**Important:** t is the time measured by the observer moving *with* the events (the astronaut's
-own clock), so the stationary observer always measures the longer time: t' > t.
-""",
-
-    ("Our Dynamic Universe", "Special Relativity", "Length Contraction"): r"""
-**Example:** A spacecraft is 120 m long when measured at rest. It travels past the Earth at
-$v = 0.8c$.
-
-*Calculate the length of the spacecraft measured by an observer on Earth.*
-
-*Equation:*
-$$l' = l\sqrt{1 - \left(\frac{v}{c}\right)^2}$$
-
-*Substitute:*
-$$l' = 120 \times \sqrt{1 - \left(\frac{0.8c}{c}\right)^2}$$
-
-*Answer:*
-$$l' = 120 \times 0.6 = 72\ \mathrm{m}$$
-
-**Important:** l is the length measured at rest relative to the object, so the moving
-observer always measures the shorter length: l' < l. Both relativity equations use the same
-factor $\sqrt{1 - (v/c)^2}$ — it divides in time dilation and multiplies in length contraction.
 """,
 
     ("Our Dynamic Universe", "Gravitation"): r"""
@@ -628,24 +247,6 @@ $$g = 8.7\ \mathrm{N/kg}$$
 
 **Important:** always convert the height to metres and add the planet's radius before
 substituting — using the height alone for r is the most common mistake.
-""",
-
-    ("Our Dynamic Universe", "Momentum and Impulse", "Momentum"): r"""
-**Example:** A car of mass 1200 kg travels at 18 m/s.
-
-*Calculate its momentum.*
-
-*Equation:*
-$$p = mv$$
-
-*Substitute:*
-$$p = 1200 \times 18$$
-
-*Answer:*
-$$p = 21\,600\ \mathrm{kg\ m/s}$$
-
-**Important:** the same equation rearranges to find the mass ($m = p \div v$) or the velocity
-($v = p \div m$) if momentum is given instead.
 """,
 
     ("Our Dynamic Universe", "Momentum and Impulse", "Collisions — Stick Together"): r"""
@@ -712,78 +313,6 @@ $$0 = 12 + 1.2v_2 \implies v_2 = -10\ \mathrm{m/s}$$
 fragment B moves the opposite way to fragment A.
 """,
 
-    ("Our Dynamic Universe", "Momentum and Impulse", "Impulse"): r"""
-**Example:** A ball of mass 0.20 kg is moving at 3 m/s towards a player when it is struck by
-a racket and **changes direction**, moving away at 18 m/s. Because the ball reverses, take its
-initial direction of travel as negative:
-
-$$u = -3\ \mathrm{m/s}$$
-$$v = 18\ \mathrm{m/s}$$
-
-The force acts for 0.01 s.
-
-*Calculate the average force exerted on the ball.*
-
-*Equation:*
-$$Ft = mv - mu$$
-
-*Substitute:*
-$$F \times 0.01 = (0.20 \times 18) - (0.20 \times (-3))$$
-
-*Rearrange and solve:*
-$$F \times 0.01 = 3.6 + 0.6$$
-$$F \times 0.01 = 4.2$$
-$$F = 420\ \mathrm{N}$$
-
-**Important:** always state which direction you are taking as positive before substituting.
-When an object changes direction like this, take its *initial* direction of travel as
-negative — that turns $-mu$ into $+m|u|$, so every minus sign in $Ft = mv - mu$ disappears and
-the two momenta simply add, as above. The same equation rearranges to find the contact time t
-if the force is given instead: $t = (mv - mu) \div F$.
-""",
-
-    ("Our Dynamic Universe", "Momentum and Impulse", "Impulse from a Force-Time Graph"): r"""
-**Example:** A football, initially at rest, is kicked. The force-time graph for the kick is
-shown below: a triangle, rising from 0 to a peak force of 0.8 kN at t = 8 ms, then falling
-back to 0 kN at t = 16 ms. The mass of the ball is 0.44 kg.
-
-**(a) Calculate the impulse given to the ball.**
-
-The graph's axes aren't in N and s here, so convert to SI units first:
-
-$$0.8\ \mathrm{kN} = 800\ \mathrm{N}$$
-$$16\ \mathrm{ms} = 0.016\ \mathrm{s}$$
-
-Impulse equals the area under the force-time graph:
-
-*Equation:*
-$$\text{impulse} = \tfrac{1}{2} \times \text{base} \times \text{height}$$
-
-*Substitute:*
-$$\text{impulse} = \tfrac{1}{2} \times 0.016 \times 800$$
-
-*Answer:*
-$$\text{impulse} = 6.4\ \mathrm{N\ s}$$
-
-**(b) Calculate the velocity of the ball as it leaves the ground.**
-
-The ball starts from rest, so the impulse equals its final momentum:
-
-*Equation:*
-$$Ft = mv - mu$$
-
-*Substitute:*
-$$6.4 = 0.44v - 0$$
-
-*Answer:*
-$$v = 14.5\ \mathrm{m/s}$$
-
-**Common exam trap:** for a triangular force-time graph, the impulse is the area of the
-*triangle* (½ × base × height), not base × height as for a constant force. Also watch the
-axis units — force-time graphs are sometimes given in kN and/or ms or µs rather than N and s,
-and you must convert to SI units before substituting.
-""",
-
     ("Our Dynamic Universe", "Momentum and Impulse", "Elastic and Inelastic Collisions"): r"""
 **Example:** Trolley A of mass 0.50 kg moving at 4.0 m/s collides with a stationary trolley B
 of mass 0.50 kg. After the collision the two move off together at 2.0 m/s.
@@ -825,73 +354,6 @@ reduces the force" without saying *why* — full marks need the chain of reasoni
 momentum is fixed → the device increases the time → so the force must decrease. Also watch the
 direction of the time/force relationship — a *longer* time gives a *smaller* force, not a larger
 one.
-""",
-
-    ("Our Dynamic Universe", "Energy, Work and Power", "Work Done"): r"""
-**Example:** A crane applies an average force of 400 N over a distance of 25 m.
-
-*Calculate the work done.*
-
-*Equation:*
-$$E_W = Fd$$
-
-*Substitute:*
-$$E_W = 400 \times 25$$
-
-*Answer:*
-$$E_W = 10\,000\ \mathrm{J}$$
-
-**Important:** the same equation rearranges to find the force ($F = E_W \div d$) or the
-distance ($d = E_W \div F$) if either of those is the unknown instead.
-""",
-
-    ("Our Dynamic Universe", "Energy, Work and Power", "Power"): r"""
-**Example:** A motor transfers 24 000 J of energy in 60 s.
-
-*Calculate the power.*
-
-*Equation:*
-$$P = \frac{E}{t}$$
-
-*Substitute:*
-$$P = \frac{24\,000}{60}$$
-
-*Answer:*
-$$P = 400\ \mathrm{W}$$
-
-**Important:** if the time is given in minutes or hours, convert it to seconds first. The same
-equation rearranges to find E ($E = Pt$) or t ($t = E \div P$).
-""",
-
-    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Ep and Ek"): r"""
-**Example:** A stone of mass 0.40 kg is dropped from a height of 8.0 m. Assuming no energy is
-lost to air resistance, calculate the speed of the stone just before it hits the ground.
-
-**Step 1 — calculate the energy you can find:**
-
-*Equation:*
-$$E_p = mgh$$
-
-*Substitute:*
-$$E_p = 0.40 \times 9.8 \times 8.0$$
-
-*Answer:*
-$$E_p = 31.4\ \mathrm{J}$$
-
-**Step 2 — no energy is lost, so all the Ep lost becomes Ek gained:**
-$$E_k = 31.4\ \mathrm{J}$$
-
-*Equation:*
-$$E_k = \tfrac{1}{2}mv^2$$
-
-*Substitute:*
-$$31.4 = \tfrac{1}{2} \times 0.40 \times v^2$$
-
-*Answer:*
-$$v = 12.5\ \mathrm{m/s}$$
-
-**Important:** the same two steps work the other way round — for an object thrown upwards,
-calculate $E_k$ first, then use that value as $E_p$ in $E_p = mgh$ to find the maximum height.
 """,
 
     ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Frictional Force"): r"""
@@ -937,75 +399,6 @@ $$F = \frac{246}{8.0} = 31\ \mathrm{N}$$
 friction, and that lost energy equals the work done against the resistive force.
 """,
 
-    ("Our Dynamic Universe", "Energy, Work and Power", "Conservation — Power"): r"""
-**Example:** A goods lift carries a load of mass 80 kg through a vertical height of 6.0 m in a
-time of 15 s, moving at constant speed.
-
-*Calculate the useful power developed.*
-
-**Step 1 — identify and calculate the energy change.** At constant speed the load gains
-gravitational potential energy:
-
-*Equation:*
-$$E_p = mgh$$
-
-*Substitute:*
-$$E_p = 80 \times 9.8 \times 6.0$$
-
-*Answer:*
-$$E_p = 4704\ \mathrm{J}$$
-
-**Step 2 — power = energy change ÷ time:**
-
-*Equation:*
-$$P = \frac{E}{t}$$
-
-*Substitute:*
-$$P = \frac{4704}{15}$$
-
-*Answer:*
-$$P = 314\ \mathrm{W}$$
-
-**Important:** every power question here follows the same two steps — only *what* the energy
-change is differs. It might be a gain in $E_p$ (lifting), a change in $E_k$ (speeding up or
-slowing down), or the work done against friction ($E_W = Fd$, e.g. an engine at constant speed).
-Work that out first, then divide by the time.
-""",
-
-    ("Our Dynamic Universe", "Effective Weight", "Lifts"): r"""
-**Example:** A person of mass 70 kg stands on bathroom scales inside a lift. The lift is moving
-upwards but slowing down at a rate of 1.5 m/s².
-
-*Calculate the reading R on the scales.*
-
-**Step 1 — weight:**
-
-*Equation:*
-$$W = mg$$
-
-*Substitute:*
-$$W = 70 \times 9.8$$
-
-*Answer:*
-$$W = 686\ \mathrm{N}$$
-
-**Step 2 — reading.** The lift moves upwards but is slowing down, so the acceleration (and the
-unbalanced force) acts **downwards**: the unbalanced force is $W - R$.
-
-*Equation:*
-$$F = ma$$
-
-*Substitute:*
-$$686 - R = 70 \times 1.5$$
-
-*Rearrange and solve:*
-$$R = 686 - 105 = 581\ \mathrm{N}$$
-
-**Important:** first work out the true weight (W = mg), then decide whether the acceleration
-acts upwards or downwards — this sets whether R is bigger or smaller than W. The same approach
-finds the acceleration or the mass if either of those is the unknown instead.
-""",
-
     ("Our Dynamic Universe", "Effective Weight", "Lifts — Constant Velocity"): r"""
 **Example:** A lift moves upwards at a constant speed of 1.2 m/s, carrying a passenger of mass
 65 kg.
@@ -1031,39 +424,6 @@ $$R = 637\ \mathrm{N}$$
 **Important:** at **constant speed** (moving up or down, it doesn't matter which), the scale
 reading always equals the true weight — it's only *changing* speed that makes the reading
 different from mg.
-""",
-
-    ("Our Dynamic Universe", "Effective Weight", "Beyond Lifts"): r"""
-**Example:** A rocket of mass 500 kg is launched vertically. It is moving upwards and speeding
-up at a rate of 6.0 m/s². Calculate the thrust force needed.
-
-**Step 1 — weight:**
-
-*Equation:*
-$$W = mg$$
-
-*Substitute:*
-$$W = 500 \times 9.8$$
-
-*Answer:*
-$$W = 4900\ \mathrm{N}$$
-
-**Step 2 — thrust.** The acceleration acts upwards, so the unbalanced force is the thrust
-minus the weight:
-
-*Equation:*
-$$F = ma$$
-
-*Substitute:*
-$$\text{Thrust} - 4900 = 500 \times 6.0$$
-
-*Rearrange and solve:*
-$$\text{Thrust} = 4900 + 3000 = 7900\ \mathrm{N}$$
-
-**Important:** this is the same reasoning as a lift, applied to any supporting or driving
-force — a crane cable, a rocket's thrust, or the force a drone's platform exerts on a parcel.
-Work out the weight first, then decide which way the unbalanced force (and so the
-acceleration) acts.
 """,
 
     ("Our Dynamic Universe", "Effective Weight", "Beyond Lifts — Explain Free Fall"): r"""
@@ -1099,42 +459,6 @@ $$F_x = 38.3\ \mathrm{N} \qquad F_y = 32.1\ \mathrm{N}$$
 the slope/vertical — since this decides whether a component uses sin or cos.
 """,
 
-    ("Our Dynamic Universe", "Components of Vectors", "Level 2 — Balancing Forces and Force from Acceleration"): r"""
-**Example (balancing forces):** An object is held in equilibrium by two ropes. Rope A pulls
-horizontally with a force of 120 N. Rope B is inclined at 35° to the horizontal, and its
-horizontal component exactly balances the pull of Rope A.
-
-*Calculate the tension in Rope B.*
-
-Since the ropes balance, the horizontal component of Rope B's tension equals Rope A's pull:
-
-*Equation:*
-$$F_x = T\cos\theta$$
-
-*Substitute:*
-$$120 = T\cos35°$$
-
-*Rearrange and solve:*
-$$T = \frac{120}{\cos35°} = 146.5\ \mathrm{N}$$
-
-**Example (force from acceleration):** A trailer of mass 200 kg is pulled across level ground
-by a horizontal force of 300 N.
-
-*Calculate the acceleration of the trailer.*
-
-*Equation:*
-$$F = ma$$
-
-*Substitute:*
-$$300 = 200 \times a$$
-
-*Rearrange and solve:*
-$$a = 1.5\ \mathrm{m/s^2}$$
-
-**Important:** the same F = ma reasoning also applies vertically — e.g. for a crane lifting a
-load that is accelerating upwards, the unbalanced force is $T - W$, where W = mg is the weight.
-""",
-
     ("Our Dynamic Universe", "Components of Vectors", "Level 3 — Weight on a Slope"): r"""
 **Example:** A crate of mass 20 kg rests on a ramp inclined at 25° to the horizontal.
 
@@ -1165,125 +489,6 @@ $$W_{\parallel} = 82.8\ \mathrm{N}$$
 common mistake.
 """,
 
-    ("Our Dynamic Universe", "Components of Vectors", "Level 4 — Acceleration, Force and Angle on a Slope"): r"""
-**Example:** A crate of mass 15 kg slides down a slope inclined at 30°. Friction acts on it
-with a force of 20 N, opposing the motion.
-
-*Calculate the acceleration of the crate.*
-
-**Step 1 — weight and its component down the slope:**
-
-$$W = mg = 15 \times 9.8 = 147\ \mathrm{N}$$
-$$W_{\parallel} = W\sin\theta = 147 \times \sin30° = 73.5\ \mathrm{N}$$
-
-**Step 2 — acceleration.** Down the slope, the unbalanced force is $W_{\parallel}$ minus
-friction:
-
-*Equation:*
-$$F = ma$$
-
-*Substitute:*
-$$73.5 - 20 = 15 \times a$$
-
-*Rearrange and solve:*
-$$a = \frac{53.5}{15} = 3.57\ \mathrm{m/s^2}$$
-
-**Important:** sliding *down* a slope, friction acts *up* the slope (opposing the motion), so
-it is subtracted from W∥. The same setup can instead ask for the friction force (rearranging,
-given a) or the angle of the slope (given the acceleration and friction).
-""",
-
-    ("Our Dynamic Universe", "Components of Vectors", "Level 5 — Sliding Up a Slope With Friction"): r"""
-**Example:** A crate of mass 12 kg is given a push and slides up a slope inclined at 20°. As it
-slides up, a friction force of 15 N acts on the crate, opposing the motion.
-
-*Calculate the deceleration of the crate.*
-
-**Step 1 — weight and its component down the slope:**
-
-$$W = mg = 12 \times 9.8 = 117.6\ \mathrm{N}$$
-$$W_{\parallel} = W\sin\theta = 117.6 \times \sin20° = 40.2\ \mathrm{N}$$
-
-**Step 2 — deceleration.** Moving up the slope, both $W_{\parallel}$ **and** friction act down
-the slope, opposing the motion, so they add together to give the unbalanced force:
-
-*Equation:*
-$$F = ma$$
-
-*Substitute:*
-$$40.2 + 15 = 12 \times a$$
-
-*Rearrange and solve:*
-$$a = \frac{55.2}{12} = 4.6\ \mathrm{m/s^2}$$
-
-**Common exam trap:** the direction friction acts depends on which way the object is *moving*,
-not which way it's accelerating — sliding up, friction always acts down the slope, whether the
-object is being driven by a constant force or simply decelerating after a single push.
-""",
-
-    ("Our Dynamic Universe", "Components of Vectors", "Level 6 — Explain: Effect of Angle"): r"""
-**Example:** A crate is held stationary on a smooth (frictionless) slope by a rope running
-parallel to the slope. The angle of the slope is then increased, while the mass of the crate
-stays the same.
-
-*What happens to the tension in the rope, and why?*
-
-With no friction, the rope's tension must exactly balance the parallel component of the
-crate's weight: $T = W\sin\theta$. As θ increases (up to 90°), sin θ increases, so **the
-tension increases** too — even though the crate's weight itself hasn't changed.
-
-**Common exam trap:** don't confuse the weight (W = mg, which never changes with angle) with
-the *component* of weight along the slope (W sin θ, which does) — these explain questions test
-whether you know which quantities depend on the angle and which don't.
-""",
-
-    ("Our Dynamic Universe", "Projectile Motion", "4 — Exam Style (Mixed)"): r"""
-**Example:** An athlete takes off with an initial velocity of 9.1 m/s at 24° to the
-horizontal, and lands at the same height.
-
-*Calculate the total time of flight, then the range.*
-
-**Step 1 — resolve into components:**
-
-*Equation:*
-$$v_H = v\cos\theta \qquad v_V = v\sin\theta$$
-
-*Substitute:*
-$$v_H = 9.1\cos24° \qquad v_V = 9.1\sin24°$$
-
-*Answer:*
-$$v_H = 8.31\ \mathrm{m/s} \qquad v_V = 3.70\ \mathrm{m/s}$$
-
-**Step 2 — total time of flight.** Vertically, up to the highest point: $u = 3.70$ m/s,
-$v = 0$, $a = -9.8$ m/s².
-
-*Equation:*
-$$v = u + at$$
-
-*Substitute:*
-$$0 = 3.70 + (-9.8) \times t_{\text{up}}$$
-
-*Rearrange and solve:*
-$$t_{\text{up}} = 0.378\ \mathrm{s}$$
-
-Landing and launch heights are equal, so the descent takes just as long as the ascent:
-$$t_{\text{total}} = 2 \times 0.378 = 0.756\ \mathrm{s}$$
-
-**Step 3 — range.** Horizontal velocity is constant:
-
-*Equation:*
-$$s = vt$$
-
-*Substitute:*
-$$s = 8.31 \times 0.756$$
-
-*Answer:*
-$$s = 6.28\ \mathrm{m}$$
-
-**Most common mistake:** using $t_{\text{up}}$ instead of $t_{\text{total}} = 2t_{\text{up}}$
-when calculating the range.
-""",
-
     ("Particles and Waves", "Standard Model", "Particle Classification"): r"""
 **Example:** Classify the electron.
 
@@ -1307,36 +512,6 @@ $$\Delta = |-27 - (-28)|$$
 
 *Answer:*
 $$\Delta = 1$$
-""",
-
-    ("Electricity and Energy", "Electrical Power"): r"""
-**Example:** A 500 W appliance runs for 120 s.
-
-*Calculate the energy transferred.*
-
-*Equation:*
-$$E = P \times t$$
-
-*Substitute:*
-$$E = 500 \times 120$$
-
-*Answer:*
-$$E = 60\,000\ \mathrm{J}$$
-""",
-
-    ("Electricity and Energy", "Efficiency"): r"""
-**Example:** A kettle is supplied with 400 000 J and heats the water with 160 000 J.
-
-*Calculate the efficiency.*
-
-*Equation:*
-$$\text{Efficiency} = \frac{\text{Useful Energy}}{\text{Input Energy}} \times 100\%$$
-
-*Substitute:*
-$$\text{Efficiency} = \frac{160\,000}{400\,000} \times 100\%$$
-
-*Answer:*
-$$\text{Efficiency} = 40\%$$
 """,
 
     ("Electricity and Energy", "Power and Efficiency"): r"""
@@ -1367,25 +542,6 @@ $$\text{Efficiency} = \frac{480\,000}{600\,000} \times 100\%$$
 $$\text{Efficiency} = 80\%$$
 """,
 
-    ("Electricity and Energy", "Renewable Energy"): r"""
-**Example:** Is coal renewable or non-renewable?
-
-Coal is burned as a fuel and cannot be replaced once used up, so **coal is non-renewable**.
-""",
-
-    ("Electricity and Energy", "Input/Output Devices"): r"""
-**Example:** Is an LDR (light dependent resistor) a digital or analogue input device?
-
-An LDR's resistance changes smoothly over a continuous range of light levels, so **an LDR is
-an analogue input device**.
-""",
-
-    ("Electricity and Energy", "Electromagnets"): r"""
-**Example:** Why is an electromagnet used in a scrapyard crane rather than a permanent magnet?
-
-Because an electromagnet **can be switched off** to release the lifted scrap metal — a
-permanent magnet cannot be turned off.
-""",
 }
 
 
@@ -1470,3 +626,76 @@ def derive_example(generate_fn, seed=42):
     """Fallback for question types with no hand-authored EXAMPLES entry —
     see format_example()."""
     return format_example(get_canonical_question(generate_fn, seed=seed))
+
+
+# ── Matching an example to a generated question ──────────────────────────────
+#
+# Most generators pick between several variants at random (which quantity is
+# unknown, which units, series vs parallel…), so the example for a generated
+# question is taken from another run of the same generator that produced the
+# same variant — identified by the answer's unit and the shape of the first
+# equation in the working, with the numbers stripped out.
+
+_CHOICE_TYPES = ("classification", "graph_mcq", "explain")
+
+
+def _equation_shape(latex):
+    shape = re.sub(r"\d+(?:\.\d+)?", "#", latex)
+    shape = re.sub(r"[\s()\-−]", "", shape)
+    return re.sub(r"#(?:\+#)+", "#+#", shape)
+
+
+def _part_signature(q):
+    """(kind, unit, first-equation shape, number of working steps) — the step
+    count separates e.g. a plain d = vt from one needing an hours → s conversion."""
+    if q.metadata.get("type") in _CHOICE_TYPES or q.metadata.get("options"):
+        return ("choice", q.metadata.get("type"), "", 0)
+    first_equation = next(
+        (step["content"] for step in q.working if step.get("type") == "latex"), "")
+    return ("calc", q.unit, _equation_shape(first_equation), len(q.working))
+
+
+def _signature(q, fields):
+    parts = q.parts if q.is_scenario else [q]
+    return tuple(_part_signature(p)[:fields] for p in parts)
+
+
+# Strictest first: same working structure → same first equation → same unit(s).
+_MATCH_LEVELS = (4, 3, 2)
+
+
+def _full_text(q):
+    if q.is_scenario:
+        return q.scenario_context + "".join(p.question_text for p in q.parts)
+    return q.question_text
+
+
+def matching_example(generate_fn, q, attempts=150):
+    """A different question from generate_fn of the same variant as q — the
+    closest match found in `attempts` runs (see _MATCH_LEVELS), else any other
+    instance. Seeds are fixed so the example for a given question is stable
+    across reruns."""
+    targets = [_signature(q, n) for n in _MATCH_LEVELS]
+    target_text = _full_text(q)
+    best, best_rank = None, len(_MATCH_LEVELS)
+    state = random.getstate()
+    try:
+        for seed in range(attempts):
+            random.seed(1000 + seed)
+            candidate = generate_fn()
+            if _full_text(candidate) == target_text:
+                continue
+            rank = next((i for i, n in enumerate(_MATCH_LEVELS)
+                         if _signature(candidate, n) == targets[i]), len(_MATCH_LEVELS))
+            if rank == 0:
+                return candidate
+            if best is None or rank < best_rank:
+                best, best_rank = candidate, rank
+    finally:
+        random.setstate(state)
+    return best or q
+
+
+def example_for_question(generate_fn, q):
+    """Worked-example markdown of the same variant as the generated question q."""
+    return format_example(matching_example(generate_fn, q))

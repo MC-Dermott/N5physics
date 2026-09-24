@@ -268,7 +268,9 @@ if notes:
     with st.expander("📚 Notes"):
         st.markdown(format_math(notes))
 
-example = get_examples(topic, question_type, sub_type=sub_type) or format_example(canonical_question)
+# A hand-authored example only exists where it matches every question the
+# generator produces; otherwise Practice derives one matching the generated question.
+hand_example = get_examples(topic, question_type, sub_type=sub_type)
 
 st.divider()
 
@@ -276,6 +278,7 @@ st.divider()
 
 if mode == "Test":
     test_generate_fn = make_test_generator(qualification, topic, question_type)
-    render_test(topic, question_type, qualification, test_generate_fn, user_id=user_id, example=example)
+    render_test(topic, question_type, qualification, test_generate_fn, user_id=user_id,
+                example=hand_example or format_example(canonical_question))
 else:
-    render_practice(topic, question_type, qualification, generate_fn, user_id=user_id, example=example)
+    render_practice(topic, question_type, qualification, generate_fn, user_id=user_id, example=hand_example)

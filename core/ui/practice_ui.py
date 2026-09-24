@@ -4,7 +4,9 @@ from core.ui.feedback_ui import check_answer, render_feedback, render_working
 from core.ui.scaffold_ui import render_scaffold, render_widget
 from core.ui.graph_mcq_ui import render_main_graph, render_option_grid, render_correct_option
 from core.db.tracker import save_practice_attempt
-from core.data.examples import notes_for
+from core.data.examples import (
+    example_for_question, format_example, get_canonical_question, notes_for,
+)
 from utils.notes import format_math
 
 
@@ -217,6 +219,20 @@ def _render_scenario(question, user_id, qualification):
 # Public entry point
 # =========================================================
 
+def _generated_example(quiz, generate_fn, question):
+    """A worked example of the same variant as the question on screen (or of
+    the canonical question before one has been generated), cached per question
+    so it isn't regenerated on every rerun."""
+    if question is None:
+        return format_example(get_canonical_question(generate_fn))
+    cached = quiz.get("example")
+    if cached and cached[0] == question.qid:
+        return cached[1]
+    example = example_for_question(generate_fn, question)
+    quiz["example"] = (question.qid, example)
+    return example
+
+
 def render_practice(topic, question_type, qualification, generate_fn, user_id=None, example=None):
     quiz = st.session_state.quiz
 
@@ -229,11 +245,13 @@ def render_practice(topic, question_type, qualification, generate_fn, user_id=No
                 del st.session_state[key]
         st.rerun()
 
-    if example:
-        with st.expander("💡 Example"):
-            st.markdown(format_math(example))
-
     question = quiz.get("current_question")
+
+    if not example:
+        example = _generated_example(quiz, generate_fn, question)
+    with st.expander("💡 Example"):
+        st.markdown(format_math(example))
+
     if not question:
         st.caption("Press **Generate Question** to begin.")
         return
