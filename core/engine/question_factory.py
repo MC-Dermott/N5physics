@@ -127,7 +127,6 @@ from topics.dynamics.energy_work_power_higher import (
 )
 from topics.dynamics.effective_weight_higher import (
     generate_effective_weight_lifts,
-    gen_ew_constant_velocity,
     generate_effective_weight_beyond_lifts,
     gen_ew_explain_freefall,
 )
@@ -367,7 +366,6 @@ QUAL_REGISTRY = {
             },
             "Effective Weight": {
                 "Lifts":                         generate_effective_weight_lifts,
-                "Lifts — Constant Velocity":      gen_ew_constant_velocity,
                 "Beyond Lifts":                   generate_effective_weight_beyond_lifts,
                 "Beyond Lifts — Explain Free Fall": gen_ew_explain_freefall,
             },

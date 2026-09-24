@@ -399,33 +399,6 @@ $$F = \frac{246}{8.0} = 31\ \mathrm{N}$$
 friction, and that lost energy equals the work done against the resistive force.
 """,
 
-    ("Our Dynamic Universe", "Effective Weight", "Lifts — Constant Velocity"): r"""
-**Example:** A lift moves upwards at a constant speed of 1.2 m/s, carrying a passenger of mass
-65 kg.
-
-**(a) State the acceleration of the lift.**
-
-The lift moves at a constant speed, so its velocity is not changing:
-$$a = 0\ \mathrm{m/s^2}$$
-
-**(b) Calculate the reading on scales carried by the passenger.**
-
-With zero acceleration, the resultant force is zero, so the reading equals the true weight:
-
-*Equation:*
-$$R = mg$$
-
-*Substitute:*
-$$R = 65 \times 9.8$$
-
-*Answer:*
-$$R = 637\ \mathrm{N}$$
-
-**Important:** at **constant speed** (moving up or down, it doesn't matter which), the scale
-reading always equals the true weight — it's only *changing* speed that makes the reading
-different from mg.
-""",
-
     ("Our Dynamic Universe", "Effective Weight", "Beyond Lifts — Explain Free Fall"): r"""
 **Example:** A skydiver of mass 75 kg is falling and speeding up at a rate of 9.8 m/s² (free
 fall) before their parachute opens. A harness sensor recording the force exerted on the

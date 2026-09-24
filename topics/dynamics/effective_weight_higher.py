@@ -302,12 +302,6 @@ def gen_ew_uniform_accel_scenario(level="Higher"):
     )
 
 
-def generate_effective_weight_lifts(level="Higher"):
-    return _with_lift_widget(random.choice([
-        gen_ew_find_reading, gen_ew_find_acceleration, gen_ew_find_mass, gen_ew_uniform_accel_scenario,
-    ])(level=level))
-
-
 # ── Section 1: Lifts at constant speed ───────────────────────────────────────
 
 def gen_ew_constant_velocity(level="Higher"):
@@ -341,11 +335,18 @@ def gen_ew_constant_velocity(level="Higher"):
         ],
         notes=_NOTES,
     )
-    return _with_lift_widget(PhysicsQuestion(
+    return PhysicsQuestion(
         question_text="", correct_answer=0, unit="",
         topic="Our Dynamic Universe", question_type="Effective Weight", level=level,
         is_scenario=True, scenario_context=context, parts=[part_a, part_b],
-    ))
+    )
+
+
+def generate_effective_weight_lifts(level="Higher"):
+    return _with_lift_widget(random.choice([
+        gen_ew_find_reading, gen_ew_find_acceleration, gen_ew_find_mass, gen_ew_uniform_accel_scenario,
+        gen_ew_constant_velocity,
+    ])(level=level))
 
 
 # ── Section 2: Apparent weight beyond lifts ──────────────────────────────────
