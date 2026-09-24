@@ -30,129 +30,142 @@ def _working_f(mass, accel, answer):
     ]
 
 
-# ── unit-conversion helpers ──────────────────────────────────────────────
-# Worksheet Section 2 always converts exactly one given quantity (mass in g
-# or tonnes, or force in kN) into SI units before F = ma is used — never
-# both at once. These helpers reproduce that pattern and feed a matching
+# ── number choices ───────────────────────────────────────────────────────
+# Small, friendly numbers throughout: F is always built as m × a so every
+# answer comes out exact. N4 uses plain kg and N only. Every other level
+# gives exactly one quantity with a prefix (mass in g, or force in kN) that
+# must be converted to SI units before F = ma is used, with a matching
 # "forgot to convert" distractor.
 
-def _mass_choice():
-    """Returns (mass_kg, display_str, raw_display_value_or_None_if_plain)."""
-    r = random.random()
-    if r < 0.35:
-        g = random.randint(200, 950)
-        return g / 1000, f"{g} g", g
-    elif r < 0.75:
-        kg = random.randint(2, 10)
-        return float(kg), f"{kg} kg", None
-    else:
-        t = round(random.uniform(1.0, 3.5), 1)
-        # Always singular — the mass is used adjectivally ("a 1.5 tonne object").
-        return t * 1000, f"{t} tonne", t
+def _fmt(x):
+    return f"{round(x, 3):g}"
+
+
+def _plain():
+    """N4: (mass_kg, accel, force_N), all small whole numbers."""
+    m = random.randint(2, 20)
+    a = random.randint(2, 10)
+    return m, a, m * a
+
+
+def _mass_in_grams():
+    """(mass_kg, mass_g, accel, force_N) — a light object, mass given in g."""
+    g = random.randrange(100, 950, 50)
+    a = random.randint(2, 10)
+    m = g / 1000
+    return m, g, a, round(m * a, 3)
+
+
+def _force_in_kN():
+    """(mass_kg, accel, force_N, force_kN) — a heavy object, force given in kN."""
+    m = random.randrange(100, 1000, 100)
+    a = random.randint(1, 5)
+    f = m * a
+    return m, a, f, f / 1000
 
 
 def _a_or_an(quantity):
-    """Article for a spoken number: "an 8 kg", "an 11 kg", "an 800 g", but "a 1.4 tonne"."""
+    """Article for a spoken number: "an 8 kg", "an 11 kg", "an 800 g", but "a 2 kg"."""
     digits = quantity.split()[0].split(".")[0]
     vowel_sound = digits.startswith("8") or (len(digits) in (2, 5) and digits[:2] in ("11", "18"))
     return "an" if vowel_sound else "a"
 
 
-def _force_choice_kN_or_N(lo_n=2000, hi_n=8000):
-    """Returns (force_N, display_str, raw_display_value_or_None_if_plain)."""
-    if random.random() < 0.5:
-        kN = round(random.uniform(lo_n / 1000, hi_n / 1000), 1)
-        return kN * 1000, f"{kN} kN", kN
-    else:
-        n = random.randint(lo_n, hi_n)
-        return float(n), f"{n} N", None
+def _finish(question, correct, options_data, unit, convert_step, answer_prompt, level):
+    """convert_step: None, or (prompt, answer, unit, wrong_value, given_str, si_unit)."""
+    scaffold = None
+    if convert_step:
+        prompt, conv_answer, conv_unit, wrong_value, given_str, si_unit = convert_step
+        options_data.append({
+            "value": wrong_value,
+            "mistake": f"You used {given_str} directly without converting it to {si_unit} first — "
+                       f"always convert to SI units before substituting.",
+            "working": options_data[0]["working"],
+        })
+        scaffold = [
+            {"question": prompt, "answer": conv_answer, "unit": conv_unit},
+            {"question": answer_prompt, "answer": correct, "unit": unit},
+        ]
+    return make_question(question, correct, _dedup(options_data, correct), unit, scaffold=scaffold,
+                         notes=NOTES["dynamics_newton"], topic="Dynamics", question_type="Acceleration", level=level)
+
+
+def _dedup(options_data, correct):
+    seen, cleaned = {round(float(correct), 4)}, [options_data[0]]
+    for opt in options_data[1:]:
+        key = round(float(opt["value"]), 4)
+        if key not in seen:
+            seen.add(key)
+            cleaned.append(opt)
+    return cleaned
 
 
 def gen_find_a(level="N5"):
-    mass_kg, mass_str, raw_mass = _mass_choice()
-    force_n = float(random.randint(2, 10) if mass_kg < 1.5 else
-                     random.randint(2000, 8000) if mass_kg > 500 else
-                     random.randint(10, 50))
-    force_str = f"{force_n:g} N"
-    correct = round(force_n / mass_kg, 2)
+    convert = None
+    if level == "N4":
+        m, a, f = _plain()
+        mass_str, force_str = f"{m} kg", f"{f} N"
+    elif random.random() < 0.5:
+        m, g, a, f = _mass_in_grams()
+        mass_str, force_str = f"{g} g", f"{_fmt(f)} N"
+        convert = ("What is the mass in kilograms?", m, "kg", round(f / g, 4), mass_str, "kg")
+    else:
+        m, a, f, kN = _force_in_kN()
+        mass_str, force_str = f"{m} kg", f"{_fmt(kN)} kN"
+        convert = ("What is the force in newtons?", f, "N", round(kN / m, 4), force_str, "N")
 
-    working = _working_a(f"{force_n:g}", f"{mass_kg:g}", correct)
-    question = f"What is the acceleration of {_a_or_an(mass_str)} {mass_str} object if a single force of {force_str} is applied?"
+    correct = a
+    working = _working_a(_fmt(f), _fmt(m), correct)
+    question = (f"What is the acceleration of {_a_or_an(mass_str)} {mass_str} object "
+                f"if a single force of {force_str} is applied?")
     options_data = [
-        {"value": correct,       "mistake": None, "working": working},
-        {"value": round(force_n * mass_kg, 2), "mistake": "You multiplied F × m instead of dividing. a = F ÷ m.", "working": working},
-        {"value": round(force_n + mass_kg, 2), "mistake": "You used the formula incorrectly. a = F ÷ m.", "working": working},
-        {"value": round(mass_kg / force_n, 2), "mistake": "You divided m by F instead of F by m. a = F ÷ m.", "working": working},
+        {"value": correct,             "mistake": None, "working": working},
+        {"value": round(f * m, 3),     "mistake": "You multiplied F × m instead of dividing. a = F ÷ m.", "working": working},
+        {"value": round(m / f, 4),     "mistake": "You divided m by F instead of F by m. a = F ÷ m.", "working": working},
     ]
-    scaffold = None
-    if raw_mass is not None:
-        options_data.append({
-            "value": round(force_n / raw_mass, 2),
-            "mistake": f"You used {mass_str} directly without converting it to kg first — always convert to SI units before substituting.",
-            "working": working,
-        })
-        scaffold = [
-            {"question": "What is the mass in kilograms?", "answer": round(mass_kg, 3)},
-            {"question": "What is the acceleration?", "answer": correct},
-        ]
-    return make_question(question, correct, options_data, "m/s²", scaffold=scaffold,
-                         notes=NOTES["dynamics_newton"], topic="Dynamics", question_type="Acceleration", level=level)
+    return _finish(question, correct, options_data, "m/s²", convert, "What is the acceleration?", level)
 
 
 def gen_find_m(level="N5"):
-    accel = random.randint(2, 5)
-    force_n, force_str, raw_force = _force_choice_kN_or_N()
-    correct = round(force_n / accel, 2)
-    working = _working_m(f"{force_n:g}", accel, correct)
-    question = f"What is the mass of an object accelerating at {accel} m/s² if a single force of {force_str} is applied?"
+    convert = None
+    if level == "N4":
+        m, a, f = _plain()
+        force_str = f"{f} N"
+    else:
+        m, a, f, kN = _force_in_kN()
+        force_str = f"{_fmt(kN)} kN"
+        convert = ("What is the force in newtons?", f, "N", round(kN / a, 4), force_str, "N")
+
+    correct = m
+    working = _working_m(_fmt(f), a, correct)
+    question = f"What is the mass of an object accelerating at {a} m/s² if a single force of {force_str} is applied?"
     options_data = [
-        {"value": correct,       "mistake": None, "working": working},
-        {"value": round(force_n * accel, 2), "mistake": "You multiplied F × a instead of dividing. m = F ÷ a.", "working": working},
-        {"value": round(force_n + accel, 2), "mistake": "You used F = ma incorrectly. m = F ÷ a.", "working": working},
-        {"value": round(accel / force_n, 2), "mistake": "You divided a by F. m = F ÷ a.", "working": working},
+        {"value": correct,             "mistake": None, "working": working},
+        {"value": round(f * a, 3),     "mistake": "You multiplied F × a instead of dividing. m = F ÷ a.", "working": working},
+        {"value": round(a / f, 4),     "mistake": "You divided a by F. m = F ÷ a.", "working": working},
     ]
-    scaffold = None
-    if raw_force is not None:
-        options_data.append({
-            "value": round(raw_force / accel, 2),
-            "mistake": f"You used {force_str} directly without converting it to N first — always convert to SI units before substituting.",
-            "working": working,
-        })
-        scaffold = [
-            {"question": "What is the force in newtons?", "answer": round(force_n, 1)},
-            {"question": "What is the mass?", "answer": correct},
-        ]
-    return make_question(question, correct, options_data, "kg", scaffold=scaffold,
-                         notes=NOTES["dynamics_newton"], topic="Dynamics", question_type="Acceleration", level=level)
+    return _finish(question, correct, options_data, "kg", convert, "What is the mass?", level)
 
 
 def gen_find_f(level="N5"):
-    mass_kg, mass_str, raw_mass = _mass_choice()
-    accel = round(random.uniform(5, 20), 1) if mass_kg < 1.5 else \
-            round(random.uniform(0.5, 3), 2) if mass_kg > 500 else \
-            random.randint(2, 5)
-    correct = round(mass_kg * accel, 2)
-    working = _working_f(f"{mass_kg:g}", accel, correct)
-    question = f"What is the force on {_a_or_an(mass_str)} {mass_str} object accelerating at {accel} m/s²?"
+    convert = None
+    if level == "N4":
+        m, a, f = _plain()
+        mass_str = f"{m} kg"
+    else:
+        m, g, a, f = _mass_in_grams()
+        mass_str = f"{g} g"
+        convert = ("What is the mass in kilograms?", m, "kg", g * a, mass_str, "kg")
+
+    correct = f
+    working = _working_f(_fmt(m), a, _fmt(correct))
+    question = f"What is the force on {_a_or_an(mass_str)} {mass_str} object accelerating at {a} m/s²?"
     options_data = [
-        {"value": correct,      "mistake": None, "working": working},
-        {"value": round(mass_kg + accel, 2), "mistake": "You added m and a instead of multiplying. F = m × a.", "working": working},
-        {"value": round(mass_kg * (accel + 1), 2), "mistake": "You used the equation incorrectly. F = m × a.", "working": working},
-        {"value": round(mass_kg / accel, 2), "mistake": "You divided m by a instead of multiplying. F = m × a.", "working": working},
+        {"value": correct,             "mistake": None, "working": working},
+        {"value": round(m + a, 3),     "mistake": "You added m and a instead of multiplying. F = m × a.", "working": working},
+        {"value": round(m / a, 4),     "mistake": "You divided m by a instead of multiplying. F = m × a.", "working": working},
     ]
-    scaffold = None
-    if raw_mass is not None:
-        options_data.append({
-            "value": round(raw_mass * accel, 2),
-            "mistake": f"You used {mass_str} directly without converting it to kg first — always convert to SI units before substituting.",
-            "working": working,
-        })
-        scaffold = [
-            {"question": "What is the mass in kilograms?", "answer": round(mass_kg, 3)},
-            {"question": "What is the force?", "answer": correct},
-        ]
-    return make_question(question, correct, options_data, "N", scaffold=scaffold,
-                         notes=NOTES["dynamics_newton"], topic="Dynamics", question_type="Acceleration", level=level)
+    return _finish(question, correct, options_data, "N", convert, "What is the force?", level)
 
 
 _ALL_GENS = [gen_find_a, gen_find_m, gen_find_f]
