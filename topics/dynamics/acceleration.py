@@ -47,8 +47,15 @@ def _mass_choice():
         return float(kg), f"{kg} kg", None
     else:
         t = round(random.uniform(1.0, 3.5), 1)
-        label = f"{t} tonne" + ("" if t == 1 else "s")
-        return t * 1000, label, t
+        # Always singular — the mass is used adjectivally ("a 1.5 tonne object").
+        return t * 1000, f"{t} tonne", t
+
+
+def _a_or_an(quantity):
+    """Article for a spoken number: "an 8 kg", "an 11 kg", "an 800 g", but "a 1.4 tonne"."""
+    digits = quantity.split()[0].split(".")[0]
+    vowel_sound = digits.startswith("8") or (len(digits) in (2, 5) and digits[:2] in ("11", "18"))
+    return "an" if vowel_sound else "a"
 
 
 def _force_choice_kN_or_N(lo_n=2000, hi_n=8000):
@@ -70,7 +77,7 @@ def gen_find_a(level="N5"):
     correct = round(force_n / mass_kg, 2)
 
     working = _working_a(f"{force_n:g}", f"{mass_kg:g}", correct)
-    question = f"What is the acceleration of a {mass_str} object if a single force of {force_str} is applied?"
+    question = f"What is the acceleration of {_a_or_an(mass_str)} {mass_str} object if a single force of {force_str} is applied?"
     options_data = [
         {"value": correct,       "mistake": None, "working": working},
         {"value": round(force_n * mass_kg, 2), "mistake": "You multiplied F × m instead of dividing. a = F ÷ m.", "working": working},
@@ -126,7 +133,7 @@ def gen_find_f(level="N5"):
             random.randint(2, 5)
     correct = round(mass_kg * accel, 2)
     working = _working_f(f"{mass_kg:g}", accel, correct)
-    question = f"What is the force on a {mass_str} object accelerating at {accel} m/s²?"
+    question = f"What is the force on {_a_or_an(mass_str)} {mass_str} object accelerating at {accel} m/s²?"
     options_data = [
         {"value": correct,      "mistake": None, "working": working},
         {"value": round(mass_kg + accel, 2), "mistake": "You added m and a instead of multiplying. F = m × a.", "working": working},
@@ -148,10 +155,8 @@ def gen_find_f(level="N5"):
                          notes=NOTES["dynamics_newton"], topic="Dynamics", question_type="Acceleration", level=level)
 
 
-_N4_GENS  = [gen_find_a]
 _ALL_GENS = [gen_find_a, gen_find_m, gen_find_f]
 
 
 def generate_acceleration(level="N5"):
-    gens = _N4_GENS if level == "N4" else _ALL_GENS
-    return random.choice(gens)(level=level)
+    return random.choice(_ALL_GENS)(level=level)
