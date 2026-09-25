@@ -3,6 +3,7 @@ import streamlit as st
 from core.engine.session_manager import initialise_session, reset_test, reset_assessment, reset_past_paper_quiz
 from core.engine.question_factory import generate_question, get_topics, get_question_types, get_sub_types, make_test_generator
 from core.ui.auth_ui import render_auth, render_change_password
+from core.auth.auth import login_as_admin
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
 from core.ui.assessment_ui import render_assessment
@@ -43,6 +44,19 @@ def _auth_button():
 
 
 user = st.session_state.get("user")
+
+# ── Admin bypass: visiting the app with ?admin_key=<ADMIN_KEY secret> in the URL
+# logs you straight in as the configured admin account, skipping the login form.
+
+if not user:
+    admin_key = st.query_params.get("admin_key")
+    if admin_key:
+        admin_user = login_as_admin(admin_key)
+        # Strip the key from the address bar so it doesn't linger in browser history.
+        del st.query_params["admin_key"]
+        if admin_user:
+            st.session_state.user = admin_user
+            user = admin_user
 
 # ── Login gate ────────────────────────────────────────────────────────────────
 
