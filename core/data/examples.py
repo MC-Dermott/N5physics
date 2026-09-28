@@ -30,6 +30,7 @@ import random
 import re
 
 from core.data.past_papers import canonical_unit
+from utils.vector_diagram import diagram_markdown
 
 EXAMPLES = {
     ("Our Dynamic Universe", "Towing", "Level 1 — One Trailer, No Friction"): r"""
@@ -532,6 +533,8 @@ def _format_working(working):
     for step in working:
         if step.get("type") == "latex":
             lines.append(f"$${step['content']}$$")
+        elif step.get("type") == "diagram":
+            lines.append(diagram_markdown(step["content"]))
         else:
             lines.append(step["content"])
     return "\n\n".join(lines)

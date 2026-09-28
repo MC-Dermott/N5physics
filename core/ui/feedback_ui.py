@@ -1,6 +1,7 @@
 import streamlit as st
 
 from utils.notes import format_math, split_equations
+from utils.vector_diagram import diagram_markdown
 
 
 def _within_tolerance(user_val, target, tolerance=0.02):
@@ -48,6 +49,8 @@ def render_working(working):
             # One equation per line: split "A \Rightarrow B" / "A \qquad B" steps.
             for equation in split_equations(step["content"]):
                 st.latex(equation)
+        elif step["type"] == "diagram":
+            st.markdown(diagram_markdown(step["content"]))
         else:
             st.markdown(format_math(step["content"]))
 

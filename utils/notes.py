@@ -746,35 +746,58 @@ $$E_H = mL$$
 > **Important:** $\\Delta T = T_2 - T_1$ (the change, not the final temperature). Convert grams to kg. During a change of state, temperature stays constant.
 """,
 
-    "vectors": """
-## Vectors — Resultant & Bearing
+    "displacement_1d": """
+## Distance and Displacement — 1D
 
 **Definitions:**
 - Distance is the total length of the path travelled — a *scalar*, so direction doesn't matter.
 - Displacement is how far and in what direction an object ends up from its starting point — a
   *vector*.
 
-**Distance vs displacement (1D):**
-- **Distance**: just add up the magnitude of every leg of the journey.
-- **Displacement**: along a single straight line, pick one direction as positive and the opposite
-  as negative, then add the signed values (legs in opposite directions partly cancel out).
+**Distance:** just add up the magnitude of every leg of the journey.
+
+**Displacement (along a single straight line):**
+- Pick one direction as positive (e.g. north or east) and the opposite direction as negative.
+- Add the signed values — legs in opposite directions partly cancel out.
+- Give the answer as a size **and** a direction (e.g. 4 km west), not a negative number.
+
+> **Important:** Distance can never be smaller than the size of the displacement. They are only
+> equal when the object never changes direction.
+""",
+
+    "vectors": """
+## Displacement — 2D (Resultant & Bearing)
+
+**Definitions:**
+- Distance is the total length of the path travelled — a *scalar*, so direction doesn't matter.
+- Displacement is how far and in what direction an object ends up from its starting point — a
+  *vector*.
+
+**Draw a vector diagram first (tip to tail):**
+1. Draw the **north/south** vector first, starting from the start point.
+2. Draw the **east/west** vector starting from the tip of the first one.
+3. The **resultant** joins the start point to the tip of the last vector.
+4. Label **θ**, the angle between the north/south vector and the resultant.
+
+For more than two legs, first add up all the north/south legs (ΣN) and all the east/west legs
+(ΣE), then draw ΣN first and ΣE from its tip.
 
 **Magnitude of resultant** (Pythagoras):
-$$R = \\sqrt{a^2 + b^2}$$
+$$R = \\sqrt{(\\text{N/S})^2 + (\\text{E/W})^2}$$
 
-**Direction (bearing):**
-$$\\theta = \\tan^{-1}\\left(\\frac{\\text{opposite}}{\\text{adjacent}}\\right)$$
+**Angle from the north/south line:**
+$$\\theta = \\tan^{-1}\\left(\\frac{\\text{E/W}}{\\text{N/S}}\\right)$$
 
-**Quadrant rules for bearing:**
+**Turning θ into a bearing** (bearings are measured clockwise from North, 000° to 360°):
 
-| Quadrant | Direction | Bearing |
-|---|---|---|
-| Q1 | N of E | $\\theta$ |
-| Q2 | N of W | $360° - \\theta$ |
-| Q3 | S of W | $180° + \\theta$ |
-| Q4 | S of E | $180° - \\theta$ |
+| Resultant points | Bearing |
+|---|---|
+| North and east | $\\theta$ |
+| South and east | $180° - \\theta$ |
+| South and west | $180° + \\theta$ |
+| North and west | $360° - \\theta$ |
 
-> **Important:** Don't add or subtract components — use Pythagoras. Bearings are measured clockwise from North (000° to 360°).
+> **Important:** Don't just add or subtract perpendicular vectors — use Pythagoras.
 """,
 
     "vectors_scalars": """

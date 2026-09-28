@@ -2,6 +2,45 @@ import random
 import math
 from utils.make_question import make_question
 from utils.notes import NOTES
+from utils.vector_diagram import vector_diagram_step
+
+
+_DIAGRAM_TEXT = ("Draw a vector diagram, tip to tail: draw the north/south vector first, then the "
+                 "east/west vector from its tip. The resultant joins the start to the finish.")
+
+# First scaffold step for every 2D displacement question — nothing to type in.
+_DRAW_DIAGRAM_STEP = {
+    "question": "Draw a vector diagram. Draw the north/south arrow first, then the east/west arrow from its "
+                "tip, then the resultant from the start to the finish. Label θ, the angle between the "
+                "north/south arrow and the resultant.",
+    "instruction": True,
+}
+
+# Level 3 version: the legs are totalled into ΣN and ΣE before drawing.
+_DRAW_DIAGRAM_STEP_MULTI = {
+    "question": "Add up the north/south legs (ΣN) and the east/west legs (ΣE), then draw a vector diagram. "
+                "Draw the ΣN arrow first, then the ΣE arrow from its tip, then the resultant from the start "
+                "to the finish. Label θ, the angle between the ΣN arrow and the resultant.",
+    "instruction": True,
+}
+
+
+def _ns_word(v):
+    return "north" if v > 0 else "south"
+
+
+def _ew_word(v):
+    return "east" if v > 0 else "west"
+
+
+def _displacement_diagram(east, north, unit, resultant_label="R", theta=False, totals=False):
+    """Vector diagram step for a north/south + east/west displacement (N/S drawn first).
+    totals=True labels the vectors as the summed components ΣN and ΣE."""
+    n_pre, e_pre = ("ΣN = ", "ΣE = ") if totals else ("", "")
+    return vector_diagram_step(
+        "N" if north > 0 else "S", north, f"{n_pre}{abs(north)} {unit} {_ns_word(north)}",
+        "E" if east > 0 else "W", east, f"{e_pre}{abs(east)} {unit} {_ew_word(east)}",
+        resultant_label=resultant_label, theta=theta)
 
 
 def _pick():
@@ -31,6 +70,8 @@ def gen_find_magnitude(level="N5"):
     correct = round(math.sqrt(east ** 2 + north ** 2), 2)
 
     working = [
+        {"type": "text",  "content": _DIAGRAM_TEXT},
+        _displacement_diagram(east, north, "km", resultant_label=f"R = {correct} km"),
         {"type": "text",  "content": "Use Pythagoras' theorem to find the resultant:"},
         {"type": "latex", "content": r"R = \sqrt{x^2 + y^2}"},
         {"type": "latex", "content": rf"R = \sqrt{{{abs(east)}^2 + {abs(north)}^2}}"},
@@ -47,6 +88,7 @@ def gen_find_magnitude(level="N5"):
         {"value": round(east ** 2 + north ** 2, 2), "display": f"{round(east**2 + north**2, 2)} km", "summary": "Incorrect.", "mistake": "You forgot to square root the result. R = √(x² + y²), not x² + y².", "working": working},
     ]
     scaffold = [
+        _DRAW_DIAGRAM_STEP,
         {"question": "What is x² + y² (east² + north²)?", "answer": round(east ** 2 + north ** 2, 2)},
         {"question": "What is the magnitude of the resultant displacement?", "answer": correct},
     ]
@@ -74,6 +116,8 @@ def gen_find_bearing(level="N5"):
     distractors = [d for d in all_bearings if d != bearing][:3]
 
     working = [
+        {"type": "text",  "content": _DIAGRAM_TEXT + " θ is the angle between the north/south vector and the resultant."},
+        _displacement_diagram(east, north, "km", theta=True),
         {"type": "latex", "content": rf"\theta = \tan^{{-1}}\!\left(\frac{{{abs(east)}}}{{{abs(north)}}}\right) = {angle}°"},
         {"type": "text",  "content": "Apply the quadrant rule (bearing measured clockwise from North):"},
         {"type": "text",  "content": "NE quadrant: bearing = θ | NW: 360 − θ | SE: 180 − θ | SW: 180 + θ"},
@@ -104,6 +148,7 @@ def gen_find_bearing(level="N5"):
         })
 
     scaffold = [
+        _DRAW_DIAGRAM_STEP,
         {"question": "What is θ = tan⁻¹(|east|/|north|)?", "answer": angle},
         {"question": "What is the bearing (applying the quadrant rule)?", "answer": float(bearing)},
     ]
@@ -201,7 +246,7 @@ def gen_l1_distance(level="N5"):
     ]
     options_data = _dedup(options_data, distance)
     return make_question(question, float(distance), options_data, "m",
-                         notes=NOTES["vectors"], topic="Dynamics", question_type="Distance and Displacement", level=level)
+                         notes=NOTES["displacement_1d"], topic="Dynamics", question_type="Distance and Displacement", level=level)
 
 
 def gen_l1_displacement(level="N5"):
@@ -265,7 +310,7 @@ def gen_l1_displacement(level="N5"):
         ]
     options_data = _dedup(options_data, correct)
     return make_question(question, float(correct), options_data, "m", scaffold=scaffold,
-                         notes=NOTES["vectors"], topic="Dynamics", question_type="Distance and Displacement", level=level)
+                         notes=NOTES["displacement_1d"], topic="Dynamics", question_type="Distance and Displacement", level=level)
 
 
 def generate_displacement_l1(level="N5"):
@@ -324,6 +369,9 @@ def gen_l3_magnitude(level="N5"):
                                      "negative), then sum each axis separately."},
         {"type": "latex", "content": rf"\Sigma N = {_signed_expr(north_vals)} = {north}\ \mathrm{{km}}"},
         {"type": "latex", "content": rf"\Sigma E = {_signed_expr(east_vals)} = {east}\ \mathrm{{km}}"},
+        {"type": "text", "content": _DIAGRAM_TEXT.replace("the north/south vector", "the ΣN vector")
+                                    .replace("the east/west vector", "the ΣE vector")},
+        _displacement_diagram(east, north, "km", resultant_label=f"R = {correct} km", totals=True),
         {"type": "text", "content": "Use Pythagoras' theorem to combine the two perpendicular components:"},
         {"type": "latex", "content": r"R = \sqrt{(\Sigma N)^2 + (\Sigma E)^2}"},
         {"type": "latex", "content": rf"R = \sqrt{{{abs(north)}^2 + {abs(east)}^2}} = {correct}\ \mathrm{{km}}"},
@@ -349,6 +397,7 @@ def gen_l3_magnitude(level="N5"):
     ]
     options_data = _dedup(options_data, correct)
     scaffold = [
+        _DRAW_DIAGRAM_STEP_MULTI,
         {"question": "What is ΣN (the net north displacement)?", "answer": float(north)},
         {"question": "What is ΣE (the net east displacement)?", "answer": float(east)},
         {"question": "What is the magnitude of the resultant displacement, R?", "answer": correct},
@@ -388,6 +437,10 @@ def gen_l3_bearing(level="N5"):
                                      "negative), then sum each axis separately."},
         {"type": "latex", "content": rf"\Sigma N = {_signed_expr(north_vals)} = {north}\ \mathrm{{km}}"},
         {"type": "latex", "content": rf"\Sigma E = {_signed_expr(east_vals)} = {east}\ \mathrm{{km}}"},
+        {"type": "text", "content": _DIAGRAM_TEXT.replace("the north/south vector", "the ΣN vector")
+                                    .replace("the east/west vector", "the ΣE vector")
+                                    + " θ is the angle between the ΣN vector and the resultant."},
+        _displacement_diagram(east, north, "km", theta=True, totals=True),
         {"type": "latex", "content": rf"\theta = \tan^{{-1}}\!\left(\frac{{{abs(east)}}}{{{abs(north)}}}\right) = {angle}°"},
         {"type": "text",  "content": "Apply the quadrant rule (bearing measured clockwise from North):"},
         {"type": "text",  "content": "NE quadrant: bearing = θ | NW: 360 − θ | SE: 180 − θ | SW: 180 + θ"},
@@ -415,6 +468,9 @@ def gen_l3_bearing(level="N5"):
         })
     options_data = _dedup(options_data, bearing)
     scaffold = [
+        _DRAW_DIAGRAM_STEP_MULTI,
+        {"question": "What is ΣN (the net north displacement)?", "answer": float(north)},
+        {"question": "What is ΣE (the net east displacement)?", "answer": float(east)},
         {"question": "What is θ = tan⁻¹(|ΣE|/|ΣN|)?", "answer": angle},
         {"question": "What is the bearing (applying the quadrant rule)?", "answer": float(bearing)},
     ]
@@ -504,7 +560,10 @@ def gen_speed_velocity_from_displacement(level="N5"):
              "working": working},
         ]
     else:
-        working = working_common + [
+        working = [
+            {"type": "text", "content": _DIAGRAM_TEXT},
+            _displacement_diagram(east, north, "m", resultant_label=f"R = {resultant} m"),
+        ] + working_common + [
             {"type": "latex", "content": r"\text{velocity} = \frac{\text{displacement}}{\text{time}}"},
             {"type": "latex", "content": rf"\text{{velocity}} = \frac{{{resultant}}}{{{t}}} = {velocity}\ \mathrm{{m/s}}"},
         ]
@@ -611,6 +670,33 @@ _RESVEL_2D = [
 ]
 
 
+_COMPASS = {"due north": "N", "due south": "S", "due east": "E", "due west": "W"}
+
+
+def _resvel_diagram_text(dir1, dir2):
+    if dir1 in _COMPASS:
+        return {"type": "text", "content": "Draw a vector diagram, tip to tail: draw the north/south velocity "
+                                           "first, then the east/west velocity from its tip. The resultant "
+                                           "joins the start to the finish."}
+    return {"type": "text", "content": "Draw a vector diagram, tip to tail: draw the boat's velocity across the "
+                                       "river first, then the current's velocity from its tip. The resultant "
+                                       "joins the start to the finish."}
+
+
+def _resvel_diagram(obj, agent, dir1, dir2, v1, v2, resultant):
+    """N/S velocity drawn first; for the river crossing, the across-river velocity
+    is drawn first (up the page) with the current along the bank."""
+    r_label = f"v = {resultant} m/s"
+    if dir1 not in _COMPASS:
+        return vector_diagram_step("N", v1, f"{obj} {v1} m/s", "E", v2, f"{agent} {v2} m/s",
+                                   resultant_label=r_label, compass=False)
+    legs = [(_COMPASS[dir1], v1, obj), (_COMPASS[dir2], v2, agent)]
+    (d_ns, m_ns, n_ns), = [leg for leg in legs if leg[0] in "NS"]
+    (d_ew, m_ew, n_ew), = [leg for leg in legs if leg[0] in "EW"]
+    return vector_diagram_step(d_ns, m_ns, f"{n_ns} {m_ns} m/s", d_ew, m_ew, f"{n_ew} {m_ew} m/s",
+                               resultant_label=r_label)
+
+
 def gen_resultant_velocity_2d(level="N5"):
     obj, agent, dir1, dir2, verb = random.choice(_RESVEL_2D)
     v1 = random.choice([3, 4, 6, 8, 9, 12, 30, 40])
@@ -630,6 +716,8 @@ def gen_resultant_velocity_2d(level="N5"):
             f"Calculate the magnitude of the {obj}'s resultant velocity relative to the ground."
         )
     working = [
+        _resvel_diagram_text(dir1, dir2),
+        _resvel_diagram(obj, agent, dir1, dir2, v1, v2, resultant),
         {"type": "text", "content": "The two velocities are perpendicular, so combine with Pythagoras' theorem:"},
         {"type": "latex", "content": rf"v = \sqrt{{{v1}^2 + {v2}^2}} = {resultant}\ \mathrm{{m/s}}"},
     ]

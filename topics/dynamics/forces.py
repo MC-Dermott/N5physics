@@ -4,6 +4,7 @@ import pathlib
 from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
 from utils.notes import NOTES
+from utils.vector_diagram import vector_diagram_step
 
 _FBD_WIDGET_HTML = (
     pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "free_body_diagram_widget.html"
@@ -297,6 +298,20 @@ _RESULTANT_FORCE_SCENARIOS = [
 ]
 
 
+def _resultant_force_diagram(f1, f2, ref_name, resultant_label="R", theta=False):
+    """Tip-to-tail diagram: the reference (forward) force first, up the page,
+    then the perpendicular force from its tip."""
+    text = (f"Draw a vector diagram, tip to tail: draw {ref_name} first, then the perpendicular force "
+            f"from its tip. The resultant joins the start to the finish.")
+    if theta:
+        text += f" θ is the angle between {ref_name} and the resultant."
+    return [
+        {"type": "text", "content": text},
+        vector_diagram_step("N", f1, f"{f1} N", "E", f2, f"{f2} N",
+                            resultant_label=resultant_label, theta=theta, compass=False),
+    ]
+
+
 def gen_resultant_force_magnitude(level="N5"):
     subject, verb, perp_phrase, perp_qualifier, ref_name = random.choice(_RESULTANT_FORCE_SCENARIOS)
     f1 = random.randint(150, 600)
@@ -305,7 +320,7 @@ def gen_resultant_force_magnitude(level="N5"):
 
     question = (f"The {subject} {verb} {f1} N. {perp_phrase} {f2} N {perp_qualifier}.\n\n"
                 f"Calculate the magnitude of the resultant force.")
-    working = [
+    working = _resultant_force_diagram(f1, f2, ref_name, resultant_label=f"R = {magnitude} N") + [
         {"type": "text", "content": "The two forces act at right angles, so use Pythagoras' theorem:"},
         {"type": "latex", "content": r"R = \sqrt{F_1^2 + F_2^2}"},
         {"type": "latex", "content": rf"R = \sqrt{{{f1}^2 + {f2}^2}}"},
@@ -342,7 +357,7 @@ def gen_resultant_force_direction(level="N5"):
 
     question = (f"The {subject} {verb} {f1} N. {perp_phrase} {f2} N {perp_qualifier}.\n\n"
                 f"Calculate the direction of the resultant force relative to {ref_name}.")
-    working = [
+    working = _resultant_force_diagram(f1, f2, ref_name, theta=True) + [
         {"type": "text", "content": f"Use trigonometry, measuring the angle from {ref_name}:"},
         {"type": "latex", "content": rf"\tan\theta = \frac{{{f2}}}{{{f1}}}"},
         {"type": "latex", "content": rf"\theta = {angle}°"},

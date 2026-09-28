@@ -30,6 +30,11 @@ def render_scaffold(question, suffix=""):
         for i, step in enumerate(question.scaffold):
             st.markdown(f"**Step {i + 1}:** {step['prompt']}")
 
+            if step.get("instruction"):
+                if i < len(question.scaffold) - 1:
+                    st.divider()
+                continue
+
             inp_key = f"scaf_{question.qid}_{suffix}_{i}_inp"
             unit_key = f"scaf_{question.qid}_{suffix}_{i}_unit"
             chk_key = f"scaf_{question.qid}_{suffix}_{i}_chk"
