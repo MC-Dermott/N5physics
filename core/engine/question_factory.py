@@ -68,6 +68,11 @@ from topics.dynamics.velocity_time_graphs  import (
     gen_describe_graph_stage,
 )
 from topics.dynamics.vectors_scalars       import gen_identify, gen_pairs
+from topics.dynamics.definitions_n5        import (
+    gen_term_to_definition,
+    gen_definition_to_term,
+    gen_statements,
+)
 from topics.dynamics.equations_of_motion   import generate_equations_of_motion
 from topics.dynamics.equations_of_motion_vertical import generate_equations_of_motion_vertical
 from topics.dynamics.graphs_of_motion      import generate_graphs_of_motion, generate_at_graph_velocity
@@ -280,6 +285,11 @@ QUAL_REGISTRY = {
             "Vectors and Scalars": {
                 "Identify Scalar or Vector":  gen_identify,
                 "Scalar & Vector Pairs":      gen_pairs,
+            },
+            "Definitions": {
+                "Term → Definition":          gen_term_to_definition,
+                "Definition → Term":          gen_definition_to_term,
+                "Which Statements Are Correct?": gen_statements,
             },
             "Speed and Velocity": {
                 "From a Compound Displacement": gen_speed_velocity_from_displacement,

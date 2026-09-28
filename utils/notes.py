@@ -823,6 +823,54 @@ Height fallen: $\\quad s = \\frac{1}{2}gt^2$
 
 > **Important:** Horizontal speed stays constant throughout. Vertical speed starts at 0 and increases. Use area under v-t graph (triangle) for height: $s = \\frac{1}{2} \\times t \\times v_v$.
 """,
+
+    "dynamics_definitions": """
+## Dynamics Definitions
+
+**Motion**
+
+| Term | Definition |
+|---|---|
+| Scalar quantity | A quantity that has magnitude (size) only. |
+| Vector quantity | A quantity that has both magnitude (size) and direction. |
+| Distance | The total length of the path travelled. |
+| Displacement | The straight-line length from the start point to the finish point, in a stated direction. |
+| Speed | The distance travelled per unit time. |
+| Velocity | The displacement per unit time. |
+| Acceleration | The change in velocity per unit time. |
+| Average speed | The total distance travelled divided by the total time taken. |
+| Instantaneous speed | The speed at a particular moment, measured over a very short time. |
+
+**Forces**
+
+| Term | Definition |
+|---|---|
+| Mass | The amount of matter in an object. |
+| Weight | The force of gravity acting on an object. |
+| Gravitational field strength | The weight per unit mass. |
+| The newton | The force that gives a mass of 1 kg an acceleration of 1 m/s². |
+| Unbalanced (resultant) force | The single force that has the same effect as all the forces acting on an object combined. |
+| Balanced forces | Forces that are equal in size and opposite in direction, so the resultant force is zero. |
+| Friction | A force that opposes the motion of an object. |
+| Newton's first law | An object will remain at rest, or continue to move at a constant velocity, unless acted on by an unbalanced force. |
+| Newton's second law | The acceleration of an object is directly proportional to the unbalanced force acting on it and inversely proportional to its mass (F = ma). |
+| Terminal velocity | The constant velocity reached by a falling object when the air resistance acting on it is equal in size to its weight. |
+
+**Energy**
+
+| Term | Definition |
+|---|---|
+| Work done | The energy transferred when a force moves an object through a distance. |
+| Kinetic energy | The energy an object has because it is moving. |
+| Gravitational potential energy | The energy an object has because of its height above a surface. |
+| Conservation of energy | Energy cannot be created or destroyed, only changed from one form to another. |
+
+**Projectiles**
+
+| Term | Definition |
+|---|---|
+| Projectile | An object that is given a horizontal velocity and then moves under the influence of gravity only. |
+""",
 }
 
 
