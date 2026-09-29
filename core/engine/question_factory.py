@@ -150,6 +150,13 @@ from topics.electricity.resistors        import generate_resistors
 from topics.electricity.power            import generate_power
 from topics.electricity.potential_divider import generate_potential_divider
 from topics.electricity.circuits         import generate_circuits
+from topics.electricity.electricity_exam_n5 import (
+    gen_ec_charge, gen_ec_electrons, gen_ec_ac_dc,
+    gen_ec_ew_qv, gen_ec_gradient, gen_ec_voltage_meaning,
+    gen_ec_series_parallel, gen_ec_parallel_total_current, gen_ec_circuit_changes,
+    gen_ec_led_resistor, gen_ec_divider_switch, gen_ec_transistor_explain,
+    gen_ec_fuse, gen_ec_power_i2r, gen_ec_energy_time, gen_ec_toaster_statements,
+)
 
 from topics.radiation.dose               import generate_dose
 from topics.radiation.half_life          import generate_half_life
@@ -311,6 +318,32 @@ QUAL_REGISTRY = {
             "Electrical Power":   generate_power,
             "Potential Divider":  generate_potential_divider,
             "Circuits":           generate_circuits,
+            "Charge Carriers": {
+                "1 — Charge, Current and Time":      gen_ec_charge,
+                "2 — Electrons and Sparks":           gen_ec_electrons,
+                "3 — a.c., d.c. and Electric Fields": gen_ec_ac_dc,
+            },
+            "Potential Difference": {
+                "1 — Energy and Charge (Ew = QV)":   gen_ec_ew_qv,
+                "2 — Resistance from a V–I Gradient": gen_ec_gradient,
+                "3 — What a Voltage Means":          gen_ec_voltage_meaning,
+            },
+            "Circuit Rules": {
+                "1 — Series–Parallel Current":       gen_ec_series_parallel,
+                "2 — Identical Loads in Parallel":   gen_ec_parallel_total_current,
+                "3 — Explain Circuit Changes":       gen_ec_circuit_changes,
+            },
+            "LEDs and Transistor Switches": {
+                "1 — LED Series Resistor":           gen_ec_led_resistor,
+                "2 — Sensor Potential Dividers":     gen_ec_divider_switch,
+                "3 — Explain a Transistor Switch":   gen_ec_transistor_explain,
+            },
+            "Power and Fuses": {
+                "1 — Energy, Power and Time":        gen_ec_energy_time,
+                "2 — Choosing a Fuse":               gen_ec_fuse,
+                "3 — P = I²R and P = V²/R":          gen_ec_power_i2r,
+                "4 — Power Statements":              gen_ec_toaster_statements,
+            },
         },
         "Radiation": {
             "Dose":      generate_dose,
