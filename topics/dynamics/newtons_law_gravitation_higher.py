@@ -307,8 +307,79 @@ def _t2_units():
     return _q(text, F, "N", opts, scaffold)
 
 
+def _t2_mass_from_force():
+    """Rearrange for the orbiter's mass, with r built from a height given in km."""
+    body, M, R = random.choice(_BODIES)
+    obj, mlo, mhi, hlo, hhi = random.choice(_ORBITERS[:2])
+    if body == "the Moon":
+        hlo, hhi = 50, 500
+    m = _pick(mlo, mhi)
+    h_km = int(_pick(hlo, hhi))
+    h = h_km * 1000
+    r = R + h
+    F = _sig(_F(M, m, r), 2)
+    m_ans = _sig(F * r ** 2 / (G * M))
+    text = (f"{obj} orbits {h_km:,} km above the surface of {body}. The gravitational force on "
+            f"{_the(obj.lower())} is {_txt(F, 2)} N. {body[0].upper() + body[1:]} has a mass of {_txt(M)} kg "
+            f"and a radius of {_txt(R)} m. Calculate the mass of {_the(obj.lower())}.")
+    work = [{"type": "latex", "content": rf"r = R + h = {_ltx(R)} + {_ltx(h)} = {_ltx(r)}\ \mathrm{{m}}"},
+            _eq(),
+            {"type": "latex", "content": rf"{_ltx(F, 2)} = 6.67 \times 10^{{-11}} \times \frac{{{_ltx(M)} \times m}}{{({_ltx(r)})^2}}"},
+            {"type": "latex", "content": rf"m = {_ltx(m_ans)}\ \mathrm{{kg}}"}]
+    opts = [
+        {"value": m_ans, "mistake": None, "working": work},
+        {"value": _sig(F * h ** 2 / (G * M)), "mistake": "You used the height above the surface as r. r is measured from the centre: r = R + h.", "working": work},
+        {"value": _sig(F * (R / 1000 + h_km) ** 2 / (G * M)), "mistake": "You didn't convert km to m before substituting — 1 km = 1000 m.", "working": work},
+        {"value": _sig(F / (G * M)), "mistake": "You dropped the r² when rearranging — multiply both sides by r² first.", "working": work},
+    ]
+    scaffold = [{"question": "What is r, the distance from the centre, in m?", "answer": _sig(r)},
+                {"question": "What is F × r²?", "answer": _sig(F * r ** 2)},
+                {"question": "What is the mass, in kg?", "answer": m_ans}]
+    return _q(text, m_ans, "kg", opts, scaffold)
+
+
+def _t2_height_from_force():
+    """Rearrange for r (square root), subtract the radius, answer in km."""
+    body, M, R = random.choice(_BODIES)
+    obj, mlo, mhi, hlo, hhi = random.choice(_ORBITERS)
+    if body == "the Moon":
+        hlo, hhi = 50, 500
+    m = _pick(mlo, mhi)
+    h_true = _pick(hlo, hhi) * 1000
+    F = _sig(_F(M, m, R + h_true), 2)
+    r2 = G * M * m / F
+    r = math.sqrt(r2)
+    h_km = _sig((r - R) / 1000, 2)
+    R_km = int(round(R / 1000, -1))
+    use_diameter = random.random() < 0.3
+    size = f"a diameter of {2 * R_km:,} km" if use_diameter else f"a radius of {R_km:,} km"
+    R = R_km * 1000
+    h_km = _sig((r - R) / 1000, 2)
+    text = (f"{obj} of mass {_txt(m)} kg experiences a gravitational force of {_txt(F, 2)} N from {body}. "
+            f"{body[0].upper() + body[1:]} has a mass of {_txt(M)} kg and {size}. "
+            f"Calculate the height of {_the(obj.lower())} above the surface of {body}, in km.")
+    work = [_eq(),
+            {"type": "latex", "content": rf"{_ltx(F, 2)} = 6.67 \times 10^{{-11}} \times \frac{{{_ltx(M)} \times {_ltx(m)}}}{{r^2}}"},
+            {"type": "latex", "content": rf"r^2 = {_ltx(r2)}\ \mathrm{{m^2}}, \quad r = {_ltx(r)}\ \mathrm{{m}}"}]
+    if use_diameter:
+        work.append({"type": "latex", "content": rf"R = \frac{{{2 * R_km}\ \mathrm{{km}}}}{{2}} = {_ltx(R)}\ \mathrm{{m}}"})
+    work.append({"type": "latex", "content": rf"h = r - R = {_ltx(r)} - {_ltx(R)} = {_ltx(r - R)}\ \mathrm{{m}} = {_ltx(h_km, 2)}\ \mathrm{{km}}"})
+    opts = [
+        {"value": h_km, "mistake": None, "working": work},
+        {"value": _sig(r / 1000, 2), "mistake": "That's r, the distance from the centre. Subtract the radius to get the height above the surface.", "working": work},
+        {"value": _sig((r2 - R) / 1000, 2), "mistake": "You forgot to take the square root of r² before subtracting the radius.", "working": work},
+    ]
+    if use_diameter:
+        opts.append({"value": _sig((r - 2 * R) / 1000, 2), "mistake": "You subtracted the diameter — halve it to get the radius first.", "working": work})
+    opts = [o for o in opts if o["value"] > 0 or o["mistake"] is None]
+    scaffold = [{"question": "What is r², in m²?", "answer": _sig(r2)},
+                {"question": "What is r, the distance from the centre, in m?", "answer": _sig(r)},
+                {"question": "What is the height above the surface, in km?", "answer": h_km}]
+    return _q(text, h_km, "km", opts, scaffold)
+
+
 def gen_grav_units_centre_distance(level="Higher"):
-    return random.choice([_t2_height, _t2_height, _t2_spheres, _t2_units])()
+    return random.choice([_t2_height, _t2_spheres, _t2_units, _t2_mass_from_force, _t2_height_from_force])()
 
 
 # ── Type 3: g at a height ───────────────────────────────────────────────────
