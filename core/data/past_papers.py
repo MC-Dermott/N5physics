@@ -669,9 +669,10 @@ def get_past_paper_units(qualification):
 
 
 def canonical_unit(unit):
-    """Strip an app-UI " (Part N)" suffix (e.g. Higher's pacing split of "Our
-    Dynamic Universe") — the quiz always pools/tracks against the whole real unit."""
-    return re.sub(r"\s*\(Part\s*\d+\)\s*$", "", unit or "").strip()
+    """Strip an app-UI " (Part N)" / " (Motion)" style suffix (e.g. Higher's
+    pacing split of "Our Dynamic Universe", or S3's split of "Dynamics" into
+    Motion and Forces) — the quiz always pools/tracks against the whole real unit."""
+    return re.sub(r"\s*\((?:Part\s*\d+|Motion|Forces)\)\s*$", "", unit or "").strip()
 
 
 def get_unit_mcqs(qualification, unit):
