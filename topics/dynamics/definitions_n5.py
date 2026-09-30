@@ -1,6 +1,4 @@
-import random
-
-from core.models.question_model import PhysicsQuestion
+from utils.definitions import make_definition_generators
 from utils.notes import NOTES
 
 # Definitions needed for the N5 Dynamics unit, taken from what SQA past papers
@@ -164,113 +162,12 @@ DEFINITIONS = {
     },
 }
 
-_TERMS = list(DEFINITIONS)
-
 # Terms where one definition also fits the other, so they must never appear as
 # options in the same question.
 _OVERLAPS = [
     {"speed", "average speed", "instantaneous speed"},
     {"unbalanced (resultant) force", "the newton"},
 ]
-
-
-def _overlaps(a, b):
-    return any(a in group and b in group for group in _OVERLAPS)
-
-
-def _display(term):
-    """Capitalise the first letter without lower-casing the rest (Newton, Universe)."""
-    return term[0].upper() + term[1:]
-
-
-def _pick_distractor_terms(term, n):
-    """Confusable terms first, then others from the same group, then anything."""
-    entry = DEFINITIONS[term]
-    chosen = [t for t in entry.get("confusables", [])
-              if t in DEFINITIONS and not _overlaps(term, t)]
-    random.shuffle(chosen)
-    chosen = chosen[:n]
-
-    usable = [t for t in _TERMS if t != term and t not in chosen and not _overlaps(term, t)]
-    same_group = [t for t in usable if DEFINITIONS[t]["group"] == entry["group"]]
-    random.shuffle(same_group)
-    chosen += same_group[:n - len(chosen)]
-
-    others = [t for t in usable if t not in chosen]
-    random.shuffle(others)
-    chosen += others[:n - len(chosen)]
-    return chosen
-
-
-def _make_question(question_text, correct, distractors, options, working, level):
-    return PhysicsQuestion(
-        question_text=question_text,
-        correct_answer=correct,
-        unit="",
-        distractors=distractors,
-        working=working,
-        notes=NOTES["dynamics_definitions"],
-        topic="Dynamics",
-        question_type="Definitions",
-        level=level,
-        metadata={"type": "classification", "options": options},
-    )
-
-
-# ── Term → definition: pick the correct definition of a given term ─────────────
-
-def gen_term_to_definition(level="N5"):
-    term = random.choice(_TERMS)
-    entry = DEFINITIONS[term]
-    correct = entry["definition"]
-
-    distractors = []
-    # At most one exam-style trap, so the rest come from genuine definitions.
-    for wrong, why in random.sample(entry.get("traps", []), min(1, len(entry.get("traps", [])))):
-        distractors.append({"value": wrong, "mistake": why, "working": []})
-
-    for other in _pick_distractor_terms(term, 4 - len(distractors)):
-        distractors.append({
-            "value": DEFINITIONS[other]["definition"],
-            "mistake": f"That is the definition of **{other}**, not {term}.",
-            "working": [],
-        })
-
-    options = [correct] + [d["value"] for d in distractors]
-    random.shuffle(options)
-
-    working = [{"type": "text", "content": f"**{_display(term)}:** {correct}"}]
-
-    return _make_question(
-        f"Which of the following is the definition of **{term}**?",
-        correct, distractors, options, working, level,
-    )
-
-
-# ── Definition → term: name the term that a definition describes ───────────────
-
-def gen_definition_to_term(level="N5"):
-    term = random.choice(_TERMS)
-    entry = DEFINITIONS[term]
-    others = _pick_distractor_terms(term, 4)
-
-    correct = _display(term)
-    distractors = [
-        {"value": _display(other),
-         "mistake": f"{_display(other)} is defined as: *{DEFINITIONS[other]['definition']}*",
-         "working": []}
-        for other in others
-    ]
-
-    options = [correct] + [d["value"] for d in distractors]
-    random.shuffle(options)
-
-    working = [{"type": "text", "content": f"**{correct}:** {entry['definition']}"}]
-
-    return _make_question(
-        f"Which term is described by the following definition?\n\n> {entry['definition']}",
-        correct, distractors, options, working, level,
-    )
 
 
 # ── Statements: past-paper style "Which of these statements is/are correct?" ───
@@ -314,68 +211,10 @@ STATEMENTS = [
      "Gravity acts vertically only — the horizontal velocity stays **constant**."),
 ]
 
-_NUMERALS = ["I", "II", "III"]
-# The answer combinations in the order SQA lists them.
-_COMBINATIONS = [
-    (0,), (1,), (2,), (0, 1), (0, 2), (1, 2), (0, 1, 2),
-]
 
+_GENERATORS = make_definition_generators(
+    "Dynamics", DEFINITIONS, STATEMENTS, _OVERLAPS, notes=NOTES["dynamics_definitions"])
 
-def _combo_label(combo):
-    names = [_NUMERALS[i] for i in combo]
-    if len(names) == 1:
-        return f"{names[0]} only"
-    if len(names) == 2:
-        return f"{names[0]} and {names[1]} only"
-    return "I, II and III"
-
-
-def gen_statements(level="N5"):
-    keys = list({s[0] for s in STATEMENTS})
-    chosen_keys = random.sample(keys, 3)
-    statements = [random.choice([s for s in STATEMENTS if s[0] == k]) for k in chosen_keys]
-
-    # At least one statement must be correct so the answer is one of the combinations.
-    if not any(s[2] for s in statements):
-        return gen_statements(level)
-
-    correct_combo = tuple(i for i, s in enumerate(statements) if s[2])
-    correct = _combo_label(correct_combo)
-
-    wrong_combos = random.sample([c for c in _COMBINATIONS if c != correct_combo], 4)
-    distractors = []
-    for combo in wrong_combos:
-        reasons = []
-        for i, (_, text, is_true, why) in enumerate(statements):
-            picked = i in combo
-            if picked and not is_true:
-                reasons.append(f"Statement {_NUMERALS[i]} is **not** correct — {why}")
-            elif not picked and is_true:
-                reasons.append(f"Statement {_NUMERALS[i]} **is** correct — {why}")
-        distractors.append({"value": _combo_label(combo), "mistake": " ".join(reasons),
-                            "working": []})
-
-    options = [_combo_label(c) for c in _COMBINATIONS
-               if c == correct_combo or c in wrong_combos]
-
-    statement_lines = "\n\n".join(
-        f"**{_NUMERALS[i]}** &nbsp; {text}" for i, (_, text, _, _) in enumerate(statements))
-    question_text = ("A student makes the following statements:\n\n"
-                     f"{statement_lines}\n\n"
-                     "Which of these statements is/are correct?")
-
-    working = [
-        {"type": "text",
-         "content": f"**{_NUMERALS[i]}** {'✓ Correct' if is_true else '✗ Not correct'} — {why}"}
-        for i, (_, _, is_true, why) in enumerate(statements)
-    ]
-    working.append({"type": "text", "content": f"So the answer is **{correct}**."})
-
-    return _make_question(question_text, correct, distractors, options, working, level)
-
-
-_ALL_GENS = [gen_term_to_definition, gen_definition_to_term, gen_statements]
-
-
-def generate_dynamics_definitions(level="N5"):
-    return random.choice(_ALL_GENS)(level=level)
+gen_term_to_definition = _GENERATORS["Term → Definition"]
+gen_definition_to_term = _GENERATORS["Definition → Term"]
+gen_statements = _GENERATORS["Which Statements Are Correct?"]

@@ -73,6 +73,10 @@ from topics.dynamics.definitions_n5        import (
     gen_definition_to_term,
     gen_statements,
 )
+from topics.dynamics.definitions_higher    import (
+    PART1_GENERATORS as odu_part1_definitions,
+    PART2_GENERATORS as odu_part2_definitions,
+)
 from topics.dynamics.equations_of_motion   import generate_equations_of_motion
 from topics.dynamics.equations_of_motion_vertical import generate_equations_of_motion_vertical
 from topics.dynamics.graphs_of_motion      import generate_graphs_of_motion, generate_at_graph_velocity
@@ -157,14 +161,18 @@ from topics.electricity.electricity_exam_n5 import (
     gen_ec_led_resistor, gen_ec_divider_switch, gen_ec_transistor_explain,
     gen_ec_fuse, gen_ec_power_i2r, gen_ec_energy_time, gen_ec_toaster_statements,
 )
+from topics.electricity.definitions_n5  import GENERATORS as electricity_n5_definitions
+from topics.electricity.definitions_higher import GENERATORS as electricity_higher_definitions
 
 from topics.radiation.dose               import generate_dose
 from topics.radiation.half_life          import generate_half_life
 from topics.radiation.activity           import generate_activity
+from topics.radiation.definitions_n5     import GENERATORS as radiation_n5_definitions
 
 from topics.waves.wave_speed             import generate_wave_speed
 from topics.waves.period_frequency       import generate_period_frequency
 from topics.waves.combined               import generate_waves_combined
+from topics.waves.definitions_n5         import GENERATORS as waves_n5_definitions
 
 from topics.properties.pressure          import generate_pressure
 from topics.properties.gas_laws          import generate_gas_laws
@@ -172,10 +180,14 @@ from topics.properties.heat              import (
     generate_heat, generate_heat_shc, generate_heat_latent,
     generate_heat_exam_icemachine,
 )
+from topics.properties.definitions_n5    import GENERATORS as properties_n5_definitions
 
 from topics.particles_and_waves.standard_model import (
     generate_standard_model_classification,
     generate_standard_model_order_of_magnitude,
+)
+from topics.particles_and_waves.definitions_higher import (
+    GENERATORS as particles_waves_definitions,
 )
 
 from topics.electricity_and_energy.electrical_power import generate_electrical_power
@@ -344,16 +356,19 @@ QUAL_REGISTRY = {
                 "3 — P = I²R and P = V²/R":          gen_ec_power_i2r,
                 "4 — Power Statements":              gen_ec_toaster_statements,
             },
+            "Definitions": electricity_n5_definitions,
         },
         "Radiation": {
             "Dose":      generate_dose,
             "Half-Life": generate_half_life,
             "Activity":  generate_activity,
+            "Definitions": radiation_n5_definitions,
         },
         "Waves": {
             "Wave Speed":        generate_wave_speed,
             "Period & Frequency": generate_period_frequency,
             "Waves Combined":    generate_waves_combined,
+            "Definitions":       waves_n5_definitions,
         },
         "Properties": {
             "Pressure": generate_pressure,
@@ -364,6 +379,7 @@ QUAL_REGISTRY = {
                 "Mixed":                  generate_heat,
                 "Exam Style":             generate_heat_exam_icemachine,
             },
+            "Definitions": properties_n5_definitions,
         },
         "Skills": {
             "Scientific Prefixes": {
@@ -422,6 +438,7 @@ QUAL_REGISTRY = {
                 "Beyond Lifts":                   generate_effective_weight_beyond_lifts,
                 "Beyond Lifts — Explain Free Fall": gen_ew_explain_freefall,
             },
+            "Definitions": odu_part1_definitions,
         },
         "Our Dynamic Universe (Part 2)": {
             "Projectile Motion": {
@@ -451,14 +468,17 @@ QUAL_REGISTRY = {
                 "5 — Evidence, Dark Matter and Dark Energy": gen_eu_evidence,
                 "6 — Stellar Temperature":                   gen_eu_stellar,
             },
+            "Definitions": odu_part2_definitions,
         },
         "Particles and Waves": {
             "Standard Model": {
                 "Particle Classification": generate_standard_model_classification,
                 "Order of Magnitude":     generate_standard_model_order_of_magnitude,
             },
+            "Definitions": particles_waves_definitions,
         },
         "Electricity": {
+            "Definitions": electricity_higher_definitions,
         },
     },
     "Crash Higher": {
