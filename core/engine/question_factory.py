@@ -47,6 +47,7 @@ from topics.dynamics.energy                import (
     generate_energy_conservation,
     gen_energy_explain,
 )
+from topics.dynamics.energy_power          import generate_power_basic, generate_power_exam
 from topics.dynamics.projectiles           import (
     generate_projectiles,
     gen_free_fall_velocity_and_height,
@@ -154,6 +155,12 @@ from topics.electricity.resistors        import generate_resistors
 from topics.electricity.power            import generate_power
 from topics.electricity.potential_divider import generate_potential_divider
 from topics.electricity.circuits         import generate_circuits
+from topics.particles_and_waves.particles_waves_higher import (
+    gen_pw_charged_speed, gen_pw_accelerators, gen_pw_hadron_charge, gen_pw_bosons,
+    gen_pw_mass_energy, gen_pw_reactions_per_second, gen_pw_isl, gen_pw_irradiance,
+    gen_pw_photoelectric, gen_pw_pe_effects, gen_pw_grating, gen_pw_path_difference,
+    gen_pw_energy_levels, gen_pw_spectra_explain, gen_pw_refraction, gen_pw_refraction_explain,
+)
 from topics.electricity.electricity_exam_n5 import (
     gen_ec_charge, gen_ec_electrons, gen_ec_ac_dc,
     gen_ec_ew_qv, gen_ec_gradient, gen_ec_voltage_meaning,
@@ -290,6 +297,8 @@ QUAL_REGISTRY = {
                 "Kinetic Energy":                 generate_energy_ke,
                 "Conservation of Energy":         generate_energy_conservation,
                 "Work Done":                      generate_energy_work,
+                "Power — Basic":                  generate_power_basic,
+                "Power — Exam-style":             generate_power_exam,
                 "Explain":                        gen_energy_explain,
             },
             "Projectile Motion": {
@@ -471,9 +480,39 @@ QUAL_REGISTRY = {
             "Definitions": odu_part2_definitions,
         },
         "Particles and Waves": {
+            "Forces on Charged Particles": {
+                "1 — Speed After Acceleration (W = QV)": gen_pw_charged_speed,
+                "2 — Fields and Accelerators":           gen_pw_accelerators,
+            },
             "Standard Model": {
                 "Particle Classification": generate_standard_model_classification,
                 "Order of Magnitude":     generate_standard_model_order_of_magnitude,
+                "Hadron Charges":         gen_pw_hadron_charge,
+                "Forces, Bosons and Definitions": gen_pw_bosons,
+            },
+            "Nuclear Reactions": {
+                "1 — Energy Released (E = mc²)":   gen_pw_mass_energy,
+                "2 — Reactions per Second":        gen_pw_reactions_per_second,
+            },
+            "Inverse Square Law": {
+                "1 — Irradiance at a New Distance": gen_pw_isl,
+                "2 — Irradiance, I = P/A":          gen_pw_irradiance,
+            },
+            "The Photoelectric Effect": {
+                "1 — Ek and Speed of Photoelectrons": gen_pw_photoelectric,
+                "2 — Irradiance, Frequency and Definitions": gen_pw_pe_effects,
+            },
+            "Interference": {
+                "1 — Path Difference":              gen_pw_path_difference,
+                "2 — Diffraction Gratings":         gen_pw_grating,
+            },
+            "Spectra": {
+                "1 — Energy Levels (E₂ − E₁ = hf)": gen_pw_energy_levels,
+                "2 — Explaining Spectra":           gen_pw_spectra_explain,
+            },
+            "Refraction of Light": {
+                "1 — Refractive Index, Speed and Critical Angle": gen_pw_refraction,
+                "2 — Explaining Refraction":        gen_pw_refraction_explain,
             },
             "Definitions": particles_waves_definitions,
         },
