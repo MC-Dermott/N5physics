@@ -33,6 +33,24 @@ _NOTES = r"""
 **Relationships (as on the relationships sheet):**
 $$f_o = f_s\left(\frac{v}{v \pm v_s}\right) \qquad z = \frac{\lambda_{observed} - \lambda_{rest}}{\lambda_{rest}} \qquad z = \frac{v}{c} \qquad v = H_0 d$$
 
+**Redshift terms:**
+- $z$ — the **redshift** of the galaxy: the fractional increase in wavelength. It is a ratio of two
+  wavelengths (or two speeds), so it has **no unit**.
+- $\lambda_{rest}$ — the **rest wavelength** (m or nm): the wavelength of the spectral line measured in a lab on
+  Earth, from a source that is not moving (e.g. hydrogen's 656 nm line).
+- $\lambda_{observed}$ — the **observed wavelength** (m or nm): the wavelength of the same line measured in the
+  light arriving from the distant galaxy. For a receding galaxy it is **longer** than $\lambda_{rest}$.
+- $\lambda_{observed} - \lambda_{rest}$ — the **change in wavelength** (the shift). Use the same unit for both
+  wavelengths so the units cancel.
+- $v$ — the **recessional velocity** of the galaxy (m s⁻¹): how fast it is moving away from us.
+- $c$ — the **speed of light**, $3.00 \times 10^{8}\ \mathrm{m\,s^{-1}}$.
+
+**Hubble's law terms:** $v$ — recessional velocity of the galaxy (m s⁻¹); $d$ — distance to the galaxy (m);
+$H_0$ — the Hubble constant (s⁻¹).
+
+**Doppler terms:** $f_o$ — frequency heard by the observer (Hz); $f_s$ — frequency emitted by the source (Hz);
+$v$ — speed of sound (m s⁻¹); $v_s$ — speed of the source (m s⁻¹).
+
 Data sheet: speed of sound $v = 3.40 \times 10^{2}\ \mathrm{m\,s^{-1}}$, $c = 3.00 \times 10^{8}\ \mathrm{m\,s^{-1}}$,
 $H_0 = 2.3 \times 10^{-18}\ \mathrm{s^{-1}}$.
 
