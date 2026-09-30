@@ -435,6 +435,36 @@ $$\\frac{1}{2}mv^2 = Fd$$
 > some energy is converted into heat due to friction / air resistance.
 """,
 
+    "energy_power": """
+## Power — $P = \\frac{E}{t}$
+
+**Definition:** Power is the energy transferred **per second**. 1 watt = 1 joule per second (1 W = 1 J/s).
+
+$$P = \\frac{E}{t} \\qquad E = Pt \\qquad t = \\frac{E}{P}$$
+
+| Symbol | Quantity | Unit |
+|---|---|---|
+| P | Power | W (watts) |
+| E | Energy transferred (or work done) | J (joules) |
+| t | Time | s (seconds) |
+
+**Units:** convert before substituting.
+- kW × 1000 → W, MW × 1 000 000 → W (and kJ, MJ → J the same way)
+- minutes × 60 → s, hours × 3600 → s
+
+**Exam-style questions — find the energy first.** The E in $P = \\frac{E}{t}$ is whatever energy
+is transferred:
+- lifting something → gravitational potential energy gained, $E_p = mgh$
+- speeding up or braking → kinetic energy gained or lost, $E_k = \\frac{1}{2}mv^2$
+  (if it does not start from rest: final $E_k$ − initial $E_k$)
+- pulling or pushing with a force → work done, $E_W = Fd$
+
+Then divide that energy by the time.
+
+> **Important:** a real motor's power is **greater** than the value calculated (or it takes longer),
+> because some energy is converted into heat and sound by friction.
+""",
+
     "waves_speed": """
 ## Wave Speed — $v = f\\lambda$
 
