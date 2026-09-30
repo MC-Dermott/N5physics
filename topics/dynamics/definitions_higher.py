@@ -342,3 +342,8 @@ PART1_GENERATORS = make_definition_generators(
 PART2_GENERATORS = make_definition_generators(
     "Our Dynamic Universe", PART2_DEFINITIONS, PART2_STATEMENTS,
     title="Our Dynamic Universe Definitions (Part 2)")
+
+# Crash Higher covers the whole of Our Dynamic Universe as one unit.
+CRASH_GENERATORS = make_definition_generators(
+    "Our Dynamic Universe", {**PART1_DEFINITIONS, **PART2_DEFINITIONS}, PART1_STATEMENTS + PART2_STATEMENTS,
+    title="Our Dynamic Universe Definitions")

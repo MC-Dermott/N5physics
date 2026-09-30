@@ -155,6 +155,13 @@ from topics.electricity.resistors        import generate_resistors
 from topics.electricity.power            import generate_power
 from topics.electricity.potential_divider import generate_potential_divider
 from topics.electricity.circuits         import generate_circuits
+from topics.dynamics.definitions_s3 import MOTION_GENERATORS as s3_motion_definitions, FORCES_GENERATORS as s3_forces_definitions
+from topics.waves.definitions_s3 import GENERATORS as s3_waves_definitions
+from topics.electricity_and_energy.definitions_n4 import GENERATORS as n4_electricity_definitions
+from topics.waves.definitions_n4 import GENERATORS as n4_waves_definitions
+from topics.dynamics.definitions_n4 import GENERATORS as n4_dynamics_definitions
+from topics.skills.definitions_n5 import GENERATORS as skills_n5_definitions
+from topics.dynamics.definitions_higher import CRASH_GENERATORS as crash_odu_definitions
 from topics.particles_and_waves.particles_waves_higher import (
     gen_pw_charged_speed, gen_pw_accelerators, gen_pw_hadron_charge, gen_pw_bosons,
     gen_pw_mass_energy, gen_pw_reactions_per_second, gen_pw_isl, gen_pw_irradiance,
@@ -235,6 +242,7 @@ QUAL_REGISTRY = {
                 "Acceleration — Calculating from a Graph": gen_accel_graph_basic,
                 "Acceleration — Compound Graphs":       gen_accel_graph_compound,
             },
+            "Definitions": s3_motion_definitions,
         },
         "Dynamics (Forces)": {
             "Weight Calculations": generate_weight_calculations,
@@ -242,11 +250,13 @@ QUAL_REGISTRY = {
                 "Horizontal (driving vs friction)": gen_horizontal_unbalanced_force,
                 "Vertical (with weight)":           generate_unbalanced_forces_s3,
             },
+            "Definitions": s3_forces_definitions,
         },
         "Waves": {
             "Wave Speed":         generate_wave_speed,
             "Period & Frequency": generate_period_frequency,
             "Waves Combined":     generate_waves_combined,
+            "Definitions":        s3_waves_definitions,
         },
     },
     "National 4": {
@@ -259,18 +269,21 @@ QUAL_REGISTRY = {
             "Electromagnets":       generate_electromagnets,
             "Current":              generate_current,
             "Ohm's Law":            generate_ohms_law,
+            "Definitions":          n4_electricity_definitions,
         },
         "Waves and Radiation": {
             "Wave Speed": generate_wave_speed,
             "Dose":       generate_dose,
             "Half-Life":  generate_half_life,
             "Activity":   generate_activity,
+            "Definitions": n4_waves_definitions,
         },
         "Dynamics and Space": {
             "Speed, Distance & Time": generate_sdt,
             "Weight":                 generate_weight,
             "Acceleration":           generate_acceleration,
             "Pressure":               generate_pressure,
+            "Definitions":            n4_dynamics_definitions,
         },
     },
     "National 5": {
@@ -397,6 +410,7 @@ QUAL_REGISTRY = {
                 "Symbol → Name":      gen_symbol_to_name,
                 "Name → Symbol":      gen_name_to_symbol,
             },
+            "Definitions": skills_n5_definitions,
         },
     },
     "Higher": {
@@ -529,6 +543,7 @@ QUAL_REGISTRY = {
             "Energy":                 generate_energy,
             "Projectile Motion":      generate_projectiles,
             "Vectors":                generate_vectors,
+            "Definitions":            crash_odu_definitions,
         },
         "Particles and Waves": {
             "Wave Speed":         generate_wave_speed,
@@ -539,6 +554,7 @@ QUAL_REGISTRY = {
                 "Particle Classification": generate_standard_model_classification,
                 "Order of Magnitude":     generate_standard_model_order_of_magnitude,
             },
+            "Definitions": particles_waves_definitions,
         },
         "Electricity": {
             "Current":           generate_current,
@@ -547,6 +563,7 @@ QUAL_REGISTRY = {
             "Electrical Power":  generate_power,
             "Potential Divider": generate_potential_divider,
             "Circuits":          generate_circuits,
+            "Definitions":       electricity_higher_definitions,
         },
     },
 }
