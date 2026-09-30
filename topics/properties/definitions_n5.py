@@ -93,6 +93,15 @@ DEFINITIONS = {
                       "proportional to the temperature in kelvin.",
         "confusables": ["the pressure law", "Boyle's law"],
     },
+    "the kinetic model": {
+        "group": "Gases",
+        "definition": "A gas is made of particles in constant random motion; the pressure is caused by the "
+                      "particles colliding with the walls of the container.",
+        "confusables": ["pressure", "temperature"],
+        "traps": [("When a gas is heated its particles get bigger and push harder on the walls.",
+                   "The particles don't change size — they move faster, so they hit the walls more "
+                   "often and with more force.")],
+    },
 }
 
 # One latent-heat definition also fits the others (fusion and vaporisation are
@@ -127,6 +136,14 @@ STATEMENTS = [
      "Each collision exerts a force on the wall; force per unit area is pressure."),
     ("kelvin", "The gas laws only work when temperatures are in degrees Celsius.", False,
      "The gas laws need temperatures in **kelvin**."),
+    ("change", "A temperature rise of 30 °C is the same as a temperature rise of 30 K.", True,
+     "Kelvin and Celsius degrees are the same size — only the zero point differs."),
+    ("change", "A temperature rise of 30 °C is the same as a temperature rise of 303 K.", False,
+     "Don't add 273 to a temperature **change**."),
+    ("heated", "When a sealed gas is heated, its particles hit the walls more often and with more "
+     "force.", True, "They move faster, so the pressure increases."),
+    ("heated", "When a sealed gas is heated, its particles expand so the pressure increases.", False,
+     "The particles don't expand — they move faster."),
     ("shc", "Equal masses of two substances are given the same energy. The one with the higher "
      "specific heat capacity has the smaller temperature rise.", True,
      "ΔT = Eh ÷ (cm), so a larger c gives a smaller ΔT."),
