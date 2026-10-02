@@ -67,7 +67,7 @@ FORCES_STATEMENTS = [
     ("friction", "Streamlining a car increases air resistance.", False, "Streamlining **reduces** air resistance."),
 ]
 
-MOTION_GENERATORS = make_definition_generators("Dynamics (Motion)", MOTION_DEFINITIONS, MOTION_STATEMENTS,
+MOTION_GENERATORS = make_definition_generators("Dynamics Part 1 (Motion)", MOTION_DEFINITIONS, MOTION_STATEMENTS,
                                                title="S3 Motion Definitions")
-FORCES_GENERATORS = make_definition_generators("Dynamics (Forces)", FORCES_DEFINITIONS, FORCES_STATEMENTS,
+FORCES_GENERATORS = make_definition_generators("Dynamics Part 2 (Forces)", FORCES_DEFINITIONS, FORCES_STATEMENTS,
                                                title="S3 Forces Definitions")

@@ -228,7 +228,7 @@ from topics.skills.prefixes import (
 
 QUAL_REGISTRY = {
     "S3": {
-        "Dynamics (Motion)": {
+        "Dynamics Part 1 (Motion)": {
             "Speed, Distance & Time": generate_sdt,
             "Acceleration": {
                 "Acceleration, Time & Change in Speed": generate_acceleration_basic,
@@ -248,7 +248,7 @@ QUAL_REGISTRY = {
             },
             "Definitions": s3_motion_definitions,
         },
-        "Dynamics (Forces)": {
+        "Dynamics Part 2 (Forces)": {
             "Weight Calculations": generate_weight_calculations,
             "Unbalanced Forces": {
                 "Horizontal (driving vs friction)": gen_horizontal_unbalanced_force,
