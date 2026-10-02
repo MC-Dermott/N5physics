@@ -107,7 +107,6 @@ from topics.dynamics.projectile_higher     import (
     generate_projectile_vertical_displacement,
     generate_projectile_vertical_time_from_top,
     generate_projectile_horizontal,
-    generate_projectile_exam_mixed,
     generate_projectile_explain,
 )
 from topics.dynamics.towing                import (
@@ -115,7 +114,6 @@ from topics.dynamics.towing                import (
     gen_l2_one_trailer_friction,
     gen_l3_multi_trailer_no_friction,
     gen_l4_multi_trailer_friction,
-    gen_exam_style as gen_towing_exam_style,
 )
 from topics.dynamics.resolving_forces_higher import (
     gen_rf_l1_components,
@@ -196,7 +194,6 @@ from topics.properties.pressure          import generate_pressure
 from topics.properties.gas_laws          import generate_gas_laws
 from topics.properties.heat              import (
     generate_heat, generate_heat_shc, generate_heat_latent,
-    generate_heat_exam_icemachine,
 )
 from topics.properties.definitions_n5    import GENERATORS as properties_n5_definitions
 
@@ -217,6 +214,12 @@ from topics.electricity_and_energy.knowledge        import (
     generate_renewable_energy,
     generate_input_output_devices,
     generate_electromagnets,
+)
+
+from topics.exam_style.base import EXAM_STYLE
+from topics.exam_style import (
+    n5_dynamics, n5_electricity, n5_radiation, n5_waves, n5_properties,
+    higher_odu, higher_particles_waves,
 )
 
 from topics.skills.prefixes import (
@@ -315,7 +318,7 @@ QUAL_REGISTRY = {
                 "Conservation of Energy":         generate_energy_conservation,
                 "Work Done":                      generate_energy_work,
                 "Power — Basic":                  generate_power_basic,
-                "Power — Exam-style":             generate_power_exam,
+                "Power — Find the Energy First":  generate_power_exam,
                 "Explain":                        gen_energy_explain,
             },
             "Projectile Motion": {
@@ -410,7 +413,6 @@ QUAL_REGISTRY = {
                 "Specific Heat Capacity": generate_heat_shc,
                 "Specific Latent Heat":   generate_heat_latent,
                 "Mixed":                  generate_heat,
-                "Exam Style":             generate_heat_exam_icemachine,
                 "Heating Then Boiling":   gen_pm_heat_then_boil,
                 "Latent Heat with Power": gen_pm_latent_power,
                 "Heating Curves and Heat Loss": gen_pm_heating_curve,
@@ -442,7 +444,6 @@ QUAL_REGISTRY = {
                 "Level 2 — One Trailer, With Friction":      gen_l2_one_trailer_friction,
                 "Level 3 — Multiple Trailers, No Friction":  gen_l3_multi_trailer_no_friction,
                 "Level 4 — Multiple Trailers, With Friction": gen_l4_multi_trailer_friction,
-                "Level 5 — Exam Style":                      gen_towing_exam_style,
             },
             "Components of Vectors": {
                 "Level 1 — Finding Components":                              gen_rf_l1_components,
@@ -482,8 +483,7 @@ QUAL_REGISTRY = {
                 "1 — Vertical Motion: Displacement and Height": generate_projectile_vertical_displacement,
                 "2 — Vertical Motion: Time from Highest Point":  generate_projectile_vertical_time_from_top,
                 "3 — Horizontal Motion":                         generate_projectile_horizontal,
-                "4 — Exam Style (Mixed)":                        generate_projectile_exam_mixed,
-                "5 — Explain":                                   generate_projectile_explain,
+                "4 — Explain":                                   generate_projectile_explain,
             },
             "Gravitation": {
                 "1 — Force, Mass or Distance":              gen_grav_force_mass_distance,
@@ -583,6 +583,49 @@ QUAL_REGISTRY = {
 }
 
 
+# ── Exam Style ────────────────────────────────────────────────────────────────
+# Every N5 and Higher topic (except the recall-only Definitions) has an "Exam Style"
+# question style: multi-part questions in the style of SQA papers. Tests and unit
+# assessments are drawn from these.
+
+_EXAM_STYLE = {
+    "National 5": {
+        "Dynamics":    n5_dynamics.EXAM,
+        "Electricity": n5_electricity.EXAM,
+        "Radiation":   n5_radiation.EXAM,
+        "Waves":       n5_waves.EXAM,
+        "Properties":  n5_properties.EXAM,
+        "Skills":      n5_properties.SKILLS_EXAM,
+    },
+    "Higher": {
+        "Our Dynamic Universe (Part 1)": higher_odu.EXAM_PART1,
+        "Our Dynamic Universe (Part 2)": higher_odu.EXAM_PART2,
+        "Particles and Waves":           higher_particles_waves.EXAM,
+    },
+}
+
+
+def _attach_exam_style():
+    for qualification, units in _EXAM_STYLE.items():
+        for unit, exams in units.items():
+            topics = QUAL_REGISTRY[qualification][unit]
+            for topic, gen in exams.items():
+                entry = topics[topic]   # KeyError here = exam module names a topic that doesn't exist
+                if not isinstance(entry, dict):
+                    entry = {"Standard": entry}
+                topics[topic] = {**entry, EXAM_STYLE: gen}
+
+
+_attach_exam_style()
+
+EXAM_TEST_QUESTIONS = 4
+
+
+def _exam_gen(qualification, topic, question_type):
+    entry = QUAL_REGISTRY.get(qualification, {}).get(topic, {}).get(question_type)
+    return entry.get(EXAM_STYLE) if isinstance(entry, dict) else None
+
+
 def get_topics(qualification):
     return list(QUAL_REGISTRY.get(qualification, {}).keys())
 
@@ -601,21 +644,50 @@ def get_sub_types(qualification, topic, question_type):
 _LEVEL_MAP = {"S3": "S3", "National 4": "N4", "National 5": "N5", "Higher": "Higher"}
 
 
-def make_test_generator(qualification, topic, question_type):
-    """A generator for Test mode: deals every question style once (in random
-    order) before any repeats, so a test covers the whole topic."""
-    entry = QUAL_REGISTRY[qualification][topic][question_type]
-    if not isinstance(entry, dict):
-        return lambda: generate_question(qualification, topic, question_type)
-    level = _LEVEL_MAP.get(qualification, "N5")
+def _deal(variants, level):
+    """Deals every variant once (in random order) before any repeats."""
     deck = []
 
     def generate():
         if not deck:
-            deck.extend(random.sample(list(entry.values()), len(entry)))
+            deck.extend(random.sample(list(variants), len(variants)))
         return deck.pop()(level=level)
 
     return generate
+
+
+def is_exam_style_test(qualification, topic, question_type):
+    return _exam_gen(qualification, topic, question_type) is not None
+
+
+def test_length(qualification, topic, question_type):
+    return EXAM_TEST_QUESTIONS if is_exam_style_test(qualification, topic, question_type) else 5
+
+
+def make_test_generator(qualification, topic, question_type):
+    """A generator for Test mode. Where the topic has exam-style questions, the test
+    is drawn from them, dealing each scenario once before repeating any; otherwise it
+    deals every question style once (in random order), so a test covers the whole topic."""
+    level = _LEVEL_MAP.get(qualification, "N5")
+    exam = _exam_gen(qualification, topic, question_type)
+    if exam is not None:
+        return _deal(exam.variants, level)
+    entry = QUAL_REGISTRY[qualification][topic][question_type]
+    if not isinstance(entry, dict):
+        return lambda: generate_question(qualification, topic, question_type)
+    return _deal(entry.values(), level)
+
+
+def unit_assessment_topics(qualification, unit):
+    """The topics in a unit that have exam-style questions, in course order."""
+    return [t for t in get_question_types(qualification, unit) if _exam_gen(qualification, unit, t)]
+
+
+def build_unit_assessment(qualification, unit):
+    """One exam-style question from each topic in the unit, in course order."""
+    level = _LEVEL_MAP.get(qualification, "N5")
+    return [_exam_gen(qualification, unit, t)(level=level)
+            for t in unit_assessment_topics(qualification, unit)]
 
 
 def generate_question(qualification, topic, question_type, sub_type=None):
@@ -626,7 +698,9 @@ def generate_question(qualification, topic, question_type, sub_type=None):
     else:
         fn = entry
     q = fn(level=level)
-    if sub_type:
+    # Exam Style parts keep the topic as their question type, so attempts are
+    # reported against the topic rather than lumped together as "Exam Style".
+    if sub_type and sub_type != EXAM_STYLE:
         q.question_type = sub_type
         if q.is_scenario:
             for part in q.parts:

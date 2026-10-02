@@ -30,6 +30,7 @@ import random
 import re
 
 from core.data.past_papers import canonical_unit
+from utils.answer_format import format_answer
 from utils.vector_diagram import diagram_markdown
 
 EXAMPLES = {
@@ -545,7 +546,7 @@ def _format_example_question(q, heading):
         body = q.metadata.get("explain_text", "")
     else:
         body = _format_working(q.working)
-        answer = f"{q.correct_answer} {q.unit}".strip()
+        answer = format_answer(q)
         if body:
             body += f"\n\n**Answer:** {answer}"
         else:

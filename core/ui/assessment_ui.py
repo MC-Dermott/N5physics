@@ -4,7 +4,8 @@ from core.engine.assessment_generator import generate_assessment, TOTAL_MARKS, P
 from core.engine.session_manager import reset_assessment
 from core.ui.feedback_ui import check_answer, render_feedback, render_working
 
-_UNIT_HINT = "Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive."
+_UNIT_HINT = ("Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive. "
+              "Powers of ten can be typed as `3.2x10^-19` or `3.2e-19`.")
 
 
 def _check_classification(selected, question):

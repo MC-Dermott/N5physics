@@ -1,12 +1,16 @@
 import streamlit as st
 
 from core.engine.session_manager import initialise_session, reset_test, reset_assessment, reset_past_paper_quiz
-from core.engine.question_factory import generate_question, get_topics, get_question_types, get_sub_types, make_test_generator
+from core.engine.question_factory import (
+    generate_question, get_topics, get_question_types, get_sub_types, make_test_generator,
+    is_exam_style_test, test_length,
+)
 from core.ui.auth_ui import render_auth, render_change_password
 from core.auth.auth import login_as_admin
 from core.ui.practice_ui import render_practice
 from core.ui.test_ui import render_test
 from core.ui.assessment_ui import render_assessment
+from core.ui.unit_assessment_ui import render_unit_assessment, UNIT_ASSESSMENT
 from core.ui.past_paper_ui import render_past_papers
 from core.ui.past_paper_quiz_ui import render_past_paper_quiz
 from core.ui.reports_ui import render_teacher_report
@@ -14,6 +18,7 @@ from core.ui.student_dashboard_ui import render_student_dashboard
 from core.data.backgrounds import get_background_videos
 from core.data.examples import get_examples, get_canonical_question, notes_for, format_example
 from utils.notes import format_math
+from topics.exam_style.base import EXAM_STYLE
 
 st.set_page_config(page_title="Physics Practice", layout="centered")
 
@@ -185,7 +190,7 @@ st.divider()
 if qualification == "National 4":
     mode_options = ["Practice", "Test", "Practice Assessment"]
 elif qualification in ("National 5", "Higher"):
-    mode_options = ["Practice", "Test", "Past Paper Questions", "Past Paper Quiz"]
+    mode_options = ["Practice", "Test", UNIT_ASSESSMENT, "Past Paper Questions", "Past Paper Quiz"]
 else:
     mode_options = ["Practice", "Test", "Past Paper Questions"]
 
@@ -228,6 +233,13 @@ if mode == "Past Paper Quiz":
     render_past_paper_quiz(topic, qualification, user_id=user_id)
     st.stop()
 
+# ── Unit Assessment (unit-level exam-style questions, N5 & Higher) ────────────
+
+if mode == UNIT_ASSESSMENT:
+    st.divider()
+    render_unit_assessment(topic, qualification, user_id=user_id)
+    st.stop()
+
 # ── Question type selection ───────────────────────────────────────────────────
 
 question_types = get_question_types(qualification, topic)
@@ -258,6 +270,10 @@ if sub_types and mode != "Test":
         st.session_state.last_sub_type = sub_type
         reset_test()
         st.session_state.quiz = {"current_question": None}
+elif mode == "Test" and is_exam_style_test(qualification, topic, question_type):
+    # The test is drawn from the exam-style questions, so show their notes and example.
+    sub_type = EXAM_STYLE
+    st.session_state.pop("last_sub_type", None)
 else:
     # A Test mixes question styles within the topic rather than pinning one.
     sub_type = None
@@ -293,6 +309,8 @@ st.divider()
 if mode == "Test":
     test_generate_fn = make_test_generator(qualification, topic, question_type)
     render_test(topic, question_type, qualification, test_generate_fn, user_id=user_id,
-                example=hand_example or format_example(canonical_question))
+                example=hand_example or format_example(canonical_question),
+                num_questions=test_length(qualification, topic, question_type),
+                exam_style=is_exam_style_test(qualification, topic, question_type))
 else:
     render_practice(topic, question_type, qualification, generate_fn, user_id=user_id, example=hand_example)

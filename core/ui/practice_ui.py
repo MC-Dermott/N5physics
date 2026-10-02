@@ -16,7 +16,8 @@ def _render_notes(question, label="📚 Notes"):
             st.markdown(format_math(question.notes))
 
 
-_UNIT_HINT = "Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive."
+_UNIT_HINT = ("Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive. "
+              "Powers of ten can be typed as `3.2x10^-19` or `3.2e-19`.")
 
 
 def _render_answer_input(question, suffix=""):
@@ -135,6 +136,9 @@ def _render_scenario(question, user_id, qualification):
     general_notes = notes_for(question)
 
     render_widget(question)
+
+    if question.metadata.get("exam_style"):
+        st.caption("📝 Exam-style question — several linked parts, like an SQA paper.")
 
     if question.scenario_context:
         st.info(question.scenario_context)

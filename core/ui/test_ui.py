@@ -7,9 +7,8 @@ import streamlit.components.v1 as components
 from core.engine.session_manager import reset_test
 from core.ui.feedback_ui import check_answer, render_feedback, render_working
 from core.ui.graph_mcq_ui import render_main_graph, render_option_grid
+from utils.answer_format import format_answer
 from utils.notes import format_math
-
-_NUM_QUESTIONS = 5
 
 _GAME_HTML_PATH = Path(__file__).parent / "assets" / "geometry_dash.html"
 _game_html_cache = None
@@ -22,7 +21,8 @@ def _load_game_html():
     return _game_html_cache
 
 
-def render_test(topic, question_type, qualification, generate_fn, user_id=None, example=None):
+def render_test(topic, question_type, qualification, generate_fn, user_id=None, example=None,
+                num_questions=5, exam_style=False):
     from core.db.tracker import save_test_result, save_test_question_attempt
 
     test = st.session_state.test
@@ -33,13 +33,20 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None, 
             from core.ui.reports_ui import render_student_insight
             render_student_insight(user_id, qualification, topic, question_type)
 
-        st.markdown(
-            f"You will be given **{_NUM_QUESTIONS} questions** on *{question_type}*. "
-            "Each question is marked automatically. A summary with feedback is shown at the end."
-        )
+        if exam_style:
+            st.markdown(
+                f"You will be given **{num_questions} exam-style questions** on *{question_type}*, "
+                "each with several parts, like an SQA paper. Every part is marked automatically. "
+                "A summary with feedback is shown at the end."
+            )
+        else:
+            st.markdown(
+                f"You will be given **{num_questions} questions** on *{question_type}*. "
+                "Each question is marked automatically. A summary with feedback is shown at the end."
+            )
         if st.button("Start Test", type="primary"):
             reset_test()
-            st.session_state.test["questions"] = [generate_fn() for _ in range(_NUM_QUESTIONS)]
+            st.session_state.test["questions"] = [generate_fn() for _ in range(num_questions)]
             st.rerun()
 
         if example:
@@ -63,7 +70,7 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None, 
                     user_id, qualification, q.topic, q.question_type, correct, mistake
                 )
             test["saved"] = True
-        if sum(test["results"]) == _NUM_QUESTIONS and "game_unlock_time" not in test:
+        if test["results"] and all(test["results"]) and "game_unlock_time" not in test:
             test["game_unlock_time"] = time.time()
         _render_summary(test)
         if st.button("Start New Test", type="primary"):
@@ -71,11 +78,16 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None, 
             st.rerun()
         return
 
-    # --- Active question ---
+    render_active_question(test)
+
+
+def render_active_question(test):
+    """The current question of a test (or unit assessment) in progress."""
     idx = test["index"]
     question = test["questions"][idx]
+    total = len(test["questions"])
 
-    st.progress((idx + 1) / _NUM_QUESTIONS, text=f"Question {idx + 1} of {_NUM_QUESTIONS}")
+    st.progress((idx + 1) / total, text=f"Question {idx + 1} of {total}")
 
     if question.is_scenario:
         _render_scenario_test(test, idx, question)
@@ -83,7 +95,14 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None, 
         _render_single_test(test, idx, question)
 
 
-_UNIT_HINT = "Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive."
+def _finish_question(test):
+    test["index"] += 1
+    if test["index"] >= len(test["questions"]):
+        test["complete"] = True
+
+
+_UNIT_HINT = ("Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive. "
+              "Powers of ten can be typed as `3.2x10^-19` or `3.2e-19`.")
 
 
 def _check_classification(selected, question):
@@ -118,9 +137,7 @@ def _render_single_test(test, idx, question):
                 test["answers"].append(selected)
                 test["results"].append(result == "correct")
                 test["feedback"].append((result, distractor, question))
-                test["index"] += 1
-                if test["index"] >= _NUM_QUESTIONS:
-                    test["complete"] = True
+                _finish_question(test)
                 st.rerun()
             else:
                 st.warning("Please select an answer before submitting.")
@@ -137,9 +154,7 @@ def _render_single_test(test, idx, question):
                 test["answers"].append(selected)
                 test["results"].append(result == "correct")
                 test["feedback"].append((result, distractor, question))
-                test["index"] += 1
-                if test["index"] >= _NUM_QUESTIONS:
-                    test["complete"] = True
+                _finish_question(test)
                 st.rerun()
             else:
                 st.warning("Please select an answer before submitting.")
@@ -162,9 +177,7 @@ def _render_single_test(test, idx, question):
             test["answers"].append(display_answer)
             test["results"].append(result == "correct")
             test["feedback"].append((result, distractor, question))
-            test["index"] += 1
-            if test["index"] >= _NUM_QUESTIONS:
-                test["complete"] = True
+            _finish_question(test)
             st.rerun()
 
 
@@ -180,6 +193,9 @@ def _render_scenario_test(test, idx, question):
         st.session_state[part_answers_key] = []
 
     part_idx = st.session_state[part_idx_key]
+
+    if question.metadata.get("exam_style"):
+        st.caption(f"📝 Exam-style question · {question.question_type}")
 
     if question.scenario_context:
         st.info(question.scenario_context)
@@ -206,9 +222,7 @@ def _render_scenario_test(test, idx, question):
                 test["answers"].append(ans)
                 test["results"].append(res == "correct")
                 test["feedback"].append((res, dist, p))
-            test["index"] += 1
-            if test["index"] >= _NUM_QUESTIONS:
-                test["complete"] = True
+            _finish_question(test)
             del st.session_state[part_idx_key]
             del st.session_state[part_answers_key]
             st.rerun()
@@ -298,14 +312,26 @@ def _render_summary(test):
     else:
         st.warning(f"{score} out of {total} correct. Keep practising!")
 
+    render_review(test)
+
+
+def render_review(test):
+    """Every answer in a finished test, with feedback. The parts of a multi-part
+    question are shown under its scenario."""
     st.markdown("---")
     st.markdown("### Question Review")
 
+    last_context = None
     for q_num, (result_type, distractor, q_ref) in enumerate(test["feedback"], start=1):
         answer = test["answers"][q_num - 1]
         correct = test["results"][q_num - 1]
 
-        correct_str = f"{q_ref.correct_answer} {q_ref.unit}".strip()
+        context = q_ref.metadata.get("scenario_context")
+        if context and context != last_context:
+            st.info(context)
+        last_context = context
+
+        correct_str = format_answer(q_ref)
         if correct:
             st.success(f"**Q{q_num}:** {q_ref.question_text}  \nYour answer: **{answer}** ✅")
         elif result_type == "wrong_unit":

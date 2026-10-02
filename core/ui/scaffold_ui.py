@@ -1,12 +1,12 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-from core.ui.feedback_ui import _normalize_unit
+from core.ui.feedback_ui import _normalize_unit, parse_number
 
 
 def _is_correct(user_input, expected, tolerance=0.02):
     try:
-        student = float(str(user_input).replace(",", "").strip())
+        student = parse_number(user_input)
         exp = float(expected)
         if exp == 0:
             return abs(student) < 0.01

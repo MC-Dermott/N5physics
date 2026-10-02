@@ -1,5 +1,8 @@
+import re
+
 import streamlit as st
 
+from utils.answer_format import format_answer
 from utils.notes import format_math, split_equations
 from utils.vector_diagram import diagram_markdown
 
@@ -15,7 +18,22 @@ def _within_tolerance(user_val, target, tolerance=0.02):
 
 
 def _normalize_unit(unit: str) -> str:
-    return unit.strip().lower().replace("²", "^2").replace(" ", "")
+    unit = unit.strip().lower().replace("²", "^2").replace("³", "^3").replace(" ", "")
+    return re.sub(r"ohms?", "ω", unit)
+
+
+_SUPERSCRIPTS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹⁻", "0123456789-")
+# e.g. 3.2x10^19, 3.2 × 10^-19, 3.2*10^(−19), 3.2 × 10⁻¹⁹
+_SCI = re.compile(r"([+-]?(?:\d+\.?\d*|\.\d+))[x×*]10\^?\(?([+-]?\d+)\)?", re.IGNORECASE)
+
+
+def parse_number(text):
+    """A typed answer as a float; accepts scientific notation written as × 10^n."""
+    text = str(text).replace(",", "").replace(" ", "").replace("−", "-").translate(_SUPERSCRIPTS)
+    m = _SCI.fullmatch(text)
+    if m:
+        return float(m.group(1)) * 10 ** int(m.group(2))
+    return float(text)
 
 
 def check_answer(user_input, question, unit_input=None, tolerance=0.02):
@@ -24,7 +42,7 @@ def check_answer(user_input, question, unit_input=None, tolerance=0.02):
     If unit_input is provided and question.unit is non-empty, the unit is also checked.
     """
     try:
-        user_val = float(str(user_input).replace(",", "").strip())
+        user_val = parse_number(user_input)
     except (ValueError, TypeError):
         return "incorrect", None
 
@@ -57,7 +75,7 @@ def render_working(working):
 
 def render_feedback(result, distractor, question, show_working=True):
     """Render feedback after an answer is submitted."""
-    correct_str = f"{question.correct_answer} {question.unit}".strip()
+    correct_str = format_answer(question)
     is_classification = question.metadata.get("type") == "classification"
 
     if result == "correct":

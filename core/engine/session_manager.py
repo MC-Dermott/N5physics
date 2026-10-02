@@ -38,6 +38,9 @@ def _empty_past_paper_quiz():
 
 def reset_test():
     st.session_state.test = _empty_test()
+    # progress through a multi-part question left behind if a test was abandoned mid-question
+    for key in [k for k in st.session_state.keys() if k.startswith("scenario_part_")]:
+        del st.session_state[key]
 
 
 def reset_assessment():
