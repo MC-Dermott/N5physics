@@ -143,7 +143,7 @@ def car_journey(level="N5"):
     d3 = 0.5 * v * t3
     Fb = sig(Ek) / d3
     ex.on("Energy").num(f"The car stops between B and C, travelling {fmt(d3)} m. Calculate the average braking force.", Fb, "N",
-        wrong=[(sig(Ek) * d3, "Ew = Fd, so F = Ew ÷ d."), (m * v / t3 * 2, "Use the work done: all the Ek is transferred by the brakes.")],
+        wrong=[(sig(Ek) * d3, "Ew = Fd, so F = Ew ÷ d."), (m * v ** 2 / d3, "Ek = ½mv² — the ½ was missed.")],
         working=[r"E_w = E_k = Fd", rf"F = \frac{{{ltx(Ek)}}}{{{fmt(d3)}}} = {ltx(Fb)}\ \text{{N}}"])
     return ex.build("The graph shows how the velocity of a car changes during a short journey.", figure=fig)
 
@@ -207,7 +207,7 @@ def space_mission(level="N5"):
          ("It decreases, because air resistance disappears.", "Less air resistance would increase a."),
          ("It decreases, because the rocket gets heavier.", "The rocket loses mass as fuel burns.")])
     mp = pick(240, 450, 600, 900)
-    planet = pick("Venus", "Jupiter", "Saturn", "Neptune", "Moon")
+    planet = pick("Venus", "Mars", "Moon")   # bodies with a solid surface to land on
     g = PLANET_G[planet]
     Wp = mp * g
     ex.on("Weight").num(f"A probe of mass {mp} kg lands on a planet where its weight is {fmt(Wp)} N. Calculate the gravitational field strength there.",
@@ -242,8 +242,8 @@ def ski_jump(level="N5"):
         [("Energy is destroyed on the ramp.", "Energy is converted, never destroyed."),
          ("Her mass increases as she speeds up.", "Her mass doesn't change."),
          ("Ep can't be converted into Ek.", "It can — but some becomes heat too.")])
-    vh, t = pick(8, 10, 12), pick(1.2, 1.5, 2.0)
-    ex.on("Projectile Motion").num(f"She leaves the horizontal end of the ramp at {vh} m/s and is in the air for {t:g} s. "
+    vh, t = int(sig(v) * random.uniform(0.65, 0.85)), pick(1.2, 1.5, 2.0)
+    ex.on("Projectile Motion").num(f"Because of these losses, she actually leaves the horizontal end of the ramp at {vh} m/s. She is in the air for {t:g} s. "
         f"Calculate the horizontal distance she travels in the air.", vh * t, "m",
         wrong=[(0.5 * vh * t, "Horizontal velocity is constant — no ½."), (vh / t, "d = v × t.")],
         working=[rf"d_h = v_h t = {vh} \times {t:g} = {ltx(vh * t)}\ \text{{m}}"])
