@@ -180,6 +180,13 @@ from topics.electricity.electricity_exam_n5 import (
     gen_ec_led_resistor, gen_ec_divider_switch, gen_ec_transistor_explain,
     gen_ec_fuse, gen_ec_power_i2r, gen_ec_energy_time, gen_ec_toaster_statements,
 )
+from topics.electricity.electricity_higher import (
+    gen_he_peak_rms, gen_he_scope, gen_he_ac_explain,
+    gen_he_resistance_power, gen_he_divider, gen_he_circuit_explain,
+    gen_he_emf_calc, gen_he_emf_graph, gen_he_emf_explain,
+    gen_he_cap_charge, gen_he_cap_energy, gen_he_cap_curves,
+    gen_he_led_photon, gen_he_band_explain,
+)
 from topics.electricity.definitions_n5  import GENERATORS as electricity_n5_definitions
 from topics.electricity.definitions_higher import GENERATORS as electricity_higher_definitions
 
@@ -225,7 +232,7 @@ from utils.diagrams import with_diagram
 from utils.light_gate_diagram import light_gate_diagram
 from topics.exam_style import (
     n5_dynamics, n5_electricity, n5_radiation, n5_waves, n5_properties,
-    higher_odu, higher_particles_waves,
+    higher_odu, higher_particles_waves, higher_electricity,
 )
 
 from topics.skills.prefixes import (
@@ -554,6 +561,30 @@ QUAL_REGISTRY = {
             "Definitions": particles_waves_definitions,
         },
         "Electricity": {
+            "Monitoring and Measuring AC": {
+                "1 — Peak and r.m.s. Values":       gen_he_peak_rms,
+                "2 — Oscilloscope Traces":          gen_he_scope,
+                "3 — Explaining AC":                gen_he_ac_explain,
+            },
+            "Current, Potential Difference, Power and Resistance": {
+                "1 — Resistor Networks and Power":  gen_he_resistance_power,
+                "2 — Potential Dividers":           gen_he_divider,
+                "3 — Explaining Circuit Changes":   gen_he_circuit_explain,
+            },
+            "Electrical Sources and Internal Resistance": {
+                "1 — E = V + Ir":                   gen_he_emf_calc,
+                "2 — V–I Graphs":                   gen_he_emf_graph,
+                "3 — e.m.f. and t.p.d. Explained":  gen_he_emf_explain,
+            },
+            "Capacitors": {
+                "1 — Charge and Capacitance":       gen_he_cap_charge,
+                "2 — Energy Stored":                gen_he_cap_energy,
+                "3 — Charging and Discharging":     gen_he_cap_curves,
+            },
+            "Semiconductors and p-n Junctions": {
+                "1 — LED Photons and Band Gaps":    gen_he_led_photon,
+                "2 — Band Theory":                  gen_he_band_explain,
+            },
             "Definitions": electricity_higher_definitions,
         },
     },
@@ -609,6 +640,7 @@ _EXAM_STYLE = {
         "Our Dynamic Universe (Part 1)": higher_odu.SCENARIOS_PART1,
         "Our Dynamic Universe (Part 2)": higher_odu.SCENARIOS_PART2,
         "Particles and Waves":           higher_particles_waves.SCENARIOS,
+        "Electricity":                   higher_electricity.SCENARIOS,
     },
 }
 

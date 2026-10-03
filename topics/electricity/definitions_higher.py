@@ -52,6 +52,18 @@ DEFINITIONS = {
                       "(Ir).",
         "confusables": ["terminal potential difference", "internal resistance"],
     },
+    "ideal supply": {
+        "group": "Internal resistance",
+        "definition": "A supply with no internal resistance, so its terminal potential difference "
+                      "equals its e.m.f. whatever the current.",
+        "confusables": ["short-circuit current", "internal resistance"],
+    },
+    "open circuit": {
+        "group": "Internal resistance",
+        "definition": "A circuit with no current, so there are no lost volts and the terminal "
+                      "potential difference equals the e.m.f.",
+        "confusables": ["short-circuit current", "ideal supply"],
+    },
     "short-circuit current": {
         "group": "Internal resistance",
         "definition": "The maximum current from a source, when the external resistance is zero "
@@ -77,6 +89,24 @@ DEFINITIONS = {
     },
 
     # ── Semiconductors ─────────────────────────────────────────────────────────
+    "valence band": {
+        "group": "Semiconductors",
+        "definition": "The highest energy band occupied by electrons.",
+        "confusables": ["conduction band", "band gap"],
+        "traps": [("The valency band — the band that holds the outer electrons.",
+                   "The marking instructions do not accept 'valency' — it is the **valence** band.")],
+    },
+    "conduction band": {
+        "group": "Semiconductors",
+        "definition": "The first unfilled energy band above the valence band; electrons in it are "
+                      "free to take part in conduction.",
+        "confusables": ["valence band", "band gap"],
+    },
+    "band gap": {
+        "group": "Semiconductors",
+        "definition": "The energy difference between the valence band and the conduction band.",
+        "confusables": ["conduction band", "valence band"],
+    },
     "conductor": {
         "group": "Semiconductors",
         "definition": "A material whose conduction band is partly filled (or overlaps the "
@@ -97,7 +127,8 @@ DEFINITIONS = {
     },
     "doping": {
         "group": "Semiconductors",
-        "definition": "Adding impurity atoms to a semiconductor to increase its conductivity.",
+        "definition": "Adding specific impurities to a semiconductor during manufacture to "
+                      "increase its conductivity.",
         "confusables": ["n-type semiconductor", "p-type semiconductor"],
     },
     "n-type semiconductor": {
@@ -117,27 +148,33 @@ DEFINITIONS = {
     },
     "forward bias": {
         "group": "Semiconductors",
-        "definition": "A p–n junction connected with the p-type to the positive terminal, so "
-                      "current flows across the junction.",
+        "definition": "A p–n junction connected with the p-type to the positive terminal; this "
+                      "reduces the electric field in the junction, so it conducts.",
         "confusables": ["reverse bias"],
     },
     "reverse bias": {
         "group": "Semiconductors",
-        "definition": "A p–n junction connected with the p-type to the negative terminal, so "
-                      "the depletion layer widens and almost no current flows.",
+        "definition": "A p–n junction connected with the p-type to the negative terminal; this "
+                      "increases the electric field in the junction, so it does not conduct.",
         "confusables": ["forward bias"],
     },
     "light emitting diode (LED)": {
         "group": "Semiconductors",
-        "definition": "A forward-biased p–n junction that emits photons when electrons and "
-                      "holes recombine at the junction.",
-        "confusables": ["photovoltaic mode", "forward bias"],
+        "definition": "A forward-biased p–n junction diode in which electrons fall from the "
+                      "conduction band into the valence band, emitting photons.",
+        "confusables": ["photovoltaic effect", "forward bias"],
+        "traps": [("A diode that emits light when holes and electrons recombine at the junction.",
+                   "Answers about recombination with no reference to band theory score **0** "
+                   "(marking instructions; course reports 2016 and 2018).")],
     },
-    "photovoltaic mode": {
+    "photovoltaic effect": {
         "group": "Semiconductors",
-        "definition": "A p–n junction with no bias, in which absorbed photons create "
-                      "electron–hole pairs that produce a potential difference (e.g. a solar cell).",
+        "definition": "The production of a potential difference by a p–n junction when it absorbs "
+                      "photons (as in a solar cell or photodiode).",
         "confusables": ["light emitting diode (LED)"],
+        "traps": [("The emission of electrons from a metal surface when light shines on it.",
+                   "That is the **photoelectric** effect. A solar cell uses the photovoltaic effect "
+                   "(course reports 2017 and 2022: many could not name it).")],
     },
 }
 
@@ -166,8 +203,18 @@ STATEMENTS = [
     ("bands", "In an insulator the valence band is full and the conduction band is empty.", True,
      "The large band gap means no electrons can move into the conduction band."),
     ("led", "An LED emits light when it is reverse biased.", False,
-     "An LED emits light when **forward** biased — electrons and holes recombine at the "
-     "junction."),
+     "An LED emits light only when **forward** biased — electrons fall from the conduction band "
+     "into the valence band, emitting photons."),
+    ("semi_temp", "An increase in temperature decreases the conductivity of a semiconductor.", False,
+     "It **increases** the conductivity — more electrons reach the conduction band (2023 Paper 1 Q23)."),
+    ("redblue", "Blue LEDs have a larger band gap than red LEDs.", True,
+     "Blue photons have more energy, so the band gap is larger."),
+    ("redblue", "The p.d. across an LED determines the wavelength of the light it emits.", False,
+     "The **band gap** determines the photon energy and so the wavelength (2025 Paper 1 Q23)."),
+    ("ac_def", "An alternating current changes direction and instantaneous value with time.", True,
+     "Both parts are needed for the definition (course report 2024)."),
+    ("larger_R", "Charging a capacitor through a larger resistor reduces the maximum energy it stores.", False,
+     "The energy stored is ½CV² — it does not depend on the resistance; only the charging time changes."),
     ("semi_temp", "Increasing the temperature of a pure semiconductor decreases its resistance.",
      True, "More electrons gain enough energy to move into the conduction band."),
 ]
