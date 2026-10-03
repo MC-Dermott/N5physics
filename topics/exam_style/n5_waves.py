@@ -38,6 +38,27 @@ $v = f\lambda$ &nbsp; $d = vt$ &nbsp; $f = \frac{N}{t}$ &nbsp; $T = \frac{1}{f}$
 """,
 }
 
+NOTES["Wave Parameters and Behaviours"] = r"""## Wave parameters — exam technique
+
+$d = vt$ &nbsp; $v = f\lambda$ &nbsp; $T = \frac{1}{f}$ &nbsp; $f = \frac{N}{t}$ (t in seconds)
+
+- Transverse: particles vibrate at 90° to the energy direction; longitudinal (sound): parallel to it.
+- Amplitude = half the crest-to-trough height. Echoes: the wave goes there **and back**.
+- Longer wavelength → more diffraction; diffracted waves keep the same wavelength.
+"""
+NOTES["Electromagnetic Spectrum"] = r"""## The electromagnetic spectrum — exam technique
+
+Increasing wavelength: gamma, X-rays, ultraviolet, visible, infrared, microwaves, radio. All transverse, all 3.0 × 10⁸ m/s.
+
+- Convert GHz/MHz/nm. Maximum wavelength ↔ minimum frequency.
+- Name the **detector** (photodiode, CCD, GM tube, aerial…), not the device that contains it.
+"""
+NOTES["Refraction of Light"] = r"""## Refraction — exam technique
+
+- Into a denser material: speed ↓, wavelength ↓, **frequency unchanged**, bends **towards** the normal (if the angle of incidence > 0°).
+- Angles are measured from the **normal** (at 90° to the surface).
+"""
+
 
 def _ex(level):
     return Exam(UNIT, level, NOTES)
@@ -147,9 +168,65 @@ def thunderstorm(level="N5"):
     return ex.build("During a storm, lightning and thunder are produced at the same moment. Speed of sound in air = 340 m/s.")
 
 
+# ════════════════ Golf rangefinder: EM band → frequency → reflected pulse → refraction in the lens ════════════════
+
+def rangefinder(level="N5"):
+    ex = _ex(level)
+    nm = pick(850, 905, 940)
+    f = C / (nm * 1e-9)
+    ex.on("Electromagnetic Spectrum").choice(f"The rangefinder emits radiation of wavelength {nm} nm. Which band is this?", "infrared",
+        [("ultraviolet", "UV is shorter than visible light (about 10–400 nm)."), ("microwaves", "Microwaves are mm to cm."), ("visible light", "Visible is about 400–700 nm.")])
+    ex.on("Electromagnetic Spectrum").num("Calculate the frequency of this radiation.", f, "Hz",
+        wrong=[(C / nm, "Convert nm to m (× 10⁻⁹) — course report 2025."), (340 / (nm * 1e-9), "Use the speed of light.")],
+        working=[r"v = f\lambda", rf"f = \frac{{3.0\times10^8}}{{{nm}\times10^{{-9}}}} = {ltx(f)}\ \text{{Hz}}"])
+    d = pick(120, 150, 180, 210)
+    t = 2 * d / C
+    ex.on("Wave Parameters and Behaviours").num(f"A pulse reflects from a flag and returns {fmt(t)} s after it is sent. Calculate the distance to the flag.", d, "m",
+        wrong=[(2 * d, "The pulse goes there AND back — halve it (course report 2025)."), (340 * t / 2, "Use the speed of light.")],
+        working=[rf"d = vt = 3.0\times10^8 \times {ltx(t)} = {2 * d}\ \text{{m (there and back)}}", rf"\text{{distance}} = {d}\ \text{{m}}"])
+    ex.on("Electromagnetic Spectrum").choice("Which is a suitable detector for the rangefinder's radiation?", "a photodiode",
+        [("photographic film", "Detects IR, but not suitable for an instant electronic reading (course report 2025)."),
+         ("a black-bulb thermometer", "Far too slow for this application."), ("a Geiger-Müller tube", "That detects gamma radiation.")])
+    ex.on("Refraction of Light").choice("The pulse passes through the centre of the rangefinder's lens along its axis. Why doesn't its direction change?",
+        "It meets the lens surfaces along the normal (angle of incidence 0°), so only its speed changes.",
+        [("It does not slow down in the lens.", "It does slow down — only the direction is unchanged (course report 2024)."),
+         ("Infrared cannot be refracted.", "All light is refracted."), ("Its frequency changes instead.", "The frequency never changes.")])
+    return ex.build("Golfers use an infrared laser rangefinder to measure the distance to the flag. Speed of light = 3.0 × 10⁸ m/s.")
+
+
+# ════════════════ Ripple tank: f = N/t → wavelength → speed → diffraction ════════════════
+
+def ripple_tank(level="N5"):
+    ex = _ex(level)
+    N, t = pick((20, 8), (25, 10), (30, 12))
+    f = N / t
+    ex.on("Wave Parameters and Behaviours").num(f"{N} waves are produced in {t} s. Calculate the frequency of the waves.", f, "Hz",
+        wrong=[(t / N, "f = N ÷ t."), (N, "Divide by the time.")], working=[rf"f = \frac{{N}}{{t}} = \frac{{{N}}}{{{t}}} = {fmt(f)}\ \text{{Hz}}"])
+    n, L = pick((4, 0.12), (5, 0.20), (6, 0.18))
+    lam = L / n
+    ex.on("Wave Parameters and Behaviours").num(f"The distance across {n} complete waves is {L:g} m. Calculate the wavelength.", lam, "m",
+        wrong=[(L / (n + 1), f"There are exactly {n} wavelengths."), (L * n, "Divide the distance by the number of waves.")],
+        working=[rf"\lambda = \frac{{{L:g}}}{{{n}}} = {fmt(lam)}\ \text{{m}}"])
+    v = f * lam
+    ex.on("Wave Parameters and Behaviours").num("Calculate the speed of the waves.", v, "m/s",
+        wrong=[(f / lam, "v = f × λ."), (lam / f, "v = f × λ.")], working=[rf"v = f\lambda = {fmt(f)} \times {fmt(lam)} = {fmt(v)}\ \text{{m/s}}"])
+    ex.on("Wave Parameters and Behaviours").choice("The waves pass through a gap about the same size as their wavelength. What do they do?",
+        "They spread out in curved wavefronts with the same wavelength.",
+        [("They spread out and their wavelength gets shorter.", "The wavelength is unchanged (course reports 2017, 2022)."),
+         ("They pass straight through without spreading.", "A gap similar to the wavelength gives a lot of diffraction."),
+         ("They slow down and change direction.", "That's refraction.")])
+    ex.on("Wave Parameters and Behaviours").choice("Water waves are an example of which type of wave?", "Transverse — the water vibrates at 90° to the direction of energy transfer.",
+        [("Longitudinal — the water vibrates along the direction of energy transfer.", "That's sound."),
+         ("Transverse — the wave moves up and down.", "Describe the vibration relative to the energy direction (course report 2025)."),
+         ("Electromagnetic.", "Water waves are mechanical.")])
+    return ex.build("A student investigates water waves in a ripple tank.")
+
+
 SCENARIOS = {
     "Sonar":            sonar,
     "Radio in a Valley": radio_valley,
     "Waves at the Beach": beach_waves,
     "Thunderstorm":     thunderstorm,
+    "Laser Rangefinder": rangefinder,
+    "Ripple Tank":       ripple_tank,
 }

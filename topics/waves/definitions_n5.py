@@ -125,6 +125,14 @@ STATEMENTS = [
     ("normal", "The angle of refraction is measured between the refracted ray and the surface "
      "of the glass.", False,
      "Angles are measured from the **normal**, not the surface."),
+    ("refr_freq", "When light passes from air into glass its frequency stays the same.", True,
+     "Only the speed and wavelength change on refraction (course reports 2018, 2024)."),
+    ("refr_freq", "When light passes from air into glass its frequency decreases.", False,
+     "The frequency **never** changes on refraction — the speed and wavelength decrease."),
+    ("diff_wl", "Radio waves diffract more than microwaves around a hill.", True,
+     "Radio waves have the longer wavelength, and longer wavelengths diffract more."),
+    ("em_speed", "In a vacuum, gamma rays travel faster than radio waves.", False,
+     "All electromagnetic waves travel at the same speed, 3.0 × 10⁸ m/s."),
 ]
 
 GENERATORS = make_definition_generators("Waves", DEFINITIONS, STATEMENTS)

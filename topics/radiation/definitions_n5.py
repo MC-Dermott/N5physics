@@ -129,6 +129,12 @@ STATEMENTS = [
      "This is the definition of ionisation."),
     ("activity", "The activity of a source is measured in sieverts.", False,
      "Activity is measured in **becquerels** (Bq). The sievert is the unit of equivalent dose."),
+    ("chain", "In a chain reaction, neutrons released by one fission go on to split further nuclei.", True,
+     "This is how a single fission leads to continuous energy generation."),
+    ("chain", "In a chain reaction, the same nucleus keeps splitting again and again.", False,
+     "Different nuclei are split by the **neutrons** released (course report 2024)."),
+    ("uses", "Generating electricity in a nuclear power station is a use of nuclear radiation.", False,
+     "It is a use of nuclear **reactions** (fission). Uses of radiation include tracers and sterilising (course report 2023)."),
 ]
 
 GENERATORS = make_definition_generators("Radiation", DEFINITIONS, STATEMENTS)

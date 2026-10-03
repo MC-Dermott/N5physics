@@ -624,6 +624,8 @@ N5_PAST_PAPERS_ENTRIES = {
     ("Waves", "Refraction of Light"): _N5_WAVES_REFRACTION_OF_LIGHT,
     ("Waves", "Wave Speed"): _N5_WAVES_WAVE_SPEED,
     ("Waves", "Waves Combined"): _N5_WAVES_WAVES_COMBINED,
+    # Space has its own unit in the app; its questions are filed under Dynamics in the compilation.
+    ("Space", "Space Exploration"): _N5_DYNAMICS_SPACE_EXPLORATION,
 }
 
 
@@ -659,7 +661,7 @@ def has_past_papers(topic, question_type):
 
 PAST_PAPER_UNITS = {
     "Higher": ["Our Dynamic Universe", "Particles and Waves"],
-    "National 5": ["Dynamics", "Electricity", "Radiation", "Waves", "Properties"],
+    "National 5": ["Dynamics", "Electricity", "Radiation", "Waves", "Properties", "Space"],
 }
 
 

@@ -194,11 +194,21 @@ from topics.radiation.dose               import generate_dose
 from topics.radiation.half_life          import generate_half_life
 from topics.radiation.activity           import generate_activity
 from topics.radiation.definitions_n5     import GENERATORS as radiation_n5_definitions
+from topics.radiation.radiation_exam_n5  import (
+    gen_rd_dose, gen_rd_nature, gen_hl_activity, gen_hl_fission_power, gen_hl_explain,
+)
+from topics.space.space_n5               import (
+    gen_sp_weight, gen_sp_rocket, gen_sp_explain, gen_cs_lightyear, gen_cs_light_time, gen_cs_explain,
+)
+from topics.space.definitions_n5         import GENERATORS as space_n5_definitions
 
 from topics.waves.wave_speed             import generate_wave_speed
 from topics.waves.period_frequency       import generate_period_frequency
 from topics.waves.combined               import generate_waves_combined
 from topics.waves.definitions_n5         import GENERATORS as waves_n5_definitions
+from topics.waves.waves_exam_n5          import (
+    gen_wv_echo, gen_wv_parameters, gen_wv_behaviour, gen_em_calc, gen_em_bands, gen_rf_explain, gen_rf_calc,
+)
 
 from topics.properties.pressure          import generate_pressure
 from topics.properties.gas_laws          import generate_gas_laws
@@ -231,7 +241,7 @@ from topics.exam_style.base import EXAM_STYLE
 from utils.diagrams import with_diagram
 from utils.light_gate_diagram import light_gate_diagram
 from topics.exam_style import (
-    n5_dynamics, n5_electricity, n5_radiation, n5_waves, n5_properties,
+    n5_dynamics, n5_electricity, n5_radiation, n5_waves, n5_properties, n5_space,
     higher_odu, higher_particles_waves, higher_electricity,
 )
 
@@ -404,13 +414,48 @@ QUAL_REGISTRY = {
             "Dose":      generate_dose,
             "Half-Life": generate_half_life,
             "Activity":  generate_activity,
+            "Nuclear Radiation and Dosimetry": {
+                "1 — Absorbed and Equivalent Dose":   gen_rd_dose,
+                "2 — Radiation, Ionisation and Uses": gen_rd_nature,
+            },
+            "Half-Life, Fission and Fusion": {
+                "1 — Activity and Half-Life":         gen_hl_activity,
+                "2 — Power from Fission":             gen_hl_fission_power,
+                "3 — Half-Life, Fission and Fusion Explained": gen_hl_explain,
+            },
             "Definitions": radiation_n5_definitions,
         },
         "Waves": {
             "Wave Speed":        generate_wave_speed,
             "Period & Frequency": generate_period_frequency,
             "Waves Combined":    generate_waves_combined,
+            "Wave Parameters and Behaviours": {
+                "1 — Echoes":                         gen_wv_echo,
+                "2 — Amplitude, Wavelength and Frequency": gen_wv_parameters,
+                "3 — Describing Waves and Diffraction": gen_wv_behaviour,
+            },
+            "Electromagnetic Spectrum": {
+                "1 — Calculations (v = fλ, d = vt)":  gen_em_calc,
+                "2 — Bands, Detectors and Uses":      gen_em_bands,
+            },
+            "Refraction of Light": {
+                "1 — Explaining Refraction":          gen_rf_explain,
+                "2 — Wavelength in a Medium":         gen_rf_calc,
+            },
             "Definitions":       waves_n5_definitions,
+        },
+        "Space": {
+            "Space Exploration": {
+                "1 — Weight on Other Planets":        gen_sp_weight,
+                "2 — Rocket Launch (F = ma)":         gen_sp_rocket,
+                "3 — Satellites and Space Travel":    gen_sp_explain,
+            },
+            "Cosmology": {
+                "1 — Light-Years":                    gen_cs_lightyear,
+                "2 — Light Travel Time":              gen_cs_light_time,
+                "3 — Big Bang, Telescopes and Spectra": gen_cs_explain,
+            },
+            "Definitions": space_n5_definitions,
         },
         "Properties": {
             "Pressure": {
@@ -634,6 +679,7 @@ _EXAM_STYLE = {
         "Electricity": n5_electricity.SCENARIOS,
         "Radiation":   n5_radiation.SCENARIOS,
         "Waves":       n5_waves.SCENARIOS,
+        "Space":       n5_space.SCENARIOS,
         "Properties":  n5_properties.SCENARIOS,
     },
     "Higher": {
