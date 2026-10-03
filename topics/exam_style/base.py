@@ -1,19 +1,19 @@
 """Shared builder for exam-style questions — multi-part scenarios in the style of SQA papers.
 
-Each scenario sets up one context (a car, a circuit, a source…) and asks two to four parts on it,
-usually building from one calculation to the next and ending with an explain/state part, which is
-asked as multiple choice so that it is marked automatically. Every part keeps the topic's name as
-its question_type, so tests and unit assessments report results against the topic.
+Like real exam questions, a scenario sets up one context (a car journey, a circuit, a tracer…) and
+asks linked parts that cut across the unit's topics, usually building from one calculation to the
+next, with state/explain parts asked as multiple choice so that they are marked automatically.
+Each part is tagged with the topic it tests, so tests and unit assessments can report by topic.
 
     def _car(level="N5"):
-        ex = Exam("Dynamics", "Acceleration", level, NOTES)
-        ex.num("Calculate the acceleration of the car.", a, "m/s²",
-               wrong=[(v / t, "Use the CHANGE in speed: v − u.")],
-               working=[r"a = \\frac{v - u}{t}", ...])
-        ex.choice("Why ...?", "Because ...", [("Wrong reason", "Why it's wrong")])
+        ex = Exam("Dynamics", level, NOTES)
+        ex.on("Acceleration").num("Calculate the acceleration of the car.", a, "m/s²",
+                                  wrong=[(v / t, "Use the CHANGE in speed: v − u.")],
+                                  working=[r"a = \\frac{v - u}{t}", ...])
+        ex.on("Forces").choice("Why ...?", "Because ...", [("Wrong reason", "Why it's wrong")])
         return ex.build("A car accelerates from rest ...")
 
-    gen_acceleration_exam = exam_style(_car, _bike, _rocket)
+    SCENARIOS = {"Car Journey": _car, ...}
 """
 import math
 import random
@@ -71,11 +71,21 @@ def _steps(working):
 
 
 class Exam:
-    """Collects the parts of one exam-style scenario."""
+    """Collects the parts of one exam-style scenario. Call .on(topic) before each part (or run
+    of parts) to tag it with the topic it tests."""
 
-    def __init__(self, topic, qtype, level, notes=""):
-        self.topic, self.qtype, self.level, self.notes = topic, qtype, level, notes
+    def __init__(self, unit, level, notes=None):
+        self.unit, self.level, self.notes = unit, level, notes or {}
+        self.topic = None
         self.parts = []
+
+    def on(self, topic):
+        self.topic = topic
+        return self
+
+    def _part_fields(self):
+        assert self.topic, "call .on(topic) before adding a part"
+        return dict(topic=self.unit, question_type=self.topic, level=self.level)
 
     def num(self, text, answer, unit, wrong=(), working=(), scaffold=(), sf=3):
         """A calculation part. wrong: (value, mistake) pairs — values that come from a common
@@ -85,14 +95,14 @@ class Exam:
         opts = [{"value": answer, "mistake": None, "working": work}]
         for value, mistake in wrong:
             v = sig(value, sf)
-            if not math.isfinite(v) or any(
-                    math.isclose(v, o["value"], rel_tol=0.03) for o in opts):
+            if not math.isfinite(v) or any(math.isclose(v, o["value"], rel_tol=0.03) for o in opts):
                 continue
             opts.append({"value": v, "mistake": mistake, "working": work,
                          "display": f"{fmt(v)} {unit}".strip()})
         steps = [{"question": p, "answer": sig(a, sf), "unit": u} for p, a, u in scaffold]
-        q = make_question(text, answer, opts, unit, scaffold=steps, notes=self.notes,
-                          topic=self.topic, question_type=self.qtype, level=self.level)
+        fields = self._part_fields()
+        q = make_question(text, answer, opts, unit, scaffold=steps, notes=self.notes.get(self.topic, ""),
+                          topic=fields["topic"], question_type=fields["question_type"], level=self.level)
         self.parts.append(q)
         return q
 
@@ -102,10 +112,9 @@ class Exam:
         options = [correct] + [w for w, _ in wrong]
         random.shuffle(options)
         q = PhysicsQuestion(
-            question_text=text, correct_answer=correct, unit="", topic=self.topic,
-            question_type=self.qtype, level=self.level, notes=self.notes, working=work,
-            distractors=[{"value": w, "mistake": why, "working": work} for w, why in wrong],
-            metadata={"type": "classification", "options": options},
+            question_text=text, correct_answer=correct, unit="", notes=self.notes.get(self.topic, ""),
+            working=work, distractors=[{"value": w, "mistake": why, "working": work} for w, why in wrong],
+            metadata={"type": "classification", "options": options}, **self._part_fields(),
         )
         self.parts.append(q)
         return q
@@ -114,14 +123,14 @@ class Exam:
         for part in self.parts:
             # lets a test's review show each part under the scenario it came from
             part.metadata["scenario_context"] = context
-        metadata = {"exam_style": True}
+        covers = list(dict.fromkeys(p.question_type for p in self.parts))
+        metadata = {"exam_style": True, "covers": covers}
         if figure is not None:
             metadata["main_figure"] = figure
         return PhysicsQuestion(
             question_text=context.split("\n\n")[0], correct_answer=0.0, unit="",
-            topic=self.topic, question_type=self.qtype, level=self.level,
-            is_scenario=True, scenario_context=context, parts=self.parts,
-            metadata=metadata,
+            topic=self.unit, question_type=EXAM_STYLE, level=self.level,
+            is_scenario=True, scenario_context=context, parts=self.parts, metadata=metadata,
         )
 
 
@@ -151,34 +160,3 @@ def graph(points, xlabel="Time (s)", ylabel="Velocity (m/s)", labels=None, smoot
     return fig
 
 
-def exam_style(*builders):
-    """A topic's Exam Style generator: one of its scenarios at random. The scenarios are kept
-    on .variants so a test can deal each one before repeating any."""
-    def generate(level="N5"):
-        return random.choice(builders)(level=level)
-
-    generate.variants = builders
-    return generate
-
-
-def mark_exam_style(q):
-    """Tags an existing multi-part generator's question as exam style (for reused generators)."""
-    q.metadata["exam_style"] = True
-    if q.is_scenario:
-        for part in q.parts:
-            part.metadata.setdefault("scenario_context", q.scenario_context)
-    return q
-
-
-def reuse(gen, qtype=None):
-    """Wraps an existing multi-part generator as an exam-style variant."""
-    def build(level="N5"):
-        q = gen(level=level)
-        if qtype:
-            q.question_type = qtype
-            for part in q.parts:
-                if part.metadata.get("type") != "explain":
-                    part.question_type = qtype
-        return mark_exam_style(q)
-
-    return build

@@ -18,7 +18,6 @@ from core.ui.student_dashboard_ui import render_student_dashboard
 from core.data.backgrounds import get_background_videos
 from core.data.examples import get_examples, get_canonical_question, notes_for, format_example
 from utils.notes import format_math
-from topics.exam_style.base import EXAM_STYLE
 
 st.set_page_config(page_title="Physics Practice", layout="centered")
 
@@ -270,10 +269,6 @@ if sub_types and mode != "Test":
         st.session_state.last_sub_type = sub_type
         reset_test()
         st.session_state.quiz = {"current_question": None}
-elif mode == "Test" and is_exam_style_test(qualification, topic, question_type):
-    # The test is drawn from the exam-style questions, so show their notes and example.
-    sub_type = EXAM_STYLE
-    st.session_state.pop("last_sub_type", None)
 else:
     # A Test mixes question styles within the topic rather than pinning one.
     sub_type = None

@@ -138,7 +138,8 @@ def _render_scenario(question, user_id, qualification):
     render_widget(question)
 
     if question.metadata.get("exam_style"):
-        st.caption("📝 Exam-style question — several linked parts, like an SQA paper.")
+        st.caption("📝 Exam-style question — linked parts across the unit, like an SQA paper. Covers: "
+                   + ", ".join(question.metadata.get("covers", [])))
 
     if question.scenario_context:
         st.info(question.scenario_context)

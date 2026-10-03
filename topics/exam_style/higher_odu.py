@@ -1,4 +1,4 @@
-"""Higher Our Dynamic Universe — exam-style multi-part questions, one generator per topic.
+"""Higher Our Dynamic Universe — exam-style questions that cut across the unit's topics, like SQA paper questions.
 
 Recognised wrong answers follow the Higher marking instructions and course reports: sign errors in
 the equations of motion (deceleration taken as positive, g not negative going up), the change in
@@ -10,9 +10,7 @@ wavelength instead of the change.
 import math
 import random
 
-from topics.dynamics.projectile_higher import generate_projectile_exam_mixed
-from topics.dynamics.towing import gen_exam_style as gen_towing_exam_style
-from topics.exam_style.base import Exam, T, exam_style, fmt, graph, ltx, pick, reuse, sig
+from topics.exam_style.base import Exam, T, fmt, graph, ltx, pick, sig
 
 UNIT1 = "Our Dynamic Universe (Part 1)"
 UNIT2 = "Our Dynamic Universe (Part 2)"
@@ -95,483 +93,278 @@ $z = \frac{\lambda_{obs} - \lambda_{rest}}{\lambda_{rest}}$ &nbsp; $z = \frac{v}
 }
 
 
-def _ex(qtype, level, unit=UNIT1):
-    return Exam(unit, qtype, level, NOTES[qtype])
+def _ex(level, unit=UNIT1):
+    return Exam(unit, level, NOTES)
 
 
-# ════════════════ Equations of Motion ════════════════
+# ════════════════════════════ Part 1 ════════════════════════════
 
-def _eom_braking(level="Higher"):
-    ex = _ex("Equations of Motion", level)
-    u, a = pick(18, 20, 24, 25, 30), -pick(4.0, 5.0, 6.0, 7.5)
-    s = -u ** 2 / (2 * a)
-    ex.num("Calculate the distance the car travels while braking.", s, "m",
-           wrong=[(u ** 2 / -a, "v² = u² + 2as: don't forget the 2."), (u ** 2 / (2 * a), "a is negative (deceleration), so s = −u² ÷ 2a is positive."),
-                  (u / -a, "Use v² = u² + 2as.")],
-           working=[r"v^2 = u^2 + 2as", rf"0 = {u}^2 + 2 \times ({a:g}) \times s", rf"s = {ltx(s)}\ \text{{m}}"])
-    t = -u / a
-    ex.num("Calculate the time taken for the car to stop.", t, "s",
-           wrong=[(u * -a, "v = u + at → t = (v − u) ÷ a."), (2 * t, "v = u + at.")],
-           working=[r"v = u + at", rf"0 = {u} + ({a:g})t", rf"t = {ltx(t)}\ \text{{s}}"])
-    t1 = pick(1.0, 1.5, 2.0)
-    s1 = u * t1 + 0.5 * a * t1 ** 2
-    ex.num(f"Calculate the distance travelled in the first {t1:g} s of braking.", s1, "m",
-           wrong=[(u * t1 - 0.5 * a * t1 ** 2, "The car is decelerating: a is NEGATIVE in s = ut + ½at²."), (u * t1, "Include the ½at² term.")],
-           working=[r"s = ut + \tfrac{1}{2}at^2", rf"s = ({u} \times {t1:g}) + \tfrac{{1}}{{2}} \times ({a:g}) \times {t1:g}^2", rf"s = {ltx(s1)}\ \text{{m}}"])
-    return ex.build(f"A car travelling at {u} m/s brakes with a constant deceleration of {-a:g} m/s² until it stops.")
-
-
-def _eom_throw(level="Higher"):
-    ex = _ex("Equations of Motion", level)
-    u = pick(8.0, 9.8, 12.0, 14.7, 15.0)
-    h = u ** 2 / (2 * G)
-    ex.num("Calculate the maximum height reached by the ball above the point of release.", h, "m",
-           wrong=[(u ** 2 / G, "v² = u² + 2as — the 2 is needed."), (u / G, "Use v² = u² + 2as with v = 0.")],
-           working=[r"v^2 = u^2 + 2as", rf"0 = {u:g}^2 + 2 \times (-9.8) \times s", rf"s = {ltx(h)}\ \text{{m}}"])
-    t = u / G
-    ex.num("Calculate the time taken to reach the maximum height.", t, "s",
-           wrong=[(u * G, "v = u + at → t = −u ÷ a."), (2 * t, "That's the time to return to the hand.")],
-           working=[r"v = u + at", rf"0 = {u:g} + (-9.8)t", rf"t = {ltx(t)}\ \text{{s}}"])
-    hd = pick(1.0, 1.5, 2.0)
-    v = -math.sqrt(u ** 2 + 2 * G * hd)
-    ex.num(f"The ball misses the catcher and lands {hd:g} m below the point of release. Calculate its velocity just before it lands "
-           f"(take upwards as positive).", v, "m/s",
-           wrong=[(-v, "The ball is moving DOWN — the velocity is negative."), (-math.sqrt(u ** 2 - 2 * G * hd) if u ** 2 > 2 * G * hd else -u, "s is negative (below the release point) and a is negative: 2as is positive."),
-                  (-u, "It falls further than its release height, so it's faster than u.")],
-           working=[r"v^2 = u^2 + 2as", rf"v^2 = {u:g}^2 + 2 \times (-9.8) \times (-{hd:g})", rf"v = -{ltx(-v)}\ \text{{m/s}}"])
-    return ex.build(f"A ball is thrown vertically upwards with a speed of {u:g} m/s. Air resistance can be ignored.")
+def car_and_trailer(level="Higher"):
+    ex = _ex(level)
+    m1, m2 = pick(1200, 1400, 1600), pick(400, 600, 800)
+    f1, f2 = pick(300, 400, 500), pick(150, 200, 250)
+    F = pick(2400, 3000, 3600)
+    a = (F - f1 - f2) / (m1 + m2)
+    ex.on("Towing").num(f"The car's driving force is {F} N. The frictional forces are {f1} N on the car and {f2} N on the trailer. "
+        f"Calculate the acceleration of the car and trailer.", a, "m/s²",
+        wrong=[(F / (m1 + m2), "Subtract BOTH frictional forces first."), ((F - f1 - f2) / m1, "Use the TOTAL mass (car + trailer)."),
+               ((F - f1) / (m1 + m2), "Include the trailer's friction too.")],
+        working=[r"F_{un} = F - f_{car} - f_{trailer}", rf"a = \frac{{{F} - {f1} - {f2}}}{{{m1} + {m2}}} = {ltx(a)}\ \text{{m/s}}^2"])
+    Tn = m2 * sig(a) + f2
+    ex.on("Towing").num("Calculate the tension in the tow bar.", Tn, "N",
+        wrong=[(m2 * sig(a), "The tension must also overcome the trailer's friction: T = ma + f."), (F - f1, "Isolate the TRAILER: T − f = m_trailer × a.")],
+        working=[r"T - f_{trailer} = m_{trailer}a", rf"T = {m2} \times {ltx(a)} + {f2} = {ltx(Tn)}\ \text{{N}}"])
+    t = pick(5, 6, 8, 10)
+    v = sig(a) * t
+    ex.on("Equations of Motion").num(f"The car starts from rest. Calculate its speed after {t} s.", v, "m/s",
+        wrong=[(sig(a) / t, "v = u + at."), (0.5 * sig(a) * t ** 2, "That's the displacement; v = u + at.")],
+        working=[rf"v = u + at = 0 + {ltx(a)} \times {t} = {ltx(v)}\ \text{{m/s}}"])
+    s = 0.5 * sig(a) * t ** 2
+    ex.on("Equations of Motion").num(f"Calculate the distance travelled in these {t} s.", s, "m",
+        wrong=[(sig(a) * t ** 2, "s = ut + ½at² — include the ½."), (v * t, "The car accelerates; use s = ut + ½at².")],
+        working=[rf"s = ut + \tfrac{{1}}{{2}}at^2 = 0 + \tfrac{{1}}{{2}} \times {ltx(a)} \times {t}^2 = {ltx(s)}\ \text{{m}}"])
+    ex.on("Energy, Work and Power").num("Calculate the work done by the driving force in this time.", F * sig(s), "J",
+        wrong=[((F - f1 - f2) * sig(s), "Use the DRIVING force for the work it does."), (F / sig(s), "E_w = F × d.")],
+        working=[rf"E_w = Fd = {F} \times {ltx(s)} = {ltx(F * sig(s))}\ \text{{J}}"])
+    ex.on("Towing").choice("The friction on the trailer increases but the acceleration is kept the same. What happens to the tension in the tow bar?",
+        "It increases — T − f = ma, so a larger friction needs a larger tension for the same acceleration.",
+        [("It decreases.", "Friction opposes the tension, so more tension is needed."),
+         ("It stays the same, because the acceleration is unchanged.", "Only the resultant on the trailer is unchanged."),
+         ("It becomes zero.", "The trailer still needs to be pulled.")])
+    return ex.build(f"A car of mass {m1} kg tows a trailer of mass {m2} kg along a level road.")
 
 
-def _eom_runway(level="Higher"):
-    ex = _ex("Equations of Motion", level)
-    a, s = pick(2.0, 2.5, 3.0, 3.5), pick(1200, 1500, 1800, 2000)
-    v = math.sqrt(2 * a * s)
-    ex.num(f"The aircraft accelerates uniformly from rest at {a:g} m/s² along {s} m of runway. Calculate its speed at the end of the runway.",
-           v, "m/s",
-           wrong=[(2 * a * s, "Take the square root: v = √(2as)."), (math.sqrt(a * s), "v² = u² + 2as — include the 2."), (a * s, "Use v² = u² + 2as.")],
-           working=[r"v^2 = u^2 + 2as", rf"v^2 = 0 + 2 \times {a:g} \times {s}", rf"v = {ltx(v)}\ \text{{m/s}}"])
-    t = sig(v) / a
-    ex.num("Calculate the time taken to travel along the runway.", t, "s",
-           wrong=[(sig(v) * a, "t = (v − u) ÷ a."), (s / sig(v), "The speed isn't constant — use v = u + at (or s = ½(u+v)t).")],
-           working=[r"v = u + at", rf"{ltx(v)} = 0 + {a:g}t", rf"t = {ltx(t)}\ \text{{s}}"])
-    ex.num("Calculate the average speed of the aircraft along the runway.", sig(v) / 2, "m/s",
-           wrong=[(sig(v), "That's the final speed."), (s / t / 2, "Average speed = total distance ÷ total time.")],
-           working=[rf"\bar{{v}} = \frac{{s}}{{t}} = \frac{{{s}}}{{{ltx(t)}}} = {ltx(sig(v) / 2)}\ \text{{m/s}}"])
-    return ex.build("An aircraft takes off from a runway.")
+def skier(level="Higher"):
+    ex = _ex(level)
+    m, th = pick(55, 60, 70, 80), pick(15, 20, 25, 30)
+    Wp = m * G * math.sin(math.radians(th))
+    ex.on("Components of Vectors").num("Calculate the component of the skier's weight acting down the slope.", Wp, "N",
+        wrong=[(m * G * math.cos(math.radians(th)), "Down the slope is mg sin θ."), (m * G, "Only the component along the slope.")],
+        working=[rf"W_\parallel = mg\sin\theta = {m} \times 9.8 \times \sin {th}^\circ = {ltx(Wp)}\ \text{{N}}"])
+    f = sig(Wp * random.uniform(0.25, 0.5), 2)
+    a = (sig(Wp) - f) / m
+    ex.on("Components of Vectors").num(f"The frictional force on the skier is {fmt(f)} N. Calculate her acceleration down the slope.", a, "m/s²",
+        wrong=[(sig(Wp) / m, "Subtract the friction first."), ((sig(Wp) + f) / m, "Friction acts UP the slope.")],
+        working=[rf"a = \frac{{{ltx(Wp)} - {fmt(f)}}}{{{m}}} = {ltx(a)}\ \text{{m/s}}^2"])
+    s = pick(40, 50, 60, 80)
+    v = math.sqrt(2 * sig(a) * s)
+    ex.on("Equations of Motion").num(f"She starts from rest. Calculate her speed after sliding {s} m down the slope.", v, "m/s",
+        wrong=[(2 * sig(a) * s, "Take the square root."), (math.sqrt(sig(a) * s), "v² = u² + 2as.")],
+        working=[rf"v^2 = u^2 + 2as = 0 + 2 \times {ltx(a)} \times {s}", rf"v = {ltx(v)}\ \text{{m/s}}"])
+    ex.on("Energy, Work and Power").num("Calculate the work done against friction over this distance.", f * s, "J",
+        wrong=[(sig(Wp) * s, "Use the FRICTIONAL force."), (f / s, "E_w = F × d.")],
+        working=[rf"E_w = Fd = {fmt(f)} \times {s} = {ltx(f * s)}\ \text{{J}}"])
+    ex.on("Components of Vectors").choice("The slope becomes steeper. What happens to the component of her weight down the slope?",
+        "It increases, because sin θ increases as θ increases.",
+        [("It decreases, because cos θ decreases.", "Down the slope is mg sin θ."), ("It stays the same.", "Weight is the same, the component changes."),
+         ("It decreases, because she has less contact with the snow.", "The component down the slope increases.")])
+    return ex.build(f"A skier of mass {m} kg slides down a straight slope at {th}° to the horizontal.")
 
 
-gen_eom_exam = exam_style(_eom_braking, _eom_throw, _eom_runway)
-
-
-# ════════════════ Graphs of Motion ════════════════
-
-def _gom_ball(level="Higher"):
-    ex = _ex("Graphs of Motion", level)
-    u = pick(9.8, 14.7, 19.6)
-    t_top = u / G
-    fig = graph([(0, u), (t_top, 0), (2 * t_top, -u)], labels=["", "P", ""])
-    ex.num("Use the graph to calculate the acceleration of the ball.", -G, "m/s²",
-           wrong=[(G, "The gradient is negative (the line slopes down)."), (u / (2 * t_top), "Gradient = Δv ÷ Δt over a straight section.")],
-           working=[rf"a = \frac{{\Delta v}}{{\Delta t}} = \frac{{0 - {u:g}}}{{{t_top:g}}} = -9.8\ \text{{m/s}}^2"])
-    h = 0.5 * u * t_top
-    ex.num("Calculate the maximum height reached by the ball.", h, "m",
-           wrong=[(u * t_top, "Area of a triangle = ½ × base × height."), (0, "That's the displacement at the END; the maximum height is at P.")],
-           working=[rf"s = \text{{area}} = \tfrac{{1}}{{2}} \times {t_top:g} \times {u:g} = {ltx(h)}\ \text{{m}}"])
-    ex.num(f"Calculate the displacement of the ball after {2 * t_top:g} s.", 0, "m",
-           wrong=[(2 * h, "Area BELOW the axis is negative displacement — the two areas cancel."), (h, "Include the area below the axis (negative).")],
-           working=[rf"s = (+{ltx(h)}) + (-{ltx(h)}) = 0\ \text{{m}}"])
-    ex.choice("Which statement describes the acceleration–time graph for the ball's flight?",
-              "A horizontal line at −9.8 m/s² for the whole flight.",
-              [("A line that is zero at P, the top of the flight.", "The acceleration is −9.8 m/s² even at the top; only the VELOCITY is zero."),
-               ("A horizontal line at +9.8 m/s² while rising and −9.8 m/s² while falling.", "The acceleration is always downwards."),
-               ("A straight line sloping down from +9.8 to −9.8 m/s².", "That's the shape of the VELOCITY–time graph.")])
-    return ex.build(f"A ball is thrown vertically upwards with a speed of {u:g} m/s and caught at the same height. The graph shows its "
-                    f"velocity (upwards positive). Air resistance can be ignored.", figure=fig)
-
-
-def _gom_lift(level="Higher"):
-    ex = _ex("Graphs of Motion", level)
-    v = pick(2.0, 2.5, 3.0, 4.0)
+def lift_journey(level="Higher"):
+    ex = _ex(level)
+    m = pick(60, 70, 80)
+    v = pick(2.0, 3.0, 4.0)
     t1, t2, t3 = pick(2, 2.5, 4), pick(6, 8, 10), pick(2, 4, 5)
     T1, T2, T3 = t1, t1 + t2, t1 + t2 + t3
     fig = graph([(0, 0), (T1, v), (T2, v), (T3, 0)], labels=["", "A", "B", "C"])
-    ex.num("Calculate the acceleration of the lift between B and C.", -v / t3, "m/s²",
-           wrong=[(v / t3, "The lift slows down — the acceleration is negative.")],
-           working=[rf"a = \frac{{0 - {v:g}}}{{{t3:g}}} = {ltx(-v / t3)}\ \text{{m/s}}^2"])
-    s = 0.5 * v * t1 + v * t2 + 0.5 * v * t3
-    ex.num("Calculate the total distance the lift rises.", s, "m",
-           wrong=[(v * T3, "The first and last sections are triangles."), (v * t2, "Include all three sections.")],
-           working=[rf"s = \tfrac{{1}}{{2}}({t1:g})({v:g}) + ({t2:g})({v:g}) + \tfrac{{1}}{{2}}({t3:g})({v:g}) = {ltx(s)}\ \text{{m}}"])
-    ex.choice("Which describes the acceleration–time graph for this journey?",
-              f"Positive constant ({fmt(v / t1)} m/s²) from 0 to A, zero from A to B, negative constant from B to C.",
-              [("Zero throughout, because the lift ends at rest.", "The lift accelerates and decelerates."),
-               ("Positive throughout, because the lift moves upwards the whole time.", "The direction of motion isn't the direction of acceleration."),
-               ("Increasing from 0 to A, constant from A to B, decreasing from B to C.", "That's the shape of the velocity–time graph.")])
-    return ex.build("The velocity–time graph shows the motion of a lift moving upwards between two floors.", figure=fig)
+    a = v / t1
+    ex.on("Graphs of Motion").num("Use the graph to calculate the acceleration of the lift in the first stage.", a, "m/s²",
+        wrong=[(t1 / v, "Gradient = Δv ÷ Δt."), (v * t1, "The gradient, not the area.")],
+        working=[rf"a = \frac{{{v:g} - 0}}{{{t1:g}}} = {ltx(a)}\ \text{{m/s}}^2"])
+    ex.on("Effective Weight").num(f"A passenger of mass {m} kg stands on scales in the lift. Calculate the reading on the scales during the first stage.",
+        m * (G + sig(a)), "N",
+        wrong=[(m * (G - sig(a)), "Accelerating UP: R = m(g + a)."), (m * G, "The lift is accelerating, so R ≠ mg.")],
+        working=[r"R - mg = ma", rf"R = {m}(9.8 + {ltx(a)}) = {ltx(m * (G + sig(a)))}\ \text{{N}}"])
+    ex.on("Effective Weight").choice("What does the scale read between B and C?", "Less than the passenger's weight.",
+        [("More than the passenger's weight.", "Slowing down while moving up is a DOWNWARD acceleration."),
+         ("Exactly the passenger's weight.", "The lift is accelerating (decelerating)."), ("Zero.", "Only in free fall.")])
+    h = 0.5 * v * t1 + v * t2 + 0.5 * v * t3
+    ex.on("Graphs of Motion").num("Calculate the height the lift rises.", h, "m",
+        wrong=[(v * T3, "The first and last sections are triangles."), (v * t2, "Include every section.")],
+        working=[rf"h = \text{{area}} = \tfrac{{1}}{{2}}({t1:g})({v:g}) + ({t2:g})({v:g}) + \tfrac{{1}}{{2}}({t3:g})({v:g}) = {ltx(h)}\ \text{{m}}"])
+    Ep = m * G * sig(h)
+    ex.on("Energy, Work and Power").num("Calculate the gravitational potential energy gained by the passenger.", Ep, "J",
+        wrong=[(m * sig(h), "Ep = mgh.")], working=[rf"E_p = mgh = {m} \times 9.8 \times {ltx(h)} = {ltx(Ep)}\ \text{{J}}"])
+    return ex.build("The graph shows the velocity of a lift moving upwards between floors.", figure=fig)
 
 
-gen_gom_exam = exam_style(_gom_ball, _gom_lift)
+def trolley_collision(level="Higher"):
+    ex = _ex(level)
+    m1, m2, u = random.choice([(0.8, 1.2, 0.5), (1.0, 1.5, 0.6), (0.5, 0.75, 0.8), (2.0, 1.0, 0.9)])
+    v = m1 * u / (m1 + m2)
+    ex.on("Momentum and Impulse").num(f"Trolley A ({m1:g} kg) moving at {u:g} m/s hits stationary trolley B ({m2:g} kg) and they stick together. "
+        f"Calculate their velocity just after the collision.", v, "m/s",
+        wrong=[(m1 * u / m2, "Both trolleys move together: use (m₁ + m₂)."), (u / 2, "Use conservation of momentum.")],
+        working=[r"m_1u_1 = (m_1 + m_2)v", rf"{m1:g} \times {u:g} = ({m1:g} + {m2:g})v", rf"v = {ltx(v)}\ \text{{m/s}}"])
+    Ek1, Ek2 = 0.5 * m1 * u ** 2, 0.5 * (m1 + m2) * sig(v) ** 2
+    ex.on("Momentum and Impulse").num("Calculate the kinetic energy lost in the collision.", Ek1 - Ek2, "J",
+        wrong=[(Ek1, "Subtract the Ek after."), (Ek2, "Find before − after.")],
+        working=[rf"E_{{k,before}} = {ltx(Ek1)}\ \text{{J}}", rf"E_{{k,after}} = {ltx(Ek2)}\ \text{{J}}", rf"\Delta E_k = {ltx(Ek1 - Ek2)}\ \text{{J}}"])
+    ex.on("Momentum and Impulse").choice("Is the collision elastic or inelastic?", "Inelastic — kinetic energy is not conserved.",
+        [("Elastic — momentum is conserved.", "Momentum is conserved in all collisions."), ("Elastic — Ek is conserved.", "Ek was lost."),
+         ("Inelastic — momentum is not conserved.", "Momentum IS conserved.")])
+    t_ms = pick(40, 50, 80)
+    F = m2 * sig(v) / (t_ms / 1000)
+    ex.on("Momentum and Impulse").num(f"The collision lasts {t_ms} ms. Calculate the average force on trolley B.", F, "N",
+        wrong=[(m2 * sig(v) / t_ms, "Convert ms to s."), (m1 * u / (t_ms / 1000), "Use B's change in momentum.")],
+        working=[rf"F = \frac{{\Delta p}}{{t}} = \frac{{{m2:g} \times {ltx(v)}}}{{{t_ms}\times10^{{-3}}}} = {ltx(F)}\ \text{{N}}"])
+    a = -pick(0.05, 0.08, 0.1)
+    s = -sig(v) ** 2 / (2 * a)
+    ex.on("Equations of Motion").num(f"Friction then decelerates the trolleys at {-a:g} m/s². Calculate how far they travel before stopping.", s, "m",
+        wrong=[(sig(v) ** 2 / -a, "v² = u² + 2as — include the 2."), (sig(v) / -a, "Use v² = u² + 2as.")],
+        working=[rf"0 = {ltx(v)}^2 + 2({a:g})s", rf"s = {ltx(s)}\ \text{{m}}"])
+    return ex.build("Two trolleys collide on a level track.")
 
 
-# ════════════════ Components of Vectors ════════════════
-
-def _cov_slope(level="Higher"):
-    ex = _ex("Components of Vectors", level)
-    m, th = pick(2.0, 3.5, 5.0, 8.0, 12.0), pick(15, 20, 25, 30, 35)
-    W_par = m * G * math.sin(math.radians(th))
-    ex.num("Calculate the component of the block's weight acting down the slope.", W_par, "N",
-           wrong=[(m * G * math.cos(math.radians(th)), "Down the slope is mg sin θ; mg cos θ is perpendicular to the slope."),
-                  (m * math.sin(math.radians(th)), "Use the weight (mg).")],
-           working=[r"W_\parallel = mg\sin\theta", rf"W_\parallel = {m:g} \times 9.8 \times \sin {th}^\circ = {ltx(W_par)}\ \text{{N}}"])
-    Ff = sig(W_par * random.uniform(0.3, 0.7), 2)
-    a = (sig(W_par) - Ff) / m
-    ex.num(f"A constant frictional force of {Ff:g} N acts on the block. Calculate its acceleration down the slope.", a, "m/s²",
-           wrong=[(sig(W_par) / m, "Subtract the friction to find the unbalanced force."), ((sig(W_par) + Ff) / m, "Friction acts UP the slope — subtract it."),
-                  (G * math.sin(math.radians(th)), "Include the frictional force.")],
-           working=[rf"F_{{un}} = {ltx(W_par)} - {Ff:g} = {ltx(sig(W_par) - Ff)}\ \text{{N}}", r"a = \frac{F_{un}}{m}", rf"a = {ltx(a)}\ \text{{m/s}}^2"])
-    ex.choice("The angle of the slope is increased. What happens to the component of the weight down the slope?",
-              "It increases, because sin θ increases as θ increases.",
-              [("It decreases, because cos θ decreases.", "The component DOWN the slope is mg sin θ."),
-               ("It stays the same — the weight hasn't changed.", "The weight is the same, but its component along the slope changes."),
-               ("It becomes zero at 45°.", "sin θ increases all the way to 90°.")])
-    return ex.build(f"A block of mass {m:g} kg slides down a slope at {th}° to the horizontal.")
-
-
-def _cov_sledge(level="Higher"):
-    ex = _ex("Components of Vectors", level)
-    F, th = pick(40, 60, 80, 120), pick(20, 25, 30, 35, 40)
-    Fh = F * math.cos(math.radians(th))
-    ex.num(f"Calculate the horizontal component of the pulling force.", Fh, "N",
-           wrong=[(F * math.sin(math.radians(th)), "The horizontal (adjacent) component is F cos θ."), (F, "Only the horizontal component moves the sledge forward.")],
-           working=[rf"F_h = F\cos\theta = {F} \cos {th}^\circ = {ltx(Fh)}\ \text{{N}}"])
-    m, Ff = pick(15, 20, 25, 30), sig(Fh * random.uniform(0.4, 0.8), 2)
-    a = (sig(Fh) - Ff) / m
-    ex.num(f"The sledge has a mass of {m} kg and the frictional force on it is {Ff:g} N. Calculate its acceleration.", a, "m/s²",
-           wrong=[((F - Ff) / m, "Use the HORIZONTAL component of the pull."), (sig(Fh) / m, "Subtract the friction.")],
-           working=[rf"F_{{un}} = {ltx(Fh)} - {Ff:g} = {ltx(sig(Fh) - Ff)}\ \text{{N}}", rf"a = \frac{{F_{{un}}}}{{m}} = {ltx(a)}\ \text{{m/s}}^2"])
-    d = pick(10, 20, 25)
-    W = sig(Fh) * d
-    ex.num(f"Calculate the work done by the pulling force as the sledge moves {d} m horizontally.", W, "J",
-           wrong=[(F * d, "Only the component in the direction of motion does work: F cos θ × d.")],
-           working=[rf"E_w = F_h d = {ltx(Fh)} \times {d} = {ltx(W)}\ \text{{J}}"])
-    return ex.build(f"A child pulls a sledge across flat snow with a force of {F} N, using a rope at {th}° above the horizontal.")
+def thrown_ball(level="Higher"):
+    ex = _ex(level)
+    u, m = pick(9.8, 14.7, 19.6), pick(0.15, 0.2, 0.4)
+    ex.on("Equations of Motion").num(f"A ball is thrown vertically upwards at {u:g} m/s. Calculate the maximum height it reaches.", u ** 2 / (2 * G), "m",
+        wrong=[(u ** 2 / G, "Include the 2: v² = u² + 2as."), (u / G, "Use v² = u² + 2as with v = 0.")],
+        working=[rf"0 = {u:g}^2 + 2(-9.8)s", rf"s = {ltx(u ** 2 / (2 * G))}\ \text{{m}}"])
+    ex.on("Equations of Motion").num("Calculate the time for the ball to return to the thrower's hand.", 2 * u / G, "s",
+        wrong=[(u / G, "That's the time to the TOP — double it."), (u * G, "Use v = u + at.")],
+        working=[rf"-{u:g} = {u:g} + (-9.8)t", rf"t = {ltx(2 * u / G)}\ \text{{s}}"])
+    ex.on("Graphs of Motion").choice("Which describes the velocity–time graph for the flight (upwards positive)?",
+        "A straight line with a constant negative gradient, crossing the time axis at the top of the flight.",
+        [("A horizontal line, because the acceleration is constant.", "That's the ACCELERATION–time graph."),
+         ("A V shape touching zero at the top.", "Velocity goes negative when the ball falls."),
+         ("A curve getting steeper.", "The acceleration is constant, so the graph is straight.")])
+    t_ms = pick(50, 80, 100)
+    F = m * u / (t_ms / 1000)
+    ex.on("Momentum and Impulse").num(f"The {m:g} kg ball is caught at {u:g} m/s and stopped in {t_ms} ms. Calculate the average force on the hand.", F, "N",
+        wrong=[(m * u / t_ms, "Convert ms to s."), (m * u * t_ms / 1000, "F = Δp ÷ t.")],
+        working=[rf"F = \frac{{mv - mu}}{{t}} = \frac{{{m:g} \times {u:g}}}{{{t_ms}\times10^{{-3}}}} = {ltx(F)}\ \text{{N}}"])
+    ex.on("Momentum and Impulse").choice("Why does moving the hand back while catching reduce the force?",
+        "It increases the time to stop the ball; the change in momentum is the same, so the average force is smaller.",
+        [("It reduces the ball's change in momentum.", "Δp is the same — it's the time that changes."),
+         ("It reduces the ball's mass.", "Mass is unchanged."), ("It increases the impulse.", "The impulse (Δp) is the same.")])
+    return ex.build("A ball is thrown vertically upwards and caught at the same height. Air resistance can be ignored.")
 
 
-gen_components_exam = exam_style(_cov_slope, _cov_sledge)
+# ════════════════════════════ Part 2 ════════════════════════════
+
+def moon_golf(level="Higher"):
+    ex = _ex(level, UNIT2)
+    M, R, m = 7.3e22, 1.74e6, 0.046
+    F = G_N * M * m / R ** 2
+    ex.on("Gravitation").num(f"Calculate the gravitational force on a {m:g} kg golf ball on the Moon's surface.", F, "N",
+        wrong=[(G_N * M * m / R, "Square the radius."), (m * G, "Use F = GMm/r² for the Moon, not g on Earth.")],
+        working=[rf"F = \frac{{GMm}}{{r^2}} = \frac{{6.67\times10^{{-11}} \times 7.3\times10^{{22}} \times {m:g}}}{{(1.74\times10^6)^2}} = {ltx(F)}\ \text{{N}}"])
+    g = sig(F) / m
+    ex.on("Gravitation").num("Calculate the gravitational field strength on the Moon's surface.", g, "N/kg",
+        wrong=[(sig(F) * m, "g = F ÷ m.")], working=[rf"g = \frac{{F}}{{m}} = {ltx(g)}\ \text{{N/kg}}"])
+    u, th = pick(15, 20, 25), pick(30, 40, 45, 50)
+    uh, uv = u * math.cos(math.radians(th)), u * math.sin(math.radians(th))
+    ex.on("Projectile Motion").num(f"The ball is hit at {u} m/s at {th}° to the horizontal. Calculate the vertical component of its initial velocity.", uv, "m/s",
+        wrong=[(uh, "Vertical component = u sin θ."), (u, "Resolve the velocity.")],
+        working=[rf"u_v = u\sin\theta = {u} \sin {th}^\circ = {ltx(uv)}\ \text{{m/s}}"])
+    tf = 2 * sig(uv) / g
+    ex.on("Projectile Motion").num("Using your value of g for the Moon, calculate the time of flight (it lands at the same level).", tf, "s",
+        wrong=[(sig(uv) / g, "That's the time to the top — double it."), (2 * sig(uv) / G, "Use the Moon's g, not 9.8.")],
+        working=[rf"t = \frac{{2u_v}}{{g}} = \frac{{2 \times {ltx(uv)}}}{{{ltx(g)}}} = {ltx(tf)}\ \text{{s}}"])
+    rng = sig(uh) * sig(tf)
+    ex.on("Projectile Motion").num("Calculate the horizontal distance travelled by the ball.", rng, "m",
+        wrong=[(u * sig(tf), "Use the HORIZONTAL component, u cos θ."), (sig(uv) * sig(tf), "Horizontal: u cos θ.")],
+        working=[rf"d = u_h t = ({u}\cos {th}^\circ) \times {ltx(tf)} = {ltx(rng)}\ \text{{m}}"])
+    return ex.build("An astronaut hits a golf ball on the Moon. (Mass of Moon = 7.3 × 10²² kg, radius = 1.74 × 10⁶ m, "
+                    "G = 6.67 × 10⁻¹¹ N m² kg⁻²; ignore the curvature of the Moon)", )
 
 
-# ════════════════ Momentum and Impulse ════════════════
-
-def _mom_collision(level="Higher"):
-    ex = _ex("Momentum and Impulse", level)
-    m1, m2, u1 = random.choice([(1200, 800, 15), (1500, 1000, 12), (0.4, 0.6, 3.0), (2.0, 3.0, 5.0), (900, 1100, 20)])
-    v = m1 * u1 / (m1 + m2)
-    ex.num("The two objects stick together after the collision. Calculate their velocity immediately after.", v, "m/s",
-           wrong=[(m1 * u1 / m2, "After the collision the combined mass (m₁ + m₂) moves together."), (u1 / 2, "Use conservation of momentum."),
-                  (u1, "Momentum is shared with the second object, so the velocity drops.")],
-           working=[r"m_1u_1 + m_2u_2 = (m_1 + m_2)v", rf"{m1:g} \times {u1:g} + 0 = ({m1:g} + {m2:g})v", rf"v = {ltx(v)}\ \text{{m/s}}"])
-    Ek1 = 0.5 * m1 * u1 ** 2
-    Ek2 = 0.5 * (m1 + m2) * sig(v) ** 2
-    ex.num("Calculate the kinetic energy lost in the collision.", Ek1 - Ek2, "J",
-           wrong=[(Ek1, "Subtract the kinetic energy after the collision."), (Ek2, "Find the DIFFERENCE before − after.")],
-           working=[rf"E_{{k,before}} = \tfrac{{1}}{{2}}({m1:g})({u1:g})^2 = {ltx(Ek1)}\ \text{{J}}",
-                    rf"E_{{k,after}} = \tfrac{{1}}{{2}}({m1 + m2:g})({ltx(v)})^2 = {ltx(Ek2)}\ \text{{J}}", rf"\Delta E_k = {ltx(Ek1 - Ek2)}\ \text{{J}}"],
-           scaffold=[("Ek before, in J?", Ek1, "J"), ("Ek after, in J?", Ek2, "J")])
-    ex.choice("Is the collision elastic or inelastic?", "Inelastic — kinetic energy is not conserved.",
-              [("Elastic — momentum is conserved.", "Momentum is conserved in ALL collisions; elastic means Ek is conserved too."),
-               ("Elastic — kinetic energy is conserved.", "Kinetic energy was lost."),
-               ("Inelastic — momentum is not conserved.", "Momentum IS conserved; it's Ek that isn't.")])
-    return ex.build(f"An object of mass {m1:g} kg moving at {u1:g} m/s collides with a stationary object of mass {m2:g} kg.")
-
-
-def _mom_bat(level="Higher"):
-    ex = _ex("Momentum and Impulse", level)
-    m, u, v, t_ms = pick(0.057, 0.145, 0.16), pick(20, 25, 30), pick(25, 30, 35, 40), pick(1.5, 2.0, 3.0, 5.0)
-    dp = m * v - m * (-u)
-    ex.num(f"The ball arrives at {u} m/s and leaves in the opposite direction at {v} m/s. Calculate the size of its change in momentum.",
-           dp, "kg m/s",
-           wrong=[(m * (v - u), "The ball reverses direction: Δp = mv − mu with u NEGATIVE."), (m * v, "Include the initial momentum.")],
-           working=[rf"\Delta p = mv - mu = {m:g} \times {v} - {m:g} \times (-{u}) = {ltx(dp)}\ \text{{kg m/s}}"])
-    F = sig(dp) / (t_ms / 1000)
-    ex.num(f"The bat is in contact with the ball for {t_ms:g} ms. Calculate the average force exerted on the ball.", F, "N",
-           wrong=[(sig(dp) / t_ms, "Convert ms to s."), (sig(dp) * t_ms / 1000, "F = Δp ÷ t.")],
-           working=[r"Ft = \Delta p", rf"F = \frac{{{ltx(dp)}}}{{{t_ms:g} \times 10^{{-3}}}} = {ltx(F)}\ \text{{N}}"])
-    ex.choice("The player 'follows through' so the bat stays in contact with the ball for longer, with the same average force. What is the effect?",
-              "The impulse is greater, so the ball's change in momentum is greater and it leaves faster.",
-              [("The force on the ball is reduced, so it leaves slower.", "The force is the same; a longer time gives a bigger impulse."),
-               ("There's no effect — the force is the same.", "Impulse = F × t, so a longer time increases it."),
-               ("The ball's mass increases.", "Mass is unchanged.")])
-    return ex.build(f"A ball of mass {m:g} kg is hit by a bat.")
+def mars_drop(level="Higher"):
+    ex = _ex(level, UNIT2)
+    M, R = 6.4e23, 3.4e6
+    m = pick(150, 250, 400)
+    F = G_N * M * m / R ** 2
+    ex.on("Gravitation").num(f"Calculate the gravitational force on a {m} kg lander at the surface of Mars.", F, "N",
+        wrong=[(G_N * M * m / R, "Square the radius."), (m * G, "Use F = GMm/r² for Mars.")],
+        working=[rf"F = \frac{{6.67\times10^{{-11}} \times 6.4\times10^{{23}} \times {m}}}{{(3.4\times10^6)^2}} = {ltx(F)}\ \text{{N}}"])
+    g = sig(F) / m
+    ex.on("Gravitation").num("Calculate the gravitational field strength at the surface of Mars.", g, "N/kg",
+        wrong=[(sig(F) * m, "g = F ÷ m.")], working=[rf"g = \frac{{F}}{{m}} = {ltx(g)}\ \text{{N/kg}}"])
+    h, vh = pick(20, 30, 45), pick(5, 8, 10)
+    t = math.sqrt(2 * h / sig(g))
+    ex.on("Projectile Motion").num(f"Flying horizontally at {vh} m/s, {h} m above the ground, the lander drops a probe. Calculate the time the probe takes to fall.",
+        t, "s",
+        wrong=[(math.sqrt(2 * h / G), "Use g on Mars."), (2 * h / sig(g), "Take the square root: s = ½gt²."), (math.sqrt(h / sig(g)), "s = ½gt² → t = √(2s/g).")],
+        working=[r"s = ut + \tfrac{1}{2}at^2", rf"{h} = 0 + \tfrac{{1}}{{2}} \times {ltx(g)} \times t^2", rf"t = {ltx(t)}\ \text{{s}}"])
+    ex.on("Projectile Motion").num("Calculate the horizontal distance the probe travels while falling.", vh * sig(t), "m",
+        wrong=[(0.5 * vh * sig(t), "Horizontal velocity is constant — no ½.")],
+        working=[rf"d = v_h t = {vh} \times {ltx(t)} = {ltx(vh * sig(t))}\ \text{{m}}"])
+    ex.on("Gravitation").choice("How would the fall time compare if the probe were dropped from the same height on Earth?",
+        "Shorter — g is larger on Earth.", [("Longer — g is larger on Earth.", "Larger g → faster fall → shorter time."),
+                                           ("The same — fall time depends only on height.", "It depends on g too."),
+                                           ("Longer — Earth has an atmosphere.", "Ignoring air resistance, larger g gives a shorter time.")])
+    return ex.build("A lander explores Mars. (Mass of Mars = 6.4 × 10²³ kg, radius = 3.4 × 10⁶ m, G = 6.67 × 10⁻¹¹ N m² kg⁻²)")
 
 
-def _mom_recoil(level="Higher"):
-    ex = _ex("Momentum and Impulse", level)
-    mb, vb, mc = random.choice([(0.02, 400, 4.0), (5.0, 200, 1500), (0.05, 300, 5.0), (12, 150, 2000)])
-    vc = -mb * vb / mc
-    ex.num(f"The projectile leaves at {vb} m/s. Calculate the recoil velocity of the gun (take the projectile's direction as positive).",
-           vc, "m/s",
-           wrong=[(-vc, "The gun recoils BACKWARDS — negative velocity."), (-vb / mc, "Use momentum: mass × velocity of the projectile.")],
-           working=[r"0 = m_bv_b + m_gv_g", rf"0 = {mb:g} \times {vb} + {mc:g}v_g", rf"v_g = {ltx(vc)}\ \text{{m/s}}"])
-    Ek = 0.5 * mb * vb ** 2 + 0.5 * mc * sig(vc) ** 2
-    ex.num("Calculate the total kinetic energy produced in the firing.", Ek, "J",
-           wrong=[(0.5 * mb * vb ** 2, "Include the gun's kinetic energy as well."), (0, "Momentum is zero before and after, but Ek is not.")],
-           working=[rf"E_k = \tfrac{{1}}{{2}}({mb:g})({vb})^2 + \tfrac{{1}}{{2}}({mc:g})({ltx(vc)})^2 = {ltx(Ek)}\ \text{{J}}"])
-    ex.choice("What is the total momentum of the gun and projectile just after firing?", "Zero",
-              [("Equal to the projectile's momentum.", "The gun has an equal and opposite momentum."), ("Double the projectile's momentum.", "They're in opposite directions."),
-               ("It can't be found without the force.", "Momentum is conserved: zero before, so zero after.")])
-    return ex.build(f"A gun of mass {mc:g} kg, initially at rest, fires a projectile of mass {mb:g} kg.")
-
-
-gen_momentum_exam = exam_style(_mom_collision, _mom_bat, _mom_recoil)
-
-
-# ════════════════ Energy, Work and Power ════════════════
-
-def _ewp_cyclist(level="Higher"):
-    ex = _ex("Energy, Work and Power", level)
-    m, h, v, d = pick(70, 80, 90), pick(12, 15, 20), pick(10, 12, 14), pick(150, 200, 250)
-    Ep = m * G * h
-    Ek = 0.5 * m * v ** 2
-    ex.num("Calculate the gravitational potential energy lost by the cyclist.", Ep, "J",
-           wrong=[(m * h, "Ep = mgh.")], working=[rf"E_p = mgh = {m} \times 9.8 \times {h} = {ltx(Ep)}\ \text{{J}}"])
-    ex.num("Calculate the kinetic energy of the cyclist at the bottom of the hill.", Ek, "J",
-           wrong=[(m * v ** 2, "Ek = ½mv².")], working=[rf"E_k = \tfrac{{1}}{{2}}mv^2 = 0.5 \times {m} \times {v}^2 = {ltx(Ek)}\ \text{{J}}"])
-    F = (sig(Ep) - sig(Ek)) / d
-    ex.num(f"The road down the hill is {d} m long. Calculate the average frictional force on the cyclist.", F, "N",
-           wrong=[(sig(Ep) / d, "Only the energy LOST (Ep − Ek) is work done against friction."), ((sig(Ep) - sig(Ek)) / h, f"Use the distance along the road ({d} m).")],
-           working=[rf"E_w = E_p - E_k = {ltx(Ep)} - {ltx(Ek)} = {ltx(sig(Ep) - sig(Ek))}\ \text{{J}}", r"E_w = Fd", rf"F = {ltx(F)}\ \text{{N}}"])
-    return ex.build(f"A cyclist of total mass {m} kg freewheels from rest down a hill of vertical height {h} m, reaching {v} m/s at the bottom.")
-
-
-def _ewp_crane(level="Higher"):
-    ex = _ex("Energy, Work and Power", level)
-    m, h, t = pick(250, 400, 500, 800), pick(12, 15, 20, 30), pick(15, 20, 25, 30)
-    Ep = m * G * h
-    ex.num("Calculate the gravitational potential energy gained by the load.", Ep, "J",
-           wrong=[(m * h, "Ep = mgh.")], working=[rf"E_p = {m} \times 9.8 \times {h} = {ltx(Ep)}\ \text{{J}}"])
-    P = sig(Ep) / t
-    ex.num(f"The lift takes {t} s at a constant speed. Calculate the useful power output of the crane motor.", P, "W",
-           wrong=[(sig(Ep) * t, "P = E ÷ t.")], working=[rf"P = \frac{{E}}{{t}} = \frac{{{ltx(Ep)}}}{{{t}}} = {ltx(P)}\ \text{{W}}"])
-    eff = pick(40, 50, 60, 75)
-    Pin = P / (eff / 100)
-    ex.num(f"The motor is {eff}% efficient. Calculate its input power.", Pin, "W",
-           wrong=[(P * eff / 100, "Input power is GREATER than the useful output."), (P * eff, "Efficiency = useful ÷ input × 100.")],
-           working=[rf"P_{{in}} = \frac{{P_{{out}}}}{{\text{{efficiency}}}} = \frac{{{ltx(P)}}}{{{eff / 100:g}}} = {ltx(Pin)}\ \text{{W}}"])
-    return ex.build(f"A crane lifts a load of mass {m} kg vertically through {h} m.")
-
-
-gen_ewp_exam = exam_style(_ewp_cyclist, _ewp_crane)
-
-
-# ════════════════ Effective Weight ════════════════
-
-def _ew_lift(level="Higher"):
-    ex = _ex("Effective Weight", level)
-    m, a = pick(50, 60, 65, 70, 80), pick(0.5, 0.8, 1.2, 1.5, 2.0)
-    ex.num(f"The lift accelerates upwards at {a:g} m/s². Calculate the reading on the scales.", m * (G + a), "N",
-           wrong=[(m * (G - a), "Accelerating UP increases the reading: R = m(g + a)."), (m * G, "The lift is accelerating — R ≠ mg."), (m * a, "R − mg = ma.")],
-           working=[r"R - mg = ma", rf"R = {m}(9.8 + {a:g}) = {ltx(m * (G + a))}\ \text{{N}}"])
-    ex.num("The lift then moves upwards at a constant speed. Calculate the reading on the scales.", m * G, "N",
-           wrong=[(m * (G + a), "At constant speed a = 0, so R = mg.")], working=[rf"R = mg = {m} \times 9.8 = {ltx(m * G)}\ \text{{N}}"])
-    a2 = pick(0.6, 1.0, 1.4)
-    ex.num(f"The lift slows down at {a2:g} m/s² as it approaches the top floor. Calculate the reading on the scales.", m * (G - a2), "N",
-           wrong=[(m * (G + a2), "Slowing down while moving UP is a DOWNWARD acceleration: R = m(g − a).")],
-           working=[r"R = m(g - a)", rf"R = {m}(9.8 - {a2:g}) = {ltx(m * (G - a2))}\ \text{{N}}"])
-    ex.choice("If the lift cable broke and the lift fell freely, what would the scales read?", "Zero",
-              [("mg", "In free fall both the person and scales accelerate at g, so there's no contact force."),
-               ("2mg", "The reading falls, not rises."), ("Slightly less than mg", "In true free fall the reading is zero.")])
-    return ex.build(f"A person of mass {m} kg stands on bathroom scales in a lift.")
-
-
-def _ew_find_a(level="Higher"):
-    ex = _ex("Effective Weight", level)
-    m = pick(55, 60, 72, 80)
-    a = pick(-1.5, -1.0, 0.8, 1.2, 1.8)
-    R = sig(m * (G + a))
-    ex.num(f"At one point the scales read {fmt(R)} N. Calculate the acceleration of the lift (upwards positive).", (R - m * G) / m, "m/s²",
-           wrong=[(R / m, "R − mg = ma: subtract the weight first."), (-(R - m * G) / m, "Take upwards as positive: a = (R − mg) ÷ m.")],
-           working=[r"R - mg = ma", rf"{fmt(R)} - {m} \times 9.8 = {m}a", rf"a = {ltx((R - m * G) / m)}\ \text{{m/s}}^2"])
-    up = a > 0
-    ex.choice("Which motion of the lift could give this reading?",
-              "Accelerating upwards (or slowing down while moving down)." if up else "Accelerating downwards (or slowing down while moving up).",
-              [("Accelerating downwards (or slowing down while moving up)." if up else "Accelerating upwards (or slowing down while moving down).",
-                "The reading is " + ("greater" if up else "less") + " than mg."),
-               ("Moving at constant speed.", "At constant speed the reading equals mg.")])
-    return ex.build(f"A pupil of mass {m} kg stands on scales in a lift.")
-
-
-gen_effective_weight_exam = exam_style(_ew_lift, _ew_find_a)
-
-
-# ════════════════ Gravitation ════════════════
-
-def _grav_satellite(level="Higher"):
-    ex = _ex("Gravitation", level, UNIT2)
-    m, h_km = pick(500, 750, 1200, 2500), pick(400, 600, 800, 20000)
-    r = R_EARTH + h_km * 1000
-    ex.num("Calculate the distance between the centre of the Earth and the satellite.", r, "m",
-           wrong=[(h_km * 1000, "Add the Earth's radius: r is measured centre to centre."), (R_EARTH + h_km, "Convert km to m.")],
-           working=[rf"r = 6.4 \times 10^6 + {h_km} \times 10^3 = {ltx(r)}\ \text{{m}}"])
-    F = G_N * M_EARTH * m / sig(r) ** 2
-    ex.num("Calculate the gravitational force between the Earth and the satellite.", F, "N",
-           wrong=[(G_N * M_EARTH * m / (h_km * 1000) ** 2, "r is from the Earth's CENTRE (radius + height)."),
-                  (G_N * M_EARTH * m / sig(r), "Square the distance: F = Gm₁m₂ ÷ r².")],
-           working=[r"F = \frac{Gm_1m_2}{r^2}", rf"F = \frac{{6.67\times10^{{-11}} \times 6.0\times10^{{24}} \times {m}}}{{({ltx(r)})^2}}", rf"F = {ltx(F)}\ \text{{N}}"])
-    ex.choice("The satellite is moved to an orbit where its distance from the Earth's centre is doubled. What happens to the gravitational force?",
-              "It becomes a quarter of its original value.",
-              [("It halves.", "F ∝ 1/r²: doubling r divides F by 4."), ("It stays the same.", "F depends on r."), ("It doubles.", "F decreases as r increases.")])
-    return ex.build(f"A satellite of mass {m} kg orbits {h_km} km above the Earth's surface. "
-                    f"(Mass of Earth = 6.0 × 10²⁴ kg; radius of Earth = 6.4 × 10⁶ m)")
-
-
-def _grav_moon(level="Higher"):
-    ex = _ex("Gravitation", level, UNIT2)
-    m_moon, d = 7.3e22, 3.84e8
-    F = G_N * M_EARTH * m_moon / d ** 2
-    ex.num("Calculate the gravitational force between the Earth and the Moon.", F, "N",
-           wrong=[(G_N * M_EARTH * m_moon / d, "Square the distance."), (M_EARTH * m_moon / d ** 2, "Include G.")],
-           working=[rf"F = \frac{{6.67\times10^{{-11}} \times 6.0\times10^{{24}} \times 7.3\times10^{{22}}}}{{(3.84\times10^8)^2}} = {ltx(F)}\ \text{{N}}"])
-    m1, m2, r = pick(60, 70, 80), pick(55, 65, 75), pick(0.5, 1.0, 2.0)
-    F2 = G_N * m1 * m2 / r ** 2
-    ex.num(f"Two pupils of mass {m1} kg and {m2} kg stand {r:g} m apart. Calculate the gravitational force between them.", F2, "N",
-           wrong=[(G_N * m1 * m2 / r, "Square the distance."), (m1 * m2 / r ** 2, "Include G = 6.67 × 10⁻¹¹.")],
-           working=[rf"F = \frac{{6.67\times10^{{-11}} \times {m1} \times {m2}}}{{{r:g}^2}} = {ltx(F2)}\ \text{{N}}"])
-    ex.choice("Why don't the pupils notice the force between them?", "G is very small, so the force between everyday masses is tiny.",
-              [("Gravity only acts between planets.", "Gravity acts between ALL masses."), ("The force is cancelled by air resistance.", "Air resistance isn't involved."),
-               ("The pupils are too far apart for gravity to act.", "Gravity has infinite range — it's just very weak here.")])
-    return ex.build("Gravitational forces act between all masses. (Mass of Earth = 6.0 × 10²⁴ kg, mass of Moon = 7.3 × 10²² kg, "
-                    "Earth–Moon distance = 3.84 × 10⁸ m)")
-
-
-gen_gravitation_exam = exam_style(_grav_satellite, _grav_moon)
-
-
-# ════════════════ Special Relativity ════════════════
-
-def _sr_muon(level="Higher"):
-    ex = _ex("Special Relativity", level, UNIT2)
-    frac = pick(0.95, 0.98, 0.99, 0.995)
-    t0 = 2.2e-6
-    gamma = 1 / math.sqrt(1 - frac ** 2)
-    t = t0 * gamma
-    ex.num("Calculate the mean lifetime of the muons as measured by an observer on Earth.", t, "s",
-           wrong=[(t0 * math.sqrt(1 - frac ** 2), "Time DILATES for a moving clock: divide by √(1 − v²/c²)."),
-                  (t0 / (1 - frac ** 2), "Take the square root of (1 − v²/c²).")],
-           working=[r"t' = \frac{t}{\sqrt{1 - \frac{v^2}{c^2}}}", rf"t' = \frac{{2.2\times10^{{-6}}}}{{\sqrt{{1 - {frac:g}^2}}}} = {ltx(t)}\ \text{{s}}"])
-    d = frac * C * sig(t)
-    ex.num("Calculate the mean distance travelled by a muon in the Earth's frame of reference.", d, "m",
-           wrong=[(frac * C * t0, "In the Earth frame, use the DILATED lifetime."), (C * sig(t), f"The muons travel at {frac:g}c.")],
-           working=[rf"d = vt' = {frac:g} \times 3.00\times10^8 \times {ltx(t)} = {ltx(d)}\ \text{{m}}"])
-    ex.choice("Why do far more muons reach the Earth's surface than expected without relativity?",
-              "In the Earth's frame the muons' lifetime is dilated, so they travel further before decaying.",
-              [("The muons travel faster than the speed of light.", "Nothing with mass can reach c."),
-               ("The atmosphere speeds the muons up.", "It's the time dilation of their lifetime."),
-               ("The muons' lifetime is shorter in the Earth's frame.", "Their lifetime is LONGER in the Earth's frame.")])
-    return ex.build(f"Muons are created in the upper atmosphere and travel towards the Earth at {frac:g}c. "
-                    f"In their own frame of reference they have a mean lifetime of 2.2 × 10⁻⁶ s.")
-
-
-def _sr_ship(level="Higher"):
-    ex = _ex("Special Relativity", level, UNIT2)
-    frac, L0 = pick(0.6, 0.75, 0.8, 0.9), pick(80, 120, 150, 200)
+def star_journey(level="Higher"):
+    ex = _ex(level, UNIT2)
+    frac, d_ly = pick(0.6, 0.8, 0.9), pick(4.2, 6.0, 8.6, 12.0)
     k = math.sqrt(1 - frac ** 2)
-    L = L0 * k
-    ex.num("Calculate the length of the spaceship as measured by an observer on a space station it passes.", L, "m",
-           wrong=[(L0 / k, "Moving objects CONTRACT: l' = l√(1 − v²/c²)."), (L0 * (1 - frac ** 2), "Take the square root.")],
-           working=[r"l' = l\sqrt{1 - \frac{v^2}{c^2}}", rf"l' = {L0}\sqrt{{1 - {frac:g}^2}} = {ltx(L)}\ \text{{m}}"])
-    t_crew = pick(30, 60, 120)
-    t_obs = t_crew / k
-    ex.num(f"A clock on board measures {t_crew} s between two events on the ship. Calculate the time between these events measured on the space station.",
-           t_obs, "s",
-           wrong=[(t_crew * k, "The station observer measures a LONGER time (time dilation).")],
-           working=[rf"t' = \frac{{t}}{{\sqrt{{1 - v^2/c^2}}}} = \frac{{{t_crew}}}{{{k:.3g}}} = {ltx(t_obs)}\ \text{{s}}"])
-    ex.choice("The crew shine a beam of light forwards. What speed do observers on the space station measure for the light?",
-              "3.00 × 10⁸ m/s — the speed of light is the same for all observers.",
-              [(f"{1 + frac:g}c — the ship's speed adds to the light's.", "The speed of light is the same in all frames."),
-               (f"{1 - frac:g}c — the light moves away from the ship at c.", "Every observer measures c."),
-               ("It depends on the wavelength of the light.", "All light travels at c in a vacuum.")])
-    return ex.build(f"A spaceship of length {L0} m (measured by its crew) travels past a space station at {frac:g}c.")
+    t_e = d_ly / frac
+    ex.on("Special Relativity").num(f"The ship travels at {frac:g}c to a star {d_ly:g} light-years away (measured from Earth). "
+        f"Calculate the journey time measured on Earth, in years.", t_e, "",
+        wrong=[(d_ly * frac, "t = d ÷ v."), (d_ly, f"The ship travels at {frac:g}c, not c.")],
+        working=[rf"t = \frac{{d}}{{v}} = \frac{{{d_ly:g}\ \text{{ly}}}}{{{frac:g}c}} = {ltx(t_e)}\ \text{{years}}"])
+    ex.on("Special Relativity").num("Calculate the journey time measured by the crew, in years.", sig(t_e) * k, "",
+        wrong=[(sig(t_e) / k, "The crew's clock is the moving clock — it records the SHORTER (proper) time.")],
+        working=[r"t' = \frac{t}{\sqrt{1 - v^2/c^2}} \Rightarrow t_{crew} = t_{Earth}\sqrt{1 - v^2/c^2}",
+                 rf"t_{{crew}} = {ltx(t_e)} \times \sqrt{{1 - {frac:g}^2}} = {ltx(sig(t_e) * k)}\ \text{{years}}"])
+    ex.on("Special Relativity").num("Calculate the distance to the star as measured by the crew, in light-years.", d_ly * k, "",
+        wrong=[(d_ly / k, "Lengths CONTRACT for the moving observer: l' = l√(1 − v²/c²).")],
+        working=[rf"l' = {d_ly:g}\sqrt{{1 - {frac:g}^2}} = {ltx(d_ly * k)}\ \text{{ly}}"])
+    ex.on("The Expanding Universe").choice("The ship sends a radio signal back to Earth while moving away. How does the received frequency compare with the transmitted frequency?",
+        "It is lower — the source is moving away (Doppler effect).",
+        [("It is higher — the source is moving away.", "Moving away → longer wavelength → lower frequency."),
+         ("It is the same — radio waves travel at c.", "The speed is c, but the frequency is Doppler-shifted."),
+         ("It is zero — signals can't catch up.", "Signals travel at c, faster than the ship.")])
+    ex.on("Special Relativity").choice("What speed would observers on Earth measure for that radio signal?", "3.00 × 10⁸ m/s",
+        [(f"{1 - frac:g}c", "The speed of light is the same for all observers."), (f"{1 + frac:g}c", "Speeds don't add for light."),
+         ("It depends on the ship's speed.", "c is the same in every frame.")])
+    return ex.build(f"A spaceship travels from Earth to a distant star at a constant speed of {frac:g}c.")
 
 
-gen_relativity_exam = exam_style(_sr_muon, _sr_ship)
-
-
-# ════════════════ The Expanding Universe ════════════════
-
-def _eu_galaxy(level="Higher"):
-    ex = _ex("The Expanding Universe", level, UNIT2)
-    lam_r = pick(656, 486, 434)
-    z = pick(0.010, 0.015, 0.020, 0.025, 0.030)
+def space_telescope(level="Higher"):
+    ex = _ex(level, UNIT2)
+    m, h_km = pick(11000, 6500, 2400), pick(540, 600, 700)
+    r = R_EARTH + h_km * 1000
+    F = G_N * M_EARTH * m / sig(r) ** 2
+    ex.on("Gravitation").num(f"The telescope ({m} kg) orbits {h_km} km above the Earth's surface. Calculate the gravitational force on it.", F, "N",
+        wrong=[(G_N * M_EARTH * m / (h_km * 1000) ** 2, "r is from Earth's CENTRE: add the radius."), (G_N * M_EARTH * m / sig(r), "Square r.")],
+        working=[rf"r = 6.4\times10^6 + {h_km}\times10^3 = {ltx(r)}\ \text{{m}}",
+                 rf"F = \frac{{6.67\times10^{{-11}} \times 6.0\times10^{{24}} \times {m}}}{{({ltx(r)})^2}} = {ltx(F)}\ \text{{N}}"])
+    lam_r = pick(656, 486)
+    z = pick(0.010, 0.015, 0.020, 0.025)
     lam_o = round(lam_r * (1 + z), 1)
     zc = (lam_o - lam_r) / lam_r
-    ex.num(f"A hydrogen line of wavelength {lam_r} nm in the laboratory is observed at {lam_o:g} nm in the galaxy's spectrum. Calculate the redshift.",
-           zc, "", wrong=[((lam_o - lam_r) / lam_o, "Divide by the REST (emitted) wavelength."), (lam_o / lam_r, "z = (λ_obs − λ_rest) ÷ λ_rest.")],
-           working=[rf"z = \frac{{\lambda_{{obs}} - \lambda_{{rest}}}}{{\lambda_{{rest}}}} = \frac{{{lam_o:g} - {lam_r}}}{{{lam_r}}} = {ltx(zc)}"])
+    ex.on("The Expanding Universe").num(f"A hydrogen line of rest wavelength {lam_r} nm is observed at {lam_o:g} nm in a galaxy's spectrum. Calculate the redshift.",
+        zc, "", wrong=[((lam_o - lam_r) / lam_o, "Divide by the REST wavelength."), (lam_o / lam_r, "z = Δλ ÷ λ_rest.")],
+        working=[rf"z = \frac{{{lam_o:g} - {lam_r}}}{{{lam_r}}} = {ltx(zc)}"])
     v = sig(zc) * C
-    ex.num("Calculate the recessional velocity of the galaxy.", v, "m/s",
-           wrong=[(sig(zc) / C, "v = z × c.")], working=[rf"v = zc = {ltx(zc)} \times 3.00\times10^8 = {ltx(v)}\ \text{{m/s}}"])
-    d = sig(v) / H0
-    ex.num("Calculate the distance to the galaxy.", d, "m",
-           wrong=[(sig(v) * H0, "d = v ÷ H₀."), (sig(v) / 1000 / H0, "Use v in m/s.")],
-           working=[r"v = H_0d", rf"d = \frac{{{ltx(v)}}}{{2.3\times10^{{-18}}}} = {ltx(d)}\ \text{{m}}"])
-    ex.choice("What does the redshift of distant galaxies show?", "The galaxies are moving away from us — the Universe is expanding.",
-              [("The galaxies are made of red stars.", "Redshift is a shift in wavelength due to motion."),
-               ("The galaxies are moving towards us.", "That would be a blueshift."),
-               ("The light has slowed down on its way to Earth.", "Light travels at c; its wavelength is stretched.")])
-    return ex.build("Light from a distant galaxy is analysed with a spectroscope. (H₀ = 2.3 × 10⁻¹⁸ s⁻¹)")
+    ex.on("The Expanding Universe").num("Calculate the recessional velocity of the galaxy.", v, "m/s",
+        wrong=[(sig(zc) / C, "v = zc.")], working=[rf"v = zc = {ltx(zc)} \times 3.00\times10^8 = {ltx(v)}\ \text{{m/s}}"])
+    ex.on("The Expanding Universe").num("Calculate the distance to the galaxy.", sig(v) / H0, "m",
+        wrong=[(sig(v) * H0, "d = v ÷ H₀.")], working=[rf"d = \frac{{v}}{{H_0}} = \frac{{{ltx(v)}}}{{2.3\times10^{{-18}}}} = {ltx(sig(v) / H0)}\ \text{{m}}"])
+    ex.on("The Expanding Universe").choice("Observations show the expansion of the Universe is accelerating. What is this attributed to?", "Dark energy",
+        [("Dark matter", "Dark matter explains galaxy rotation speeds."), ("Gravity", "Gravity would slow the expansion."),
+         ("Redshift", "Redshift is the evidence, not the cause.")])
+    return ex.build("A space telescope in orbit around the Earth observes distant galaxies. (Mass of Earth = 6.0 × 10²⁴ kg, radius = 6.4 × 10⁶ m, "
+                    "H₀ = 2.3 × 10⁻¹⁸ s⁻¹)")
 
 
-def _eu_siren(level="Higher"):
-    ex = _ex("The Expanding Universe", level, UNIT2)
-    fs, vs = pick(500, 640, 800, 960), pick(15, 20, 25, 30)
-    fa = fs * 340 / (340 - vs)
-    ex.num("Calculate the frequency heard by the pedestrian as the ambulance approaches.", fa, "Hz",
-           wrong=[(fs * 340 / (340 + vs), "Approaching → HIGHER frequency: use v − v_s."), (fs * (340 - vs) / 340, "f_o = f_s × v ÷ (v − v_s).")],
-           working=[r"f_o = f_s\left(\frac{v}{v - v_s}\right)", rf"f_o = {fs}\left(\frac{{340}}{{340 - {vs}}}\right) = {ltx(fa)}\ \text{{Hz}}"])
-    fr = fs * 340 / (340 + vs)
-    ex.num("Calculate the frequency heard as the ambulance moves away.", fr, "Hz",
-           wrong=[(fa, "Moving away → LOWER frequency: use v + v_s.")],
-           working=[rf"f_o = {fs}\left(\frac{{340}}{{340 + {vs}}}\right) = {ltx(fr)}\ \text{{Hz}}"])
-    ex.choice("Explain why the frequency heard is higher as the ambulance approaches.",
-              "The source moves towards the listener, so the wavefronts are squashed together: a shorter wavelength reaches the listener, giving a higher frequency.",
-              [("The sound travels faster when the ambulance approaches.", "The speed of sound in air doesn't change."),
-               ("The siren emits a higher frequency when moving.", "The emitted frequency is constant."),
-               ("The wavelength increases as the source approaches.", "The wavelength DEcreases.")])
-    return ex.build(f"An ambulance with a siren of frequency {fs} Hz travels at {vs} m/s past a pedestrian. Speed of sound = 340 m/s.")
-
-
-def _eu_age(level="Higher"):
-    ex = _ex("The Expanding Universe", level, UNIT2)
-    t = 1 / H0
-    ex.num("Using H₀ = 2.3 × 10⁻¹⁸ s⁻¹, estimate the age of the Universe in seconds.", t, "s",
-           wrong=[(H0, "Age ≈ 1 ÷ H₀.")], working=[rf"t = \frac{{1}}{{H_0}} = \frac{{1}}{{2.3\times10^{{-18}}}} = {ltx(t)}\ \text{{s}}"])
-    ex.num("Convert this age to years.", sig(t) / YEAR, "",
-           wrong=[(sig(t) / (24 * 3600), "Divide by the number of seconds in a YEAR (365 × 24 × 3600).")],
-           working=[rf"\frac{{{ltx(t)}}}{{365 \times 24 \times 3600}} = {ltx(sig(t) / YEAR)}\ \text{{years}}"])
-    ex.choice("Measurements of the rotation of galaxies suggest there is more mass than can be seen. What is this called?", "Dark matter",
-              [("Dark energy", "Dark energy explains the ACCELERATING expansion."), ("Black body radiation", "That's thermal emission from hot objects."),
-               ("Redshift", "Redshift is evidence for expansion.")])
-    return ex.build("Hubble's law can be used to estimate the age of the Universe.")
-
-
-gen_expanding_universe_exam = exam_style(_eu_galaxy, _eu_siren, _eu_age)
-
-
-EXAM_PART1 = {
-    "Equations of Motion":    gen_eom_exam,
-    "Graphs of Motion":       gen_gom_exam,
-    "Towing":                 exam_style(reuse(gen_towing_exam_style, qtype="Towing")),
-    "Components of Vectors":  gen_components_exam,
-    "Momentum and Impulse":   gen_momentum_exam,
-    "Energy, Work and Power": gen_ewp_exam,
-    "Effective Weight":       gen_effective_weight_exam,
+SCENARIOS_PART1 = {
+    "Car and Trailer":    car_and_trailer,
+    "Skier":              skier,
+    "Lift Journey":       lift_journey,
+    "Trolley Collision":  trolley_collision,
+    "Thrown Ball":        thrown_ball,
 }
 
-EXAM_PART2 = {
-    "Projectile Motion":      exam_style(reuse(generate_projectile_exam_mixed, qtype="Projectile Motion")),
-    "Gravitation":            gen_gravitation_exam,
-    "Special Relativity":     gen_relativity_exam,
-    "The Expanding Universe": gen_expanding_universe_exam,
+SCENARIOS_PART2 = {
+    "Golf on the Moon":   moon_golf,
+    "Lander on Mars":     mars_drop,
+    "Journey to a Star":  star_journey,
+    "Space Telescope":    space_telescope,
 }
-
-EXAM = {**EXAM_PART1, **EXAM_PART2}

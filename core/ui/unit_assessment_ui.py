@@ -1,10 +1,10 @@
-"""Unit Assessment (N5 and Higher): one exam-style question from every topic in the unit,
-taken like a test, with a per-topic breakdown at the end."""
+"""Unit Assessment (N5 and Higher): exam-style questions from across the unit, chosen to cover as
+many of its topics as possible, taken like a test, with a per-topic breakdown at the end."""
 from collections import OrderedDict
 
 import streamlit as st
 
-from core.engine.question_factory import build_unit_assessment, unit_assessment_topics
+from core.engine.question_factory import build_unit_assessment, has_unit_assessment
 from core.engine.session_manager import reset_test
 from core.ui.test_ui import render_active_question, render_review
 
@@ -39,7 +39,7 @@ def _render_summary(unit, test):
         f"| {t} | {got} / {out_of} | {round(100 * got / out_of)}% |" for t, got, out_of in rows))
     weakest = [t for t, got, out_of in rows if got / out_of < 0.5]
     if weakest:
-        st.caption("Practise next (Exam Style): " + ", ".join(weakest))
+        st.caption("Practise next: " + ", ".join(weakest))
 
     render_review(test)
 
@@ -48,21 +48,17 @@ def render_unit_assessment(unit, qualification, user_id=None):
     from core.db.tracker import save_test_result, save_test_question_attempt
 
     test = st.session_state.test
-    topics = unit_assessment_topics(qualification, unit)
-
     # --- Start screen ---
     if not test["questions"]:
-        if not topics:
+        if not has_unit_assessment(qualification, unit):
             st.info("No exam-style questions for this unit yet — check back soon!")
             return
         st.markdown(f"### {UNIT_ASSESSMENT}: {unit}")
         st.markdown(
-            f"**{len(topics)} exam-style questions** — one from each topic in the unit, each with several "
-            "parts, like an SQA paper. Every part is marked automatically, and you'll get a breakdown by "
-            "topic at the end."
+            "Exam-style questions from across the whole unit, like a section of an SQA paper — "
+            "chosen so that between them they cover the unit's topics. Every part is marked "
+            "automatically, and you'll get a breakdown by topic at the end."
         )
-        with st.expander("Topics covered"):
-            st.markdown("\n".join(f"- {t}" for t in topics))
         if st.button("Start Unit Assessment", type="primary"):
             reset_test()
             st.session_state.test["questions"] = build_unit_assessment(qualification, unit)

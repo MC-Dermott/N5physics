@@ -35,8 +35,9 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None, 
 
         if exam_style:
             st.markdown(
-                f"You will be given **{num_questions} exam-style questions** on *{question_type}*, "
-                "each with several parts, like an SQA paper. Every part is marked automatically. "
+                f"You will be given **{num_questions} exam-style questions** from across *{topic}*, "
+                "each with several parts that draw on different topics, like an SQA paper. "
+                "Every part is marked automatically. "
                 "A summary with feedback is shown at the end."
             )
         else:
@@ -195,7 +196,7 @@ def _render_scenario_test(test, idx, question):
     part_idx = st.session_state[part_idx_key]
 
     if question.metadata.get("exam_style"):
-        st.caption(f"📝 Exam-style question · {question.question_type}")
+        st.caption("📝 Exam-style question · covers " + ", ".join(question.metadata.get("covers", [])))
 
     if question.scenario_context:
         st.info(question.scenario_context)
