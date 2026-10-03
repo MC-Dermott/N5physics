@@ -1,6 +1,7 @@
 import random
 from utils.make_question import make_question
 from utils.notes import NOTES
+from utils.circuit_diagram import comp, divider, loop_circuit, par, with_diagram
 
 SUPPLY_V = 5.0
 
@@ -15,6 +16,17 @@ def _gen_r_ohm():
 
 def _gen_v():
     return round(random.randint(1, 17) * 0.5, 1)
+
+
+def _transistor(r_fixed, r_var):
+    return divider("resistor", f"fixed {r_fixed} kΩ", "variable", f"variable {r_var} kΩ", f"+{SUPPLY_V:g} V",
+                   transistor="npn", output_kind="lamp")
+
+
+def _complex(r1, r2, r3, supply_label=""):
+    return loop_circuit([comp("resistor", f"R1 = {r1} Ω"),
+                         par([comp("resistor", f"R2 = {r2} Ω")], [comp("resistor", f"R3 = {r3} Ω")])],
+                        supply_label=supply_label)
 
 
 # ── Transistor-style potential divider (fixed 5 V supply) ───────────────────
@@ -58,8 +70,9 @@ def gen_transistor_supply_given(level="N5"):
         {"value": SUPPLY_V,        "display": f"{SUPPLY_V} V", "summary": "Incorrect.", "mistake": "This is the supply voltage. The voltage is shared across the resistors in proportion to their resistance.", "working": working},
         {"value": float(current),  "display": f"{current} mA", "summary": "Incorrect.", "mistake": "You gave the current in the circuit, not the voltage. Use V = IR to find the voltage.", "working": working},
     ]
-    return make_question(question, float(correct), options_data, "V", scaffold=scaffold,
+    qobj = make_question(question, float(correct), options_data, "V", scaffold=scaffold,
                          notes=NOTES["electricity_current"], topic="Electricity", question_type="Circuits", level=level)
+    return with_diagram(qobj, _transistor(r_fixed, r_var))
 
 
 def gen_transistor_partial_voltage(level="N5"):
@@ -106,8 +119,9 @@ def gen_transistor_partial_voltage(level="N5"):
         {"value": float(v_sum),    "display": f"{v_sum} V",      "summary": "Incorrect.", "mistake": "You added the two voltages. The voltages share the supply — they don't add beyond it.", "working": working},
         {"value": SUPPLY_V,        "display": f"{SUPPLY_V} V",   "summary": "Incorrect.", "mistake": "This is the supply voltage. Find the current using V=IR, then use it to find the voltage across the target resistor.", "working": working},
     ]
-    return make_question(question, float(correct), options_data, "V", scaffold=scaffold,
+    qobj = make_question(question, float(correct), options_data, "V", scaffold=scaffold,
                          notes=NOTES["electricity_current"], topic="Electricity", question_type="Circuits", level=level)
+    return with_diagram(qobj, _transistor(r_fixed, r_var))
 
 
 # ── Complex circuit (R2 ∥ R3 in series with R1) ─────────────────────────────
@@ -165,8 +179,9 @@ def gen_complex_supply_given(level="N5"):
         {"value": float(v_total),  "display": f"{v_total} V",   "summary": "Incorrect.", "mistake": "This is the full supply voltage. Find the total current first, then use V = IR for the component.", "working": working},
         {"value": float(i_total),  "display": f"{i_total} A",   "summary": "Incorrect.", "mistake": "You gave the current, not the voltage. Use V = IR to find the voltage across the resistor.", "working": working},
     ]
-    return make_question(question, float(correct), options_data, "V", scaffold=scaffold,
+    qobj = make_question(question, float(correct), options_data, "V", scaffold=scaffold,
                          notes=NOTES["electricity_current"], topic="Electricity", question_type="Circuits", level=level)
+    return with_diagram(qobj, _complex(r1, r2, r3, f"{v_total} V"))
 
 
 def gen_complex_partial_voltage(level="N5"):
@@ -212,8 +227,9 @@ def gen_complex_partial_voltage(level="N5"):
         {"value": float(v_total), "display": f"{v_total} V", "summary": "Incorrect.", "mistake": "You added the voltages together. This would be the supply voltage, not the voltage across R1.", "working": working},
         {"value": float(i_total), "display": f"{i_total} A", "summary": "Incorrect.", "mistake": "You gave the current value, not the voltage. Use V = IR to find the voltage across R1.", "working": working},
     ]
-    return make_question(question, float(v1), options_data, "V", scaffold=scaffold,
+    qobj = make_question(question, float(v1), options_data, "V", scaffold=scaffold,
                          notes=NOTES["electricity_current"], topic="Electricity", question_type="Circuits", level=level)
+    return with_diagram(qobj, _complex(r1, r2, r3))
 
 
 _ALL_GENS = [gen_transistor_supply_given, gen_transistor_partial_voltage,

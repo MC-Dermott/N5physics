@@ -1,6 +1,14 @@
 import random
 from utils.make_question import make_question
 from utils.notes import NOTES
+from utils.circuit_diagram import comp, loop_circuit, with_diagram
+
+_CONTEXT_SYMBOL = {"A filament lamp": "lamp", "An LDR": "ldr", "A thermistor": "thermistor"}
+
+
+def _circuit(ctx):
+    """The component in a circuit, with an ammeter in series and a voltmeter across it."""
+    return loop_circuit([comp("ammeter"), comp(_CONTEXT_SYMBOL.get(ctx, "resistor"), voltmeter="V")])
 
 
 def round_sf(value, sf=3):
@@ -129,8 +137,9 @@ def gen_vir_find_v(level="N5"):
         if r_unit != "Ω":
             scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
         scaffold.append({"question": "What is the voltage V?", "answer": correct})
-    return make_question(question, correct, options_data, "V", notes=NOTES["ohms_law"],
+    qobj = make_question(question, correct, options_data, "V", notes=NOTES["ohms_law"],
                          topic="Electricity", question_type="Ohm's Law", level=level, scaffold=scaffold)
+    return with_diagram(qobj, _circuit(ctx))
 
 
 def gen_vir_find_i(level="N5"):
@@ -192,8 +201,9 @@ def gen_vir_find_i(level="N5"):
         if r_unit != "Ω":
             scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
         scaffold.append({"question": "What is the current I?", "answer": correct})
-    return make_question(question, correct, options_data, "A", notes=NOTES["ohms_law"],
+    qobj = make_question(question, correct, options_data, "A", notes=NOTES["ohms_law"],
                          topic="Electricity", question_type="Ohm's Law", level=level, scaffold=scaffold)
+    return with_diagram(qobj, _circuit(ctx))
 
 
 def gen_vir_find_r(level="N5"):
@@ -255,8 +265,9 @@ def gen_vir_find_r(level="N5"):
         if i_unit != "A":
             scaffold.append({"question": "What is the current I in amps?", "answer": i_si})
         scaffold.append({"question": "What is the resistance R?", "answer": correct})
-    return make_question(question, correct, options_data, "Ω", notes=NOTES["ohms_law"],
+    qobj = make_question(question, correct, options_data, "Ω", notes=NOTES["ohms_law"],
                          topic="Electricity", question_type="Ohm's Law", level=level, scaffold=scaffold)
+    return with_diagram(qobj, _circuit(ctx))
 
 
 _N4_GENS  = [gen_vir_find_v]

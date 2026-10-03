@@ -1,6 +1,14 @@
 import random
 from utils.make_question import make_question
 from utils.notes import NOTES
+from utils.circuit_diagram import comp, loop_circuit, with_diagram
+
+_CONTEXT_SYMBOL = {"A thermistor": "thermistor", "A resistive heating element": "heater"}
+
+
+def _circuit(ctx):
+    """The component in a circuit, with an ammeter in series and a voltmeter across it."""
+    return loop_circuit([comp("ammeter"), comp(_CONTEXT_SYMBOL.get(ctx, "resistor"), voltmeter="V")])
 
 
 def round_sf(value, sf=3):
@@ -319,8 +327,9 @@ def gen_pv2r_find_p(level="N5"):
         scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
     scaffold.append({"question": "What is V²?", "answer": round_sf(v_si ** 2)})
     scaffold.append({"question": "What is the power P?", "answer": correct})
-    return make_question(question, correct, options_data, "W", notes=NOTES["electricity_power"],
+    qobj = make_question(question, correct, options_data, "W", notes=NOTES["electricity_power"],
                          topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
+    return with_diagram(qobj, _circuit(ctx))
 
 
 def gen_pv2r_find_v(level="N5"):
@@ -367,8 +376,9 @@ def gen_pv2r_find_v(level="N5"):
         scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
     scaffold.append({"question": "What is P × R?", "answer": round_sf(p_si * r_si)})
     scaffold.append({"question": "What is the voltage V?", "answer": correct})
-    return make_question(question, correct, options_data, "V", notes=NOTES["electricity_power"],
+    qobj = make_question(question, correct, options_data, "V", notes=NOTES["electricity_power"],
                          topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
+    return with_diagram(qobj, _circuit(ctx))
 
 
 def gen_pv2r_find_r(level="N5"):
@@ -415,8 +425,9 @@ def gen_pv2r_find_r(level="N5"):
         scaffold.append({"question": "What is the power P in watts?", "answer": p_si})
     scaffold.append({"question": "What is V²?", "answer": round_sf(v_si ** 2)})
     scaffold.append({"question": "What is the resistance R?", "answer": correct})
-    return make_question(question, correct, options_data, "Ω", notes=NOTES["electricity_power"],
+    qobj = make_question(question, correct, options_data, "Ω", notes=NOTES["electricity_power"],
                          topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
+    return with_diagram(qobj, _circuit(ctx))
 
 
 # ─── P = I²R ──────────────────────────────────────────────
@@ -466,8 +477,9 @@ def gen_pi2r_find_p(level="N5"):
         scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
     scaffold.append({"question": "What is I²?", "answer": round_sf(i_si ** 2)})
     scaffold.append({"question": "What is the power P?", "answer": correct})
-    return make_question(question, correct, options_data, "W", notes=NOTES["electricity_power"],
+    qobj = make_question(question, correct, options_data, "W", notes=NOTES["electricity_power"],
                          topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
+    return with_diagram(qobj, _circuit(ctx))
 
 
 def gen_pi2r_find_i(level="N5"):
@@ -514,8 +526,9 @@ def gen_pi2r_find_i(level="N5"):
         scaffold.append({"question": "What is the resistance R in ohms?", "answer": r_si})
     scaffold.append({"question": "What is P ÷ R?", "answer": round_sf(p_si / r_si)})
     scaffold.append({"question": "What is the current I?", "answer": correct})
-    return make_question(question, correct, options_data, "A", notes=NOTES["electricity_power"],
+    qobj = make_question(question, correct, options_data, "A", notes=NOTES["electricity_power"],
                          topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
+    return with_diagram(qobj, _circuit(ctx))
 
 
 def gen_pi2r_find_r(level="N5"):
@@ -563,8 +576,9 @@ def gen_pi2r_find_r(level="N5"):
         scaffold.append({"question": "What is the current I in amps?", "answer": i_si})
     scaffold.append({"question": "What is I²?", "answer": round_sf(i_si ** 2)})
     scaffold.append({"question": "What is the resistance R?", "answer": correct})
-    return make_question(question, correct, options_data, "Ω", notes=NOTES["electricity_power"],
+    qobj = make_question(question, correct, options_data, "Ω", notes=NOTES["electricity_power"],
                          topic="Electricity", question_type="Power", level=level, scaffold=scaffold)
+    return with_diagram(qobj, _circuit(ctx))
 
 
 # ─── P = E/t ──────────────────────────────────────────────

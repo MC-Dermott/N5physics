@@ -1,6 +1,7 @@
 import random
 from utils.make_question import make_question
 from utils.notes import NOTES
+from utils.circuit_diagram import divider, with_diagram
 
 
 def round_sf(value, sf=3):
@@ -74,9 +75,10 @@ def gen_type1(level="N5"):
              "mistake": "Check your current calculation: I = V_supply ÷ R_total, then V = I × R_target.",
              "working": full_working},
         ]
-        return make_question(question, correct, options_data, "V", scaffold=scaffold,
+        qobj = make_question(question, correct, options_data, "V", scaffold=scaffold,
                              notes=NOTES.get("potential_divider", NOTES["ohms_law"]),
                              topic="Electricity", question_type="Potential Divider", level=level)
+        return with_diagram(qobj, divider("resistor", f"R1 = {r1} kΩ", "resistor", f"R2 = {r2} kΩ", f"+{v_supply} V"))
 
 
 def gen_type2(level="N5"):
@@ -136,9 +138,10 @@ def gen_type2(level="N5"):
             "mistake": "The voltages across the two resistors add up to the supply voltage, not beyond it.",
             "working": full_working,
         }
-        return make_question(question, correct, options_data, "V", scaffold=scaffold,
+        qobj = make_question(question, correct, options_data, "V", scaffold=scaffold,
                              notes=NOTES.get("potential_divider", NOTES["ohms_law"]),
                              topic="Electricity", question_type="Potential Divider", level=level)
+        return with_diagram(qobj, divider("resistor", f"R1 = {r1} kΩ", "resistor", f"R2 = {r2} kΩ"))
 
 
 _ALL_GENS = [gen_type1, gen_type2]

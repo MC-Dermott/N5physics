@@ -1,6 +1,6 @@
 import streamlit as st
 
-from core.ui.feedback_ui import check_answer, render_feedback, render_working
+from core.ui.feedback_ui import check_answer, render_diagram, render_feedback, render_working
 from core.ui.scaffold_ui import render_scaffold, render_widget
 from core.ui.graph_mcq_ui import render_main_graph, render_option_grid, render_correct_option
 from core.db.tracker import save_practice_attempt
@@ -55,6 +55,7 @@ def _render_single(question, user_id, qualification):
         render_widget(question)
 
     st.markdown(question.question_text)
+    render_diagram(question)
     st.write("")
 
     q_type = question.metadata.get("type")
@@ -143,6 +144,7 @@ def _render_scenario(question, user_id, qualification):
 
     if question.scenario_context:
         st.info(question.scenario_context)
+    render_diagram(question)
 
     if question.metadata.get("main_figure") is not None:
         render_main_graph(question, key_suffix="_scenario")

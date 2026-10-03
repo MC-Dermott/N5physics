@@ -8,6 +8,7 @@ import math
 import random
 
 from topics.exam_style.base import Exam, T, fmt, graph, ltx, pick, sig
+from utils.circuit_diagram import comp, divider, loop_circuit, par
 
 UNIT = "Electricity"
 E_CHARGE = 1.6e-19
@@ -180,7 +181,9 @@ def night_light(level="N5"):
         working=[rf"V_R = {Vs} - {VL:g} = {ltx(VR)}\ \text{{V}}", rf"R = \frac{{V_R}}{{I}} = \frac{{{ltx(VR)}}}{{{I_mA / 1000:g}}} = {ltx(VR / (I_mA / 1000))}\ \Omega"],
         scaffold=[("Voltage across the resistor, in V?", VR, "V")])
     return ex.build(f"A night light uses an LDR and a {Rf} Ω resistor as a potential divider across a {Vs} V supply. A transistor "
-                    f"connected across the LDR switches on an LED.")
+                    f"connected across the LDR switches on an LED.",
+                    diagram=divider("resistor", f"{Rf} Ω", "ldr", "LDR", f"+{Vs} V", transistor="npn",
+                                    output_kind="led", output_label="LED"))
 
 
 # ════════════════ Car lights: parallel circuit → resistance → power ════════════════
@@ -207,7 +210,8 @@ def car_lights(level="N5"):
         "It stays lit at the same brightness — it still has the full 12 V across it.",
         [("It goes out.", "In parallel each lamp has its own path."), ("It gets brighter.", "Its voltage is unchanged."),
          ("It gets dimmer.", "Its voltage is unchanged.")])
-    return ex.build(f"A car's {P1} W headlamp and a {P2} W lamp are connected in parallel to the 12 V battery.")
+    return ex.build(f"A car's {P1} W headlamp and a {P2} W lamp are connected in parallel to the 12 V battery.",
+                    diagram=loop_circuit([par([comp("lamp", f"{P1} W")], [comp("lamp", f"{P2} W")])], supply_label="12 V"))
 
 
 # ════════════════ Thermostat: thermistor divider → current → heater power ════════════════
@@ -235,7 +239,8 @@ def thermostat(level="N5"):
     ex.on("Power and Fuses").num(f"The heater switched by the thermostat has a {R} Ω element with a current of {Ih} A. Calculate its power.", P, "W",
         wrong=[(Ih * R, "That's the voltage. P = I²R."), (Ih * R ** 2, "Square the current, not R.")],
         working=[rf"P = I^2R = {Ih}^2 \times {R} = {ltx(P)}\ \text{{W}}"])
-    return ex.build(f"A thermostat uses a thermistor in series with a {Rf} Ω resistor across a {Vs} V supply.")
+    return ex.build(f"A thermostat uses a thermistor in series with a {Rf} Ω resistor across a {Vs} V supply.",
+                    diagram=divider("thermistor", "thermistor", "resistor", f"{Rf} Ω", f"+{Vs} V", vout_label="V"))
 
 
 # ════════════════ Investigating a series circuit ════════════════
@@ -262,7 +267,9 @@ def series_investigation(level="N5"):
     ex.on("Potential Difference").choice(f"What does a supply voltage of {Vs} V mean?", f"{Vs} J of energy is given to each coulomb of charge.",
         [(f"{Vs} C of charge flows each second.", "That would be a current."), (f"{Vs} J of energy is transferred each second.", "That would be a power."),
          (f"The battery has {Vs} Ω of resistance.", "Voltage is energy per unit charge.")])
-    return ex.build(f"A pupil connects a {R1} Ω resistor and a {R2} Ω resistor in series with a {Vs} V battery.")
+    return ex.build(f"A pupil connects a {R1} Ω resistor and a {R2} Ω resistor in series with a {Vs} V battery.",
+                    diagram=loop_circuit([comp("resistor", f"{R1} Ω"), comp("resistor", f"{R2} Ω", voltmeter="V")],
+                                         supply_label=f"{Vs} V"))
 
 
 SCENARIOS = {

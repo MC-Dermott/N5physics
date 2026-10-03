@@ -5,9 +5,10 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from core.engine.session_manager import reset_test
-from core.ui.feedback_ui import check_answer, render_feedback, render_working
+from core.ui.feedback_ui import check_answer, render_diagram, render_feedback, render_working
 from core.ui.graph_mcq_ui import render_main_graph, render_option_grid
 from utils.answer_format import format_answer
+from utils.diagrams import diagram_markdown as question_diagram_markdown
 from utils.notes import format_math
 
 _GAME_HTML_PATH = Path(__file__).parent / "assets" / "geometry_dash.html"
@@ -117,6 +118,7 @@ def _check_classification(selected, question):
 
 def _render_single_test(test, idx, question):
     st.markdown(question.question_text)
+    render_diagram(question)
     st.write("")
 
     q_type = question.metadata.get("type")
@@ -200,6 +202,7 @@ def _render_scenario_test(test, idx, question):
 
     if question.scenario_context:
         st.info(question.scenario_context)
+    render_diagram(question)
 
     if question.metadata.get("main_figure") is not None:
         render_main_graph(question, key_suffix=f"_test_{idx}_scenario")
@@ -330,7 +333,11 @@ def render_review(test):
         context = q_ref.metadata.get("scenario_context")
         if context and context != last_context:
             st.info(context)
+            if q_ref.metadata.get("scenario_diagram"):
+                st.markdown(question_diagram_markdown(q_ref.metadata["scenario_diagram"]))
         last_context = context
+        if not context:
+            render_diagram(q_ref)
 
         correct_str = format_answer(q_ref)
         if correct:

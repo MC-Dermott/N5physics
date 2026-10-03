@@ -11,6 +11,7 @@ import math
 import random
 
 from topics.exam_style.base import Exam, T, fmt, graph, ltx, pick, sig
+from utils.projectile_diagram import cliff_launch, platform_landing
 
 UNIT1 = "Our Dynamic Universe (Part 1)"
 UNIT2 = "Our Dynamic Universe (Part 2)"
@@ -354,6 +355,94 @@ def space_telescope(level="Higher"):
                     "H₀ = 2.3 × 10⁻¹⁸ s⁻¹)")
 
 
+def off_a_cliff(level="Higher"):
+    ex = _ex(level, UNIT2).on("Projectile Motion")
+    what, below = random.choice([("ball", "sea"), ("stone", "beach"), ("ball", "ground")])
+    u, th, h = pick(12, 15, 18, 20), pick(30, 35, 40, 45), pick(15, 20, 25, 30, 40)
+    uh, uv = u * math.cos(math.radians(th)), u * math.sin(math.radians(th))
+    ex.num("Calculate the vertical component of the initial velocity.", uv, "m/s",
+           wrong=[(uh, "Vertical component = u sin θ."), (u, "Resolve the velocity into components.")],
+           working=[rf"u_v = u\sin\theta = {u} \sin {th}^\circ = {ltx(uv)}\ \text{{m/s}}"])
+    t1 = uv / G
+    rise = uv ** 2 / (2 * G)
+    Hmax = h + rise
+    ex.num(f"Calculate the maximum height of the {what} above the {below}.", Hmax, "m",
+           wrong=[(rise, f"That's the height above the LAUNCH point — add the {h} m cliff."), (h + uv ** 2 / G, "v² = u² + 2as: include the 2.")],
+           working=[r"v^2 = u^2 + 2as", rf"0 = {ltx(uv)}^2 + 2(-9.8)s \Rightarrow s = {ltx(rise)}\ \text{{m}}",
+                    rf"H = {h} + {ltx(rise)} = {ltx(Hmax)}\ \text{{m}}"],
+           scaffold=[("Height gained above the launch point, in m?", rise, "m")])
+    t2 = math.sqrt(2 * Hmax / G)
+    ex.num(f"Calculate the total time the {what} is in the air.", t1 + t2, "s",
+           wrong=[(2 * t1, f"That's the time to return to the LAUNCH height — the {what} keeps falling to the {below}."),
+                  (t2, "Add the time taken to rise to the highest point."),
+                  (t1 + math.sqrt(2 * h / G), f"From the highest point it falls the FULL height H = {fmt(Hmax)} m, not just the cliff height.")],
+           working=[T("Time to the highest point:"), rf"0 = {ltx(uv)} + (-9.8)t_1 \Rightarrow t_1 = {ltx(t1)}\ \text{{s}}",
+                    T(f"From the highest point (u = 0) it falls {fmt(Hmax)} m:"),
+                    rf"{ltx(Hmax)} = \tfrac{{1}}{{2}} \times 9.8 \times t_2^2 \Rightarrow t_2 = {ltx(t2)}\ \text{{s}}",
+                    rf"t = t_1 + t_2 = {ltx(t1 + t2)}\ \text{{s}}"],
+           scaffold=[("Time to the highest point, in s?", t1, "s"), ("Time to fall from the highest point, in s?", t2, "s")])
+    d = uh * (t1 + t2)
+    ex.num(f"Calculate the horizontal distance from the foot of the cliff to where the {what} lands.", d, "m",
+           wrong=[(u * (t1 + t2), "Use the HORIZONTAL component, u cos θ."), (uh * 2 * t1, "Use the total time of flight, including the fall below the cliff top.")],
+           working=[rf"u_h = {u}\cos {th}^\circ = {ltx(uh)}\ \text{{m/s}}", rf"d = u_h t = {ltx(uh)} \times {ltx(t1 + t2)} = {ltx(d)}\ \text{{m}}"])
+    vv = -G * t2
+    ex.num(f"Calculate the vertical velocity of the {what} just before it lands (take upwards as positive).", vv, "m/s",
+           wrong=[(-vv, "It is moving DOWN, so the vertical velocity is negative."), (-uv, f"It lands {h} m below its launch point, so it is moving faster than it was launched.")],
+           working=[rf"v = u + at = 0 + (-9.8) \times {ltx(t2)} = {ltx(vv)}\ \text{{m/s}}"])
+    ex.choice(f"In practice, air resistance acts on the {what}. How does this affect where it lands?",
+              "It lands closer to the cliff, because air resistance reduces its horizontal velocity.",
+              [("It lands further away, because air resistance slows its fall.", "Air resistance also reduces the horizontal velocity, so the range is shorter."),
+               ("It lands in the same place — air resistance only acts vertically.", "Air resistance opposes the motion in every direction, including horizontally."),
+               ("It lands in the same place — the horizontal velocity is always constant.", "That's only true when air resistance is ignored.")])
+    return ex.build(f"A {what} is launched at {u} m/s at {th}° above the horizontal from the top of a cliff {h} m above the {below}. "
+                    f"Ignore air resistance unless told otherwise.",
+                    diagram=cliff_launch(f"u = {u} m/s", f"{th}°", f"{h} m", what))
+
+
+def onto_a_platform(level="Higher"):
+    ex = _ex(level, UNIT2).on("Projectile Motion")
+    what = pick("ball", "beanbag")
+    u, th = pick(14, 16, 18, 20), pick(50, 55, 60)
+    uh, uv = u * math.cos(math.radians(th)), u * math.sin(math.radians(th))
+    Hmax = uv ** 2 / (2 * G)
+    h = round(Hmax * random.uniform(0.3, 0.65), 1)
+    ex.num("Calculate the horizontal component of the initial velocity.", uh, "m/s",
+           wrong=[(uv, "Horizontal component = u cos θ."), (u, "Resolve the velocity into components.")],
+           working=[rf"u_h = u\cos\theta = {u} \cos {th}^\circ = {ltx(uh)}\ \text{{m/s}}"])
+    ex.num(f"Calculate the maximum height reached by the {what}.", Hmax, "m",
+           wrong=[(uv ** 2 / G, "v² = u² + 2as: include the 2."), (u ** 2 / (2 * G), "Use the VERTICAL component, u sin θ.")],
+           working=[rf"u_v = {u}\sin {th}^\circ = {ltx(uv)}\ \text{{m/s}}", rf"0 = {ltx(uv)}^2 + 2(-9.8)s \Rightarrow s = {ltx(Hmax)}\ \text{{m}}"],
+           scaffold=[("Vertical component of the initial velocity, in m/s?", uv, "m/s")])
+    t1 = uv / G
+    drop = Hmax - h
+    t2 = math.sqrt(2 * drop / G)
+    ex.num(f"The {what} lands on the platform while it is falling. Calculate the time from launch until it lands.", t1 + t2, "s",
+           wrong=[(2 * t1, "That's the time to return to GROUND level — the platform is higher, so it lands sooner."),
+                  (t1 - t2, "That's when it passes the platform's height on the way UP; it lands on the way down."),
+                  (t1 + math.sqrt(2 * h / G), f"From the highest point it only falls H − h = {fmt(drop)} m to the platform.")],
+           working=[rf"t_1 = \frac{{u_v}}{{g}} = \frac{{{ltx(uv)}}}{{9.8}} = {ltx(t1)}\ \text{{s}}",
+                    T(f"From the highest point (u = 0) it falls {fmt(Hmax)} − {h:g} = {fmt(drop)} m:"),
+                    rf"{ltx(drop)} = \tfrac{{1}}{{2}} \times 9.8 \times t_2^2 \Rightarrow t_2 = {ltx(t2)}\ \text{{s}}",
+                    rf"t = t_1 + t_2 = {ltx(t1 + t2)}\ \text{{s}}"],
+           scaffold=[("Time to the highest point, in s?", t1, "s"), ("Height fallen from the highest point to the platform, in m?", drop, "m")])
+    d = uh * (t1 + t2)
+    ex.num(f"Calculate the horizontal distance the {what} travels before landing.", d, "m",
+           wrong=[(u * (t1 + t2), "Use the horizontal component, u cos θ."), (uh * 2 * t1, "Use the time until it lands on the platform.")],
+           working=[rf"d = u_h t = {ltx(uh)} \times {ltx(t1 + t2)} = {ltx(d)}\ \text{{m}}"])
+    vv = -G * t2
+    ex.num(f"Calculate the vertical velocity of the {what} as it lands (take upwards as positive).", vv, "m/s",
+           wrong=[(-vv, "It is falling, so the vertical velocity is negative."), (-uv, "It lands higher than it started, so it is moving more slowly than at launch.")],
+           working=[rf"v = u + at = 0 + (-9.8) \times {ltx(t2)} = {ltx(vv)}\ \text{{m/s}}"])
+    ex.choice(f"How does the {what}'s speed as it lands compare with its launch speed, and why?",
+              "It is smaller — the platform is higher than the launch point, so some kinetic energy has become gravitational potential energy.",
+              [("It is the same — the horizontal velocity is constant.", "The VERTICAL velocity is smaller on landing, so the speed is smaller."),
+               ("It is larger — it has been accelerating downwards.", "It hasn't fallen back to its launch height."),
+               ("It is smaller because of air resistance.", "Air resistance is ignored here; it's because the platform is higher.")])
+    return ex.build(f"A {what} is thrown from ground level at {u} m/s at {th}° above the horizontal. It lands on a flat platform "
+                    f"{h:g} m above the ground. Ignore air resistance.",
+                    diagram=platform_landing(f"u = {u} m/s", f"{th}°", f"{h:g} m", what))
+
+
 SCENARIOS_PART1 = {
     "Car and Trailer":    car_and_trailer,
     "Skier":              skier,
@@ -363,6 +452,8 @@ SCENARIOS_PART1 = {
 }
 
 SCENARIOS_PART2 = {
+    "Off a Cliff":        off_a_cliff,
+    "Onto a Platform":    onto_a_platform,
     "Golf on the Moon":   moon_golf,
     "Lander on Mars":     mars_drop,
     "Journey to a Star":  star_journey,

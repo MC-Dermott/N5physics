@@ -1,6 +1,11 @@
 import random
 from utils.make_question import make_question
 from utils.notes import NOTES
+from utils.circuit_diagram import comp, network, par, with_diagram
+
+
+def _r(name, value, unit):
+    return comp("resistor", f"{name} = {value} {unit}")
 
 
 def round_sf(value, sf=3):
@@ -102,8 +107,9 @@ def gen_series_3(level="N5"):
         {"question": "What is R1 + R2?", "answer": round_sf(r1 + r2)},
         {"question": "What is the total resistance RT?", "answer": correct},
     ]
-    return make_question(question, correct, options_data, unit, scaffold=scaffold, notes=NOTES["resistor_combinations"],
+    qobj = make_question(question, correct, options_data, unit, scaffold=scaffold, notes=NOTES["resistor_combinations"],
                          topic="Electricity", question_type="Resistors", level=level)
+    return with_diagram(qobj, network([_r("R1", r1, unit), _r("R2", r2, unit), _r("R3", r3, unit)]))
 
 
 def gen_parallel_3(level="N5"):
@@ -144,8 +150,9 @@ def gen_parallel_3(level="N5"):
         {"question": "What is 1/R1 + 1/R2 + 1/R3?", "answer": round_sf(1/r1 + 1/r2 + 1/r3)},
         {"question": "What is the total resistance RT?", "answer": correct},
     ]
-    return make_question(question, correct, options_data, unit, scaffold=scaffold, notes=NOTES["resistor_combinations"],
+    qobj = make_question(question, correct, options_data, unit, scaffold=scaffold, notes=NOTES["resistor_combinations"],
                          topic="Electricity", question_type="Resistors", level=level)
+    return with_diagram(qobj, network([par([_r("R1", r1, unit)], [_r("R2", r2, unit)], [_r("R3", r3, unit)])]))
 
 
 def gen_two_series_one_parallel(level="N5"):
@@ -186,9 +193,10 @@ def gen_two_series_one_parallel(level="N5"):
         {"value": d_parallel,   "display": fmt_r(d_parallel, unit),   "summary": "Incorrect.", "mistake": f"You treated all three as parallel. {na} and {nb} are in series first.",                     "working": working},
         {"value": d_par_first,  "display": fmt_r(d_par_first, unit),  "summary": "Incorrect.", "mistake": f"You combined {na} and {nb} in parallel instead of series — check the circuit arrangement.", "working": working},
     ]
-    return make_question(question, correct, options_data, unit, scaffold=scaffold,
+    qobj = make_question(question, correct, options_data, unit, scaffold=scaffold,
                          notes=NOTES["resistor_combinations"],
                          topic="Electricity", question_type="Resistors", level=level)
+    return with_diagram(qobj, network([par([_r(na, ra, unit), _r(nb, rb, unit)], [_r(nc, rc, unit)])]))
 
 
 def gen_two_parallel_one_series(level="N5"):
@@ -231,9 +239,10 @@ def gen_two_parallel_one_series(level="N5"):
         {"value": d_parallel,  "display": fmt_r(d_parallel, unit),  "summary": "Incorrect.", "mistake": f"You treated all three as parallel. {nc} is in series with the parallel combination.",         "working": working},
         {"value": d_ser_first, "display": fmt_r(d_ser_first, unit), "summary": "Incorrect.", "mistake": f"You combined {na} and {nb} in series instead of parallel — check the circuit arrangement.",   "working": working},
     ]
-    return make_question(question, correct, options_data, unit, scaffold=scaffold,
+    qobj = make_question(question, correct, options_data, unit, scaffold=scaffold,
                          notes=NOTES["resistor_combinations"],
                          topic="Electricity", question_type="Resistors", level=level)
+    return with_diagram(qobj, network([par([_r(na, ra, unit)], [_r(nb, rb, unit)]), _r(nc, rc, unit)]))
 
 
 _ALL_GENS = [gen_series_3, gen_parallel_3, gen_two_series_one_parallel, gen_two_parallel_one_series]

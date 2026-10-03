@@ -15,6 +15,7 @@ import random
 
 from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
+from utils.circuit_diagram import comp, divider, loop_circuit, par, with_diagram
 
 TOPIC = "Electricity"
 E_CHARGE = 1.6e-19
@@ -249,11 +250,12 @@ def gen_ec_series_parallel(level="N5"):
     scaffold = [{"question": "What is the resistance of the parallel pair, in Ω?", "answer": float(rp)},
                 {"question": "What is the total resistance, in Ω?", "answer": float(rt)},
                 {"question": "What is the supply current, in A?", "answer": _sig(I)}]
-    return _q(text, _sig(I), "A", opts, "Circuit Rules", scaffold, level)
+    qobj = _q(text, _sig(I), "A", opts, "Circuit Rules", scaffold, level)
+    return with_diagram(qobj, loop_circuit([comp("resistor", f"{rs} Ω"), par([comp("resistor", f"{r1} Ω")], [comp("resistor", f"{r2} Ω")])], supply_label=f"{Vs:g} V"))
 
 
 # (device, number lo, hi, power each (W), supply V)
-_PARALLEL_SETS = [("LED spotlights", 3, 6, 4.8, 12), ("halogen lamps", 2, 5, 20, 12), ("garden lights", 4, 8, 3.0, 12),
+_PARALLEL_SETS = [("LED spotlights", 3, 5, 4.8, 12), ("halogen lamps", 2, 5, 20, 12), ("garden lights", 3, 5, 3.0, 12),
                   ("heaters", 2, 3, 1000, 230)]
 
 
@@ -271,28 +273,32 @@ def gen_ec_parallel_total_current(level="N5"):
             {"value": _sig(V / P * n), "mistake": "P = IV rearranges to I = P ÷ V.", "working": work}]
     scaffold = [{"question": "What is the current in one of them, in A?", "answer": _sig(I1)},
                 {"question": "What is the total current, in A?", "answer": _sig(It)}]
-    return _q(text, _sig(It), "A", opts, "Circuit Rules", scaffold, level)
+    qobj = _q(text, _sig(It), "A", opts, "Circuit Rules", scaffold, level)
+    return with_diagram(qobj, loop_circuit([par(*[[comp("heater" if dev == "heaters" else "lamp")] for _ in range(n)])], supply_label=f"{V} V"))
 
 
 def gen_ec_circuit_changes(level="N5"):
     kind = random.choice(["add_branch", "ldr_branch", "advantage"])
     if kind == "add_branch":
-        return _choice("A switch is closed that connects another resistor in parallel with the existing one. What happens to the supply current, and why?",
+        qobj = _choice("A switch is closed that connects another resistor in parallel with the existing one. What happens to the supply current, and why?",
                        "It increases, because the total resistance of the circuit decreases.",
                        [("It increases, because the resistance goes down.", "Must make clear it is the TOTAL resistance of the circuit (course report 2023)."),
                         ("It decreases, because there is more resistance in the circuit.", "Adding a parallel branch lowers the total resistance."),
                         ("It stays the same, because the supply voltage is unchanged.", "The total resistance changes, so the current does.")], "Circuit Rules", level)
+        return with_diagram(qobj, loop_circuit([par([comp("resistor")], [comp("switch", "S"), comp("resistor")])]))
     if kind == "ldr_branch":
-        return _choice("An LDR is in one branch of a parallel circuit and a fixed resistor is in the other. The light level falls. What happens to the current in the fixed resistor?",
+        qobj = _choice("An LDR is in one branch of a parallel circuit and a fixed resistor is in the other. The light level falls. What happens to the current in the fixed resistor?",
                        "It stays the same, because the voltage across it is unchanged.",
                        [("It increases, because the LDR branch takes less current.", "Parallel branches each have the supply voltage; the resistor's current doesn't change (course report 2024)."),
                         ("It decreases, because the LDR's resistance increases.", "Only the LDR branch current decreases."),
                         ("It becomes zero.", "The resistor still has the supply voltage across it.")], "Circuit Rules", level)
-    return _choice("Which is an advantage of connecting spotlights in parallel rather than in series?",
+        return with_diagram(qobj, loop_circuit([par([comp("ldr", "LDR")], [comp("resistor")])]))
+    qobj = _choice("Which is an advantage of connecting spotlights in parallel rather than in series?",
                    "Each spotlight operates at the correct (supply) voltage, and if one fails the others stay on.",
                    [("They all have the same voltage.", "Must say they operate at the CORRECT voltage (course report 2025)."),
                     ("The current is the same in each spotlight.", "That is a property of series circuits."),
                     ("The total resistance is higher, so less current is drawn.", "The total resistance in parallel is lower.")], "Circuit Rules", level)
+    return with_diagram(qobj, loop_circuit([par([comp("lamp")], [comp("lamp")], [comp("lamp")])]))
 
 
 # ════════════════ Potential dividers, LEDs and transistors ════════════════
@@ -320,7 +326,8 @@ def gen_ec_led_resistor(level="N5"):
             {"value": _sig(vr / i_ma), "mistake": "The current must be in amps: mA ÷ 1000.", "working": work}]
     scaffold = [{"question": "What is the voltage across the resistor, in V?", "answer": _sig(vr)},
                 {"question": "What is the resistance, in Ω?", "answer": _sig(R)}]
-    return _q(text, _sig(R), "Ω", opts, "LEDs and Transistor Switches", scaffold, level)
+    qobj = _q(text, _sig(R), "Ω", opts, "LEDs and Transistor Switches", scaffold, level)
+    return with_diagram(qobj, loop_circuit([comp("led") for _ in range(n)] + [comp("resistor", "R")], supply_label=f"{vs:g} V"))
 
 
 # (sensor, what lowers its resistance, condition that raises its voltage)
@@ -347,12 +354,13 @@ def gen_ec_divider_switch(level="N5"):
             {"value": _sig(vs * r2 / (r1 + r2) + vsw), "mistake": "The switching voltage isn't part of the calculation — it's only compared with your answer.", "working": work}]
     scaffold = [{"question": "What is the total resistance, in kΩ?", "answer": _sig(r1 + r2)},
                 {"question": f"What is the voltage across the {sensor}, in V?", "answer": _sig(v2)}]
-    return _q(text, _sig(v2), "V", opts, "LEDs and Transistor Switches", scaffold, level)
+    qobj = _q(text, _sig(v2), "V", opts, "LEDs and Transistor Switches", scaffold, level)
+    return with_diagram(qobj, divider("variable", f"{r1:g} kΩ", "ldr" if sensor == "LDR" else "thermistor", f"{sensor} ({r2:g} kΩ)", f"+{vs:g} V", transistor="npn" if vsw == 0.7 else "mosfet", output_kind="lamp"))
 
 
 def gen_ec_transistor_explain(level="N5"):
     sensor, factor, condition, device = random.choice(_SENSORS)
-    return _choice(f"A resistor (top) and a {sensor} (bottom) form a potential divider. A MOSFET's gate is connected across the {sensor}, and the MOSFET "
+    qobj = _choice(f"A resistor (top) and a {sensor} (bottom) form a potential divider. A MOSFET's gate is connected across the {sensor}, and the MOSFET "
                    f"switches on {device}. Which explanation of how {device} switches on when {condition} is best?",
                    f"The {sensor}'s resistance increases, so the voltage across it increases; when it reaches the switching voltage the MOSFET switches on.",
                    [(f"The {sensor} lets less current through, so more current goes to the MOSFET and it switches on.",
@@ -361,6 +369,7 @@ def gen_ec_transistor_explain(level="N5"):
                      f"When {condition}, the {sensor}'s resistance INCREASES."),
                     (f"The {sensor}'s resistance increases, so {device} switches on.",
                      "The link through the VOLTAGE across the sensor reaching the switching voltage is missing.")], "LEDs and Transistor Switches", level)
+    return with_diagram(qobj, divider("resistor", "", "ldr" if sensor == "LDR" else "thermistor", sensor, transistor="mosfet", output_kind="lamp" if device == "a lamp" else "heater", output_label=device[2:]))
 
 
 # ════════════════ Power and fuses ════════════════
@@ -389,6 +398,13 @@ def gen_ec_fuse(level="N5"):
 _PIR = [("heating element", 2.0, 6.0, 10, 50), ("wire", 1.0, 3.0, 2, 10), ("lamp filament", 0.2, 0.8, 5, 30), ("resistor", 0.05, 0.5, 20, 200)]
 
 
+_PIR_SYMBOL = {"heating element": "heater", "lamp filament": "lamp"}
+
+
+def _pir_circuit(el):
+    return loop_circuit([comp("ammeter"), comp(_PIR_SYMBOL.get(el, "resistor"), el, voltmeter="V")])
+
+
 def gen_ec_power_i2r(level="N5"):
     el, ilo, ihi, rlo, rhi = random.choice(_PIR)
     if random.random() < 0.5:
@@ -402,7 +418,8 @@ def gen_ec_power_i2r(level="N5"):
                 {"value": _sig(I * I / R), "mistake": "P = I²R — multiply by R.", "working": work},
                 {"value": _sig(I * R * R), "mistake": "It is the CURRENT that is squared, not the resistance.", "working": work}]
         scaffold = [{"question": "What is I², in A²?", "answer": _sig(I * I)}, {"question": "What is the power, in W?", "answer": _sig(P)}]
-        return _q(text, _sig(P), "W", opts, "Power and Fuses", scaffold, level)
+        qobj = _q(text, _sig(P), "W", opts, "Power and Fuses", scaffold, level)
+        return with_diagram(qobj, _pir_circuit(el))
     V = random.choice([6.0, 12.0, 24.0, 230.0])
     R = random.randint(rlo, rhi) * (20 if V == 230 else 1)
     P = V * V / R
@@ -411,7 +428,8 @@ def gen_ec_power_i2r(level="N5"):
     opts = [{"value": _sig(P), "mistake": None, "working": work},
             {"value": _sig(V / R), "mistake": "That's the current (V ÷ R) — the voltage must be squared for the power.", "working": work},
             {"value": _sig(V * V * R), "mistake": "P = V² ÷ R — divide by R.", "working": work}]
-    return _q(text, _sig(P), "W", opts, "Power and Fuses", None, level)
+    qobj = _q(text, _sig(P), "W", opts, "Power and Fuses", None, level)
+    return with_diagram(qobj, _pir_circuit(el))
 
 
 def gen_ec_energy_time(level="N5"):

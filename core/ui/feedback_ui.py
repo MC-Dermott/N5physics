@@ -3,6 +3,7 @@ import re
 import streamlit as st
 
 from utils.answer_format import format_answer
+from utils.diagrams import diagram_markdown as question_diagram_markdown
 from utils.notes import format_math, split_equations
 from utils.vector_diagram import diagram_markdown
 
@@ -58,6 +59,13 @@ def check_answer(user_input, question, unit_input=None, tolerance=0.02):
             return "wrong_unit", None
 
     return "correct", None
+
+
+def render_diagram(question):
+    """The question's diagram (a circuit, a light-gate set-up…), if it has one."""
+    svg = question.metadata.get("diagram")
+    if svg:
+        st.markdown(question_diagram_markdown(svg))
 
 
 def render_working(working):

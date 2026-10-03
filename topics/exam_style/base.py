@@ -119,14 +119,18 @@ class Exam:
         self.parts.append(q)
         return q
 
-    def build(self, context, figure=None):
+    def build(self, context, figure=None, diagram=None):
         for part in self.parts:
             # lets a test's review show each part under the scenario it came from
             part.metadata["scenario_context"] = context
+            if diagram:
+                part.metadata["scenario_diagram"] = diagram
         covers = list(dict.fromkeys(p.question_type for p in self.parts))
         metadata = {"exam_style": True, "covers": covers}
         if figure is not None:
             metadata["main_figure"] = figure
+        if diagram:
+            metadata["diagram"] = diagram
         return PhysicsQuestion(
             question_text=context.split("\n\n")[0], correct_answer=0.0, unit="",
             topic=self.unit, question_type=EXAM_STYLE, level=self.level,

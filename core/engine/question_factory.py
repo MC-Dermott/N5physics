@@ -1,3 +1,4 @@
+import functools
 import random
 
 from topics.dynamics.speed_distance_time   import generate_sdt
@@ -220,6 +221,8 @@ from topics.electricity_and_energy.knowledge        import (
 )
 
 from topics.exam_style.base import EXAM_STYLE
+from utils.diagrams import with_diagram
+from utils.light_gate_diagram import light_gate_diagram
 from topics.exam_style import (
     n5_dynamics, n5_electricity, n5_radiation, n5_waves, n5_properties,
     higher_odu, higher_particles_waves,
@@ -612,6 +615,36 @@ _EXAM_STYLE = {
 for _qualification, _units in _EXAM_STYLE.items():
     for _unit, _scenarios in _units.items():
         QUAL_REGISTRY[_qualification][_unit][EXAM_STYLE] = dict(_scenarios)
+
+# ── Light-gate set-up diagrams ──────────────────────────────────────────────
+# Any question whose own text mentions a light gate is shown with a diagram of the set-up
+# (matched to its wording), whichever generator produced it.
+
+def _with_light_gate_diagram(fn):
+    @functools.wraps(fn)
+    def generate(level="N5"):
+        q = fn(level=level)
+        if q.metadata.get("diagram"):
+            return q
+        text = q.question_text
+        if q.is_scenario:
+            text = " ".join([q.scenario_context] + [p.question_text for p in q.parts])
+        svg = light_gate_diagram(text)
+        if svg:
+            with_diagram(q, svg)
+            for part in q.parts:
+                part.metadata["scenario_diagram"] = svg
+        return q
+    return generate
+
+
+for _units in QUAL_REGISTRY.values():
+    for _topics in _units.values():
+        for _name, _entry in _topics.items():
+            if isinstance(_entry, dict):
+                _topics[_name] = {k: _with_light_gate_diagram(f) for k, f in _entry.items()}
+            else:
+                _topics[_name] = _with_light_gate_diagram(_entry)
 
 EXAM_TEST_QUESTIONS = 4
 UNIT_ASSESSMENT_MAX_QUESTIONS = 6

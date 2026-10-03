@@ -31,6 +31,7 @@ import re
 
 from core.data.past_papers import canonical_unit
 from utils.answer_format import format_answer
+from utils.diagrams import diagram_markdown as question_diagram_markdown
 from utils.vector_diagram import diagram_markdown
 
 EXAMPLES = {
@@ -552,6 +553,8 @@ def _format_example_question(q, heading):
         else:
             body = f"**Answer:** {answer}"
     parts = [f"**{heading}:** {q.question_text}"]
+    if q.metadata.get("diagram"):
+        parts.append(question_diagram_markdown(q.metadata["diagram"]))
     if body:
         parts.append(body)
     return "\n\n".join(parts)
@@ -592,6 +595,8 @@ def format_example(q):
         return _format_example_question(q, "Example")
 
     blocks = [q.scenario_context] if q.scenario_context else []
+    if q.metadata.get("diagram"):
+        blocks.append(question_diagram_markdown(q.metadata["diagram"]))
     blocks += [
         _format_example_question(part, f"Part {i + 1}")
         for i, part in enumerate(q.parts)
