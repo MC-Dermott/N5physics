@@ -6,6 +6,7 @@ import streamlit as st
 from core.data.past_papers import get_unit_mcqs, canonical_unit
 from core.db.tracker import save_test_result, save_test_question_attempt
 from core.engine.session_manager import reset_past_paper_quiz
+from core.ui.test_nav import GO_BACK_HINT, ensure_slots, nav_buttons, refill
 
 _ASSETS_DIR = Path(__file__).parent.parent / "data" / "past_paper_assets"
 _OPTIONS = ["A", "B", "C", "D", "E"]
@@ -66,22 +67,30 @@ def render_past_paper_quiz(unit, qualification, user_id=None):
     entry = quiz["questions"][idx]
 
     st.progress((idx + 1) / total, text=f"Question {idx + 1} of {total}")
+    st.caption(GO_BACK_HINT)
     st.caption(f"**{_year_label(entry)} — Question {entry['qnum']} — {entry['question_type']}**")
     st.image(_img_path(entry))
 
+    ensure_slots(quiz, total)
     radio_key = f"ppq_radio_{quiz['session_id']}_{idx}"
+    refill(radio_key, quiz["answers"][idx])
     selected = st.radio("Select your answer:", _OPTIONS, key=radio_key, index=None, horizontal=True)
 
-    if st.button("Submit", key=f"ppq_submit_{quiz['session_id']}_{idx}", type="primary"):
-        if selected is not None:
-            quiz["answers"].append(selected)
-            quiz["results"].append(selected == entry["answer_text"])
-            quiz["index"] += 1
-            if quiz["index"] >= total:
-                quiz["complete"] = True
-            st.rerun()
+    back, submit = nav_buttons(f"ppq_{quiz['session_id']}_{idx}", idx > 0)
+    if submit and selected is None:
+        st.warning("Please select an answer before submitting.")
+        return
+    if back or submit:
+        if selected is not None:   # going back keeps a chosen answer
+            quiz["answers"][idx] = selected
+            quiz["results"][idx] = selected == entry["answer_text"]
+        if back:
+            quiz["index"] -= 1
+        elif idx + 1 >= total:
+            quiz["complete"] = True
         else:
-            st.warning("Please select an answer before submitting.")
+            quiz["index"] += 1
+        st.rerun()
 
 
 def _render_summary(quiz):

@@ -10,6 +10,7 @@ from core.ui.graph_mcq_ui import render_main_graph, render_option_grid
 from utils.answer_format import format_answer
 from utils.diagrams import diagram_markdown as question_diagram_markdown
 from utils.notes import format_math
+from core.ui.test_nav import GO_BACK_HINT, nav_buttons, refill
 
 _GAME_HTML_PATH = Path(__file__).parent / "assets" / "geometry_dash.html"
 _game_html_cache = None
@@ -84,12 +85,16 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None, 
 
 
 def render_active_question(test):
-    """The current question of a test (or unit assessment) in progress."""
+    """The current question of a test (or unit assessment) in progress. Pupils can go back and
+    change any answer until they submit the last question — each question's response is kept in
+    test["responses"] and only flattened into answers/results/feedback when the test ends."""
+    test.setdefault("responses", {})
     idx = test["index"]
     question = test["questions"][idx]
     total = len(test["questions"])
 
     st.progress((idx + 1) / total, text=f"Question {idx + 1} of {total}")
+    st.caption(GO_BACK_HINT)
 
     if question.is_scenario:
         _render_scenario_test(test, idx, question)
@@ -97,10 +102,33 @@ def render_active_question(test):
         _render_single_test(test, idx, question)
 
 
-def _finish_question(test):
-    test["index"] += 1
-    if test["index"] >= len(test["questions"]):
+def _scored_parts(question):
+    return [p for p in question.parts if p.metadata.get("type") != "explain"]
+
+
+def _scenario_keys(idx):
+    return f"scenario_part_idx_{idx}", f"scenario_part_answers_{idx}"
+
+
+def _move(test, back):
+    """Step to the previous or next question, or finish the test after the last one."""
+    questions = test["questions"]
+    if back:
+        test["index"] -= 1
+        previous = questions[test["index"]]
+        if previous.is_scenario:   # come back in on its last part
+            st.session_state[_scenario_keys(test["index"])[0]] = len(_scored_parts(previous)) - 1
+    elif test["index"] == len(questions) - 1:
+        for i in range(len(questions)):
+            for display_answer, result, distractor, part, _raw in test["responses"][i]:
+                test["answers"].append(display_answer)
+                test["results"].append(result == "correct")
+                test["feedback"].append((result, distractor, part))
         test["complete"] = True
+    else:
+        test["index"] += 1
+        st.session_state.pop(_scenario_keys(test["index"])[0], None)
+    st.rerun()
 
 
 _UNIT_HINT = ("Use `/` for per and `^2` for squared — e.g. `m/s`, `m/s^2`. Units are not case sensitive. "
@@ -116,85 +144,73 @@ def _check_classification(selected, question):
     return "incorrect", None
 
 
+def _answer_widgets(q, key, saved):
+    """The radio, or answer (and units) boxes, for a question or scenario part, refilled with
+    the pupil's saved response if they've come back to it. Returns the response
+    (display_answer, result_type, distractor, q, raw_inputs), or None if no option is chosen."""
+    raw = saved[4] if saved else {}
+    q_type = q.metadata.get("type")
+    if q_type in ("classification", "graph_mcq"):
+        options = q.metadata.get("options", [q.correct_answer] + [d["value"] for d in q.distractors])
+        radio_key = f"test_radio_{key}"
+        if raw.get("choice") in options:
+            refill(radio_key, raw["choice"])
+        selected = st.radio("Select your answer:", options, key=radio_key, index=None,
+                            horizontal=q_type == "graph_mcq")
+        if selected is None:
+            return None
+        result, distractor = _check_classification(selected, q)
+        return selected, result, distractor, q, {"choice": selected}
+
+    refill(f"test_ans_{key}", raw.get("answer"))
+    if q.unit:
+        refill(f"test_unit_{key}", raw.get("unit"))
+        col1, col2 = st.columns([3, 2])
+        with col1:
+            answer = st.text_input("Your answer:", key=f"test_ans_{key}")
+        with col2:
+            unit_input = st.text_input("Units:", key=f"test_unit_{key}", placeholder="e.g. m/s")
+        st.caption(_UNIT_HINT)
+    else:
+        answer = st.text_input("Your answer:", key=f"test_ans_{key}")
+        unit_input = None
+    result, distractor = check_answer(answer, q, unit_input=unit_input)
+    display_answer = f"{answer} {unit_input}".strip() if unit_input else answer
+    return display_answer, result, distractor, q, {"answer": answer, "unit": unit_input}
+
+
 def _render_single_test(test, idx, question):
     st.markdown(question.question_text)
     render_diagram(question)
     st.write("")
 
-    q_type = question.metadata.get("type")
-    is_classification = q_type == "classification"
-    is_graph_mcq = q_type == "graph_mcq"
-
     if question.metadata.get("main_figure") is not None:
         render_main_graph(question, key_suffix=f"_test_{idx}")
         st.write("")
-
-    if is_graph_mcq:
+    if question.metadata.get("type") == "graph_mcq":
         render_option_grid(question, key_prefix=f"test_{idx}")
-        labels = question.metadata.get("options", [])
-        selected = st.radio("Select your answer:", labels,
-                            key=f"test_radio_{idx}", index=None, horizontal=True)
-        if st.button("Submit", key=f"test_submit_{idx}", type="primary"):
-            if selected is not None:
-                result, distractor = _check_classification(selected, question)
-                test["answers"].append(selected)
-                test["results"].append(result == "correct")
-                test["feedback"].append((result, distractor, question))
-                _finish_question(test)
-                st.rerun()
-            else:
-                st.warning("Please select an answer before submitting.")
-    elif is_classification:
-        options = question.metadata.get(
-            "options",
-            [question.correct_answer] + [d["value"] for d in question.distractors],
-        )
-        selected = st.radio("Select your answer:", options,
-                            key=f"test_radio_{idx}", index=None)
-        if st.button("Submit", key=f"test_submit_{idx}", type="primary"):
-            if selected is not None:
-                result, distractor = _check_classification(selected, question)
-                test["answers"].append(selected)
-                test["results"].append(result == "correct")
-                test["feedback"].append((result, distractor, question))
-                _finish_question(test)
-                st.rerun()
-            else:
-                st.warning("Please select an answer before submitting.")
-    else:
-        if question.unit:
-            col1, col2 = st.columns([3, 2])
-            with col1:
-                answer = st.text_input("Your answer:", key=f"test_ans_{idx}")
-            with col2:
-                unit_input = st.text_input("Units:", key=f"test_unit_{idx}",
-                                           placeholder="e.g. m/s")
-            st.caption(_UNIT_HINT)
-        else:
-            answer = st.text_input("Your answer:", key=f"test_ans_{idx}")
-            unit_input = None
 
-        if st.button("Submit", key=f"test_submit_{idx}", type="primary"):
-            result, distractor = check_answer(answer, question, unit_input=unit_input)
-            display_answer = f"{answer} {unit_input}".strip() if unit_input else answer
-            test["answers"].append(display_answer)
-            test["results"].append(result == "correct")
-            test["feedback"].append((result, distractor, question))
-            _finish_question(test)
-            st.rerun()
+    saved = test["responses"].get(idx, [None])[0]
+    response = _answer_widgets(question, str(idx), saved)
+    back, submit = nav_buttons(f"test_{idx}", idx > 0)
+    if submit and response is None:
+        st.warning("Please select an answer before submitting.")
+        return
+    if back or submit:
+        # going back keeps whatever was entered, but doesn't record a blank as an answer
+        if response is not None and (submit or response[0]):
+            test["responses"][idx] = [response]
+        _move(test, back)
 
 
 def _render_scenario_test(test, idx, question):
     """Treat each scored scenario part as a separate test question. Explain parts are skipped."""
-    scored_parts = [p for p in question.parts if p.metadata.get("type") != "explain"]
-
-    part_idx_key = f"scenario_part_idx_{idx}"
-    part_answers_key = f"scenario_part_answers_{idx}"
-
-    if part_idx_key not in st.session_state:
-        st.session_state[part_idx_key] = 0
-        st.session_state[part_answers_key] = []
-
+    scored_parts = _scored_parts(question)
+    part_idx_key, part_answers_key = _scenario_keys(idx)
+    st.session_state.setdefault(part_idx_key, 0)
+    if part_answers_key not in st.session_state:
+        st.session_state[part_answers_key] = list(test["responses"].get(idx, [None] * len(scored_parts)))
+    answers = st.session_state[part_answers_key]
     part_idx = st.session_state[part_idx_key]
 
     if question.metadata.get("exam_style"):
@@ -212,58 +228,32 @@ def _render_scenario_test(test, idx, question):
     st.markdown(f"**Part {part_idx + 1} of {len(scored_parts)}:** {part.question_text}")
     st.write("")
 
-    part_type = part.metadata.get("type")
-    is_graph_mcq = part_type == "graph_mcq"
-    is_classification = part_type == "classification" or is_graph_mcq
+    if part.metadata.get("type") == "graph_mcq":
+        if part.metadata.get("main_figure") is not None:
+            render_main_graph(part, key_suffix=f"_test_{idx}_p{part_idx}")
+            st.write("")
+        render_option_grid(part, key_prefix=f"test_{idx}_p{part_idx}")
 
-    def _advance(display_answer, result, distractor, part):
-        st.session_state[part_answers_key].append((display_answer, result, distractor, part))
-        if part_idx + 1 < len(scored_parts):
-            st.session_state[part_idx_key] += 1
-            st.rerun()
-        else:
-            for ans, res, dist, p in st.session_state[part_answers_key]:
-                test["answers"].append(ans)
-                test["results"].append(res == "correct")
-                test["feedback"].append((res, dist, p))
-            _finish_question(test)
-            del st.session_state[part_idx_key]
-            del st.session_state[part_answers_key]
-            st.rerun()
-
-    if is_classification:
-        if is_graph_mcq:
-            if part.metadata.get("main_figure") is not None:
-                render_main_graph(part, key_suffix=f"_test_{idx}_p{part_idx}")
-                st.write("")
-            render_option_grid(part, key_prefix=f"test_{idx}_p{part_idx}")
-        options = part.metadata.get("options", [])
-        selected = st.radio("Select your answer:", options,
-                            key=f"test_radio_{idx}_p{part_idx}", index=None,
-                            horizontal=is_graph_mcq)
-        if st.button("Submit", key=f"test_submit_{idx}_p{part_idx}", type="primary"):
-            if selected is not None:
-                result, distractor = _check_classification(selected, part)
-                _advance(selected, result, distractor, part)
-            else:
-                st.warning("Please select an answer before submitting.")
-    else:
-        if part.unit:
-            col1, col2 = st.columns([3, 2])
-            with col1:
-                answer = st.text_input("Your answer:", key=f"test_ans_{idx}_p{part_idx}")
-            with col2:
-                unit_input = st.text_input("Units:", key=f"test_unit_{idx}_p{part_idx}",
-                                           placeholder="e.g. m/s")
-            st.caption(_UNIT_HINT)
-        else:
-            answer = st.text_input("Your answer:", key=f"test_ans_{idx}_p{part_idx}")
-            unit_input = None
-
-        if st.button("Submit", key=f"test_submit_{idx}_p{part_idx}", type="primary"):
-            result, distractor = check_answer(answer, part, unit_input=unit_input)
-            display_answer = f"{answer} {unit_input}".strip() if unit_input else answer
-            _advance(display_answer, result, distractor, part)
+    response = _answer_widgets(part, f"{idx}_p{part_idx}", answers[part_idx])
+    back, submit = nav_buttons(f"test_{idx}_p{part_idx}", idx > 0 or part_idx > 0)
+    if submit and response is None:
+        st.warning("Please select an answer before submitting.")
+        return
+    if response is not None and (submit or response[0]):
+        answers[part_idx] = response
+    if back and part_idx > 0:
+        st.session_state[part_idx_key] -= 1
+        st.rerun()
+    if submit and part_idx + 1 < len(scored_parts):
+        st.session_state[part_idx_key] += 1
+        st.rerun()
+    if back or submit:
+        if submit or any(answers):
+            test["responses"][idx] = [a or ("", "incorrect", None, p, {})
+                                      for a, p in zip(answers, scored_parts)]
+        del st.session_state[part_idx_key]
+        del st.session_state[part_answers_key]
+        _move(test, back)
 
 
 def _render_game_reward(test):

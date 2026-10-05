@@ -8,6 +8,7 @@ def _empty_test():
         "answers": [],
         "results": [],
         "feedback": [],
+        "responses": {},     # question index -> its response(s), until the test is finished
         "complete": False,
         "saved": False,
     }
