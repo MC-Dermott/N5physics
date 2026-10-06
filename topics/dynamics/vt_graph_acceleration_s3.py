@@ -179,8 +179,9 @@ def gen_accel_graph_basic(level="S3"):
     points = [(0, u, "A"), (t, v, "B")]
     working = [
         {"type": "text", "content": f"Points: A(0, {u}), B({t}, {v})"},
-        {"type": "latex", "content": r"a = \frac{\Delta v}{t} = \frac{v - u}{t}"},
-        {"type": "latex", "content": rf"a = \frac{{{v} - {u}}}{{{t}}}"},
+        {"type": "latex", "content": rf"\Delta v = {v} - {u} = {delta_v}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": r"a = \frac{\Delta v}{t}"},
+        {"type": "latex", "content": rf"a = \frac{{{delta_v}}}{{{t}}}"},
         {"type": "latex", "content": rf"a = {correct}\ \mathrm{{m/s^2}}"},
     ]
     question = (
@@ -189,22 +190,22 @@ def gen_accel_graph_basic(level="S3"):
     )
     distractors = [
         {"value": -correct,
-         "mistake": "You calculated (u − v) ÷ t instead of (v − u) ÷ t — check which point comes "
-                    "first on the graph.",
+         "mistake": "You found the change in speed the wrong way round — Δv = final speed − "
+                    "initial speed.",
          "working": working},
         {"value": delta_v,
          "mistake": "That's the change in speed (Δv), not the acceleration — you still need to "
                     "divide by the time, t.",
          "working": working},
         {"value": round(v / t, 2) if t else 0,
-         "mistake": "Use a = (v − u) ÷ t — divide the *change* in speed by time, not the final "
+         "mistake": "Use a = Δv ÷ t — divide the *change* in speed by time, not the final "
                     "speed alone.",
          "working": working},
     ]
     options_data = [{"value": correct, "mistake": None, "working": working}] + distractors
     options_data = _dedup(options_data, correct)
     scaffold = [
-        {"question": "What is the change in speed (Δv = v − u) between A and B, read from the graph?",
+        {"question": "What is the change in speed (Δv = final − initial speed) between A and B, read from the graph?",
          "answer": float(delta_v)},
     ]
     q = make_question(question, correct, options_data, "m/s²", scaffold=scaffold,
@@ -243,8 +244,9 @@ def gen_accel_graph_compound(level="S3"):
     points_desc = ", ".join(f"{lbl}({t}, {v})" for t, v, lbl in points)
     working = [
         {"type": "text", "content": f"Points: {points_desc}"},
-        {"type": "latex", "content": r"a = \frac{\Delta v}{t} = \frac{v - u}{t}"},
-        {"type": "latex", "content": rf"a = \frac{{{v1_} - {v0}}}{{{duration}}}"},
+        {"type": "latex", "content": rf"\Delta v = {v1_} - {v0} = {delta_v}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": r"a = \frac{\Delta v}{t}"},
+        {"type": "latex", "content": rf"a = \frac{{{delta_v}}}{{{duration}}}"},
         {"type": "latex", "content": rf"a = {correct}\ \mathrm{{m/s^2}}"},
     ]
     question = (

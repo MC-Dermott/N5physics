@@ -146,7 +146,7 @@ def gen_find_acceleration(level="N5"):
          "working": working},
     ]
     return _with_acceleration_widget(_question(question, correct, options_data, "m/s²",
-                                               NOTES["acceleration_s3"], level=level))
+                                               NOTES["acceleration_n5"], level=level))
 
 
 def gen_find_final_speed(level="N5"):
@@ -184,7 +184,7 @@ def gen_find_final_speed(level="N5"):
          "working": working},
     ]
     return _with_acceleration_widget(_question(question, correct, options_data, "m/s",
-                                               NOTES["acceleration_s3"], level=level))
+                                               NOTES["acceleration_n5"], level=level))
 
 
 def gen_find_initial_speed(level="N5"):
@@ -225,7 +225,7 @@ def gen_find_initial_speed(level="N5"):
          "working": working},
     ]
     return _with_acceleration_widget(_question(question, correct, options_data, "m/s",
-                                               NOTES["acceleration_s3"], level=level))
+                                               NOTES["acceleration_n5"], level=level))
 
 
 def gen_find_time(level="N5"):
@@ -261,7 +261,7 @@ def gen_find_time(level="N5"):
          "working": working},
     ]
     return _with_acceleration_widget(_question(question, correct, options_data, "s",
-                                               NOTES["acceleration_s3"], level=level))
+                                               NOTES["acceleration_n5"], level=level))
 
 
 def generate_acceleration_equation(level="N5"):

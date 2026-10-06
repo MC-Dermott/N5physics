@@ -45,9 +45,9 @@ def gen_change_in_speed(level="S3"):
 
     working = [
         {"type": "text",  "content": "Rearrange the acceleration equation for the change in speed:"},
-        {"type": "latex", "content": r"a = \frac{v - u}{t} \quad\Rightarrow\quad v - u = at"},
-        {"type": "latex", "content": rf"v - u = ({a}) \times {t}"},
-        {"type": "latex", "content": rf"v - u = {correct}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": r"a = \frac{\Delta v}{t} \quad\Rightarrow\quad \Delta v = at"},
+        {"type": "latex", "content": rf"\Delta v = ({a}) \times {t}"},
+        {"type": "latex", "content": rf"\Delta v = {correct}\ \mathrm{{m/s}}"},
     ]
     question = (
         f"A {obj} has an acceleration of {a} m/s² for {t} s.\n\n"
@@ -72,7 +72,7 @@ def gen_change_in_speed(level="S3"):
                          question_type="Acceleration", level=level))
 
 
-# ── Level 1b — calculating acceleration itself (a = (v - u) / t) ────────────────
+# ── Level 1b — calculating acceleration itself (a = Δv / t) ────────────────
 
 def gen_calculate_acceleration(level="S3"):
     obj = random.choice(_CONTEXTS)
@@ -91,21 +91,22 @@ def gen_calculate_acceleration(level="S3"):
         f"Calculate its acceleration."
     )
     working = [
-        {"type": "text",  "content": "Use a = (v − u) ÷ t:"},
-        {"type": "latex", "content": r"a = \frac{v - u}{t}"},
-        {"type": "latex", "content": rf"a = \frac{{{v} - {u}}}{{{t}}}"},
+        {"type": "text",  "content": "First find the change in speed, then use a = Δv ÷ t:"},
+        {"type": "latex", "content": rf"\Delta v = {v} - {u} = {v - u}\ \mathrm{{m/s}}"},
+        {"type": "latex", "content": r"a = \frac{\Delta v}{t}"},
+        {"type": "latex", "content": rf"a = \frac{{{v - u}}}{{{t}}}"},
         {"type": "latex", "content": rf"a = {correct}\ \mathrm{{m/s^2}}"},
     ]
     options_data = [
         {"value": correct, "mistake": None, "working": working},
         {"value": -correct,
-         "mistake": "You calculated (u − v) ÷ t instead of (v − u) ÷ t — check which speed comes first.",
+         "mistake": "You found the change in speed the wrong way round — Δv = final speed − initial speed.",
          "working": working},
         {"value": v - u,
-         "mistake": "You found the change in speed (v − u) but forgot to divide by the time.",
+         "mistake": "You found the change in speed (Δv) but forgot to divide by the time.",
          "working": working},
         {"value": round(v / t, 2),
-         "mistake": "Use a = (v − u) ÷ t — divide the change in speed by time, not just v by t.",
+         "mistake": "Use a = Δv ÷ t — divide the change in speed by time, not just the final speed by t.",
          "working": working},
     ]
     options_data = _dedup(options_data, correct)
@@ -152,7 +153,7 @@ def generate_acceleration_basic(level="S3"):
     return random.choice([gen_calculate_acceleration, gen_calculate_time, gen_change_in_speed])(level=level)
 
 
-# ── Level 2 — initial or final speed (v = u + at) ───────────────────────────────
+# ── Level 2 — initial or final speed (using Δv = at) ───────────────────────────────
 
 def gen_initial_final_speed(level="S3"):
     a = random.choice(_ACCELS)
@@ -173,21 +174,22 @@ def gen_initial_final_speed(level="S3"):
             f"Calculate its final speed."
         )
         working = [
-            {"type": "text",  "content": "Use v = u + at:"},
-            {"type": "latex", "content": r"v = u + at"},
-            {"type": "latex", "content": rf"v = {u} + ({a}) \times {t}"},
-            {"type": "latex", "content": rf"v = {correct}\ \mathrm{{m/s}}"},
+            {"type": "text",  "content": "Find the change in speed, then add it to the initial speed:"},
+            {"type": "latex", "content": r"\Delta v = at"},
+            {"type": "latex", "content": rf"\Delta v = ({a}) \times {t} = {round(a * t, 2)}\ \mathrm{{m/s}}"},
+            {"type": "latex", "content": rf"\text{{final speed}} = {u} + ({round(a * t, 2)})"},
+            {"type": "latex", "content": rf"\text{{final speed}} = {correct}\ \mathrm{{m/s}}"},
         ]
         options_data = [
             {"value": correct, "mistake": None, "working": working},
             {"value": round(u - a * t, 2),
-             "mistake": "Add at to u (don't subtract it) to find the final speed: v = u + at.",
+             "mistake": "Add the change in speed (Δv = at) to the initial speed — don't subtract it.",
              "working": working},
             {"value": round(a * t, 2),
-             "mistake": "You forgot to include the initial speed u: v = u + at.",
+             "mistake": "You found the change in speed but forgot to add it to the initial speed.",
              "working": working},
             {"value": round(u / t, 2) if t else 0,
-             "mistake": "Use v = u + at — don't divide the initial speed by the time.",
+             "mistake": "Find Δv = at first — don't divide the initial speed by the time.",
              "working": working},
         ]
     else:
@@ -197,21 +199,22 @@ def gen_initial_final_speed(level="S3"):
             f"Calculate its initial speed."
         )
         working = [
-            {"type": "text",  "content": "Rearrange v = u + at for u:"},
-            {"type": "latex", "content": r"u = v - at"},
-            {"type": "latex", "content": rf"u = {v} - ({a}) \times {t}"},
-            {"type": "latex", "content": rf"u = {correct}\ \mathrm{{m/s}}"},
+            {"type": "text",  "content": "Find the change in speed, then subtract it from the final speed:"},
+            {"type": "latex", "content": r"\Delta v = at"},
+            {"type": "latex", "content": rf"\Delta v = ({a}) \times {t} = {round(a * t, 2)}\ \mathrm{{m/s}}"},
+            {"type": "latex", "content": rf"\text{{initial speed}} = {v} - ({round(a * t, 2)})"},
+            {"type": "latex", "content": rf"\text{{initial speed}} = {correct}\ \mathrm{{m/s}}"},
         ]
         options_data = [
             {"value": correct, "mistake": None, "working": working},
             {"value": round(v + a * t, 2),
-             "mistake": "Subtract at from v (don't add it) to find the initial speed: u = v − at.",
+             "mistake": "Subtract the change in speed (Δv = at) from the final speed — don't add it.",
              "working": working},
             {"value": round(a * t, 2),
-             "mistake": "You forgot to include the final speed v: u = v − at.",
+             "mistake": "You found the change in speed but forgot to subtract it from the final speed.",
              "working": working},
             {"value": round(v / t, 2) if t else 0,
-             "mistake": "Use u = v − at — don't divide the final speed by the time.",
+             "mistake": "Find Δv = at first — don't divide the final speed by the time.",
              "working": working},
         ]
 

@@ -143,15 +143,15 @@ $$\\text{Area of triangle} = \\tfrac{1}{2} \\times \\text{base} \\times \\text{h
 
 **The acceleration of an object is equal to the gradient (slope) of its speed-time graph.**
 $$a = \\frac{\\Delta v}{t}$$
-$$\\Delta v = v - u$$
+$$\\Delta v = \\text{final speed} - \\text{initial speed}$$
 
 The steeper the line, the greater the size of the acceleration. A line sloping **upward**
 means the object is speeding up (positive acceleration); a line sloping **downward** means
 it's slowing down (negative acceleration). A **flat, horizontal** section means constant
 speed — zero acceleration.
 
-> **Important:** Always read the two points straight off the graph — the initial speed *u* is
-> the **height at the start** of the section, the final speed *v* is the **height at the
+> **Important:** Always read the two points straight off the graph — the initial speed is
+> the **height at the start** of the section, the final speed is the **height at the
 > end** of the section, and *t* is the **time interval** between them (not necessarily
 > starting from t = 0). For a multi-section graph, always use the two points at the ends of
 > the *one section* you're asked about — don't use the total time for the whole graph.
@@ -250,6 +250,33 @@ gives a close approximation to the speed at that exact point.
 """,
 
     "acceleration_s3": """
+## Acceleration — $a = \\frac{\\Delta v}{t}$
+
+**Definitions:**
+- Acceleration is the change in speed of an object per second.
+- A **positive** acceleration means the object is speeding up; a **negative** acceleration means
+  it is slowing down (decelerating).
+
+**Key equation:**
+$$a = \\frac{\\Delta v}{t}$$
+
+| Symbol | Quantity | Unit |
+|---|---|---|
+| a | Acceleration | m/s² |
+| Δv | Change in speed | m/s |
+| t | Time | s |
+
+**Change in speed:** find it by taking the final speed minus the initial speed.
+$$\\Delta v = \\text{final speed} - \\text{initial speed}$$
+
+**Rearrangements:**
+$$\\Delta v = at$$
+$$t = \\frac{\\Delta v}{a}$$
+
+> **Important:** If the acceleration is negative, the final speed will be lower than the
+> initial speed.
+""",
+    "acceleration_n5": """
 ## Acceleration — $a = \\frac{v - u}{t}$
 
 **Definitions:**
