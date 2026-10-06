@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from collections import Counter, defaultdict
 from core.db.client import get_supabase
-from core.auth.auth import reset_password
+from core.auth.auth import reset_password, delete_student
 from core.ui.student_dashboard_ui import render_progress_heatmaps
 
 
@@ -233,9 +233,11 @@ def render_teacher_report(_qualification=None):
 
     # ── Student Accounts ──────────────────────────────────────────────────────
     st.subheader("Student Accounts")
+    if msg := st.session_state.pop("account_deleted_msg", None):
+        st.success(msg)
     account_action = st.radio(
         "Action",
-        ["Assign Class Code", "Reset Password"],
+        ["Assign Class Code", "Reset Password", "Delete Account"],
         horizontal=True,
         label_visibility="collapsed",
         key="student_accounts_action",
@@ -254,6 +256,26 @@ def render_teacher_report(_qualification=None):
                     st.rerun()
                 except Exception as e:
                     st.error(f"Update failed: {e}")
+
+    elif account_action == "Delete Account":
+        del_name = st.selectbox("Student", [u["username"] for u in all_users], key="delete_select")
+        st.warning(
+            f"Deleting **{del_name}** permanently removes their account, question history and "
+            "test results. This cannot be undone."
+        )
+        with st.form("delete_account_form"):
+            confirm_name = st.text_input(f"Type **{del_name}** to confirm")
+            if st.form_submit_button("Delete account", type="primary"):
+                if confirm_name.strip() != del_name:
+                    st.error("Username doesn't match — nothing was deleted.")
+                else:
+                    del_uid = next(u["id"] for u in all_users if u["username"] == del_name)
+                    err = delete_student(del_uid)
+                    if err:
+                        st.error(err)
+                    else:
+                        st.session_state["account_deleted_msg"] = f"Account **{del_name}** deleted."
+                        st.rerun()
 
     else:
         reset_name = st.selectbox("Student", [u["username"] for u in all_users], key="reset_select")

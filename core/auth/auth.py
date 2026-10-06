@@ -62,6 +62,16 @@ def reset_password(user_id: str, new_password: str) -> "str | None":
         return f"Reset failed: {e}"
 
 
+def delete_student(user_id: str) -> "str | None":
+    """Permanently deletes a student account and (via ON DELETE CASCADE) all their
+    attempts and test results. Returns None on success, error string on failure."""
+    try:
+        get_supabase().table("users").delete().eq("id", user_id).eq("role", "student").execute()
+        return None
+    except Exception as e:
+        return f"Delete failed: {e}"
+
+
 def signup(username: str, password: str, role: str = "student", class_code: str = "") -> "dict | str":
     """Returns user dict on success, error string on failure."""
     try:
