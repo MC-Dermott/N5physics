@@ -90,8 +90,8 @@ def _render_single(question, user_id, qualification):
                 "options",
                 [question.correct_answer] + [d["value"] for d in question.distractors],
             )
-            selected = st.radio("Select your answer:", options,
-                                key=f"radio_{question.qid}", index=None)
+            selected = st.radio("Select your answer:", options, key=f"radio_{question.qid}", index=None,
+                                horizontal=question.metadata.get("horizontal", False))
             if st.button("Submit Answer", key=f"submit_{question.qid}", type="primary"):
                 if selected is not None:
                     st.session_state[submitted_key] = selected

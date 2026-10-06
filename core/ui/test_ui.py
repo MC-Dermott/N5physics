@@ -156,7 +156,7 @@ def _answer_widgets(q, key, saved):
         if raw.get("choice") in options:
             refill(radio_key, raw["choice"])
         selected = st.radio("Select your answer:", options, key=radio_key, index=None,
-                            horizontal=q_type == "graph_mcq")
+                            horizontal=q_type == "graph_mcq" or q.metadata.get("horizontal", False))
         if selected is None:
             return None
         result, distractor = _check_classification(selected, q)

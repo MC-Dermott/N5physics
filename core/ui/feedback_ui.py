@@ -98,7 +98,7 @@ def render_feedback(result, distractor, question, show_working=True):
         if distractor and distractor.get("mistake"):
             st.warning(f"Common mistake: {distractor['mistake']}")
         if is_classification:
-            st.info(f"The correct classification is: **{correct_str}**")
+            st.info(f"The correct answer is: **{correct_str}**")
     else:
         st.error(f"❌ Incorrect. The correct answer is **{correct_str}**.")
 

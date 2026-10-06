@@ -245,6 +245,7 @@ from topics.exam_style import (
     higher_odu, higher_particles_waves, higher_electricity,
 )
 
+from topics.skills.rearranging import GENERATORS as rearranging
 from topics.skills.prefixes import (
     gen_name_to_power,
     gen_power_to_name,
@@ -288,6 +289,9 @@ QUAL_REGISTRY = {
             "Waves Combined":     generate_waves_combined,
             "Definitions":        s3_waves_definitions,
         },
+        "Skills": {
+            "Rearranging Relationships": rearranging["S3"],
+        },
     },
     "National 4": {
         "Electricity and Energy": {
@@ -314,6 +318,9 @@ QUAL_REGISTRY = {
             "Acceleration":           generate_acceleration,
             "Pressure":               generate_pressure,
             "Definitions":            n4_dynamics_definitions,
+        },
+        "Skills": {
+            "Rearranging Relationships": rearranging["N4"],
         },
     },
     "National 5": {
@@ -485,6 +492,7 @@ QUAL_REGISTRY = {
                 "Symbol → Name":      gen_symbol_to_name,
                 "Name → Symbol":      gen_name_to_symbol,
             },
+            "Rearranging Relationships": rearranging["N5"],
             "Definitions": skills_n5_definitions,
         },
     },
@@ -631,6 +639,9 @@ QUAL_REGISTRY = {
                 "2 — Band Theory":                  gen_he_band_explain,
             },
             "Definitions": electricity_higher_definitions,
+        },
+        "Skills": {
+            "Rearranging Relationships": rearranging["Higher"],
         },
     },
     "Crash Higher": {
