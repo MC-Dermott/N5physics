@@ -6,7 +6,7 @@ Mirrors Hphys_Expanding_Universe_Worksheet.docx, one generator per worksheet typ
   3  Redshift and recessional velocity (z, v, or λ_observed)
   4  Hubble's law and the age of the Universe
   5  Evidence for the Big Bang, dark matter and dark energy
-  6  Stellar temperature and radiation curves
+  6  Stellar temperature and radiation curves (qualitative — no Wien's law calculations)
 
 Distractors are the errors named in SQA marking instructions and course reports: wrong sign in the
 Doppler relationship, λ_observed as the redshift denominator, z used as v in Hubble's law, age of
@@ -26,7 +26,6 @@ V_SOUND = 340.0
 C = 3.00e8
 H0 = 2.3e-18
 YEAR = 365 * 24 * 3600
-WIEN = 2.9e-3
 
 _STELLAR_WIDGET_HTML = (
     pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "stellar_spectrum_widget.html"
@@ -368,51 +367,87 @@ def gen_eu_evidence(level="Higher"):
 
 
 # ── Type 6: stellar temperature and radiation curves ────────────────────────
-_STARS = [("a red dwarf", 2500, 3800), ("the Sun-like star", 5200, 6200), ("a white star", 7500, 10000),
-          ("a blue giant", 12000, 30000)]
+# Qualitative only, as in the course specification and past papers: no peak-wavelength calculations.
+_PEAK_SHORTER = "Hotter stars have a shorter peak wavelength (towards blue)."
+_PEAK_LONGER = "Cooler stars have a longer peak wavelength (towards red)."
+_MORE_EVERY = ("A hotter star emits more energy per second per unit area at every wavelength — its curve never "
+               "crosses the cooler star's (2019 and 2025 course reports).")
+_STATIC_STELLAR = [
+    ("Star X has a higher surface temperature than the Sun. How does its graph of energy emitted per second per "
+     "unit area against wavelength compare with the Sun's?",
+     "Its peak is at a shorter wavelength, and the curve is higher than the Sun's at every wavelength.",
+     [("Its peak is at a longer wavelength, and the curve is higher at every wavelength.", _PEAK_SHORTER),
+      ("Its peak is at a shorter wavelength, but the curve is lower than the Sun's at long wavelengths.", _MORE_EVERY),
+      ("Its curve is the same shape but shifted to longer wavelengths because its light is redshifted.",
+       "The shape depends on temperature — redshift is about motion, not temperature.")]),
+    ("Star Y has a lower surface temperature than the Sun. How does its graph of energy emitted per second per "
+     "unit area against wavelength compare with the Sun's?",
+     "Its peak is at a longer wavelength, and the curve is lower than the Sun's at every wavelength.",
+     [("Its peak is at a shorter wavelength, and the curve is lower at every wavelength.", _PEAK_LONGER),
+      ("Its peak is at a longer wavelength, but the curve is higher than the Sun's at short wavelengths.",
+       "A cooler star emits less energy per second per unit area at every wavelength."),
+      ("Its peak is at the same wavelength but the curve is lower.", "The peak moves to a longer wavelength as the star cools.")]),
+    ("Which of these statements about the radiation emitted by stellar objects is correct?",
+     "Stellar objects emit radiation over a wide range of wavelengths.",
+     [("Stellar objects emit radiation at one wavelength only, which depends on their temperature.",
+       "Stars emit over a wide range of wavelengths — the temperature sets the shape and peak of the distribution."),
+      ("The peak wavelength of the radiation is longer for hotter objects than for cooler objects.", _PEAK_SHORTER),
+      ("Cooler objects emit more radiation per unit surface area per unit time than hotter objects.",
+       "Hotter objects emit more per unit surface area per unit time.")]),
+    ("A student says that a blue star looks blue because it is moving away from us. Is the student correct?",
+     "No — a blue star looks blue because it is hot, so more of its radiation is at the short-wavelength end of the visible spectrum.",
+     [("Yes — redshift makes the light from all stars look blue.", "Redshift moves light to longer wavelengths, and it is about motion, not temperature."),
+      ("Yes — a star moving away has a higher temperature.", "A star's colour is set by its surface temperature, not by its motion."),
+      ("No — a blue star looks blue because it is cool, so it emits mostly long-wavelength radiation.",
+       "Cool stars look red/orange; hot stars have their peak at short wavelengths and look blue-white.")]),
+    ("The graph of energy emitted per second per unit area against wavelength for star Z has its peak at a shorter "
+     "wavelength than the Sun's. What can be concluded about star Z?",
+     "It is hotter than the Sun and emits more energy per second per unit area at every wavelength.",
+     [("It is cooler than the Sun and emits less energy per second per unit area at every wavelength.", _PEAK_SHORTER),
+      ("It is hotter than the Sun but emits less energy per second per unit area.", _MORE_EVERY),
+      ("It is moving towards the Earth.", "The shape of the curve depends on temperature, not on motion.")]),
+]
+_COLOUR_PAIRS = [("a red star", "a blue star"), ("an orange star", "a white star"), ("a red star", "a yellow star"),
+                 ("a yellow star", "a blue-white star")]
+
+
+def _hotter_star():
+    cool, hot = random.choice(_COLOUR_PAIRS)
+    q = (f"Two stars are compared: {cool} and {hot}. Which statement is correct?")
+    correct = f"{hot.capitalize()} has the higher surface temperature, and its peak wavelength is shorter."
+    wrong = [(f"{cool.capitalize()} has the higher surface temperature, and its peak wavelength is shorter.",
+              "Blue/white stars are hotter than red/orange stars."),
+             (f"{hot.capitalize()} has the higher surface temperature, and its peak wavelength is longer.", _PEAK_SHORTER),
+             (f"{cool.capitalize()} has the higher surface temperature, and its peak wavelength is longer.",
+              "The star whose peak is at the shorter wavelength (nearer blue) is the hotter one.")]
+    return _choice(q, correct, wrong)
+
+
+def _temperature_change():
+    hotter = random.random() < 0.5
+    word, other = ("increases", "decreases") if hotter else ("decreases", "increases")
+    pk, pk_other = ("decreases", "increases") if hotter else ("increases", "decreases")
+    q = (f"The surface temperature of a star {word}. What happens to the peak wavelength of its radiation and to the "
+         f"energy it emits per second per unit area?")
+    correct = f"The peak wavelength {pk} and the energy per second per unit area {word}."
+    wrong = [(f"The peak wavelength {pk_other} and the energy per second per unit area {word}.",
+              _PEAK_SHORTER if hotter else _PEAK_LONGER),
+             (f"The peak wavelength {pk} and the energy per second per unit area {other}.",
+              "Hotter stars emit more per unit area; cooler stars emit less."),
+             (f"The peak wavelength {pk_other} and the energy per second per unit area {other}.",
+              "Both changes are the wrong way round.")]
+    return _choice(q, correct, wrong)
 
 
 def gen_eu_stellar(level="Higher"):
-    q = _gen_eu_stellar()
+    r = random.random()
+    if r < 0.2:
+        q = _hotter_star()
+    elif r < 0.4:
+        q = _temperature_change()
+    else:
+        text, correct, wrong = random.choice(_STATIC_STELLAR)
+        q = _choice(text, correct, wrong)
     q.metadata["widget_html"] = _STELLAR_WIDGET_HTML
     q.metadata["widget_height"] = 950
     return q
-
-
-def _gen_eu_stellar():
-    if random.random() < 0.3:
-        return _choice(
-            "Star X has a higher surface temperature than the Sun. How does its graph of energy emitted per second per "
-            "unit area against wavelength compare with the Sun's?",
-            "Its peak is at a shorter wavelength, and the curve is higher than the Sun's at every wavelength.",
-            [("Its peak is at a longer wavelength, and the curve is higher at every wavelength.",
-              "Hotter stars have a shorter peak wavelength (towards blue)."),
-             ("Its peak is at a shorter wavelength, but the curve is lower than the Sun's at long wavelengths.",
-              "A hotter star emits more at every wavelength — its curve never crosses the Sun's (2019 and 2025 course reports)."),
-             ("Its curve is the same shape but shifted to longer wavelengths because its light is redshifted.",
-              "The shape depends on temperature — redshift is about motion, not temperature.")])
-    name, lo, hi = random.choice(_STARS)
-    T = int(round(random.uniform(lo, hi), -2))
-    lam = WIEN / T
-    if random.random() < 0.5:
-        text = (f"The surface temperature of {name} is {T} K. Using T = 2.9 × 10⁻³ / λ_peak, calculate the peak "
-                f"wavelength of the radiation it emits.")
-        ans = _sig(lam)
-        work = [_L(r"T = \frac{2.9 \times 10^{-3}}{\lambda_{peak}}"), _L(rf"{T} = \frac{{2.9 \times 10^{{-3}}}}{{\lambda_{{peak}}}}"),
-                _L(rf"\lambda_{{peak}} = {_ltx(ans)}\ \mathrm{{m}}")]
-        opts = [{"value": ans, "mistake": None, "working": work},
-                {"value": _sig(WIEN * T), "mistake": "You multiplied — rearrange for λ_peak = 2.9 × 10⁻³ ÷ T.", "working": work},
-                {"value": _sig(T / WIEN), "mistake": "The fraction is upside down — λ_peak = 2.9 × 10⁻³ ÷ T.", "working": work}]
-        return _q(text, ans, "m", opts, None)
-    lam_nm = int(round(lam * 1e9))
-    ans = _sig(WIEN / (lam_nm * 1e-9))
-    text = (f"The radiation emitted by {name} has a peak wavelength of {lam_nm} nm. Using T = 2.9 × 10⁻³ / λ_peak, "
-            f"calculate the surface temperature of the star.")
-    work = [_T(f"λ_peak = {lam_nm} nm = {_txt(lam_nm * 1e-9)} m"), _L(r"T = \frac{2.9 \times 10^{-3}}{\lambda_{peak}}"),
-            _L(rf"T = \frac{{2.9 \times 10^{{-3}}}}{{{_ltx(lam_nm * 1e-9)}}}"), _L(rf"T = {ans:g}\ \mathrm{{K}}")]
-    opts = [{"value": ans, "mistake": None, "working": work},
-            {"value": _sig(WIEN / lam_nm), "mistake": "Convert nm to m first — the constant is in m K.", "working": work},
-            {"value": _sig(WIEN * lam_nm * 1e-9), "mistake": "You multiplied — T = 2.9 × 10⁻³ ÷ λ_peak.", "working": work}]
-    scaffold = [{"question": "What is λ_peak in metres?", "answer": _sig(lam_nm * 1e-9)},
-                {"question": "What is the surface temperature T, in K?", "answer": ans}]
-    return _q(text, ans, "K", opts, scaffold)
