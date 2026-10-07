@@ -14,6 +14,7 @@ the Universe left in seconds, km s⁻¹ not converted, dark matter/dark energy c
 explained by redshift rather than temperature.
 """
 import math
+import pathlib
 import random
 
 from core.models.question_model import PhysicsQuestion
@@ -26,6 +27,10 @@ C = 3.00e8
 H0 = 2.3e-18
 YEAR = 365 * 24 * 3600
 WIEN = 2.9e-3
+
+_STELLAR_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "stellar_spectrum_widget.html"
+).read_text(encoding="utf-8")
 
 _NOTES = r"""
 ## The Expanding Universe
@@ -368,6 +373,13 @@ _STARS = [("a red dwarf", 2500, 3800), ("the Sun-like star", 5200, 6200), ("a wh
 
 
 def gen_eu_stellar(level="Higher"):
+    q = _gen_eu_stellar()
+    q.metadata["widget_html"] = _STELLAR_WIDGET_HTML
+    q.metadata["widget_height"] = 950
+    return q
+
+
+def _gen_eu_stellar():
     if random.random() < 0.3:
         return _choice(
             "Star X has a higher surface temperature than the Sun. How does its graph of energy emitted per second per "

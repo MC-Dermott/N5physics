@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stellar Temperature — Radiation Curves</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #f5f5f5; color: #111; display: flex; justify-content: center; padding: 1rem; }
+  .container { width: 100%; max-width: 720px; }
+  h1 { font-size: 18px; font-weight: 500; margin-bottom: 0.75rem; }
+  .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .row label { font-size: 13px; color: #666; }
+  #T { flex: 1; min-width: 180px; }
+  .tv { font-size: 20px; font-weight: 500; min-width: 100px; text-align: right; }
+  .pre { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .pre button { font-size: 12px; padding: 4px 10px; border-radius: 8px; border: 0.5px solid #bbb; background: #fff; color: #111; cursor: pointer; }
+  .pre button:hover { background: #eee; }
+  .plotbox { background: #fff; border: 0.5px solid #ccc; border-radius: 10px; padding: 6px; }
+  svg { display: block; width: 100%; }
+  svg text { font-family: sans-serif; }
+  .chk { font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; margin: 8px 0 0; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-top: 12px; }
+  .card { background: #fff; border: 0.5px solid #ccc; border-radius: 8px; padding: 10px 12px; }
+  .card .k { font-size: 12px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .card .v { font-size: 15px; font-weight: 500; }
+  .card .s { font-size: 12px; color: #666; margin-top: 2px; }
+  .sw { display: flex; align-items: center; gap: 10px; }
+  .dot { width: 34px; height: 34px; border-radius: 50%; flex: none; border: 0.5px solid #999; }
+  .dot.none { border: 1.5px dashed #777; background: transparent; }
+  .wien { background: #fff; border: 0.5px solid #ccc; border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 14px; line-height: 1.6; }
+  .wien .k { font-size: 12px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .try { background: #fff; border: 0.5px solid #ccc; border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 14px; }
+  .try .k { font-size: 12px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .try ol { padding-left: 20px; line-height: 1.6; }
+  .try button { font-size: 12px; padding: 2px 8px; margin-left: 4px; border-radius: 6px; border: 0.5px solid #bbb; background: #f5f5f5; cursor: pointer; }
+  .try button:hover { background: #e8e8e8; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Stellar Temperature — Radiation Curves</h1>
+
+  <div class="row">
+    <label for="T">Surface temperature</label>
+    <input type="range" id="T" min="1500" max="20000" step="50" value="5800">
+    <div class="tv" id="tv"></div>
+  </div>
+  <div class="pre" id="pre"></div>
+
+  <div class="plotbox"><svg id="plot" viewBox="0 0 680 330" role="img" aria-label="Energy emitted per second per unit area against wavelength"></svg></div>
+  <label class="chk"><input type="checkbox" id="cmp"> Compare with the Sun (dashed) on the same scale</label>
+
+  <div class="cards">
+    <div class="card"><div class="k">Peak wavelength</div><div class="sw"><div class="dot" id="pdot"></div><div><div class="v" id="pw"></div><div class="s" id="pc"></div></div></div></div>
+    <div class="card"><div class="k">Star appears</div><div class="sw"><div class="dot" id="adot"></div><div><div class="v" id="ac"></div><div class="s" id="cls"></div></div></div></div>
+    <div class="card"><div class="k">Energy per second per m²</div><div class="v" id="pow"></div><div class="s" id="vis"></div></div>
+  </div>
+
+  <div class="wien">
+    <div class="k">Wien's law — T = 2.9 × 10⁻³ ÷ λ<sub>peak</sub></div>
+    <div id="wk"></div>
+  </div>
+
+  <div class="try">
+    <div class="k">Try it</div>
+    <ol>
+      <li>Set the star to <b>3000 K</b> <button data-t="3000">go</button> — where is the peak? Is the star's light mostly visible?</li>
+      <li>Raise the temperature to the <b>Sun, 5800 K</b> <button data-t="5800">go</button> — the peak is in the green, so why does it look white / yellow? (Look at the whole curve.)</li>
+      <li>Now go to <b>12 000 K</b> <button data-t="12000">go</button> and tick <b>Compare with the Sun</b>. Does the hotter curve ever fall below the Sun's?</li>
+      <li>Check the Wien's law line: rearrange for λ<sub>peak</sub> and confirm the value for a star of your choice.</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+const HCK = 1.4388e-2, TSUN = 5800, XMAX = 2500, WIEN = 2.9e-3;
+const B = (l, T) => { const m = l * 1e-9; return 1 / (m ** 5 * (Math.exp(HCK / (m * T)) - 1)); };
+const g = (l, mu, s1, s2) => { const t = (l - mu) / (l < mu ? s1 : s2); return Math.exp(-0.5 * t * t); };
+const cie = l => [1.056 * g(l, 599.8, 37.9, 31) + 0.362 * g(l, 442, 16, 26.7) - 0.065 * g(l, 501.1, 20.4, 26.2),
+                  0.821 * g(l, 568.8, 46.9, 40.5) + 0.286 * g(l, 530.9, 16.3, 31.1),
+                  1.217 * g(l, 437, 11.8, 36) + 0.681 * g(l, 459, 26, 13.8)];
+function xyz2rgb([X, Y, Z]) {
+  const c = [3.2406 * X - 1.5372 * Y - 0.4986 * Z, -0.9689 * X + 1.8758 * Y + 0.0415 * Z, 0.0557 * X - 0.204 * Y + 1.057 * Z].map(v => Math.max(0, v));
+  const m = Math.max(...c) || 1;
+  return c.map(v => { v /= m; v = v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055; return Math.round(255 * Math.min(1, v)); });
+}
+const css = c => `rgb(${c[0]},${c[1]},${c[2]})`;
+const lamRGB = l => xyz2rgb(cie(l));
+function starRGB(T) {
+  let X = 0, Y = 0, Z = 0, mx = 0;
+  for (let l = 380; l <= 780; l += 5) mx = Math.max(mx, B(l, T));
+  for (let l = 380; l <= 780; l += 5) { const w = B(l, T) / mx, c = cie(l); X += w * c[0]; Y += w * c[1]; Z += w * c[2]; }
+  return xyz2rgb([X, Y, Z]);
+}
+function visFrac(T) {
+  let a = 0, b = 0;
+  for (let l = 5; l <= 60000; l += 5) { const v = B(l, T); b += v; if (l >= 380 && l <= 750) a += v; }
+  return a / b;
+}
+const classes = [[30000, 'O', 'e.g. Alnitak'], [10000, 'B', 'e.g. Rigel, Spica'], [7500, 'A', 'e.g. Sirius, Vega'], [6000, 'F', 'e.g. Procyon'], [5200, 'G', 'e.g. the Sun'], [3700, 'K', 'e.g. Arcturus'], [0, 'M', 'e.g. Betelgeuse']];
+const names = T => T < 2800 ? 'deep red' : T < 3700 ? 'orange-red' : T < 4800 ? 'orange' : T < 5500 ? 'yellow-orange' : T < 6300 ? 'yellowish-white' : T < 7500 ? 'white' : T < 10000 ? 'blue-white' : 'blue';
+function region(l) {
+  if (l < 380) return 'Ultraviolet (invisible)';
+  if (l > 750) return 'Infrared (invisible)';
+  return l < 450 ? 'Violet / blue' : l < 495 ? 'Blue' : l < 570 ? 'Green' : l < 590 ? 'Yellow' : l < 620 ? 'Orange' : 'Red';
+}
+const sci = x => { const [c, e] = x.toExponential(2).split('e'); return `${c} × 10<sup>${parseInt(e)}</sup>`; };
+const $ = id => document.getElementById(id);
+[['Red dwarf', 3000], ['Betelgeuse', 3500], ['Sun', 5800], ['Procyon', 6500], ['Sirius', 9900], ['Rigel', 12000], ['Hot blue star', 20000]].forEach(([n, t]) => {
+  const b = document.createElement('button'); b.textContent = n + ' ' + t + ' K';
+  b.onclick = () => { $('T').value = t; draw(); }; $('pre').appendChild(b);
+});
+document.querySelectorAll('.try button').forEach(b => b.onclick = () => { $('T').value = b.dataset.t; draw(); });
+const W = 680, H = 330, ml = 52, mr = 14, mt = 14, mb = 44, pw = W - ml - mr, ph = H - mt - mb;
+const X = l => ml + l / XMAX * pw;
+function draw() {
+  const T = +$('T').value, cmp = $('cmp').checked;
+  $('tv').textContent = T.toLocaleString('en') + ' K';
+  const pts = []; let pk = 0;
+  for (let l = 5; l <= XMAX; l += 5) { const v = B(l, T); pts.push([l, v]); pk = Math.max(pk, v); }
+  const ref = B(2.898e6 / TSUN, TSUN);
+  const ymax = (cmp ? Math.max(pk, ref) : pk) * 1.08;
+  const Y = v => mt + ph * (1 - v / ymax);
+  const GREY = '#666', INK = '#111';
+  let s = '';
+  for (let l = 380; l < 750; l += 3) s += `<rect x="${X(l).toFixed(1)}" y="${mt}" width="${(X(3) - X(0) + 0.6).toFixed(1)}" height="${ph}" fill="${css(lamRGB(l))}" opacity="0.38"/>`;
+  s += `<line x1="${ml}" y1="${mt + ph}" x2="${W - mr}" y2="${mt + ph}" stroke="${GREY}"/><line x1="${ml}" y1="${mt}" x2="${ml}" y2="${mt + ph}" stroke="${GREY}"/>`;
+  for (let l = 0; l <= XMAX; l += 500) s += `<line x1="${X(l)}" y1="${mt + ph}" x2="${X(l)}" y2="${mt + ph + 5}" stroke="${GREY}"/><text x="${X(l)}" y="${mt + ph + 19}" font-size="12" text-anchor="middle" fill="${GREY}">${l}</text>`;
+  s += `<text x="${ml + pw / 2}" y="${H - 6}" font-size="13" text-anchor="middle" fill="${GREY}">Wavelength (nm)</text>`;
+  s += `<text transform="translate(14 ${mt + ph / 2}) rotate(-90)" font-size="13" text-anchor="middle" fill="${GREY}">${cmp ? 'Energy per second per m² (true scale)' : 'Energy per second per m² (scaled to peak)'}</text>`;
+  s += `<text x="${X(190)}" y="${mt + ph - 8}" font-size="12" text-anchor="middle" fill="${GREY}">UV</text><text x="${X(565)}" y="${mt + ph - 8}" font-size="12" text-anchor="middle" fill="${INK}">visible</text><text x="${X(1100)}" y="${mt + ph - 8}" font-size="12" text-anchor="middle" fill="${GREY}">infrared</text>`;
+  if (cmp) {
+    let d = ''; for (let l = 5; l <= XMAX; l += 5) d += (l == 5 ? 'M' : 'L') + X(l).toFixed(1) + ' ' + Y(B(l, TSUN)).toFixed(1);
+    s += `<path d="${d}" fill="none" stroke="${GREY}" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+  }
+  const col = starRGB(T);
+  let d = ''; pts.forEach(([l, v], i) => d += (i ? 'L' : 'M') + X(l).toFixed(1) + ' ' + Y(v).toFixed(1));
+  s += `<path d="${d}L${X(XMAX)} ${Y(0)}L${X(5)} ${Y(0)}Z" fill="${css(col)}" opacity="0.28"/><path d="${d}" fill="none" stroke="${INK}" stroke-width="2.2"/>`;
+  const lp = 2.898e6 / T;
+  if (lp <= XMAX) {
+    const px = X(lp), py = Y(B(lp, T)), right = px > W - 150;
+    s += `<line x1="${px}" y1="${py}" x2="${px}" y2="${mt + ph}" stroke="${INK}" stroke-width="1.2" stroke-dasharray="3 3"/>`;
+    s += `<circle cx="${px}" cy="${py}" r="5" fill="${lp >= 380 && lp <= 750 ? css(lamRGB(lp)) : '#fff'}" stroke="${INK}" stroke-width="1.5"/>`;
+    s += `<text x="${px + (right ? -10 : 10)}" y="${Math.max(py + 4, mt + 14)}" font-size="13" font-weight="500" text-anchor="${right ? 'end' : 'start'}" fill="${INK}">peak ${Math.round(lp)} nm</text>`;
+  }
+  $('plot').innerHTML = s;
+  $('pw').textContent = Math.round(lp) + ' nm'; $('pc').textContent = region(lp);
+  const pd = $('pdot');
+  if (lp >= 380 && lp <= 750) { pd.className = 'dot'; pd.style.background = css(lamRGB(lp)); } else { pd.className = 'dot none'; pd.style.background = ''; }
+  $('adot').style.background = css(col); $('ac').textContent = names(T);
+  const c = classes.find(c => T >= c[0]); $('cls').textContent = 'Spectral type ' + c[1] + ' · ' + c[2];
+  const p = Math.pow(T / TSUN, 4);
+  $('pow').textContent = (p < 10 ? p.toFixed(p < 1 ? 3 : 1) : Math.round(p).toLocaleString('en')) + ' × the Sun';
+  $('vis').textContent = Math.round(visFrac(T) * 100) + '% of the light is visible';
+  const lm = WIEN / T;
+  $('wk').innerHTML = `λ<sub>peak</sub> = 2.9 × 10⁻³ ÷ ${T.toLocaleString('en')} = <b>${sci(lm)} m</b> = <b>${Math.round(lm * 1e9)} nm</b>`;
+}
+$('T').addEventListener('input', draw); $('cmp').addEventListener('change', draw);
+draw();
+</script>
+</body>
+</html>
