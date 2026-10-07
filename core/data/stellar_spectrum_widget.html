@@ -28,8 +28,6 @@
   .sw { display: flex; align-items: center; gap: 10px; }
   .dot { width: 34px; height: 34px; border-radius: 50%; flex: none; border: 0.5px solid #999; }
   .dot.none { border: 1.5px dashed #777; background: transparent; }
-  .wien { background: #fff; border: 0.5px solid #ccc; border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 14px; line-height: 1.6; }
-  .wien .k { font-size: 12px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
   .try { background: #fff; border: 0.5px solid #ccc; border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 14px; }
   .try .k { font-size: 12px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
   .try ol { padding-left: 20px; line-height: 1.6; }
@@ -57,10 +55,6 @@
     <div class="card"><div class="k">Energy per second per m²</div><div class="v" id="pow"></div><div class="s" id="vis"></div></div>
   </div>
 
-  <div class="wien">
-    <div class="k">Wien's law — T = 2.9 × 10⁻³ ÷ λ<sub>peak</sub></div>
-    <div id="wk"></div>
-  </div>
 
   <div class="try">
     <div class="k">Try it</div>
@@ -68,13 +62,12 @@
       <li>Set the star to <b>3000 K</b> <button data-t="3000">go</button> — where is the peak? Is the star's light mostly visible?</li>
       <li>Raise the temperature to the <b>Sun, 5800 K</b> <button data-t="5800">go</button> — the peak is in the green, so why does it look white / yellow? (Look at the whole curve.)</li>
       <li>Now go to <b>12 000 K</b> <button data-t="12000">go</button> and tick <b>Compare with the Sun</b>. Does the hotter curve ever fall below the Sun's?</li>
-      <li>Check the Wien's law line: rearrange for λ<sub>peak</sub> and confirm the value for a star of your choice.</li>
     </ol>
   </div>
 </div>
 
 <script>
-const HCK = 1.4388e-2, TSUN = 5800, XMAX = 2500, WIEN = 2.9e-3;
+const HCK = 1.4388e-2, TSUN = 5800, XMAX = 2500;
 const B = (l, T) => { const m = l * 1e-9; return 1 / (m ** 5 * (Math.exp(HCK / (m * T)) - 1)); };
 const g = (l, mu, s1, s2) => { const t = (l - mu) / (l < mu ? s1 : s2); return Math.exp(-0.5 * t * t); };
 const cie = l => [1.056 * g(l, 599.8, 37.9, 31) + 0.362 * g(l, 442, 16, 26.7) - 0.065 * g(l, 501.1, 20.4, 26.2),
@@ -105,7 +98,6 @@ function region(l) {
   if (l > 750) return 'Infrared (invisible)';
   return l < 450 ? 'Violet / blue' : l < 495 ? 'Blue' : l < 570 ? 'Green' : l < 590 ? 'Yellow' : l < 620 ? 'Orange' : 'Red';
 }
-const sci = x => { const [c, e] = x.toExponential(2).split('e'); return `${c} × 10<sup>${parseInt(e)}</sup>`; };
 const $ = id => document.getElementById(id);
 [['Red dwarf', 3000], ['Betelgeuse', 3500], ['Sun', 5800], ['Procyon', 6500], ['Sirius', 9900], ['Rigel', 12000], ['Hot blue star', 20000]].forEach(([n, t]) => {
   const b = document.createElement('button'); b.textContent = n + ' ' + t + ' K';
@@ -153,8 +145,6 @@ function draw() {
   const p = Math.pow(T / TSUN, 4);
   $('pow').textContent = (p < 10 ? p.toFixed(p < 1 ? 3 : 1) : Math.round(p).toLocaleString('en')) + ' × the Sun';
   $('vis').textContent = Math.round(visFrac(T) * 100) + '% of the light is visible';
-  const lm = WIEN / T;
-  $('wk').innerHTML = `λ<sub>peak</sub> = 2.9 × 10⁻³ ÷ ${T.toLocaleString('en')} = <b>${sci(lm)} m</b> = <b>${Math.round(lm * 1e9)} nm</b>`;
 }
 $('T').addEventListener('input', draw); $('cmp').addEventListener('change', draw);
 draw();
