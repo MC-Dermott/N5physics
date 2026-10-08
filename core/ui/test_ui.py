@@ -24,7 +24,7 @@ def _load_game_html():
 
 
 def render_test(topic, question_type, qualification, generate_fn, user_id=None, example=None,
-                num_questions=5, exam_style=False):
+                num_questions=5, exam_style=False, assignment_id=None):
     from core.db.tracker import save_test_result, save_test_question_attempt
 
     test = st.session_state.test
@@ -61,8 +61,10 @@ def render_test(topic, question_type, qualification, generate_fn, user_id=None, 
     if test["complete"]:
         if not test.get("saved") and user_id:
             total = len(test["results"])
-            save_test_result(user_id, qualification, topic, question_type,
-                             sum(test["results"]), total)
+            if not save_test_result(user_id, qualification, topic, question_type,
+                                    sum(test["results"]), total, assignment_id=assignment_id) and assignment_id:
+                st.error("Your score could not be saved, so it won't count towards the assignment. "
+                         "Please tell your teacher.")
             # Save per-question results with mistake text
             for result_type, distractor, q in test["feedback"]:
                 correct = result_type == "correct"

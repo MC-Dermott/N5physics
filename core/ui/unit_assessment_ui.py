@@ -44,7 +44,7 @@ def _render_summary(unit, test):
     render_review(test)
 
 
-def render_unit_assessment(unit, qualification, user_id=None):
+def render_unit_assessment(unit, qualification, user_id=None, assignment_id=None):
     from core.db.tracker import save_test_result, save_test_question_attempt
 
     test = st.session_state.test
@@ -68,8 +68,11 @@ def render_unit_assessment(unit, qualification, user_id=None):
     # --- Summary screen ---
     if test["complete"]:
         if not test.get("saved") and user_id:
-            save_test_result(user_id, qualification, unit, UNIT_ASSESSMENT,
-                             sum(test["results"]), len(test["results"]))
+            if not save_test_result(user_id, qualification, unit, UNIT_ASSESSMENT,
+                                    sum(test["results"]), len(test["results"]),
+                                    assignment_id=assignment_id) and assignment_id:
+                st.error("Your score could not be saved, so it won't count towards the assignment. "
+                         "Please tell your teacher.")
             for result_type, distractor, q in test["feedback"]:
                 mistake = distractor.get("mistake") if result_type == "distractor" and distractor else None
                 save_test_question_attempt(user_id, qualification, q.topic, q.question_type,

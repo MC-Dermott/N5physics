@@ -14,6 +14,8 @@ from core.ui.unit_assessment_ui import render_unit_assessment, UNIT_ASSESSMENT
 from core.ui.past_paper_ui import render_past_papers
 from core.ui.past_paper_quiz_ui import render_past_paper_quiz
 from core.ui.reports_ui import render_teacher_report
+from core.ui.assignments_ui import render_my_assignments, render_assignment_runner, render_teacher_assignments
+from core.db.assignments import outstanding_count
 from core.ui.student_dashboard_ui import render_student_dashboard
 from core.data.backgrounds import get_background_videos
 from core.data.examples import get_examples, get_canonical_question, notes_for, format_example
@@ -27,7 +29,8 @@ initialise_session()
 def _do_logout():
     for key in ["user", "qualification", "last_qualification",
                 "last_topic", "last_question_type", "show_change_password",
-                "show_dashboard", "show_student_dashboard"]:
+                "show_dashboard", "show_student_dashboard", "show_assignments",
+                "show_teacher_assignments", "active_assignment"]:
         st.session_state.pop(key, None)
     reset_test()
     reset_assessment()
@@ -105,6 +108,27 @@ if st.session_state.get("show_student_dashboard"):
     render_student_dashboard(user)
     st.stop()
 
+# ── Assignments pages ─────────────────────────────────────────────────────────
+
+if st.session_state.get("show_assignments") or st.session_state.get("show_teacher_assignments"):
+    st.title("Physics Practice")
+    col_back, col_corner = st.columns([5, 1])
+    with col_back:
+        if st.button("← Back"):
+            for key in ("show_assignments", "show_teacher_assignments", "active_assignment"):
+                st.session_state.pop(key, None)
+            reset_test()
+            st.rerun()
+    with col_corner:
+        _auth_button()
+    if st.session_state.get("show_teacher_assignments"):
+        render_teacher_assignments(user)
+    elif st.session_state.get("active_assignment"):
+        render_assignment_runner(user)
+    else:
+        render_my_assignments(user)
+    st.stop()
+
 # ── Homepage: level selection ─────────────────────────────────────────────────
 
 if "qualification" not in st.session_state:
@@ -116,6 +140,17 @@ if "qualification" not in st.session_state:
     if user and user.get("role") == "teacher":
         if st.button("📊 Teacher Dashboard", use_container_width=True):
             st.session_state.show_dashboard = True
+            st.rerun()
+        if st.button("📝 Set & Track Assignments", use_container_width=True):
+            st.session_state.show_teacher_assignments = True
+            st.rerun()
+        st.write("")
+
+    if user and user.get("role") != "teacher":
+        todo = outstanding_count(user)
+        if st.button("📝 My Assignments" + (f" ({todo} to do)" if todo else ""), use_container_width=True,
+                     type="primary" if todo else "secondary"):
+            st.session_state.show_assignments = True
             st.rerun()
         st.write("")
 
