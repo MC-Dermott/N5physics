@@ -5,6 +5,7 @@ import pandas as pd
 import streamlit as st
 
 from core.db import assignments as db
+from core.db import tracker_import
 from core.db.client import get_supabase
 from core.engine.question_factory import (
     QUAL_REGISTRY, generate_question, has_unit_assessment, is_exam_style_test, make_test_generator, test_length,
@@ -205,6 +206,53 @@ def _render_track(students):
             st.error(err) if err else st.rerun()
 
 
+def _render_import(teacher, students):
+    st.caption("Upload the CSV made from your assessment tracker (export_app_assignments.py). Each pupil gets "
+               "practice on their weakest topics; pupils with the same topics share one assignment.")
+    up = st.file_uploader("App assignments CSV", type="csv", key="import_csv")
+    if not up:
+        return
+    groups, problems = tracker_import.parse(up.getvalue(), QUAL_REGISTRY)
+    for p in problems:
+        st.warning(p)
+    ids = {s["username"]: s["id"] for s in students}
+    known = [{**g, "usernames": [u for u in g["usernames"] if u in ids]} for g in groups]
+    unknown = sorted({u for g in groups for u in g["usernames"] if u not in ids})
+    known = [g for g in known if g["usernames"]]
+    if unknown:
+        st.warning("No app account for: " + ", ".join(unknown) + " — they are skipped. "
+                   "Check the App username column on the tracker's Pupils sheet.")
+    if not known:
+        st.info("Nothing to set.")
+        return
+
+    c1, c2, c3 = st.columns([3, 2, 2])
+    base = c1.text_input("Title prefix", value="Focus practice", key="imp_title")
+    no_due = c3.checkbox("No due date", key="imp_nodue")
+    due = c2.date_input("Due date", value=date.today() + timedelta(days=7), disabled=no_due, key="imp_due")
+    pass_pct = st.number_input("Pass mark (%)", 0, 100, 60, step=5, key="imp_pass")
+    st.markdown(f"**{len(known)} assignment{'s' if len(known) != 1 else ''}** for "
+                f"{sum(len(g['usernames']) for g in known)} pupils:")
+    for g in known:
+        with st.expander(f"{tracker_import.title_for(base, g)} — {len(g['usernames'])} pupil"
+                         f"{'s' if len(g['usernames']) != 1 else ''}"):
+            st.markdown("Pupils: " + ", ".join(g["usernames"]))
+            st.markdown("\n".join(f"- {i['question_type']} · {i['topic']} ({i['qualification']})" for i in g["items"]))
+
+    if st.button("Set these assignments", type="primary", key="imp_go"):
+        errors = []
+        for g in known:
+            err = db.create_assignment(teacher["id"], tracker_import.title_for(base, g), None if no_due else due,
+                                       pass_pct, g["items"], [], [ids[u] for u in g["usernames"]])
+            if err:
+                errors.append(err)
+        if errors:
+            st.error("\n\n".join(errors))
+        else:
+            st.session_state["assignment_set_msg"] = f"{len(known)} assignment(s) set from the tracker."
+            st.rerun()
+
+
 def render_teacher_assignments(teacher):
     st.header("Assignments")
     if msg := st.session_state.pop("assignment_set_msg", None):
@@ -214,8 +262,10 @@ def render_teacher_assignments(teacher):
     except Exception as e:
         st.error(f"Could not load pupils: {e}")
         return
-    tab_track, tab_new = st.tabs(["Track", "Set new"])
+    tab_track, tab_new, tab_import = st.tabs(["Track", "Set new", "Import from tracker"])
     with tab_track:
         _render_track(students)
     with tab_new:
         _render_set_new(teacher, students)
+    with tab_import:
+        _render_import(teacher, students)

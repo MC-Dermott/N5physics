@@ -92,6 +92,38 @@ else:
     assert any("Start Test" in b.label or "Start Unit" in b.label for b in at.button), [b.label for b in at.button]
 
 
+def test_tracker_import_groups_identical_focus_sets():
+    from core.db import tracker_import
+    from core.engine.question_factory import QUAL_REGISTRY
+    qual = "National 5"
+    csv_text = ("username,qualification,unit,question_type,tracker_topic,topic_pct\n"
+                f"a,{qual},Dynamics,Forces,Forces,40\n"
+                f"b,{qual},Dynamics,Forces,Forces,35\n"
+                f"c,{qual},Dynamics,Energy,Energy,50\n"
+                f"c,{qual},Dynamics,Forces,Forces,50\n"
+                f"d,{qual},Dynamics,Nonsense,X,10\n")
+    groups, problems = tracker_import.parse(csv_text.encode(), QUAL_REGISTRY)
+    assert [sorted(g["usernames"]) for g in groups] == [["a", "b"], ["c"]]
+    assert groups[1]["topics"] == ["Energy", "Forces"] and len(groups[1]["items"]) == 2
+    assert len(problems) == 1 and "Nonsense" in problems[0]
+    assert tracker_import.parse(b"x,y\n1,2\n", QUAL_REGISTRY)[0] == []
+    assert tracker_import.title_for("Focus", {"topics": list("abcd")}) == "Focus: a, b, c…"
+
+
+def test_tracker_topic_map_matches_registry():
+    import importlib.util
+    path = Path("/Users/luke/Library/CloudStorage/OneDrive-GlowScotland/Resources/Physics/.pipeline-tools/assessment_tracker/topic_map.py")
+    if not path.exists():
+        return
+    spec = importlib.util.spec_from_file_location("topic_map", path); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+    from core.engine.question_factory import QUAL_REGISTRY
+    for lvl, units in m.MAP.items():
+        for topics in units.values():
+            for app_unit, qts in topics.values():
+                for qt in qts:
+                    assert qt in QUAL_REGISTRY[lvl][app_unit], (lvl, app_unit, qt)
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):
