@@ -61,6 +61,82 @@ def test_save_test_result_omits_assignment_id_when_unset():
     assert "assignment_id" not in sent[0]
     assert tracker.save_test_result("u", "Higher", "U", "A", 3, 5, assignment_id="x")
     assert sent[1]["assignment_id"] == "x"
+    assert len(sent) == 2          # no review row for an ordinary test, even when review_state is passed
+    assert tracker.save_test_result("u", "Higher", "U", "A", 3, 5, review_state={"feedback": []})
+    assert len(sent) == 3
+
+
+def test_change_username():
+    from core.auth import auth
+    assert auth.valid_username("jm483") is None
+    assert all(auth.valid_username(x) for x in ("ab", "j m483", "jm_48", "x" * 21, "jmé48"))
+    table = [dict(id="1", username="aa111"), dict(id="2", username="bb222")]
+
+    class T:
+        def __init__(s): s.f = None; s.upd = None
+        def select(s, *_): return s
+        def eq(s, col, v): s.f = (col, v); return s
+        def update(s, row): s.upd = row; return s
+        def execute(s):
+            if s.upd is not None:
+                for u in table:
+                    if u["id"] == s.f[1]: u.update(s.upd)
+                return s
+            s.data = [u for u in table if u[s.f[0]] == s.f[1]]
+            return s
+    class C:
+        def table(s, _): return T()
+    auth.get_supabase = lambda: C()
+    assert auth.change_username("1", "bb222") == "That username is already taken."
+    assert auth.change_username("1", "x y") is not None
+    assert auth.change_username("1", " cc333 ") is None and table[0]["username"] == "cc333"
+    assert auth.change_username("1", "cc333") is None            # renaming to your own name is fine
+
+
+def _first_item():
+    from core.engine.question_factory import QUAL_REGISTRY
+    qual = next(iter(QUAL_REGISTRY)); unit = next(iter(QUAL_REGISTRY[qual])); qt = next(iter(QUAL_REGISTRY[qual][unit]))
+    return qual, unit, qt
+
+
+def test_review_roundtrip():
+    import json
+    from core.db import reviews
+    from core.engine.question_factory import generate_question
+    qs = [generate_question(*_first_item()) for _ in range(2)]
+    test = dict(answers=["1", "2"], results=[True, False], feedback=[("correct", None, qs[0]), ("wrong", None, qs[1])])
+    back = reviews.attempt_from_json(json.loads(json.dumps(reviews.attempt_to_json(test))))
+    assert [f[2].question_text for f in back["feedback"]] == [q.question_text for q in qs]
+    assert back["answers"] == ["1", "2"] and back["results"] == [True, False]
+    assert all(f[2].working == q.working for f, q in zip(back["feedback"], qs))
+
+
+def test_review_button_shows_saved_attempt():
+    from streamlit.testing.v1 import AppTest
+    qual, unit, qt = _first_item()
+    item = dict(id="i1", assignment_id="a1", qualification=qual, topic=unit, question_type=qt)
+    res = dict(id="r1", qualification=qual, topic=unit, question_type=qt, score=3, total=5, taken_at="2026-10-21T09:00:00")
+    a = dict(id="a1", title="T", pass_pct=0, due_date=None, items=[item], results=[res],
+             status=db.assignment_status([item], [res], 0))
+    assert a["status"]["state"] == db.DONE          # no pass mark: taking it once completes it
+    script = f"""
+import streamlit as st
+from core.db import assignments as db, reviews
+db.pupil_assignments = lambda user: [{a!r}]
+from core.engine.question_factory import generate_question
+qs = [generate_question({qual!r}, {unit!r}, {qt!r}) for _ in range(2)]
+reviews.load_review = lambda rid: dict(answers=["1", "2"], results=[True, False],
+                                       feedback=[("correct", None, qs[0]), ("wrong", None, qs[1])])
+from core.engine.session_manager import initialise_session
+initialise_session()
+from core.ui.assignments_ui import render_my_assignments
+render_my_assignments({{"id": "u1", "username": "p", "class_code": "5A"}})
+"""
+    at = AppTest.from_string(script).run(timeout=30)
+    assert not at.exception, at.exception
+    next(b for b in at.button if b.label == "Review").click(); at.run(timeout=30)
+    assert not at.exception, at.exception
+    assert any("Review — attempt" in m.value for m in at.markdown), [m.value for m in at.markdown][:10]
 
 
 def test_pages_render():

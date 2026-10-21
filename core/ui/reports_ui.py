@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from collections import Counter, defaultdict
 from core.db.client import get_supabase
-from core.auth.auth import reset_password, delete_student
+from core.auth.auth import change_username, reset_password, delete_student
 from core.ui.student_dashboard_ui import render_progress_heatmaps
 
 
@@ -237,7 +237,7 @@ def render_teacher_report(_qualification=None):
         st.success(msg)
     account_action = st.radio(
         "Action",
-        ["Assign Class Code", "Reset Password", "Delete Account"],
+        ["Assign Class Code", "Change Username", "Reset Password", "Delete Account"],
         horizontal=True,
         label_visibility="collapsed",
         key="student_accounts_action",
@@ -256,6 +256,20 @@ def render_teacher_report(_qualification=None):
                     st.rerun()
                 except Exception as e:
                     st.error(f"Update failed: {e}")
+
+    elif account_action == "Change Username":
+        st.caption("The pupil keeps their password, results and assignments and logs in with the new name. "
+                   "Use the name in the tracker's App username column. Letters and digits only.")
+        rename_name = st.selectbox("Student", [u["username"] for u in all_users], key="rename_select")
+        with st.form("change_username_form"):
+            new_name = st.text_input("New username")
+            if st.form_submit_button("Change username", type="primary"):
+                err = change_username(next(u["id"] for u in all_users if u["username"] == rename_name), new_name)
+                if err:
+                    st.error(err)
+                else:
+                    st.session_state["account_deleted_msg"] = f"**{rename_name}** is now **{new_name.strip()}**."
+                    st.rerun()
 
     elif account_action == "Delete Account":
         del_name = st.selectbox("Student", [u["username"] for u in all_users], key="delete_select")

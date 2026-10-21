@@ -70,7 +70,7 @@ def render_unit_assessment(unit, qualification, user_id=None, assignment_id=None
         if not test.get("saved") and user_id:
             if not save_test_result(user_id, qualification, unit, UNIT_ASSESSMENT,
                                     sum(test["results"]), len(test["results"]),
-                                    assignment_id=assignment_id) and assignment_id:
+                                    assignment_id=assignment_id, review_state=test) and assignment_id:
                 st.error("Your score could not be saved, so it won't count towards the assignment. "
                          "Please tell your teacher.")
             for result_type, distractor, q in test["feedback"]:
