@@ -10,6 +10,7 @@ not squared; photon energy given as Ek; lines per mm used as d; the central maxi
 energy levels added instead of subtracted; angles measured from the surface; v × n instead of v ÷ n.
 """
 import math
+import pathlib
 import random
 
 from core.models.question_model import PhysicsQuestion
@@ -93,6 +94,17 @@ def _choice(text, correct, wrong, qtype, level="Higher"):
 
 
 # ════════════════ Forces on charged particles ════════════════
+_FIELD_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "charged_particle_field_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_field_widget(question):
+    question.metadata["widget_html"] = _FIELD_WIDGET_HTML
+    question.metadata["widget_height"] = 1000
+    return question
+
+
 # (particle, charge, mass, p.d. choices (kV))
 _PARTICLES = [("An electron", E, ME, [0.25, 0.60, 1.5, 2.4, 3.0]),
               ("A proton", E, MP, [2.5, 10, 25, 50]),
@@ -100,6 +112,10 @@ _PARTICLES = [("An electron", E, ME, [0.25, 0.60, 1.5, 2.4, 3.0]),
 
 
 def gen_pw_charged_speed(level="Higher"):
+    return _with_field_widget(_charged_speed(level))
+
+
+def _charged_speed(level):
     name, q, m, vs = random.choice(_PARTICLES)
     kv = random.choice(vs)
     V = kv * 1000

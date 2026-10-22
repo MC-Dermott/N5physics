@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charged particle in a uniform electric field</title>
+<style>
+  :root { --bg:#f6f8fb; --card:#fff; --ink:#1b2430; --mute:#5b6676; --line:#d5dbe5;
+          --pos:#d9480f; --neg:#1c6fd1; --accent:#1f3a5f; --good:#2b8a3e; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .wrap { max-width:1000px; margin:0 auto; padding:14px 16px 24px; }
+  h1 { font-size:20px; margin:0 0 10px; color:var(--accent); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  canvas { width:100%; height:auto; display:block; border-radius:8px; background:#fff; border:1px solid var(--line); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+  @media (max-width:720px) { .grid { grid-template-columns:1fr; } }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--mute); margin:0 0 8px; }
+  .row { margin-bottom:10px; }
+  .row label { display:flex; justify-content:space-between; font-weight:600; margin-bottom:3px; }
+  .row label span { font-weight:500; color:var(--accent); }
+  input[type=range] { width:100%; }
+  .btns { display:flex; flex-wrap:wrap; gap:6px; }
+  button { font:inherit; padding:6px 10px; border:1px solid var(--line); background:#fff; color:var(--ink);
+           border-radius:7px; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button.go { background:var(--good); color:#fff; border-color:var(--good); font-weight:600; padding:8px 16px; }
+  button.go:hover { filter:brightness(1.08); }
+  .chg { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:-1px; }
+  table { width:100%; border-collapse:collapse; }
+  td { padding:5px 4px; border-bottom:1px solid var(--line); }
+  td:last-child { text-align:right; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  tr:last-child td { border-bottom:0; }
+  .work { font-size:14px; color:var(--ink); line-height:1.55; }
+  .work b { color:var(--accent); }
+  .status { margin-top:8px; padding:7px 10px; border-radius:7px; background:#eef3fa; color:var(--accent); min-height:34px; }
+  .note { color:var(--mute); font-size:13px; margin-top:6px; }
+  .disabled { opacity:.45; pointer-events:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Charged particle in a uniform electric field</h1>
+  <div class="card">
+    <canvas id="cv" width="820" height="440"></canvas>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Controls</h2>
+      <div class="row">
+        <label>Potential difference between the plates <span id="vOut"></span></label>
+        <input type="range" id="V" min="10" max="1000" step="10" value="100">
+      </div>
+      <div class="row">
+        <label>Particle</label>
+        <div class="btns" id="pBtns"></div>
+      </div>
+      <div class="row">
+        <label>Field direction <span id="fOut"></span></label>
+        <div class="btns"><button id="flip">⇄ Flip the field</button></div>
+      </div>
+      <div class="row">
+        <label>Speed on entering the field <span id="uOut"></span></label>
+        <input type="range" id="U" min="0" max="50" step="1" value="5">
+        <div class="note">0 = released from rest at the plate that repels it.</div>
+      </div>
+      <div class="row" id="dirRow">
+        <label>Direction of travel <span id="aOut"></span></label>
+        <div class="btns" style="margin-bottom:6px">
+          <button data-a="0">→</button>
+          <button data-a="180">←</button>
+          <button data-a="90">↓</button>
+          <button data-a="-90">↑</button>
+        </div>
+        <input type="range" id="A" min="-180" max="180" step="5" value="0">
+        <div class="note">Measured from the right, clockwise. Within 60° of → or ← the particle goes in through the hole in a plate; otherwise it enters from the top or bottom.</div>
+      </div>
+      <div class="btns">
+        <button class="go" id="fire">▶ Fire</button>
+        <button id="reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Readings</h2>
+      <table>
+        <tr><td>Potential difference across the plates, V</td><td id="rV"></td></tr>
+        <tr><td>Potential difference the particle has crossed</td><td id="rVc"></td></tr>
+        <tr><td>Work done on the particle by the field, W</td><td id="rW"></td></tr>
+        <tr><td>Kinetic energy, E<sub>k</sub></td><td id="rEk"></td></tr>
+        <tr><td>Speed, v</td><td id="rv"></td></tr>
+      </table>
+      <h2 style="margin-top:12px">Working</h2>
+      <div class="work" id="work"></div>
+    </div>
+  </div>
+  <div class="note">Plate separation 8.0 cm, plate height 6.0 cm. Edge effects are ignored. Only the electric force acts, and speeds are small enough to ignore relativity.</div>
+</div>
+
+<script>
+const Q = 1.60e-19;                       // C
+const D = 0.08, L = 0.06, HOLE = 0.006;   // plate separation, plate height, half-width of hole (m)
+const E_FIELD = () => V / D;              // V m^-1
+const P = {
+  electron:   {name:"Electron",      sym:"e⁻", q:-1, m:9.11e-31},
+  positron:   {name:"Positron",      sym:"e⁺", q: 1, m:9.11e-31},
+  alpha:      {name:"Alpha particle",sym:"α",  q: 2, m:6.65e-27},
+  proton:     {name:"Proton",        sym:"p",  q: 1, m:1.673e-27},
+  antiproton: {name:"Anti-proton",   sym:"p̄",  q:-1, m:1.673e-27}
+};
+// field: +1 points right (left plate positive), -1 points left (right plate positive)
+let V = 100, pk = "proton", u0 = 5e5, ang = 0, fdir = 1;
+
+// physical metres -> pixels. x is horizontal (right +), y is vertical (down +)
+const cv = document.getElementById("cv"), cx = cv.getContext("2d");
+const S = 5000, X0 = 210, Y0 = 70;
+const px = x => X0 + x*S, py = y => Y0 + y*S;
+const XMIN = -X0/S, XMAX = (820-X0)/S, YMIN = -Y0/S, YMAX = (440-Y0)/S;
+
+const sup = {"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","-":"⁻"};
+function sci(x, unit, sf=3) {
+  if (x === 0) return "0 " + unit;
+  const neg = x < 0; x = Math.abs(x);
+  let e = Math.floor(Math.log10(x)), m = x / Math.pow(10, e);
+  let ms = m.toFixed(sf-1);
+  if (parseFloat(ms) >= 10) { e += 1; ms = (m/10).toFixed(sf-1); }
+  if (e >= -1 && e <= 2) return (neg?"−":"") + x.toPrecision(sf) + " " + unit;
+  return (neg?"−":"") + ms + " × 10" + String(e).split("").map(c => sup[c]).join("") + " " + unit;
+}
+const fmtV = v => (Math.round(v*10)/10).toString() + " V";
+
+// ---------- simulation state ----------
+let st = null;
+
+function setup() {
+  const p = P[pk], q = p.q * Q, m = p.m;
+  let pos, vel;
+  if (u0 === 0) {
+    // released from rest at the plate that repels it
+    pos = {x: (p.q * fdir > 0) ? 0 : D, y: L/2};
+    vel = {x:0, y:0};
+  } else {
+    const a = ang * Math.PI/180, dir = {x:Math.cos(a), y:Math.sin(a)};
+    vel = {x:u0*dir.x, y:u0*dir.y};
+    let entry, back;
+    if (Math.abs(ang) <= 60)       { entry = {x:0, y:L/2}; back = 0.03; }
+    else if (Math.abs(ang) >= 120) { entry = {x:D, y:L/2}; back = 0.03; }
+    else                           { entry = {x:D/2, y: ang > 0 ? 0 : L}; back = 0.012; }
+    pos = {x:entry.x - dir.x*back, y:entry.y - dir.y*back};
+  }
+  st = {p, q, m, x:pos.x, y:pos.y, vx:vel.x, vy:vel.y, ek0:0.5*m*(vel.x**2 + vel.y**2),
+        trail:[{x:pos.x, y:pos.y}], done:false, moving:false, inField:false,
+        msg:"Press Fire to release the particle."};
+}
+
+function inRegion(x, y) { return x >= 0 && x <= D && y >= 0 && y <= L; }
+
+// advance by dt, switching the field on/off exactly at the plate edges
+function moveFor(s, dt, forceIn, depth = 0) {
+  const inside = forceIn || inRegion(s.x, s.y);
+  const acc = inside ? s.q * fdir * E_FIELD() / s.m : 0;   // acceleration along x
+  const adv = t => ({x:s.x + s.vx*t + 0.5*acc*t*t, y:s.y + s.vy*t});
+  const end = adv(dt);
+  if (depth < 4 && inside !== inRegion(end.x, end.y)) {
+    let lo = 0, hi = dt;
+    for (let i = 0; i < 40; i++) {
+      const mid = (lo + hi)/2, p = adv(mid);
+      if (inside === inRegion(p.x, p.y)) lo = mid; else hi = mid;
+    }
+    const p = adv(hi);
+    s.x = p.x; s.y = p.y; s.vx += acc*hi;
+    moveFor(s, dt - hi, !inside, depth + 1);
+    return;
+  }
+  s.x = end.x; s.y = end.y; s.vx += acc*dt;
+}
+
+function step() {
+  const s = st, a = inRegion(s.x, s.y) ? Math.abs(s.q * E_FIELD() / s.m) : 0;
+  const ds = 0.0006, sp = Math.hypot(s.vx, s.vy);
+  const dt = ds / (sp + Math.sqrt(2*a*ds) + 1e-9);
+  const ox = s.x, oy = s.y;
+  moveFor(s, dt, false);
+  // did it reach a plate away from the hole?
+  for (const plane of [0, D]) {
+    if ((ox - plane) * (s.x - plane) < 0) {
+      const t = (plane - ox) / (s.x - ox), yc = oy + (s.y - oy) * t;
+      if (yc >= 0 && yc <= L && Math.abs(yc - L/2) > HOLE) {
+        s.x = plane; s.y = yc; s.vx = s.vy = 0; s.done = true;
+        const positive = (plane === 0) === (fdir > 0);
+        s.msg = "The particle hit the " + (positive ? "positive" : "negative") + " plate (" + (plane === 0 ? "left" : "right") + ").";
+      }
+    }
+  }
+  s.trail.push({x:s.x, y:s.y});
+  const now = inRegion(s.x, s.y);
+  if (now) s.inField = true;
+  if (!s.done && s.inField && !now && !s.left) {
+    s.left = true;
+    s.msg = s.x > D ? "The particle left the field through the hole in the right-hand plate."
+          : s.x < 0 ? "The particle left the field through the hole in the left-hand plate."
+          : s.y < 0 ? "The particle left the field at the top." : "The particle left the field at the bottom.";
+  }
+  if (!s.done && (s.x < XMIN || s.x > XMAX || s.y < YMIN || s.y > YMAX)) s.done = true;
+}
+
+// ---------- drawing ----------
+function arrow(x1, y1, x2, y2, col, w=2, head=8) {
+  const a = Math.atan2(y2-y1, x2-x1);
+  cx.strokeStyle = col; cx.fillStyle = col; cx.lineWidth = w;
+  cx.beginPath(); cx.moveTo(x1,y1); cx.lineTo(x2,y2); cx.stroke();
+  cx.beginPath(); cx.moveTo(x2,y2);
+  cx.lineTo(x2 - head*Math.cos(a-0.4), y2 - head*Math.sin(a-0.4));
+  cx.lineTo(x2 - head*Math.cos(a+0.4), y2 - head*Math.sin(a+0.4)); cx.closePath(); cx.fill();
+}
+
+function draw() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+  const xl = px(0), xr = px(D), yt = py(0), yb = py(L), gap = HOLE*S, mid = py(L/2);
+  // field lines (arrows point the way a positive charge is pushed)
+  for (let i = 1; i < 10; i++) {
+    const y = yt + (yb - yt) * i / 10;
+    if (fdir > 0) arrow(xl + 8, y, xr - 8, y, "#c9d2e0", 1.5, 7);
+    else          arrow(xr - 8, y, xl + 8, y, "#c9d2e0", 1.5, 7);
+  }
+  // plates with a gap
+  for (const [x, positive] of [[xl, fdir > 0], [xr, fdir < 0]]) {
+    cx.fillStyle = positive ? "#d9480f" : "#1c6fd1";
+    cx.fillRect(x - 4, yt, 8, mid - gap - yt);
+    cx.fillRect(x - 4, mid + gap, 8, yb - mid - gap);
+    cx.font = "bold 18px system-ui"; cx.textAlign = "center";
+    for (let i = 1; i < 8; i++) {
+      const y = yt + (yb - yt) * i / 8;
+      if (Math.abs(y - mid) < gap + 10) continue;
+      cx.fillText(positive ? "+" : "−", x + (x === xl ? -16 : 16), y + 6);
+    }
+  }
+  cx.fillStyle = "#5b6676"; cx.font = "13px system-ui"; cx.textAlign = "center";
+  cx.fillText("d = 8.0 cm", (xl + xr)/2, yb + 26);
+  cx.strokeStyle = "#5b6676"; cx.lineWidth = 1;
+  cx.beginPath(); cx.moveTo(xl, yb + 10); cx.lineTo(xr, yb + 10); cx.stroke();
+  cx.fillText("Electric field pointing " + (fdir > 0 ? "right →" : "left ←"),
+              (xl + xr)/2, yt - 14);
+
+  if (!st) return;
+  const s = st, col = s.q > 0 ? "#d9480f" : "#1c6fd1";
+  cx.strokeStyle = col; cx.globalAlpha = .55; cx.lineWidth = 2;
+  cx.beginPath();
+  s.trail.forEach((p, i) => i ? cx.lineTo(px(p.x), py(p.y)) : cx.moveTo(px(p.x), py(p.y)));
+  cx.stroke(); cx.globalAlpha = 1;
+  const X = px(s.x), Y = py(s.y);
+  cx.fillStyle = col; cx.beginPath(); cx.arc(X, Y, 10, 0, 7); cx.fill();
+  cx.fillStyle = "#fff"; cx.font = "bold 12px system-ui"; cx.textAlign = "center"; cx.textBaseline = "middle";
+  cx.fillText(s.p.sym, X, Y + 1); cx.textBaseline = "alphabetic";
+  const sp = Math.hypot(s.vx, s.vy);
+  if (sp > 0 && !s.done) arrow(X, Y, X + 36*s.vx/sp, Y + 36*s.vy/sp, "#2b8a3e", 2.5, 9);
+  if (inRegion(s.x, s.y) && !s.done) {
+    const dirF = (s.q > 0 ? 1 : -1) * fdir;
+    arrow(X, Y + 16, X + dirF*36, Y + 16, "#7b2cbf", 2.5, 9);
+  }
+  cx.font = "12px system-ui"; cx.textAlign = "left";
+  cx.fillStyle = "#2b8a3e"; cx.fillRect(14, 14, 14, 3); cx.fillStyle = "#1b2430"; cx.fillText("velocity", 34, 19);
+  cx.fillStyle = "#7b2cbf"; cx.fillRect(14, 32, 14, 3); cx.fillStyle = "#1b2430"; cx.fillText("force (only inside the field)", 34, 37);
+}
+
+// ---------- readings ----------
+function readings() {
+  document.getElementById("rV").textContent = fmtV(V);
+  if (!st) return;
+  const s = st, Ek = 0.5*s.m*(s.vx**2 + s.vy**2), W = Ek - s.ek0;
+  const Vc = Math.abs(W / s.q), sp = Math.sqrt(2*Ek/s.m);
+  document.getElementById("rVc").textContent = fmtV(Vc);
+  document.getElementById("rW").textContent = sci(W, "J");
+  document.getElementById("rEk").textContent = sci(Ek, "J");
+  document.getElementById("rv").textContent = sci(sp, "m s⁻¹");
+  document.getElementById("work").innerHTML =
+    "Charge Q = <b>" + (s.q<0?"−":"+") + sci(Math.abs(s.q), "C") + "</b><br>" +
+    "Mass m = <b>" + sci(s.m, "kg") + "</b><br>" +
+    "W = QV = " + sci(Math.abs(s.q), "C") + " × " + fmtV(Vc) + " = <b>" + sci(Math.abs(W), "J") + "</b>" +
+      (W < 0 ? " (the field slows the particle: work is taken from E<sub>k</sub>)" : "") + "<br>" +
+    "E<sub>k</sub> = E<sub>k</sub> at start " + (W<0?"−":"+") + " W = " + sci(s.ek0, "J") + (W<0?" − ":" + ") +
+      sci(Math.abs(W), "J") + " = <b>" + sci(Ek, "J") + "</b><br>" +
+    "v = √(2E<sub>k</sub>/m) = <b>" + sci(sp, "m s⁻¹") + "</b>";
+}
+
+// ---------- run loop ----------
+function frame() {
+  if (st && st.moving && !st.done) step();
+  if (st && st.done) st.moving = false;
+  draw(); readings();
+  document.getElementById("status").textContent = st ? st.msg : "";
+  requestAnimationFrame(frame);
+}
+function reset() { setup(); draw(); readings(); }
+function fire() { setup(); st.moving = true; st.msg = "Particle moving…"; }
+
+// ---------- controls ----------
+const pBtns = document.getElementById("pBtns");
+Object.keys(P).forEach(k => {
+  const b = document.createElement("button"); b.dataset.k = k;
+  b.innerHTML = '<span class="chg" style="background:' + (P[k].q>0?"var(--pos)":"var(--neg)") + '"></span>' + P[k].name;
+  b.onclick = () => { pk = k; sync(); reset(); };
+  pBtns.appendChild(b);
+});
+document.getElementById("V").oninput = e => { V = +e.target.value; sync(); reset(); };
+document.getElementById("U").oninput = e => { u0 = +e.target.value * 1e5; sync(); reset(); };
+document.getElementById("A").oninput = e => { ang = +e.target.value; sync(); reset(); };
+document.querySelectorAll("[data-a]").forEach(b => b.onclick = () => {
+  ang = +b.dataset.a; document.getElementById("A").value = ang; sync(); reset(); });
+document.getElementById("flip").onclick = () => { fdir = -fdir; sync(); reset(); };
+document.getElementById("fire").onclick = fire;
+document.getElementById("reset").onclick = reset;
+
+function sync() {
+  document.getElementById("vOut").textContent = V + " V";
+  document.getElementById("uOut").textContent = u0 === 0 ? "from rest" : sci(u0, "m s⁻¹", 2);
+  document.getElementById("fOut").textContent = fdir > 0 ? "→ (left plate +)" : "← (right plate +)";
+  const name = ang === 0 ? "→" : ang === 180 || ang === -180 ? "←" : ang === 90 ? "↓" : ang === -90 ? "↑" : "";
+  document.getElementById("aOut").textContent = ang + "°" + (name ? " (" + name + ")" : "");
+  document.getElementById("dirRow").classList.toggle("disabled", u0 === 0);
+  pBtns.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.k === pk));
+  document.querySelectorAll("[data-a]").forEach(b => b.classList.toggle("on", +b.dataset.a === ang || (+b.dataset.a === 180 && ang === -180)));
+}
+
+sync(); reset(); frame();
+</script>
+</body>
+</html>
