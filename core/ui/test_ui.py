@@ -24,14 +24,14 @@ def _load_game_html():
 
 
 def render_test(topic, question_type, qualification, generate_fn, user_id=None, example=None,
-                num_questions=5, exam_style=False, assignment_id=None):
+                num_questions=5, exam_style=False, assignment_id=None, mixed=False):
     from core.db.tracker import save_test_result, save_test_question_attempt
 
     test = st.session_state.test
 
     # --- Start screen ---
     if not test["questions"]:
-        if user_id:
+        if user_id and not mixed:   # a mixed test has no single topic to give an insight on
             from core.ui.reports_ui import render_student_insight
             render_student_insight(user_id, qualification, topic, question_type)
 

@@ -782,6 +782,25 @@ def make_test_generator(qualification, topic, question_type):
     return generate
 
 
+def multi_test_length(num_topics):
+    """Questions in a test across several topics: 3 per topic, between 5 and 15."""
+    return max(5, min(3 * num_topics, 15))
+
+
+def make_multi_test_generator(qualification, topic, question_types):
+    """A generator for a Test over several topics: deals every chosen topic once (in
+    random order) before any repeats, so each topic is covered as evenly as possible."""
+    generators = [make_test_generator(qualification, topic, qt) for qt in question_types]
+    deck = []
+
+    def generate():
+        if not deck:
+            deck.extend(random.sample(generators, len(generators)))
+        return deck.pop()()
+
+    return generate
+
+
 def has_unit_assessment(qualification, unit):
     return EXAM_STYLE in QUAL_REGISTRY.get(qualification, {}).get(unit, {})
 

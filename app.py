@@ -1,9 +1,11 @@
 import streamlit as st
 
+from topics.exam_style.base import EXAM_STYLE
+
 from core.engine.session_manager import initialise_session, reset_test, reset_assessment, reset_past_paper_quiz
 from core.engine.question_factory import (
     generate_question, get_topics, get_question_types, get_sub_types, make_test_generator,
-    is_exam_style_test, test_length,
+    is_exam_style_test, test_length, make_multi_test_generator, multi_test_length,
 )
 from core.ui.auth_ui import render_auth, render_change_password
 from core.auth.auth import login_as_admin
@@ -282,7 +284,21 @@ if not question_types:
     st.info("No questions available for this unit yet — check back soon!")
     st.stop()
 
-question_type  = st.selectbox("Topic", question_types)
+if mode == "Test":
+    selected_types = st.multiselect(
+        "Topics (pick one or more)", question_types, default=question_types[:1],
+        key=f"test_topics_{qualification}_{topic}",
+    )
+    if not selected_types:
+        st.info("Pick at least one topic to be tested on.")
+        st.stop()
+    if len(selected_types) > 1 and EXAM_STYLE in selected_types:
+        st.warning("Exam-style questions are a test of their own — remove it to mix the other topics.")
+        st.stop()
+    question_type = selected_types[0] if len(selected_types) == 1 else " + ".join(selected_types)
+else:
+    selected_types = None
+    question_type = st.selectbox("Topic", question_types)
 
 if st.session_state.get("last_question_type") != question_type:
     st.session_state.last_question_type = question_type
@@ -311,7 +327,9 @@ else:
 
 # ── Background videos (N5 only) ───────────────────────────────────────────────
 
-if qualification in ("National 5", "Crash Higher"):
+multi_topic = bool(selected_types) and len(selected_types) > 1
+
+if qualification in ("National 5", "Crash Higher") and not multi_topic:
     videos = get_background_videos(topic, question_type, qualification=qualification)
     with st.expander("📺 Background"):
         if videos:
@@ -320,27 +338,35 @@ if qualification in ("National 5", "Crash Higher"):
         else:
             st.caption("No background videos added yet for this topic.")
 
-generate_fn = lambda: generate_question(qualification, topic, question_type, sub_type=sub_type)
-canonical_question = get_canonical_question(generate_fn)
+if multi_topic:
+    generate_fn = canonical_question = hand_example = None
+else:
+    generate_fn = lambda: generate_question(qualification, topic, question_type, sub_type=sub_type)
+    canonical_question = get_canonical_question(generate_fn)
 
-notes = notes_for(canonical_question)
-if notes:
-    with st.expander("📚 Notes"):
-        st.markdown(format_math(notes))
+    notes = notes_for(canonical_question)
+    if notes:
+        with st.expander("📚 Notes"):
+            st.markdown(format_math(notes))
 
-# A hand-authored example only exists where it matches every question the
-# generator produces; otherwise Practice derives one matching the generated question.
-hand_example = get_examples(topic, question_type, sub_type=sub_type)
+    # A hand-authored example only exists where it matches every question the
+    # generator produces; otherwise Practice derives one matching the generated question.
+    hand_example = get_examples(topic, question_type, sub_type=sub_type)
 
 st.divider()
 
 # ── Route to practice or test ─────────────────────────────────────────────────
 
 if mode == "Test":
-    test_generate_fn = make_test_generator(qualification, topic, question_type)
-    render_test(topic, question_type, qualification, test_generate_fn, user_id=user_id,
-                example=hand_example or format_example(canonical_question),
-                num_questions=test_length(qualification, topic, question_type),
-                exam_style=is_exam_style_test(qualification, topic, question_type))
+    if multi_topic:
+        test_generate_fn = make_multi_test_generator(qualification, topic, selected_types)
+        render_test(topic, question_type, qualification, test_generate_fn, user_id=user_id,
+                    num_questions=multi_test_length(len(selected_types)), mixed=True)
+    else:
+        test_generate_fn = make_test_generator(qualification, topic, question_type)
+        render_test(topic, question_type, qualification, test_generate_fn, user_id=user_id,
+                    example=hand_example or format_example(canonical_question),
+                    num_questions=test_length(qualification, topic, question_type),
+                    exam_style=is_exam_style_test(qualification, topic, question_type))
 else:
     render_practice(topic, question_type, qualification, generate_fn, user_id=user_id, example=hand_example)
