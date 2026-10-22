@@ -151,6 +151,10 @@ def _charged_speed(level):
 
 
 def gen_pw_accelerators(level="Higher"):
+    return _with_field_widget(_accelerators(level))
+
+
+def _accelerators(level):
     kind = random.choice(["cyclotron", "linac", "synchrotron", "field"])
     if kind == "cyclotron":
         return _choice("Why is an alternating voltage used in a cyclotron?",
