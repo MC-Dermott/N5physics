@@ -209,6 +209,42 @@ def loop_circuit(elements, supply="battery", supply_label=""):
     return _svg(x_end + 50, bottom + (50 if supply_label else 30), body)
 
 
+def ladder(branches, supply="battery", supply_label="", rail=None):
+    """A ladder: the branches are horizontal rungs between two vertical rails, the supply on the
+    bottom wire. rail: an optional component (e.g. an ammeter) on the left rail, so it carries the
+    supply current."""
+    x0 = 100
+    flat = [c for b in branches for c in b] + ([rail] if rail else [])
+    top = _headroom(flat)
+    ys = [top + i * _GAP_Y for i in range(len(branches))]
+    xr = x0 + max(len(b) for b in branches) * _U + 70
+    y_am = ys[-1] + 50
+    y_b = ys[-1] + (120 if rail else 90)
+    cx = (x0 + xr) / 2
+    out = []
+    if rail:
+        out.append(_line(x0, ys[0], x0, y_am - _U / 2) + _line(x0, y_am + _U / 2, x0, y_b)
+                   + _place(rail["kind"], x0, y_am, vertical=True))
+        if rail["label"]:
+            out.append(_text(x0 - 26, y_am, rail["label"], anchor="end"))
+    else:
+        out.append(_line(x0, ys[0], x0, y_b))
+    out.append(_line(xr, ys[0], xr, y_b)
+               + _wire((x0, y_b), (cx - _U / 2, y_b)) + _wire((cx + _U / 2, y_b), (xr, y_b)) + _place(supply, cx, y_b))
+    if supply_label:
+        out.append(_text(cx, y_b + 30, supply_label))
+    for y, branch in zip(ys, branches):
+        bw = len(branch) * _U
+        bx = x0 + (xr - x0 - bw) / 2
+        out.append(_line(x0, y, bx, y) + _line(bx + bw, y, xr, y) + _dot(x0, y) + _dot(xr, y))
+        for j, c in enumerate(branch):
+            ccx = bx + j * _U + _U / 2
+            out.append(_place(c["kind"], ccx, y))
+            if c["label"]:
+                out.append(_text(ccx, y - _label_gap(c["kind"]), c["label"]))
+    return _svg(xr + 50, y_b + (50 if supply_label else 30), "".join(out))
+
+
 def network(elements, left="X", right="Y"):
     """A resistor network between two terminals."""
     x0 = 50
