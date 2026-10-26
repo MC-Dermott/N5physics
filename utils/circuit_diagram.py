@@ -8,7 +8,7 @@ Three layouts:
   whose collector (drain) circuit contains an output device.
 
 Components are dicts made with comp(kind, label); kinds: resistor, variable, thermistor, ldr, lamp,
-led, ammeter, voltmeter, switch, fuse, heater. A parallel group is par([branch, branch, ...]) where
+led, ammeter, voltmeter, switch, fuse, heater, motor. A parallel group is par([branch, branch, ...]) where
 each branch is a list of components. comp(..., voltmeter="V") also draws a voltmeter across it.
 
 Pure string-building — no randomness — so generators seeded for worked examples stay reproducible.
@@ -102,6 +102,8 @@ def _symbol(kind, x, y):
                 + _line(x + 7, y - 9, x + 7, y + 9) + _arrow(x - 2, y - 19, x + 9, y - 31) + _arrow(x + 7, y - 17, x + 18, y - 29)), ""
     if kind in ("ammeter", "voltmeter"):
         return _leads(x, y, 14) + _circle(x, y, 14), _text(x, y + 1, "A" if kind == "ammeter" else "V", size=14)
+    if kind == "motor":
+        return _leads(x, y, 15) + _circle(x, y, 15), _text(x, y + 1, "M", size=14)
     if kind == "switch":
         return (_line(x - _U / 2, y, x - 16, y) + _line(x + 16, y, x + _U / 2, y) + _dot(x - 16, y) + _dot(x + 16, y)
                 + _line(x - 16, y, x + 13, y - 14)), ""
