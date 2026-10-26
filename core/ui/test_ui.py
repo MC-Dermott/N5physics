@@ -312,16 +312,20 @@ def _render_summary(test):
     render_review(test)
 
 
-def render_review(test):
+def render_review(test, only_wrong=False):
     """Every answer in a finished test, with feedback. The parts of a multi-part
-    question are shown under its scenario."""
+    question are shown under its scenario. only_wrong (the teacher's view) leaves out the right ones."""
     st.markdown("---")
-    st.markdown("### Question Review")
+    st.markdown("### Question Review" if not only_wrong else "### Questions answered wrongly")
+    if only_wrong and all(test["results"]):
+        st.success("Every question was answered correctly.")
 
     last_context = None
     for q_num, (result_type, distractor, q_ref) in enumerate(test["feedback"], start=1):
         answer = test["answers"][q_num - 1]
         correct = test["results"][q_num - 1]
+        if only_wrong and correct:
+            continue
 
         context = q_ref.metadata.get("scenario_context")
         if context and context != last_context:

@@ -839,3 +839,23 @@ def generate_question(qualification, topic, question_type, sub_type=None):
                 if part.metadata.get("type") != "explain":
                     part.question_type = sub_type
     return q
+
+
+def generate_exam_question(qualification, unit, topic):
+    """One exam-style question for a topic: a random one of the unit's exam-style scenarios that covers the
+    topic, or, when none does (or the unit has none), a random question on the topic as a Test would give it.
+    "Exam Style" itself gives one random scenario from the unit."""
+    scenarios = QUAL_REGISTRY[qualification][unit].get(EXAM_STYLE)
+    if scenarios and topic == EXAM_STYLE:
+        return random.choice(list(scenarios.values()))(level=_LEVEL_MAP.get(qualification, "N5"))
+    if scenarios:
+        level = _LEVEL_MAP.get(qualification, "N5")
+        covering = [q for q in (fn(level=level) for fn in scenarios.values()) if topic in q.metadata.get("covers", [])]
+        if covering:
+            return random.choice(covering)
+    return make_test_generator(qualification, unit, topic)()
+
+
+def generate_mixed_assignment(items):
+    """One exam-style question per item ({qualification, topic (the unit), question_type (the topic)})."""
+    return [generate_exam_question(i["qualification"], i["topic"], i["question_type"]) for i in items]

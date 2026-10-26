@@ -139,6 +139,117 @@ render_my_assignments({{"id": "u1", "username": "p", "class_code": "5A"}})
     assert any("Review — attempt" in m.value for m in at.markdown), [m.value for m in at.markdown][:10]
 
 
+def test_exam_question_covers_topic_or_falls_back():
+    from core.engine.question_factory import generate_exam_question, EXAM_STYLE
+    for _ in range(10):
+        q = generate_exam_question("National 5", "Dynamics", "Acceleration")
+        assert q.is_scenario and "Acceleration" in q.metadata["covers"]
+    assert generate_exam_question("National 5", "Dynamics", "Definitions").question_text   # no scenario covers it
+    assert generate_exam_question("S3", "Dynamics Part 1 (Motion)", "Speed, Distance & Time").question_text
+    assert generate_exam_question("National 5", "Dynamics", EXAM_STYLE).is_scenario
+
+
+def test_mixed_status():
+    res = [dict(score=2, total=5), dict(score=4, total=5)]
+    s = db.assignment_status([], res, 60, "mixed")
+    assert s["state"] == db.DONE and s["items"][0]["best"] == 80 and s["items"][0]["attempts"] == 2
+    assert db.assignment_status([], [dict(score=1, total=5)], 60, "mixed")["state"] == db.IN_PROGRESS
+    assert db.assignment_status([], [], 60, "mixed")["state"] == db.NOT_STARTED
+
+
+def test_progress_roundtrip():
+    import json
+    from core.db import progress
+    from core.engine.question_factory import generate_exam_question
+    qs = [generate_exam_question("National 5", "Dynamics", t) for t in ("Acceleration", "Definitions", "Forces")]
+    scored = progress._targets(qs[0])
+    test = dict(questions=qs, index=1, responses={
+        0: [("5", "correct", None, p, {"answer": "5", "unit": "m/s"}) for p in scored],
+        1: [("x", "distractor", {"value": 1, "mistake": "m"}, progress._targets(qs[1])[0], {"choice": "x"})]})
+    back = progress.progress_from_json(json.loads(json.dumps(progress.progress_to_json(test))))
+    assert back["index"] == 1 and not back["complete"] and progress.answered_count(back) == 2
+    assert [q.question_text for q in back["questions"]] == [q.question_text for q in qs]
+    r0 = back["responses"][0]
+    assert len(r0) == len(scored) and r0[0][3].question_text == scored[0].question_text and r0[0][4]["unit"] == "m/s"
+    assert back["responses"][1][0][2]["mistake"] == "m"
+
+
+def test_continue_and_start_over():
+    from streamlit.testing.v1 import AppTest
+    script = """
+import streamlit as st
+from core.db import progress
+from core.engine.question_factory import generate_exam_question
+STORE = {}
+progress.save_progress = lambda u, i, t: STORE.update({i: progress.progress_to_json(t)}) or True
+progress.load_progress = lambda u, i: progress.progress_from_json(STORE[i]) if i in STORE else None
+progress.delete_progress = lambda u, i: STORE.pop(i, None)
+from core.engine.session_manager import initialise_session
+initialise_session()
+if not st.session_state.get("seeded"):
+    qs = [generate_exam_question("National 5", "Dynamics", t) for t in ("Acceleration", "Forces", "Energy")]
+    STORE["i1"] = progress.progress_to_json(dict(questions=qs, index=1, responses={
+        0: [("1", "incorrect", None, p, {"answer": "1", "unit": None}) for p in progress._targets(qs[0])]}))
+    st.session_state.seeded = True
+    st.session_state.active_assignment = {"assignment": dict(id="a1", title="T", pass_pct=60, items=[]),
+        "item": dict(id="i1", qualification="National 5", topic="Dynamics", question_type="Acceleration")}
+from core.ui.assignments_ui import render_assignment_runner
+render_assignment_runner({"id": "u1"})
+"""
+    at = AppTest.from_string(script).run(timeout=60)
+    assert not at.exception, at.exception
+    assert any("question 2 of 3" in i.value for i in at.info)
+    at.button(key="asg_continue").click(); at.run(timeout=60)
+    assert not at.exception, at.exception
+    assert at.session_state.test["index"] == 1 and 0 in at.session_state.test["responses"]
+    at2 = AppTest.from_string(script).run(timeout=60)
+    at2.button(key="asg_start_over").click(); at2.run(timeout=60)
+    assert not at2.exception, at2.exception
+    assert any("Start Test" in b.label for b in at2.button)
+
+
+def test_mixed_assignment_starts():
+    from streamlit.testing.v1 import AppTest
+    script = """
+import streamlit as st
+from core.db import progress
+progress.load_progress = lambda u, i: None
+progress.save_progress = lambda *a, **k: True
+progress.delete_progress = lambda *a, **k: None
+from core.engine.session_manager import initialise_session
+initialise_session()
+items = [dict(id="i%d" % n, qualification="National 5", topic="Dynamics", question_type=t)
+         for n, t in enumerate(["Acceleration", "Forces", "Energy"])]
+if "active_assignment" not in st.session_state:
+    st.session_state.active_assignment = {"assignment": dict(id="a1", title="T", pass_pct=0, format="mixed", items=items),
+                                          "item": items[0]}
+from core.ui.assignments_ui import render_assignment_runner
+render_assignment_runner({"id": "u1"})
+"""
+    at = AppTest.from_string(script).run(timeout=60)
+    assert not at.exception, at.exception
+    at.button(key="mixed_start").click(); at.run(timeout=60)
+    assert not at.exception, at.exception
+    assert len(at.session_state.test["questions"]) == 3
+    assert at.session_state.test["index"] == 0
+
+
+def test_teacher_sees_only_wrong_questions():
+    from streamlit.testing.v1 import AppTest
+    script = """
+import streamlit as st
+from core.engine.question_factory import generate_question
+from core.ui.test_ui import render_review
+qs = [generate_question("National 5", "Dynamics", "Acceleration") for _ in range(2)]
+render_review(dict(answers=["1", "2"], results=[True, False],
+                   feedback=[("correct", None, qs[0]), ("incorrect", None, qs[1])]), only_wrong=True)
+"""
+    at = AppTest.from_string(script).run(timeout=30)
+    assert not at.exception, at.exception
+    text = " ".join(e.value for e in at.error) + " ".join(e.value for e in at.success)
+    assert "Q2:" in text and "Q1:" not in text
+
+
 def test_pages_render():
     from streamlit.testing.v1 import AppTest
     from core.engine.question_factory import QUAL_REGISTRY
