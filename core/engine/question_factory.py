@@ -176,7 +176,7 @@ from topics.particles_and_waves.particles_waves_higher import (
 from topics.electricity.electricity_exam_n5 import (
     gen_ec_charge, gen_ec_electrons, gen_ec_ac_dc,
     gen_ec_ew_qv, gen_ec_gradient, gen_ec_voltage_meaning,
-    gen_ec_series_parallel, gen_ec_parallel_total_current, gen_ec_circuit_changes,
+    gen_ec_series_parallel, gen_ec_parallel_total_current, gen_ec_circuit_changes, gen_ec_three_resistors,
     gen_ec_led_resistor, gen_ec_divider_switch, gen_ec_transistor_explain,
     gen_ec_fuse, gen_ec_power_i2r, gen_ec_energy_time, gen_ec_toaster_statements,
 )
@@ -403,6 +403,7 @@ QUAL_REGISTRY = {
                 "1 — Series–Parallel Current":       gen_ec_series_parallel,
                 "2 — Identical Loads in Parallel":   gen_ec_parallel_total_current,
                 "3 — Explain Circuit Changes":       gen_ec_circuit_changes,
+                "4 — Three-Resistor Arrangements":   gen_ec_three_resistors,
             },
             "LEDs and Transistor Switches": {
                 "1 — LED Series Resistor":           gen_ec_led_resistor,

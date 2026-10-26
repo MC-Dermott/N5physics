@@ -15,7 +15,7 @@ import random
 
 from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
-from utils.circuit_diagram import comp, divider, loop_circuit, par, with_diagram
+from utils.circuit_diagram import comp, divider, loop_circuit, network as net3, par, with_diagram
 
 TOPIC = "Electricity"
 E_CHARGE = 1.6e-19
@@ -252,6 +252,49 @@ def gen_ec_series_parallel(level="N5"):
                 {"question": "What is the supply current, in A?", "answer": _sig(I)}]
     qobj = _q(text, _sig(I), "A", opts, "Circuit Rules", scaffold, level)
     return with_diagram(qobj, loop_circuit([comp("resistor", f"{rs} Ω"), par([comp("resistor", f"{r1} Ω")], [comp("resistor", f"{r2} Ω")])], supply_label=f"{Vs:g} V"))
+
+
+_ARRANGEMENTS = ("series", "parallel", "pair_series", "series_pair")
+
+
+def gen_ec_three_resistors(level="N5"):
+    """Total resistance of three resistors in one of the four possible arrangements (2018/2025 Paper 1 style)."""
+    kind = random.choice(_ARRANGEMENTS)
+    r = random.choice([6, 12, 15, 30, 60])
+    a = f"{r} Ω"
+    if kind == "series":
+        rt = 3 * r
+        text = f"Three {r} Ω resistors are connected in series. Calculate the total resistance."
+        work = [_L(rf"R_T = {r} + {r} + {r} = {rt}\ \Omega")]
+        wrong = [(r / 3, "The resistors were combined as if in parallel — in series the resistances add."), (2 * r, "All three resistors must be added.")]
+        diagram = net3([comp("resistor", a)] * 3)
+        steps = [{"question": "What is the total resistance, in Ω?", "answer": float(rt)}]
+    elif kind == "parallel":
+        rt = r / 3
+        text = f"Three {r} Ω resistors are connected in parallel. Calculate the total resistance."
+        work = [_L(rf"\frac{{1}}{{R_T}} = \frac{{3}}{{{r}}}"), _L(rf"R_T = {_ltx(rt)}\ \Omega")]
+        wrong = [(3 / r, "1/R_T was not inverted."), (3 * r, "The resistors were added as if in series.")]
+        diagram = net3([par(*[[comp("resistor", a)] for _ in range(3)])])
+        steps = [{"question": "What is 1/R_T, in Ω⁻¹ (give it to 3 s.f.)?", "answer": _sig(3 / r)}, {"question": "What is the total resistance, in Ω?", "answer": _sig(rt)}]
+    elif kind == "pair_series":
+        rp = r / 2
+        rt = rp + r
+        text = f"Two {r} Ω resistors are connected in parallel and this combination is connected in series with a third {r} Ω resistor. Calculate the total resistance."
+        work = [_L(rf"\frac{{1}}{{R_P}} = \frac{{1}}{{{r}}} + \frac{{1}}{{{r}}} \Rightarrow R_P = {_ltx(rp)}\ \Omega"), _L(rf"R_T = {_ltx(rp)} + {r} = {_ltx(rt)}\ \Omega")]
+        wrong = [(r / 3, "All three were treated as parallel."), (3 * r, "All three were added as if in series."), (rp, "The series resistor was left out.")]
+        diagram = net3([par([comp("resistor", a)], [comp("resistor", a)]), comp("resistor", a)])
+        steps = [{"question": "What is the resistance of the parallel pair, in Ω?", "answer": _sig(rp)}, {"question": "What is the total resistance, in Ω?", "answer": _sig(rt)}]
+    else:
+        rs = 2 * r
+        rt = rs * r / (rs + r)
+        text = f"Two {r} Ω resistors are connected in series and this combination is connected in parallel with a third {r} Ω resistor. Calculate the total resistance."
+        work = [_L(rf"R_S = {r} + {r} = {rs}\ \Omega"), _L(rf"\frac{{1}}{{R_T}} = \frac{{1}}{{{rs}}} + \frac{{1}}{{{r}}} \Rightarrow R_T = {_ltx(rt)}\ \Omega")]
+        wrong = [(r / 3, "All three were treated as parallel."), (3 * r, "All three were added as if in series."), (r / 2 + r, "The two in series are the pair — they must be added first, then combined in parallel with the third.")]
+        diagram = net3([par([comp("resistor", a), comp("resistor", a)], [comp("resistor", a)])])
+        steps = [{"question": "What is the resistance of the series pair, in Ω?", "answer": float(rs)}, {"question": "What is the total resistance, in Ω?", "answer": _sig(rt)}]
+    opts = [{"value": _sig(rt), "mistake": None, "working": work}] + [{"value": _sig(v), "mistake": why, "working": work} for v, why in wrong]
+    qobj = _q(text, _sig(rt), "Ω", opts, "Circuit Rules", steps if len(steps) > 1 else None, level)
+    return with_diagram(qobj, diagram)
 
 
 # (device, number lo, hi, power each (W), supply V)
