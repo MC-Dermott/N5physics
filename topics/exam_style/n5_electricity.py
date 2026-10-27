@@ -69,6 +69,12 @@ $R$ = gradient of a V–I graph = $\frac{\Delta V}{\Delta I}$.
 
 Adding a lamp in series → greater total resistance → smaller current → lamps dimmer. Adding a lamp in parallel → each lamp still has the full supply voltage.
 """),
+    "Resistance of a Wire": _notes("Resistance of a wire", r"""
+The resistance of a wire depends on its **length**, its **cross-sectional area (thickness)**, the **material** and its **temperature**.
+
+- Longer wire → greater resistance. Thicker wire (larger cross-sectional area) → **smaller** resistance.
+- A metal wire's resistance increases as its temperature increases.
+"""),
     "LEDs and Transistor Switches": _notes("LEDs and transistor switches", r"""
 **LED:** a series resistor limits the current. $V_R = V_s - V_{LED}$, then $R = V_R \div I$.
 
@@ -272,6 +278,32 @@ def series_investigation(level="N5"):
                                          supply_label=f"{Vs} V"))
 
 
+def extension_lead(level="N5"):
+    ex = _ex(level)
+    V = 230
+    P = random.choice([1800, 2000, 2300, 2500, 2760])
+    I = P / V
+    ex.on("Electrical Power").num(f"Calculate the current in the heater.", I, "A",
+        wrong=[(P * V, "I = P ÷ V."), (V / P, "I = P ÷ V.")],
+        working=[rf"I = \frac{{P}}{{V}} = \frac{{{P}}}{{230}} = {ltx(I)}\ \text{{A}}"])
+    R = V / I
+    ex.on("Ohm's Law").num("Calculate the resistance of the heater.", R, "Ω",
+        wrong=[(I / V, "R = V ÷ I."), (V * I, "R = V ÷ I.")],
+        working=[rf"R = \frac{{V}}{{I}} = \frac{{230}}{{{ltx(I)}}} = {ltx(R)}\ \Omega"])
+    ex.on("Resistance of a Wire").choice("The cable of the extension lead is made from very thin wire. Which statement is correct?",
+        "The thin wire has a greater resistance, so more energy is transferred as heat in the cable.",
+        [("The thin wire has a smaller resistance, so less energy is transferred as heat in the cable.", "A thinner wire has a GREATER resistance."),
+         ("The thin wire has a greater resistance, so the heater gets more current.", "A greater resistance in the cable means less current, and more heat in the cable."),
+         ("The thickness of the wire has no effect on its resistance.", "Cross-sectional area is one of the factors affecting resistance.")])
+    ex.on("Circuit Rules").choice("The heater and a lamp are plugged into a double socket on the same lead, so that they are in parallel. Which statement is correct?",
+        "The heater and the lamp each have the full mains voltage across them.",
+        [("The voltage is shared between the heater and the lamp.", "That is the series rule."),
+         ("The current is the same in the heater and the lamp.", "That is the series rule: the currents in parallel branches add."),
+         ("The lamp has a larger voltage across it because it has a smaller current.", "Every branch of a parallel circuit has the same voltage.")])
+    return ex.build(f"A {P} W heater is connected to the 230 V mains by an extension lead.",
+                    diagram=loop_circuit([comp("heater", f"{P} W")], supply_label="230 V"))
+
+
 SCENARIOS = {
     "Kitchen Appliance":     kitchen_appliance,
     "Charging a Phone":      phone_charger,
@@ -279,4 +311,5 @@ SCENARIOS = {
     "Car Lights":            car_lights,
     "Thermostat":            thermostat,
     "Series Circuit Investigation": series_investigation,
+    "Extension Lead":        extension_lead,
 }

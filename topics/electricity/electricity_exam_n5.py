@@ -344,6 +344,103 @@ def gen_ec_circuit_changes(level="N5"):
     return with_diagram(qobj, loop_circuit([par([comp("lamp")], [comp("lamp")], [comp("lamp")])]))
 
 
+# ════════════════ Which branch? and resistance of a wire ════════════════
+_BRANCH_SETS = [(5.0, 10, 20, 12), (6.0, 12, 24, 9.0), (10, 20, 40, 6.0), (4.0, 8.0, 16, 12), (20, 30, 60, 9.0), (15, 30, 45, 6.0)]
+
+
+def gen_ec_parallel_compare(level="N5"):
+    """Three resistors in parallel: which has the largest current (smallest R) or the largest voltage (all equal)."""
+    rs = list(random.choice(_BRANCH_SETS))
+    V = rs.pop()
+    random.shuffle(rs)
+    labels = [f"{r:g} Ω" for r in rs]
+    small, large = min(rs), max(rs)
+    diagram = loop_circuit([par(*[[comp("resistor", lab)] for lab in labels])], supply_label=f"{V:g} V")
+    names = f"{labels[0]}, {labels[1]} and {labels[2]}"
+    if random.random() < 0.5:
+        text = (f"Three resistors of {names} are connected in three parallel branches across a {V:g} V supply. "
+                "Which resistor has the largest current in it, and why?")
+        mid = [r for r in rs if r not in (small, large)][0]
+        qobj = _choice(text, f"The {small:g} Ω resistor, because each branch has the same voltage so the smallest resistance has the largest current.",
+                       [(f"The {large:g} Ω resistor, because it has the largest resistance.", "A larger resistance means a SMALLER current for the same voltage (I = V ÷ R)."),
+                        (f"The {mid:g} Ω resistor, because it is in the middle of the circuit.", "Compare the resistances: the voltage across every branch is the same, so the smallest R has the largest I."),
+                        ("They all have the same current, because the voltage is the same across each branch.", "The voltage is the same, but I = V ÷ R, so branches with different resistances have different currents.")],
+                       "Circuit Rules", level)
+    else:
+        text = (f"Three resistors of {names} are connected in three parallel branches across a {V:g} V supply. "
+                "Which resistor has the largest voltage across it, and why?")
+        qobj = _choice(text, f"None of them: each has {V:g} V across it, because the voltage is the same across every branch of a parallel circuit.",
+                       [(f"The {large:g} Ω resistor, because it has the largest resistance.", "In parallel every branch has the full supply voltage, whatever its resistance."),
+                        (f"The {small:g} Ω resistor, because it has the largest current.", "The current differs between branches but the voltage is the same across each."),
+                        (f"The {V:g} V is shared out between them, so the largest resistor gets the most.", "That is the series rule. In parallel every branch has the full supply voltage.")],
+                       "Circuit Rules", level)
+    return with_diagram(qobj, diagram)
+
+
+# (cross-sectional areas in mm², lengths in m)
+_WIRE_AREAS = [0.25, 0.50, 1.0, 2.0]
+_WIRE_LENGTHS = [0.5, 1.0, 2.0, 4.0]
+
+
+def gen_ec_wire_compare(level="N5"):
+    """Four wires of the same material: which has the greatest (or smallest) resistance."""
+    while True:
+        combos = random.sample([(L, A) for L in _WIRE_LENGTHS for A in _WIRE_AREAS], 4)
+        ratios = [L / A for L, A in combos]
+        if len(set(ratios)) == 4 and sorted(ratios)[-1] / sorted(ratios)[-2] > 1.3 and sorted(ratios)[1] / sorted(ratios)[0] > 1.3:
+            break
+    greatest = random.random() < 0.5
+    names = "ABCD"
+    lines = "\n".join(f"- Wire {n}: length {L:g} m, cross-sectional area {A:g} mm²" for n, (L, A) in zip(names, combos))
+    target = max(ratios) if greatest else min(ratios)
+    ti = ratios.index(target)
+    word = "greatest" if greatest else "smallest"
+    text = f"Four wires are made from the same material.\n\n{lines}\n\nWhich wire has the {word} resistance?"
+    wrong = []
+    for i, (n, (L, A)) in enumerate(zip(names, combos)):
+        if i == ti:
+            continue
+        longest, thinnest = L == max(c[0] for c in combos), A == min(c[1] for c in combos)
+        if greatest:
+            why = ("Resistance depends on BOTH length and thickness: a longer wire has more resistance, a thicker wire has less."
+                   if (longest or thinnest) else "A shorter or thicker wire has less resistance.")
+        else:
+            why = ("Resistance depends on BOTH length and thickness: a shorter wire has less resistance, a thicker wire has less."
+                   if (L == min(c[0] for c in combos) or A == max(c[1] for c in combos)) else "A longer or thinner wire has more resistance.")
+        wrong.append((f"Wire {n}", why))
+    return _choice(text, f"Wire {names[ti]}", wrong, "Resistance of a Wire", level)
+
+
+def gen_ec_wire_explain(level="N5"):
+    kind = random.choice(["length", "area", "temperature", "cable", "factors"])
+    if kind == "length":
+        return _choice("A longer wire of the same material and thickness replaces a shorter one. What happens to the resistance?",
+                       "It increases.", [("It decreases.", "Longer wire, more resistance."), ("It stays the same.", "Length is one of the factors that affects the resistance of a wire.")],
+                       "Resistance of a Wire", level)
+    if kind == "area":
+        return _choice("A thicker wire of the same material and length replaces a thinner one. What happens to the resistance?",
+                       "It decreases, because the larger cross-sectional area gives charge more room to flow.",
+                       [("It increases, because there is more wire.", "A thicker wire has a SMALLER resistance."),
+                        ("It stays the same, because the material is the same.", "Cross-sectional area is one of the factors that affects the resistance of a wire.")],
+                       "Resistance of a Wire", level)
+    if kind == "temperature":
+        return _choice("The temperature of a metal wire increases. What happens to the resistance of the wire?",
+                       "It increases.", [("It decreases.", "A metal wire's resistance increases as its temperature increases."), ("It stays the same.", "Temperature is one of the factors that affects the resistance of a wire.")],
+                       "Resistance of a Wire", level)
+    if kind == "cable":
+        return _choice("The cable to an electric cooker is made from thick copper wire rather than thin copper wire. Why?",
+                       "A thicker wire has a smaller resistance, so less energy is transferred as heat in the cable.",
+                       [("A thicker wire has a greater resistance, so more current flows.", "A thicker wire has a SMALLER resistance."),
+                        ("A thicker wire is stronger, so it does not break.", "The reason is electrical: a smaller resistance means less heating in the cable."),
+                        ("A thicker wire has a smaller resistance, so the voltage is greater.", "Lower resistance means less heat in the cable; it does not increase the voltage.")],
+                       "Resistance of a Wire", level)
+    return _choice("Which of these are factors that affect the resistance of a metal wire?",
+                   "Length, cross-sectional area and temperature.",
+                   [("Length and colour.", "Colour has no effect on resistance."), ("Cross-sectional area and the voltage across it.", "Voltage is not a property of the wire."),
+                    ("Temperature and current only.", "Length and cross-sectional area also affect the resistance.")],
+                   "Resistance of a Wire", level)
+
+
 # ════════════════ Potential dividers, LEDs and transistors ════════════════
 # (colour, LED voltage)
 _LEDS = [("red", 1.8), ("yellow", 2.0), ("green", 2.2), ("blue", 3.0)]
