@@ -10,6 +10,7 @@ import math
 import random
 
 from topics.exam_style.base import Exam, T, fmt, ltx, pick, sig
+from utils.field_diagram import linac_svg
 
 UNIT = "Particles and Waves"
 E = 1.60e-19
@@ -30,6 +31,8 @@ $W = QV$ and $E_k = \frac{1}{2}mv^2$ → $v = \sqrt{\frac{2QV}{m}}$. Charge on a
 - 1 volt = 1 joule per coulomb.
 - A linear accelerator uses an **alternating** p.d. so the field reverses each time the particle is between drift tubes, always accelerating it.
 - A magnetic field changes the **direction** of a moving charged particle (circular path in a cyclotron/synchrotron).
+- The force is at **right angles** to both the velocity and the field; there is **no force** on a neutral particle or on a charge moving along the field. The force on an electron is opposite to the force on a proton.
+- In a linac the particles are accelerated in the **gaps** (no field inside the tubes); the tubes lengthen because the particles speed up.
 """),
     "Standard Model": _notes("The Standard Model", r"""
 Quark charges: up $+\frac{2}{3}$, down $-\frac{1}{3}$, strange $-\frac{1}{3}$ (antiquarks: opposite sign).
@@ -232,6 +235,47 @@ def particle_accelerator(level="Higher"):
     return ex.build("Protons are accelerated in a particle accelerator. (e = 1.60 × 10⁻¹⁹ C, mₚ = 1.67 × 10⁻²⁷ kg)")
 
 
+# ════════════════ Linear accelerator: work done at a gap → speed → why a.c. → magnetic deflection ════════════════
+
+def linear_accelerator(level="Higher"):
+    ex = _ex(level)
+    kv, u = pick(15, 18, 25, 28, 35), pick(4.0e5, 8.0e5, 1.2e6, 2.0e6)
+    V = kv * 1e3
+    W = E * V
+    ex.on("Forces on Charged Particles").num("Show that the work done on a proton as it crosses a gap is "
+        f"{fmt(W)} J.", W, "J",
+        wrong=[(E * kv, "Convert kV to V."), (V / E, "W = QV — multiply the charge by the p.d.")],
+        working=[rf"W = QV = 1.60\times10^{{-19}} \times {ltx(V)} = {ltx(W)}\ \text{{J}}"])
+    Ek0 = 0.5 * MP * u * u
+    v = math.sqrt(2 * (Ek0 + sig(W)) / MP)
+    ex.on("Forces on Charged Particles").num(f"A proton enters a gap moving at {fmt(u, 2)} m/s. Calculate its speed as it leaves the gap.", v, "m/s",
+        wrong=[(math.sqrt(2 * sig(W) / MP), "The proton already had kinetic energy — add the work done to its initial Ek (course report 2022)."),
+               (u + math.sqrt(2 * sig(W) / MP), "Add the energies, not the speeds.")],
+        working=[rf"E_{{k,initial}} = \tfrac12 mv^2 = {ltx(Ek0)}\ \text{{J}}", rf"E_{{k,final}} = {ltx(Ek0)} + {ltx(W)} = {ltx(Ek0 + sig(W))}\ \text{{J}}",
+                 rf"v = \sqrt{{\frac{{2E_k}}{{m}}}} = {ltx(v)}\ \text{{m/s}}"],
+        scaffold=[("What is the initial kinetic energy, in J?", Ek0, "J"), ("What is the final kinetic energy, in J?", Ek0 + sig(W), "J")])
+    ex.on("Forces on Charged Particles").choice("Why is an alternating supply used?",
+        "It switches so that the force on a proton is in the correct direction to accelerate it each time it reaches a gap.",
+        [("It keeps the protons moving in a circle.", "The alternating supply does not bend the protons."),
+         ("It stops the protons being accelerated inside the tubes.", "That is because there is no field inside a metal tube."),
+         ("It gives the protons a negative charge.", "The protons remain positively charged.")])
+    ex.on("Forces on Charged Particles").choice("Suggest one reason why the tubes get longer along the accelerator.",
+        "The protons are moving faster, so they travel further in the same time (the time in each tube stays the same).",
+        [("The protons slow down as they move along.", "The protons speed up."),
+         ("The protons gain mass and need more room.", "It is the speed, not the mass, that matters here."),
+         ("A longer tube gives a stronger electric field.", "There is no field inside a tube.")])
+    up = random.random() < 0.5
+    ex.on("Forces on Charged Particles").choice(
+        f"The proton beam leaves the accelerator moving to the right and is deflected towards the {'top' if up else 'bottom'} of the page by a magnetic field. "
+        "What is the direction of the magnetic field?",
+        "into the page" if up else "out of the page",
+        [("out of the page" if up else "into the page", "A positive charge deflected this way would need the opposite field — check the sign of the charge."),
+         ("towards the top of the page" if up else "towards the bottom of the page", "The field is at right angles to both the velocity and the force."),
+         ("towards the left", "The field is at right angles to the velocity.")])
+    return ex.build(f"Protons are accelerated in a linear accelerator. The hollow tubes are connected to a {kv} kV alternating supply. "
+                    "(e = 1.60 × 10⁻¹⁹ C, mₚ = 1.67 × 10⁻²⁷ kg)", diagram=linac_svg(kv))
+
+
 # ════════════════ The Sun: mass–energy → irradiance → spectrum ════════════════
 
 def the_sun(level="Higher"):
@@ -265,5 +309,6 @@ SCENARIOS = {
     "Hydrogen Lamp":        hydrogen_lamp,
     "Laser and Optical Fibre": laser_fibre,
     "Particle Accelerator": particle_accelerator,
+    "Linear Accelerator":   linear_accelerator,
     "The Sun":              the_sun,
 }

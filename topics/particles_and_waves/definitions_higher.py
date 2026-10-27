@@ -202,6 +202,22 @@ STATEMENTS = [
      "This produces an absorption spectrum."),
     ("field", "A charged particle placed in an electric field experiences a force.", True,
      "This is what defines an electric field."),
+    ("magfield", "A charged particle moving parallel to a magnetic field experiences no force.", True,
+     "A force acts only on a charge moving **across** the field lines."),
+    ("magfield", "A charged particle moving parallel to a magnetic field is deflected.", False,
+     "There is **no** force on a charge moving parallel to the field, so it carries straight on."),
+    ("magdir", "The force on an electron in a magnetic field is in the opposite direction to the force on a proton moving the same way.", True,
+     "The charges have opposite signs, so the forces are opposite."),
+    ("magdir", "A neutron is deflected by a magnetic field.", False,
+     "A neutron has no charge, so a magnetic field has no effect on it."),
+    ("linac", "The tubes in a linear accelerator get longer because the particles are moving faster.", True,
+     "The particles must spend the same time in each tube, so faster particles need longer tubes."),
+    ("linac", "The tubes in a linear accelerator get longer because the particles slow down.", False,
+     "The particles **speed up** along the accelerator — that is why the tubes lengthen."),
+    ("linac", "There is no electric field inside the tubes of a linear accelerator.", True,
+     "The particles are accelerated across the gaps between the tubes."),
+    ("linac", "The particles in a linear accelerator are accelerated by the electric field inside each tube.", False,
+     "The metal tube shields the particles — the acceleration happens in the gaps."),
 ]
 
 GENERATORS = make_definition_generators("Particles and Waves", DEFINITIONS, STATEMENTS, OVERLAPS)

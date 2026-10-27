@@ -168,7 +168,7 @@ from topics.properties.properties_exam_n5 import (
     gen_pm_gas_kelvin, gen_pm_pressure_weight, gen_pm_kinetic_model,
 )
 from topics.particles_and_waves.particles_waves_higher import (
-    gen_pw_charged_speed, gen_pw_accelerators, gen_pw_hadron_charge, gen_pw_bosons,
+    gen_pw_charged_speed, gen_pw_accelerators, gen_pw_magnetic, gen_pw_linac, gen_pw_hadron_charge, gen_pw_bosons,
     gen_pw_mass_energy, gen_pw_reactions_per_second, gen_pw_isl, gen_pw_irradiance,
     gen_pw_photoelectric, gen_pw_pe_effects, gen_pw_grating, gen_pw_path_difference,
     gen_pw_energy_levels, gen_pw_spectra_explain, gen_pw_refraction, gen_pw_refraction_explain,
@@ -581,6 +581,8 @@ QUAL_REGISTRY = {
             "Forces on Charged Particles": {
                 "1 — Speed After Acceleration (W = QV)": gen_pw_charged_speed,
                 "2 — Fields and Accelerators":           gen_pw_accelerators,
+                "3 — Force in a Magnetic Field":         gen_pw_magnetic,
+                "4 — Linear Accelerator Calculations":   gen_pw_linac,
             },
             "Standard Model": {
                 "Particle Classification": generate_standard_model_classification,

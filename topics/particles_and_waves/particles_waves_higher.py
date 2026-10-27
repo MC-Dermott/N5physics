@@ -15,6 +15,8 @@ import random
 
 from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
+from utils.diagrams import with_diagram
+from utils.field_diagram import deflection_svg, field_entry_svg, linac_svg
 
 TOPIC = "Particles and Waves"
 E = 1.60e-19
@@ -155,7 +157,7 @@ def gen_pw_accelerators(level="Higher"):
 
 
 def _accelerators(level):
-    kind = random.choice(["cyclotron", "linac", "synchrotron", "field"])
+    kind = random.choice(["cyclotron", "linac", "synchrotron", "field", "tube", "vacuum"])
     if kind == "cyclotron":
         return _choice("Why is an alternating voltage used in a cyclotron?",
                        "It switches so that the force on the particle is in the correct direction each time it crosses the gap.",
@@ -168,6 +170,18 @@ def _accelerators(level):
                        [("The particles need more room as they gain mass.", "It's the speed that increases, not (at these energies) the mass."),
                         ("Longer tubes provide a stronger electric field.", "There is no field inside the tubes; acceleration happens at the gaps."),
                         ("To slow the particles down before they collide.", "The linac accelerates particles.")], "Forces on Charged Particles", level)
+    if kind == "tube":
+        return _choice("Why are the protons not accelerated while they are inside a tube of a linear accelerator?",
+                       "There is no electric field inside the metal tube, so no force acts on them.",
+                       [("The tube is at the same potential as the protons.", "It is the lack of an electric field inside the tube that matters."),
+                        ("The magnetic field inside the tube cancels the electric field.", "There is no magnetic field in a linac tube."),
+                        ("The protons are moving too fast to be accelerated.", "A particle can always be accelerated by an electric field.")], "Forces on Charged Particles", level)
+    if kind == "vacuum":
+        return _choice("Why must the tubes of a linear accelerator be in a vacuum?",
+                       "So that the particles do not collide with air molecules.",
+                       [("So that the particles are not charged.", "The particles must stay charged to be accelerated."),
+                        ("To increase the electric field in the gaps.", "A vacuum does not change the field."),
+                        ("To keep the tubes at the same potential.", "The tubes are connected to an alternating supply.")], "Forces on Charged Particles", level)
     if kind == "synchrotron":
         return _choice("In a synchrotron, what are the roles of the electric and magnetic fields?",
                        "Electric fields accelerate the particles; magnetic fields bend them round the ring.",
@@ -179,6 +193,125 @@ def _accelerators(level):
                    [("Evenly spaced parallel lines with arrows pointing upwards, from − to +.", "Field lines point from positive to negative (course report 2024)."),
                     ("Radial lines spreading out from the centre.", "That's the field of a point charge."),
                     ("Curved lines bulging outwards between the plates.", "Between parallel plates the field is uniform (apart from the edges).")], "Forces on Charged Particles", level)
+
+
+# ── Magnetic fields: direction of the force on a moving charge ──
+_DIR_TEXT = {(1, 0, 0): "towards the right", (-1, 0, 0): "towards the left",
+             (0, 1, 0): "towards the top of the page", (0, -1, 0): "towards the bottom of the page",
+             (0, 0, 1): "out of the page", (0, 0, -1): "into the page"}
+_AXES = list(_DIR_TEXT)
+_MOVE_TEXT = {(1, 0, 0): "to the right", (-1, 0, 0): "to the left", (0, 1, 0): "up the page",
+              (0, -1, 0): "down the page", (0, 0, 1): "out of the page", (0, 0, -1): "into the page"}
+_FIELD_TEXT = {(0, 0, 1): "directed out of the page", (0, 0, -1): "directed into the page",
+               (1, 0, 0): "directed from left to right", (-1, 0, 0): "directed from right to left",
+               (0, 1, 0): "directed up the page", (0, -1, 0): "directed down the page"}
+_CHARGED = [("An electron", -1), ("A proton", 1), ("An alpha particle", 1), ("A positive ion", 1), ("A negative ion", -1)]
+
+
+def _cross(a, b):
+    return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+
+def _neg(a):
+    return tuple(-x for x in a)
+
+
+def gen_pw_magnetic(level="Higher"):
+    """Direction of the force on a charge entering a magnetic field, or the field direction from the deflection."""
+    if random.random() < 0.3:
+        return _field_from_deflection(level)
+    name, sign = random.choice(_CHARGED)
+    b = random.choice(_AXES)
+    v = random.choice([a for a in _AXES if _cross(a, b) != (0, 0, 0)])
+    shown = name.split()[-1]
+    if random.random() < 0.12:                       # no force: neutral particle, or moving along the field
+        neutral = random.random() < 0.5
+        if neutral:
+            particle, vv = "A neutron", v
+        else:
+            particle, vv = name, b
+        text = (f"{particle} enters a region of magnetic field {_FIELD_TEXT[b]}, moving {_MOVE_TEXT[vv]}. "
+                f"What is the force on it as it enters the field?")
+        correct = "There is no force on it."
+        why = "A neutron has no charge." if neutral else "It is moving parallel to the field — a force acts only on a charge moving across the field."
+        wrong = [(_DIR_TEXT[d], "A force acts only on a charged particle moving across the field.") if not neutral else
+                 (_DIR_TEXT[d], "A neutron is uncharged, so the field has no effect on it.") for d in random.sample([a for a in _AXES if a != vv], 3)]
+        q = _choice(text, correct, wrong, "Forces on Charged Particles", level)
+        return with_diagram(q, field_entry_svg(b, vv, particle.split()[-1]))
+    f = tuple(sign * c for c in _cross(v, b))
+    text = (f"{name} enters the region of magnetic field shown, moving {_MOVE_TEXT[v]}. "
+            f"What is the direction of the force on it as it enters the field?")
+    correct = _DIR_TEXT[f]
+    others = [d for d in _AXES if d not in (f, _neg(f))]
+    opposite = ("An electron or negative ion is pushed the opposite way to a positive charge — check the sign."
+                if sign < 0 else "That is the force on a negative charge — a positive charge is pushed the other way.")
+    wrong = [(_DIR_TEXT[_neg(f)], opposite)]
+    wrong += [(_DIR_TEXT[d], "The force is at right angles to both the velocity and the field.") for d in random.sample(others, 2)]
+    q = _choice(text, correct, wrong, "Forces on Charged Particles", level)
+    return with_diagram(q, field_entry_svg(b, v, shown))
+
+
+def _field_from_deflection(level):
+    name, sign = random.choice(_CHARGED)
+    v = random.choice([(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)])
+    f = random.choice([a for a in _AXES[:4] if _cross(a, v) != (0, 0, 0)])
+    # B so that sign * (v × B) = f  →  B is along the page's normal
+    b = next(a for a in ((0, 0, 1), (0, 0, -1)) if tuple(sign * c for c in _cross(v, a)) == f)
+    text = (f"{name} moves {_MOVE_TEXT[v]} into a region of magnetic field and follows the path shown. "
+            f"What is the direction of the magnetic field?")
+    correct = _DIR_TEXT[b].replace("towards ", "")
+    wrong = [(_DIR_TEXT[_neg(b)], "Check the sign of the charge — a negative charge is deflected the opposite way to a positive charge."),
+             (_DIR_TEXT[f].replace("towards ", ""), "The field is at right angles to both the velocity and the force — it is into or out of the page, not along the deflection."),
+             (_DIR_TEXT[v].replace("towards ", ""), "The field is at right angles to the velocity.")]
+    q = _choice(text, correct, wrong, "Forces on Charged Particles", level)
+    return with_diagram(q, deflection_svg(v, f, name.split()[-1]))
+
+
+# ── Linear accelerator: work done across a gap, speed gained ──
+def gen_pw_linac(level="Higher"):
+    kv = random.choice([10.0, 15.0, 18.0, 20.0, 25.0, 28.0, 35.0, 40.0])
+    V = kv * 1000
+    W1 = E * V
+    mode = random.choice(["gap", "gap", "gaps", "work"])
+    svg = linac_svg(kv)
+    if mode == "work":
+        text = f"The potential difference across each gap in a linear accelerator is {kv:g} kV. Calculate the work done on a proton as it crosses one gap."
+        work = [_L(r"W = QV"), _L(rf"W = {_ltx(E)} \times {V:g} = {_ltx(W1)}\ \mathrm{{J}}")]
+        opts = [{"value": _sig(W1), "mistake": None, "working": work},
+                {"value": _sig(E * kv), "mistake": "The p.d. must be in volts: kV × 1000.", "working": work},
+                {"value": _sig(V / E), "mistake": "W = QV — multiply the charge by the p.d.", "working": work}]
+        return with_diagram(_q(text, _sig(W1), "J", opts, "Forces on Charged Particles", None, level), svg)
+    if mode == "gaps":
+        n = random.choice([2, 3, 4, 5])
+        W = n * W1
+        v = math.sqrt(2 * W / MP)
+        text = (f"A proton starts from rest and is accelerated across {n} gaps in a linear accelerator. "
+                f"The potential difference across each gap is {kv:g} kV. Calculate its final speed.")
+        work = [_L(rf"W = n \times QV = {n} \times {_ltx(W1)} = {_ltx(W)}\ \mathrm{{J}}"), _L(r"E_k = \tfrac12 mv^2"),
+                _L(rf"v = {_ltx(v)}\ \mathrm{{m\,s^{{-1}}}}")]
+        opts = [{"value": _sig(v), "mistake": None, "working": work},
+                {"value": _sig(math.sqrt(2 * W1 / MP)), "mistake": f"The proton gains energy at EVERY gap — multiply by {n}.", "working": work},
+                {"value": _sig(math.sqrt(2 * W1 / MP) * n), "mistake": f"Add the ENERGIES from each gap, then find v — speeds don't just multiply.", "working": work},
+                {"value": _sig(2 * W / MP), "mistake": "That's v² — take the square root.", "working": work}]
+        scaffold = [{"question": "What is the work done on the proton at one gap, in J?", "answer": _sig(W1)},
+                    {"question": f"What is the total work done across the {n} gaps, in J?", "answer": _sig(W)},
+                    {"question": "What is the final speed, in m s⁻¹?", "answer": _sig(v)}]
+        return with_diagram(_q(text, _sig(v), "m s⁻¹", opts, "Forces on Charged Particles", scaffold, level), svg)
+    u = random.choice([4.0e5, 8.0e5, 1.2e6, 2.0e6])
+    Ek0 = 0.5 * MP * u * u
+    v = math.sqrt(2 * (Ek0 + W1) / MP)
+    text = (f"A proton enters a gap in a linear accelerator moving at {_txt(u, 2)} m s⁻¹. The potential difference across the gap "
+            f"is {kv:g} kV. Calculate its speed as it leaves the gap.")
+    work = [_L(rf"E_{{k,initial}} = \tfrac12 mv^2 = {_ltx(Ek0)}\ \mathrm{{J}}"), _L(rf"W = QV = {_ltx(W1)}\ \mathrm{{J}}"),
+            _L(rf"E_{{k,final}} = {_ltx(Ek0 + W1)}\ \mathrm{{J}}"), _L(rf"v = {_ltx(v)}\ \mathrm{{m\,s^{{-1}}}}")]
+    opts = [{"value": _sig(v), "mistake": None, "working": work},
+            {"value": _sig(math.sqrt(2 * W1 / MP)), "mistake": "The proton already had kinetic energy — add the work done to its initial Ek (course report 2022).", "working": work},
+            {"value": _sig(u + math.sqrt(2 * W1 / MP)), "mistake": "Add the ENERGIES, then find v — speeds don't add.", "working": work},
+            {"value": _sig(math.sqrt(2 * (Ek0 + E * kv) / MP)), "mistake": "The p.d. must be in volts: kV × 1000.", "working": work}]
+    scaffold = [{"question": "What is the initial kinetic energy, in J?", "answer": _sig(Ek0)},
+                {"question": "What is the work done across the gap, in J?", "answer": _sig(W1)},
+                {"question": "What is the final speed, in m s⁻¹?", "answer": _sig(v)}]
+    return with_diagram(_q(text, _sig(v), "m s⁻¹", opts, "Forces on Charged Particles", scaffold, level), svg)
 
 
 # ════════════════ Standard Model ════════════════
