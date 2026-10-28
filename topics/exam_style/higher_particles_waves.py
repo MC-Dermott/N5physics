@@ -10,7 +10,7 @@ import math
 import random
 
 from topics.exam_style.base import Exam, T, fmt, ltx, pick, sig
-from utils.field_diagram import linac_svg
+from utils.field_diagram import linac_svg, wire_svg
 
 UNIT = "Particles and Waves"
 E = 1.60e-19
@@ -32,6 +32,7 @@ $W = QV$ and $E_k = \frac{1}{2}mv^2$ → $v = \sqrt{\frac{2QV}{m}}$. Charge on a
 - A linear accelerator uses an **alternating** p.d. so the field reverses each time the particle is between drift tubes, always accelerating it.
 - A magnetic field changes the **direction** of a moving charged particle (circular path in a cyclotron/synchrotron).
 - The force is at **right angles** to both the velocity and the field; there is **no force** on a neutral particle or on a charge moving along the field. The force on an electron is opposite to the force on a proton.
+- A **moving charge** (a current) produces a magnetic field: circles around a long straight wire. Right-hand grip rule with the **conventional** current (opposite to electron flow).
 - In a linac the particles are accelerated in the **gaps** (no field inside the tubes); the tubes lengthen because the particles speed up.
 """),
     "Standard Model": _notes("The Standard Model", r"""
@@ -276,6 +277,49 @@ def linear_accelerator(level="Higher"):
                     "(e = 1.60 × 10⁻¹⁹ C, mₚ = 1.67 × 10⁻²⁷ kg)", diagram=linac_svg(kv))
 
 
+# ════════════════ Electron beam beside a wire: speed → field direction → force direction ════════════════
+
+_AX = {"up the page": (0, 1, 0), "down the page": (0, -1, 0)}
+
+
+def beam_and_wire(level="Higher"):
+    ex = _ex(level)
+    kv = pick(0.60, 1.5, 2.4, 3.0)
+    V = kv * 1e3
+    W = E * V
+    v = math.sqrt(2 * sig(W) / ME)
+    ex.on("Forces on Charged Particles").num(f"Electrons are accelerated from rest through a potential difference of {fmt(V)} V. Calculate their speed.", v, "m/s",
+        wrong=[(math.sqrt(2 * sig(W) / MP), "Use the ELECTRON mass."), (2 * sig(W) / ME, "That is v² — take the square root."),
+               (math.sqrt(2 * E * kv / ME), "Convert kV to V.")],
+        working=[rf"W = QV = {ltx(W)}\ \text{{J}}", rf"v = \sqrt{{\frac{{2W}}{{m}}}} = {ltx(v)}\ \text{{m/s}}"],
+        scaffold=[("What is the work done on an electron, in J?", W, "J")])
+    up = random.random() < 0.5
+    right = random.random() < 0.5
+    b_out = (up and not right) or (not up and right)          # grip rule
+    ex.on("Forces on Charged Particles").choice(
+        f"A long straight wire carries a conventional current {'up' if up else 'down'} the page. What is the direction of the magnetic field at point P, "
+        f"{'to the right' if right else 'to the left'} of the wire?",
+        "out of the page" if b_out else "into the page",
+        [("into the page" if b_out else "out of the page", "Check the right-hand grip rule and which side of the wire P is on."),
+         ("up the page", "The field forms circles around the wire, so at P it is into or out of the page."),
+         ("towards the wire", "The field forms circles around the wire — it does not point at the wire.")])
+    moving_up = random.random() < 0.5
+    vv = (0, 1, 0) if moving_up else (0, -1, 0)
+    bz = (0, 0, 1) if b_out else (0, 0, -1)
+    cr = (vv[1] * bz[2] - vv[2] * bz[1], vv[2] * bz[0] - vv[0] * bz[2], vv[0] * bz[1] - vv[1] * bz[0])
+    f = tuple(-c for c in cr)                                  # electron: opposite to a positive charge
+    name = {(1, 0, 0): "towards the right", (-1, 0, 0): "towards the left"}[f]
+    other = "towards the left" if name == "towards the right" else "towards the right"
+    ex.on("Forces on Charged Particles").choice(
+        f"The electron beam passes point P moving {'up' if moving_up else 'down'} the page. What is the direction of the force on the electrons?",
+        name,
+        [(other, "The force on an electron is opposite to the force on a positive charge — check the sign."),
+         ("into the page", "The force is at right angles to both the velocity and the field — here that is in the plane of the page."),
+         ("out of the page", "The force is at right angles to both the velocity and the field — here that is in the plane of the page.")])
+    return ex.build("An electron beam is directed past a long straight wire. (e = 1.60 × 10⁻¹⁹ C, mₑ = 9.11 × 10⁻³¹ kg)",
+                    diagram=wire_svg("in_plane", 1 if up else -1, points=("P", "Q") if not right else ("Q", "P")))
+
+
 # ════════════════ The Sun: mass–energy → irradiance → spectrum ════════════════
 
 def the_sun(level="Higher"):
@@ -310,5 +354,6 @@ SCENARIOS = {
     "Laser and Optical Fibre": laser_fibre,
     "Particle Accelerator": particle_accelerator,
     "Linear Accelerator":   linear_accelerator,
+    "Electron Beam and Wire": beam_and_wire,
     "The Sun":              the_sun,
 }

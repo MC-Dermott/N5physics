@@ -16,7 +16,7 @@ import random
 from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
 from utils.diagrams import with_diagram
-from utils.field_diagram import deflection_svg, field_entry_svg, linac_svg
+from utils.field_diagram import deflection_svg, field_entry_svg, linac_svg, wire_svg
 
 TOPIC = "Particles and Waves"
 E = 1.60e-19
@@ -265,6 +265,74 @@ def _field_from_deflection(level):
              (_DIR_TEXT[v].replace("towards ", ""), "The field is at right angles to the velocity.")]
     q = _choice(text, correct, wrong, "Forces on Charged Particles", level)
     return with_diagram(q, deflection_svg(v, f, name.split()[-1]))
+
+
+# ── Magnetic field around a current-carrying wire ──
+def gen_pw_wire(level="Higher"):
+    """Direction and pattern of the magnetic field around a straight wire (right-hand grip rule)."""
+    kind = random.choice(["end_on", "end_on", "in_plane", "in_plane", "concept"])
+    if kind == "concept":
+        return _wire_concept(level)
+    electrons = random.random() < 0.35
+    if kind == "end_on":
+        out = random.random() < 0.5                       # conventional current out of the page
+        shown = out != electrons                          # the flow of electrons is opposite to the conventional current
+        text = (f"{'Electrons flow' if electrons else 'A conventional current flows'} "
+                f"{'out of' if shown else 'into'} the page in a long straight wire, as shown. "
+                f"What is the direction of the magnetic field around the wire?")
+        correct = "anticlockwise" if out else "clockwise"
+        wrong = [("clockwise" if out else "anticlockwise",
+                  "The grip rule uses the CONVENTIONAL current — opposite to the electron flow." if electrons
+                  else "Check the grip rule: thumb along the current, fingers curl the way the field goes."),
+                 ("in straight lines parallel to the wire", "The field forms circles around the wire."),
+                 ("in straight lines pointing away from the wire", "The field forms circles around the wire.")]
+        q = _choice(text, correct, wrong, "Forces on Charged Particles", level)
+        lab = f"wire: {'electron flow' if electrons else 'conventional current'} {'out of' if shown else 'into'} the page"
+        return with_diagram(q, wire_svg("end_on", 1 if shown else -1, label=lab))
+    up = random.random() < 0.5                            # conventional current up the page
+    shown_up = up != electrons
+    side = random.choice([("P", "left"), ("Q", "right")])
+    b_out = (up and side[1] == "left") or (not up and side[1] == "right")
+    text = (f"{'Electrons flow' if electrons else 'A conventional current flows'} {'up' if shown_up else 'down'} the page in a long straight "
+            f"wire, as shown. What is the direction of the magnetic field at point {side[0]}?")
+    correct = "out of the page" if b_out else "into the page"
+    wrong = [("into the page" if b_out else "out of the page",
+              "The grip rule uses the CONVENTIONAL current — opposite to the electron flow." if electrons
+              else "Check the grip rule and which side of the wire the point is on."),
+             ("up the page", "The field forms circles around the wire — at a point beside it the field is into or out of the page."),
+             ("towards the wire", "The field forms circles around the wire — it does not point at the wire.")]
+    q = _choice(text, correct, wrong, "Forces on Charged Particles", level)
+    return with_diagram(q, wire_svg("in_plane", 1 if shown_up else -1, arrow_label="electron flow" if electrons else "conventional current"))
+
+
+def _wire_concept(level):
+    kind = random.choice(["moving", "reverse", "strength", "far"])
+    if kind == "moving":
+        return _choice("Which charge produces a magnetic field?", "A charge that is moving.",
+                       [("A charge that is stationary.", "A stationary charge only has an electric field."),
+                        ("Only a positive charge.", "Any moving charge, positive or negative, produces a magnetic field."),
+                        ("Only a charge inside a wire.", "Any moving charge produces a magnetic field, in a wire or not.")],
+                       "Forces on Charged Particles", level)
+    if kind == "reverse":
+        return _choice("The current in a long straight wire is reversed. What happens to the magnetic field around the wire?",
+                       "Its direction is reversed.",
+                       [("It disappears.", "A current is still flowing, so there is still a field."),
+                        ("It stays the same.", "The direction of the field depends on the direction of the current."),
+                        ("It becomes straight lines along the wire.", "The field is still circles around the wire.")],
+                       "Forces on Charged Particles", level)
+    if kind == "strength":
+        return _choice("How can the strength of the magnetic field at a point beside a long straight wire be increased?",
+                       "Increase the current in the wire.",
+                       [("Reverse the current in the wire.", "That only reverses the direction of the field."),
+                        ("Move the point further from the wire.", "The field gets weaker with distance."),
+                        ("Use a shorter wire.", "The length of the wire is not what changes the field beside it.")],
+                       "Forces on Charged Particles", level)
+    return _choice("How does the strength of the magnetic field around a long straight wire change with distance from the wire?",
+                   "It gets weaker as the distance from the wire increases.",
+                   [("It gets stronger as the distance from the wire increases.", "The field is strongest close to the wire."),
+                    ("It is the same at every distance.", "The field is strongest close to the wire."),
+                    ("It is zero except right at the wire.", "The field extends around the wire and gets weaker with distance.")],
+                   "Forces on Charged Particles", level)
 
 
 # ── Linear accelerator: work done across a gap, speed gained ──

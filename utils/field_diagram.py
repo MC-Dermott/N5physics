@@ -120,3 +120,20 @@ def deflection_svg(v, f, particle):
     parts.append(f'<path d="M{sx},{sy} Q{qx},{qy} {ex},{ey}" fill="none" stroke="#111" stroke-width="2.2" '
                  f'stroke-dasharray="6,4" marker-end="url(#ah)"/>')
     return f'<svg {_NS} viewBox="0 0 {bx0*2+bw} 285" width="{bx0*2+bw}" height="285">{_MARK}{"".join(parts)}</svg>'
+
+
+def wire_svg(kind, current, points=("P", "Q"), label="", arrow_label="current"):
+    """kind 'end_on': a wire seen end-on (current +1 out of the page, -1 into it) with circles to guide the eye.
+    kind 'in_plane': a vertical wire in the page (current +1 up the page, -1 down) with a point either side."""
+    if kind == "end_on":
+        parts = ['<circle cx="150" cy="115" r="38" fill="none" stroke="#bbb" stroke-dasharray="4,4"/>',
+                 '<circle cx="150" cy="115" r="75" fill="none" stroke="#bbb" stroke-dasharray="4,4"/>',
+                 _out_symbol(150, 115) if current > 0 else _into_symbol(150, 115),
+                 _text(150, 222, label or "wire: current " + ("out of" if current > 0 else "into") + " the page")]
+        return f'<svg {_NS} viewBox="0 0 300 235" width="300" height="235">{_MARK}{"".join(parts)}</svg>'
+    parts = ['<line x1="150" y1="20" x2="150" y2="200" stroke="#111" stroke-width="5"/>',
+             _arrow(150, 110 if current > 0 else 90, 150, 28 if current > 0 else 192, 2.6),
+             _text(166, 36 if current > 0 else 190, arrow_label, "start"),
+             '<circle cx="70" cy="110" r="5" fill="#111"/>', _text(70, 132, points[0]),
+             '<circle cx="230" cy="110" r="5" fill="#111"/>', _text(230, 132, points[1])]
+    return f'<svg {_NS} viewBox="0 0 300 215" width="300" height="215">{_MARK}{"".join(parts)}</svg>'
