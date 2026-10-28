@@ -357,7 +357,17 @@ def gen_ec_parallel_compare(level="N5"):
     small, large = min(rs), max(rs)
     diagram = loop_circuit([par(*[[comp("resistor", lab)] for lab in labels])], supply_label=f"{V:g} V")
     names = f"{labels[0]}, {labels[1]} and {labels[2]}"
-    if random.random() < 0.5:
+    variant = random.choice(["current", "voltage", "series_voltage"])
+    if variant == "series_voltage":
+        text = f"Three resistors of {names} are connected in series across a {V:g} V supply. Which resistor has the largest voltage across it, and why?"
+        mid = [r for r in rs if r not in (small, large)][0]
+        qobj = _choice(text, f"The {large:g} Ω resistor, because the current is the same in each resistor so the largest resistance has the largest voltage.",
+                       [(f"The {small:g} Ω resistor, because it has the smallest resistance.", "In series the current is the same, so V = IR gives the largest voltage across the largest resistance."),
+                        ("They all have the same voltage, because the current is the same through each resistor.", "The current is the same, but V = IR, so resistors of different sizes have different voltages."),
+                        (f"The {mid:g} Ω resistor, because it is in the middle of the circuit.", "Compare the resistances: with the same current, the largest R has the largest V.")],
+                       "Circuit Rules", level)
+        return with_diagram(qobj, loop_circuit([comp("resistor", lab) for lab in labels], supply_label=f"{V:g} V"))
+    if variant == "current":
         text = (f"Three resistors of {names} are connected in three parallel branches across a {V:g} V supply. "
                 "Which resistor has the largest current in it, and why?")
         mid = [r for r in rs if r not in (small, large)][0]
