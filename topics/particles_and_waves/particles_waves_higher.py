@@ -16,7 +16,7 @@ import random
 from core.models.question_model import PhysicsQuestion
 from utils.make_question import make_question
 from utils.diagrams import with_diagram
-from utils.field_diagram import deflection_svg, field_entry_svg, linac_svg, wire_svg
+from utils.field_diagram import deflection_svg, field_entry_svg, linac_svg, magnet_svg, wire_svg
 
 TOPIC = "Particles and Waves"
 E = 1.60e-19
@@ -334,6 +334,85 @@ def _wire_concept(level):
                     ("It is zero except right at the wire.", "The field extends around the wire and gets weaker with distance.")],
                    "Forces on Charged Particles", level)
 
+
+
+# ── Magnetic field patterns: bar magnets (like and unlike poles), field strength from line spacing ──
+def gen_pw_magnets(level="Higher"):
+    """Shape and strength of the magnetic field around bar magnets, read from field-line diagrams."""
+    kind = random.choice(["pole_id", "direction", "strength", "which_pattern", "which_pattern", "statement"])
+    qt = "Forces on Charged Particles"
+    if kind == "pole_id":
+        svg = magnet_svg("unlike", True, False)           # the arrows always run P -> Q, so P is the north pole
+        text = ("The diagram shows the magnetic field lines between two bar magnets with poles P and Q facing each other. "
+                "What type of pole is P?")
+        q = _choice(text, "A north pole.", [("A south pole.", "Field lines leave a NORTH pole and enter a south pole — "
+                                              "the arrows point away from P."),
+                                            ("It cannot be told from the diagram.", "The direction of the arrows shows which is the north pole.")],
+                    qt, level)
+        return with_diagram(q, svg)
+    if kind == "direction":
+        svg = magnet_svg("unlike", True, False)
+        text = ("The diagram shows two bar magnets with poles P and Q facing each other. "
+                "What is the direction of the magnetic field at point X?")
+        q = _choice(text, "From P towards Q.", [("From Q towards P.", "Field lines run from north to south — the arrows point away from P."),
+                                                  ("Up the page.", "Between unlike poles the lines run straight across the gap."),
+                                                  ("There is no field at X.", "X is in the gap between the poles, where the field is strong.")],
+                    qt, level)
+        return with_diagram(q, svg)
+    if kind == "strength":
+        svg = magnet_svg("unlike", True, False)
+        text = ("The diagram shows the magnetic field between two bar magnets. At which point is the magnetic field stronger, "
+                "and how can you tell?")
+        q = _choice(text, "X, because the field lines are closer together there.",
+                    [("Y, because it is further from the magnets.", "The field is weaker further from the poles."),
+                     ("X, because it is at the centre of the magnets.", "It is the spacing of the field lines that shows the strength."),
+                     ("The field is the same strength at X and Y.", "Field lines are closer together at X, so the field is stronger there.")],
+                    qt, level)
+        return with_diagram(q, svg)
+    if kind == "which_pattern":
+        poles = random.choice(["north", "south", "unlike"])
+        if poles == "unlike":
+            text = "Two bar magnets are placed with the north pole of one facing the south pole of the other. Which statement describes the field lines in the gap?"
+            correct = "They run across the gap from the north pole to the south pole."
+            wrong = [("They curve away from each other and never join up.", "That is the pattern for LIKE poles."),
+                     ("They run from the south pole to the north pole.", "Field lines run from north to south."),
+                     ("There are no field lines in the gap.", "The field between unlike poles is strong.")]
+            svg = magnet_svg("unlike", False, True)
+        else:
+            text = (f"Two bar magnets are placed with their {poles} poles facing each other. "
+                    "Which statement describes the field lines between them?")
+            correct = "They curve away from each other and never join up."
+            wrong = [("They run straight across from one pole to the other.", "Lines only run between a NORTH and a SOUTH pole — like poles repel."),
+                     ("They cross at the midpoint between the poles.", "Field lines never cross."),
+                     ("They are parallel and evenly spaced in the gap.", "That describes the gap between UNLIKE poles.")]
+            svg = magnet_svg("nn" if poles == "north" else "ss", False, True)
+        q = _choice(text, correct, wrong, qt, level)
+        return with_diagram(q, svg)
+    return _magnet_concept(level)
+
+
+def _magnet_concept(level):
+    qt = "Forces on Charged Particles"
+    kind = random.choice(["direction", "strength", "single"])
+    if kind == "direction":
+        return _choice("Which statement about the magnetic field lines outside a bar magnet is correct?",
+                       "They run from the north pole to the south pole.",
+                       [("They run from the south pole to the north pole.", "Field lines run from N to S outside a magnet."),
+                        ("They run in straight lines away from the north pole.", "The lines curve round to the south pole."),
+                        ("They start and end on the same pole.", "The lines run between the two different poles.")], qt, level)
+    if kind == "strength":
+        return _choice("Where is the magnetic field around a bar magnet strongest?",
+                       "At the poles, where the field lines are closest together.",
+                       [("At the middle of the magnet, where the field lines are closest together.", "The field is strongest at the poles."),
+                        ("Far from the magnet, where the field lines are furthest apart.", "The field gets weaker with distance."),
+                        ("It is the same strength everywhere around the magnet.", "The field lines are closer together near the poles, so it is stronger there.")],
+                       qt, level)
+    return with_diagram(_choice("The diagram shows the magnetic field around a bar magnet. What is the direction of the field lines "
+                                "outside the magnet?", "From the north pole to the south pole.",
+                                [("From the south pole to the north pole.", "Field lines run from N to S outside a magnet."),
+                                 ("Away from both poles.", "The lines join the two poles."),
+                                 ("Towards both poles.", "The lines join the two poles.")], qt, level),
+                        magnet_svg("single", False, True))
 
 # ── Linear accelerator: work done across a gap, speed gained ──
 def gen_pw_linac(level="Higher"):

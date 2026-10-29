@@ -32,7 +32,8 @@ $W = QV$ and $E_k = \frac{1}{2}mv^2$ → $v = \sqrt{\frac{2QV}{m}}$. Charge on a
 - A linear accelerator uses an **alternating** p.d. so the field reverses each time the particle is between drift tubes, always accelerating it.
 - A magnetic field changes the **direction** of a moving charged particle (circular path in a cyclotron/synchrotron).
 - The force is at **right angles** to both the velocity and the field; there is **no force** on a neutral particle or on a charge moving along the field. The force on an electron is opposite to the force on a proton.
-- A **moving charge** (a current) produces a magnetic field: circles around a long straight wire. Right-hand grip rule with the **conventional** current (opposite to electron flow).
+- Magnetic field lines run **N → S** outside a magnet and never cross; the field is **strongest where the lines are closest together** (at the poles). Between **unlike** poles the lines run straight across the gap; **like** poles repel, so the lines curve away from each other and never join.
+- A **moving charge** (a current) produces a magnetic field: circles around a long straight wire. The field gets weaker (the circles are further apart) as the distance from the wire increases. Right-hand grip rule with the **conventional** current (opposite to electron flow).
 - In a linac the particles are accelerated in the **gaps** (no field inside the tubes); the tubes lengthen because the particles speed up.
 """),
     "Standard Model": _notes("The Standard Model", r"""
