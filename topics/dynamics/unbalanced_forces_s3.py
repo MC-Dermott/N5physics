@@ -311,87 +311,6 @@ def gen_fma(level="S3"):
     return _numeric(q, ans, wrong, unit, working, None, level)
 
 
-def gen_light_gate_acceleration(level="S3"):
-    """a = Δv ÷ t from two light-gate speeds (Δv = v − u)."""
-    u = random.choice([0.2, 0.4, 0.6, 0.8])
-    a = random.choice([0.5, 1.0, 1.5, 2.0])
-    t = random.choice([0.8, 1.0, 1.6, 2.0])
-    v = round(u + a * t, 2)
-    dv = round(v - u, 2)
-    working = [{"type": "latex", "content": rf"\Delta v = v - u = {_n(v)} - {_n(u)} = {_n(dv)}\ \mathrm{{m/s}}"},
-               {"type": "latex", "content": r"a = \frac{\Delta v}{t}"},
-               {"type": "latex", "content": rf"a = \frac{{{_n(dv)}}}{{{_n(t)}}} = {_n(a)}\ \mathrm{{m/s^2}}"}]
-    q = (f"Two light gates measure the speed of a trolley as {_n(u)} m/s at the first gate and {_n(v)} m/s at the second gate. "
-         f"The time between the gates is {_n(t)} s.\n\nCalculate the acceleration of the trolley.")
-    wrong = [(round(v / t, 2), "You used the final speed instead of the change in speed (v − u)."),
-             (round((v + u) / t, 2), "You added the speeds. The change in speed is v − u."),
-             (dv, "That is the change in speed. Now divide by the time.")]
-    sc = [{"question": "What is the change in speed (v − u)?", "answer": dv, "unit": "m/s"},
-          {"question": "What is the acceleration?", "answer": a, "unit": "m/s²"}]
-    return _numeric(q, a, wrong, "m/s²", working, sc, level)
-
-
-def gen_experiment_mass(level="S3"):
-    """Trolley investigation: use one pair of results with F = ma to find the mass."""
-    m = random.choice([0.5, 1.0, 2.0, 4.0])
-    forces = [1.0, 2.0, 3.0, 4.0]
-    accs = [f / m for f in forces]
-    i = random.randrange(4)
-    row_f = "      ".join(_n(f) for f in forces)
-    row_a = "      ".join(_n(a) for a in accs)
-    q = ("A pupil investigates how the acceleration of a trolley depends on the unbalanced force on it. "
-         "The mass of the trolley is kept constant. Her results are shown.\n\n"
-         f"Unbalanced force (N):    {row_f}\nAcceleration (m/s²):      {row_a}\n\n"
-         f"Use the results for {_n(forces[i])} N to calculate the mass of the trolley.")
-    working = [{"type": "latex", "content": r"F = ma"},
-               {"type": "latex", "content": rf"{_n(forces[i])} = m \times {_n(accs[i])}"},
-               {"type": "latex", "content": rf"m = \frac{{{_n(forces[i])}}}{{{_n(accs[i])}}} = {_n(m)}\ \mathrm{{kg}}"}]
-    wrong = [(round(forces[i] * accs[i], 3), "You multiplied force by acceleration. Rearrange F = ma to m = F ÷ a."),
-             (round(accs[i] / forces[i], 3), "You divided acceleration by force — the wrong way up."),
-             (round(forces[i] - accs[i], 3), "You subtracted. m = F ÷ a.")]
-    return _numeric(q, m, [w for w in wrong if w[0] > 0], "kg", working, None, level)
-
-
-def gen_experiment_conclusions(level="S3"):
-    """Word-answer questions about the force / mass / acceleration investigations."""
-    kind = random.choice(["keep_const_f", "keep_const_m", "double_f", "double_m", "friction", "mass_trend"])
-    if kind == "keep_const_f":
-        return _mc("A pupil investigates how the acceleration of a trolley depends on the unbalanced force on it. "
-                   "Which quantity must be kept the same?", "The mass of the trolley",
-                   [("The unbalanced force", "That is the quantity being changed."),
-                    ("The acceleration", "That is the quantity being measured."),
-                    ("The time between the light gates", "The time is not what is being controlled in this investigation.")], level)
-    if kind == "keep_const_m":
-        return _mc("A pupil investigates how the acceleration of a trolley depends on its mass. "
-                   "Which quantity must be kept the same?", "The unbalanced force",
-                   [("The mass of the trolley", "That is the quantity being changed."),
-                    ("The acceleration", "That is the quantity being measured."),
-                    ("The speed of the trolley", "The speed changes as the trolley accelerates.")], level)
-    if kind == "double_f":
-        return _mc("The mass of a trolley is kept constant. What happens to its acceleration when the unbalanced force is doubled?",
-                   "The acceleration doubles",
-                   [("The acceleration halves", "A bigger force gives a bigger acceleration (a = F ÷ m)."),
-                    ("The acceleration stays the same", "Acceleration depends on the unbalanced force."),
-                    ("The acceleration quadruples", "Doubling the force doubles the acceleration — not four times.")], level)
-    if kind == "double_m":
-        return _mc("The unbalanced force on a trolley is kept constant. What happens to its acceleration when the mass is doubled?",
-                   "The acceleration halves",
-                   [("The acceleration doubles", "A bigger mass is harder to accelerate (a = F ÷ m)."),
-                    ("The acceleration stays the same", "Acceleration depends on the mass."),
-                    ("The acceleration quadruples", "A bigger mass gives a smaller acceleration.")], level)
-    if kind == "friction":
-        return _mc("There is friction between a trolley and the bench. Why does this make the measured acceleration smaller than expected?",
-                   "Friction acts against the motion, so the unbalanced force is smaller",
-                   [("Friction increases the mass of the trolley", "Friction does not change the mass."),
-                    ("Friction increases the pulling force", "Friction acts against the motion, reducing the unbalanced force."),
-                    ("Friction makes the weight of the trolley bigger", "Friction does not change the weight.")], level)
-    return _mc("Pupils measure the acceleration of a trolley with a constant unbalanced force and different masses. "
-               "Which statement describes their results?", "As the mass increases, the acceleration decreases",
-               [("As the mass increases, the acceleration increases", "A bigger mass is harder to accelerate."),
-                ("The acceleration is the same for every mass", "Acceleration depends on the mass (a = F ÷ m)."),
-                ("As the mass increases, the speed stays the same", "That doesn't describe the acceleration.")], level)
-
-
 def gen_skydiver_calculation(level="S3"):
     """Falling skydiver: weight, then unbalanced force (weight − air resistance), then acceleration."""
     m = random.choice([60, 70, 80, 90])
@@ -459,3 +378,79 @@ def gen_explain_motion(level="S3"):
                [("It is zero", "There is air resistance — it equals the weight."),
                 ("It is bigger than the weight", "Then the skydiver would be slowing down."),
                 ("It is smaller than the weight", "Then the skydiver would still be speeding up.")], level)
+
+
+# (object, masses, engine/driving force options, label for the resistive force) — tied so numbers suit the object
+_SLOW = [
+    ("lorry", [6000, 8000, 10000], [0, 1000, 2000], "resistive forces"),
+    ("car", [800, 900, 1000, 1200], [0, 200, 400], "resistive forces"),
+    ("cyclist and bike", [80, 90, 100], [0, 20, 40], "resistive forces"),
+    ("skier gliding on flat snow", [60, 70, 80], [0], "friction"),
+]
+
+
+def gen_slowing_down(level="S3"):
+    """Horizontal, slowing down: resistive forces bigger than the driving force. Find the deceleration."""
+    obj, masses, drives, rname = random.choice(_SLOW)
+    m = random.choice(masses)
+    a = random.choice([0.5, 1.0, 1.5, 2.0])
+    drive = random.choice(drives)
+    unb = m * a
+    res = unb + drive
+    forces = [("left", f"{_n(res)} N", 1.0)] + ([("right", f"{_n(drive)} N", _rel(drive, res))] if drive else [])
+    if drive:
+        q = (f"A {obj} of mass {_n(m)} kg is slowing down. The driving force on it is {_n(drive)} N and the {rname} total {_n(res)} N.\n\n"
+             f"Calculate the size of its deceleration (acceleration backwards).")
+        working = [{"type": "latex", "content": rf"F_{{unbalanced}} = {_n(res)} - {_n(drive)} = {_n(unb)}\ \mathrm{{N\ backwards}}"}]
+    else:
+        q = (f"A {obj} of mass {_n(m)} kg is slowing down. There is no driving force and the {rname} total {_n(res)} N.\n\n"
+             f"Calculate the size of its deceleration (acceleration backwards).")
+        working = [{"type": "latex", "content": rf"F_{{unbalanced}} = {_n(res)}\ \mathrm{{N\ backwards}}"}]
+    working += [{"type": "latex", "content": r"F = ma"}, {"type": "latex", "content": rf"{_n(unb)} = {_n(m)} \times a"},
+                {"type": "latex", "content": rf"a = \frac{{{_n(unb)}}}{{{_n(m)}}} = {_n(a)}\ \mathrm{{m/s^2\ backwards}}"}]
+    wrong = [(round(res / m, 3), "You used the resistive force on its own. Use the unbalanced force (resistive − driving)."),
+             (round((res + drive) / m, 3), "You added the driving force. It acts against the resistive forces, so subtract it."),
+             (round(drive / m, 3), "You used the driving force. The unbalanced force is the DIFFERENCE between the two forces.")]
+    sc = [{"question": "What is the size of the unbalanced force?", "answer": unb, "unit": "N"},
+          _fbd_step(forces),
+          {"question": "What is the deceleration?", "answer": a, "unit": "m/s²"}]
+    return _with_fbd_widget(_numeric(q, a, [w for w in wrong if w[0] > 0], "m/s²", working, sc, level))
+
+
+def gen_unknown_vertical_force(level="S3"):
+    """Vertical, starting from the acceleration: unbalanced force = ma, then the unknown upward force."""
+    if random.random() < 0.5:
+        m = random.choice([500, 1000, 1500, 2000])
+        a = random.choice([0.5, 1.0, 1.5, 2.0])
+        W = round(m * G, 1)
+        L = W + m * a
+        q = (f"A helicopter of mass {_n(m)} kg accelerates upwards at {_n(a)} m/s².\n\nCalculate the upward (lift) force on the helicopter.")
+        working = [{"type": "latex", "content": rf"W = mg = {_n(m)} \times {G} = {_n(W)}\ \mathrm{{N}}"},
+                   {"type": "latex", "content": rf"F = ma = {_n(m)} \times {_n(a)} = {_n(m * a)}\ \mathrm{{N}}"},
+                   {"type": "latex", "content": rf"F_{{unbalanced}} = L - W: {_n(m * a)} = L - {_n(W)}"},
+                   {"type": "latex", "content": rf"L = {_n(m * a)} + {_n(W)} = {_n(L)}\ \mathrm{{N}}"}]
+        wrong = [(round(W - m * a, 1), "You subtracted. The lift must be BIGGER than the weight for an upward acceleration."),
+                 (round(m * a, 1), "That is just the unbalanced force. Add the weight to get the lift force."),
+                 (W, "That is only the weight — the helicopter is accelerating, so the lift is bigger.")]
+        sc = [{"question": "What is the weight?", "answer": W, "unit": "N"},
+              {"question": "What is the unbalanced force (ma)?", "answer": m * a, "unit": "N"},
+              _fbd_step([("up", "L", 1.0), ("down", f"{_n(W)} N", 0.85)]),
+              {"question": "What is the lift force?", "answer": L, "unit": "N"}]
+        return _with_fbd_widget(_numeric(q, L, wrong, "N", working, sc, level))
+    m = random.choice([10, 20, 40, 50])
+    a = random.choice([0.5, 1.0, 2.0])
+    W = round(m * G, 1)
+    T = W - m * a
+    q = (f"A {_n(m)} kg mass is lowered on a rope. It accelerates downwards at {_n(a)} m/s².\n\nCalculate the force the rope pulls upwards with.")
+    working = [{"type": "latex", "content": rf"W = mg = {_n(m)} \times {G} = {_n(W)}\ \mathrm{{N}}"},
+               {"type": "latex", "content": rf"F = ma = {_n(m)} \times {_n(a)} = {_n(m * a)}\ \mathrm{{N}}"},
+               {"type": "latex", "content": rf"F_{{unbalanced}} = W - T: {_n(m * a)} = {_n(W)} - T"},
+               {"type": "latex", "content": rf"T = {_n(W)} - {_n(m * a)} = {_n(T)}\ \mathrm{{N}}"}]
+    wrong = [(round(W + m * a, 1), "You added. The rope force must be SMALLER than the weight for a downward acceleration."),
+             (round(m * a, 1), "That is just the unbalanced force. Subtract it from the weight."),
+             (W, "That is only the weight — the mass is accelerating downwards, so the rope force is smaller.")]
+    sc = [{"question": "What is the weight?", "answer": W, "unit": "N"},
+          {"question": "What is the unbalanced force (ma)?", "answer": m * a, "unit": "N"},
+          _fbd_step([("down", f"{_n(W)} N", 1.0), ("up", "T", 0.8)]),
+          {"question": "What is the rope force?", "answer": T, "unit": "N"}]
+    return _with_fbd_widget(_numeric(q, T, wrong, "N", working, sc, level))

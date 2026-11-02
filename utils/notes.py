@@ -182,11 +182,7 @@ $$W = mg$$
 **Free body diagrams:** draw the object as a box and each force as an arrow starting on the
 box, pointing the way the force acts, labelled with its size. Bigger forces get longer arrows.
 
-**Investigating F, m and a:** with the mass kept constant, doubling the unbalanced force
-doubles the acceleration. With the unbalanced force kept constant, doubling the mass halves
-the acceleration ($a = F \\div m$). Light gates give the speeds $u$ and $v$ and the time $t$, so
-$a = \\frac{v - u}{t}$. Friction reduces the unbalanced force, so the measured acceleration
-is smaller than expected.
+**Slowing down:** when the resistive forces are bigger than the driving force the unbalanced force (and the acceleration) points backwards, so the object slows down. With no driving force the unbalanced force is just the resistive force.
 
 **Skydivers:** at first the weight is bigger than the air resistance, so the skydiver
 accelerates downwards. Air resistance grows with speed until it equals the weight: the forces
