@@ -152,7 +152,7 @@ from topics.dynamics.effective_weight_higher import (
 
 from topics.electricity.current          import generate_current
 from topics.electricity.ohms_law         import generate_ohms_law
-from topics.electricity.resistors        import generate_resistors
+from topics.electricity.resistors        import generate_resistors, generate_series, generate_parallel, generate_complex
 from topics.electricity.power            import generate_power
 from topics.electricity.potential_divider import generate_potential_divider
 from topics.electricity.circuits         import generate_circuits
@@ -386,7 +386,11 @@ QUAL_REGISTRY = {
         "Electricity": {
             "Current":            generate_current,
             "Ohm's Law":          generate_ohms_law,
-            "Resistors":          generate_resistors,
+            "Resistors": {
+                "Series":   generate_series,
+                "Parallel": generate_parallel,
+                "Complex":  generate_complex,
+            },
             "Electrical Power":   generate_power,
             "Potential Divider":  generate_potential_divider,
             "Circuits":           generate_circuits,

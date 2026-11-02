@@ -245,7 +245,20 @@ def gen_two_parallel_one_series(level="N5"):
     return with_diagram(qobj, network([par([_r(na, ra, unit)], [_r(nb, rb, unit)]), _r(nc, rc, unit)]))
 
 
-_ALL_GENS = [gen_series_3, gen_parallel_3, gen_two_series_one_parallel, gen_two_parallel_one_series]
+_COMPLEX_GENS = [gen_two_series_one_parallel, gen_two_parallel_one_series]
+_ALL_GENS = [gen_series_3, gen_parallel_3] + _COMPLEX_GENS
+
+
+def generate_series(level="N5"):
+    return gen_series_3(level=level)
+
+
+def generate_parallel(level="N5"):
+    return gen_parallel_3(level=level)
+
+
+def generate_complex(level="N5"):
+    return random.choice(_COMPLEX_GENS)(level=level)
 
 
 def generate_resistors(level="N5"):
