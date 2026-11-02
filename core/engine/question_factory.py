@@ -179,7 +179,7 @@ from topics.electricity.electricity_exam_n5 import (
     gen_ec_series_parallel, gen_ec_parallel_total_current, gen_ec_circuit_changes, gen_ec_three_resistors,
     gen_ec_led_resistor, gen_ec_divider_switch, gen_ec_transistor_explain,
     gen_ec_fuse, gen_ec_power_i2r, gen_ec_energy_time, gen_ec_toaster_statements,
-    gen_ec_parallel_compare, gen_ec_series_current, gen_ec_switch_ammeter, gen_ec_wire_compare, gen_ec_wire_explain,
+    gen_ec_parallel_compare, gen_ec_series_current, gen_ec_switch_ammeter, gen_ec_ohm_experiment, gen_ec_wire_compare, gen_ec_wire_explain,
 )
 from topics.electricity.electricity_higher import (
     gen_he_peak_rms, gen_he_scope, gen_he_ac_explain,
@@ -399,6 +399,7 @@ QUAL_REGISTRY = {
                 "1 — Energy and Charge (Ew = QV)":   gen_ec_ew_qv,
                 "2 — Resistance from a V–I Gradient": gen_ec_gradient,
                 "3 — What a Voltage Means":          gen_ec_voltage_meaning,
+                "4 — Ohm's Law Experiments and Graphs": gen_ec_ohm_experiment,
             },
             "Circuit Rules": {
                 "1 — Series–Parallel Current":       gen_ec_series_parallel,

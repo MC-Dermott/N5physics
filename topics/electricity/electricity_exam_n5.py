@@ -217,6 +217,42 @@ def gen_ec_gradient(level="N5"):
     return _q(text, float(R), "Ω", opts, "Potential Difference", scaffold, level)
 
 
+def gen_ec_ohm_experiment(level="N5"):
+    """Ohm's law experiment and V–I graphs: meter positions, obtaining a range of readings, graph conclusions."""
+    kind = random.choice(["meters", "range", "lamp", "resistor_graph", "warming"])
+    if kind == "meters":
+        qobj = _choice("A student finds the resistance of resistor R using a battery, a variable resistor, an ammeter and a voltmeter. How should the meters be connected?",
+                       "The ammeter in series with R and the voltmeter in parallel with R.",
+                       [("The ammeter in parallel with R and the voltmeter in series with R.", "Ammeters go in series; voltmeters go across (in parallel with) the component."),
+                        ("Both meters in series with R.", "The voltmeter must be connected across R."),
+                        ("Both meters in parallel with R.", "The ammeter must be in series so the current passes through it.")], "Potential Difference", level)
+        return with_diagram(qobj, loop_circuit([comp("variable", "variable resistor"), comp("resistor", "R")], supply_label=""))
+    if kind == "range":
+        qobj = _choice("The student wants a range of values of current and voltage for resistor R. What should be done?",
+                       "Change the resistance of the variable resistor.",
+                       [("Change the variable resistor.", "Must say it is the RESISTANCE of the variable resistor that is changed (course report 2024)."),
+                        ("Change the voltage of the battery.", "The method uses the variable resistor to change the current and voltage."),
+                        ("Change the resistance of R.", "R is the resistor being investigated — its resistance must stay the same.")], "Potential Difference", level)
+        return with_diagram(qobj, loop_circuit([comp("variable", "variable resistor"), comp("resistor", "R")], supply_label=""))
+    if kind == "lamp":
+        return _choice("The V–I graph for a filament lamp curves so that the gradient increases as the current increases. Which conclusion is correct?",
+                       "The resistance of the lamp increases as the current increases.",
+                       [("As the voltage increases, the current increases.", "That describes the graph but says nothing about the RESISTANCE (course report 2025)."),
+                        ("The resistance of the lamp stays constant.", "A straight line through the origin means constant resistance; this curve does not."),
+                        ("The resistance of the lamp decreases as the current increases.", "A steeper V–I line means a greater resistance.")], "Potential Difference", level)
+    if kind == "resistor_graph":
+        return _choice("Which V–I graph is correct for a fixed resistor at constant temperature?",
+                       "A straight line through the origin.",
+                       [("A straight line that does not pass through the origin.", "V is directly proportional to I, so the line goes through the origin."),
+                        ("A curve with a gradient that increases.", "That is the shape for a filament lamp."),
+                        ("A horizontal straight line.", "The voltage increases as the current increases.")], "Potential Difference", level)
+    return _choice("What happens to the resistance of a filament lamp as it warms up after being switched on?",
+                   "It increases, so the current decreases.",
+                   [("It decreases, so the current increases.", "The resistance of the filament increases with temperature."),
+                    ("It stays the same, so the current stays the same.", "The filament is non-ohmic: its resistance changes as it heats."),
+                    ("It increases, so the current increases.", "A greater resistance with the same voltage means a smaller current.")], "Potential Difference", level)
+
+
 def gen_ec_voltage_meaning(level="N5"):
     V = random.choice([1.5, 3.0, 6.0, 9.0, 12])
     return _choice(f"What does a potential difference of {V:g} V across a battery mean?",
