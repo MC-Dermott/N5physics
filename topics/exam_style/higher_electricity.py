@@ -243,7 +243,7 @@ def garden_lights(level="Higher"):
     ex.on(SEMI).num(f"Each LED emits light of wavelength {lam} nm. Calculate the band gap energy.", Eph, "J",
                     wrong=[(H * C / lam, "Convert nm to m."), (H * lam * 1e-9 / C, "f = v ÷ λ.")],
                     working=[rf"f = \frac v\lambda = {ltx(C / (lam * 1e-9))}\ \text{{Hz}}", rf"E = hf = {ltx(Eph)}\ \text{{J}}"])
-    return ex.build("A set of garden lights in a Lewis croft is powered by an array of solar cells.")
+    return ex.build("A set of garden lights is powered by an array of solar cells.")
 
 
 SCENARIOS = {

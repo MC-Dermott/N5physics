@@ -95,7 +95,7 @@ def _opts(work, right, *wrong):
 # (context, speed m/s, time range s) — echoes tied to the medium
 _ECHOES = [("A student claps in front of a cliff", VS, [0.30, 0.40, 0.50, 0.60, 0.80], "cliff"),
            ("A fishing boat's sonar pulse reflects from a shoal of fish", 1500, [0.080, 0.10, 0.12, 0.16], "shoal"),
-           ("A CalMac ferry's echo sounder pulse reflects from the sea bed", 1500, [0.040, 0.060, 0.080, 0.10], "sea bed"),
+           ("A ship's echo sounder pulse reflects from the sea bed", 1500, [0.040, 0.060, 0.080, 0.10], "sea bed"),
            ("A car's parking sensor sends ultrasound to a wall", VS, [0.0030, 0.0035, 0.0050, 0.0080], "wall")]
 
 
@@ -195,7 +195,7 @@ _BANDS = ["gamma rays", "X-rays", "ultraviolet", "visible light", "infrared", "m
 # (context, value, prefix multiplier, prefix text, band)
 _SOURCES = [("Wireless headphones receive signals at", 2.42, 1e9, "GHz", "microwaves"),
             ("A mobile phone mast transmits at", 1.8, 1e9, "GHz", "microwaves"),
-            ("A Stornoway radio station broadcasts at", 103.4, 1e6, "MHz", "radio waves"),
+            ("A local radio station broadcasts at", 103.4, 1e6, "MHz", "radio waves"),
             ("Long-wave radio is broadcast at", 198, 1e3, "kHz", "radio waves"),
             ("A microwave oven operates at", 2.45, 1e9, "GHz", "microwaves")]
 _WAVELENGTHS = [("An infrared laser rangefinder emits radiation of wavelength", 905, "infrared"),
