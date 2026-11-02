@@ -278,6 +278,32 @@ def series_investigation(level="N5"):
                                          supply_label=f"{Vs} V"))
 
 
+def two_switches(level="N5"):
+    """2023 Paper 2 Q6 style: S1 closed, then S2 adds an equal parallel branch."""
+    ex = _ex(level)
+    ra = random.choice([10, 20, 24, 30])
+    rb = random.choice([30, 36, 60, 90])
+    Vs = pick(6, 10, 12, 18)
+    r1, rp = ra + rb, rb / 2
+    r2 = ra + rp
+    I1 = Vs / r1
+    ex.on("Ohm's Law").num("S1 is closed. Determine the reading on the ammeter.", I1, "A",
+        wrong=[(Vs / ra, "The resistor in the parallel pair was left out of the total resistance."), (Vs / r2, "S2 is still open, so the lower branch carries no current.")],
+        working=[rf"R_T = {ra} + {rb} = {r1}\ \Omega", rf"I = \frac{{V}}{{R_T}} = \frac{{{Vs}}}{{{r1}}} = {ltx(I1)}\ \text{{A}}"])
+    ex.on("Resistors").num("S2 is now also closed. Determine the total resistance of the circuit.", r2, "Ω",
+        wrong=[(r1, "S2 is closed — the second branch is in parallel with the first."), (ra + 2 * rb, "Parallel resistors do not simply add.")],
+        working=[rf"\frac{{1}}{{R_P}} = \frac{{1}}{{{rb}}} + \frac{{1}}{{{rb}}} \Rightarrow R_P = {ltx(rp)}\ \Omega", rf"R_T = {ra} + {ltx(rp)} = {ltx(r2)}\ \Omega"])
+    ex.on("Circuit Rules").choice("State how the ammeter reading now compares with the value when only S1 was closed.",
+        "Greater, because the total resistance of the circuit is less.",
+        [("Greater, because the resistance is less.", "Say it is the TOTAL resistance of the circuit that has decreased (course report 2023)."),
+         ("Less, because there is now more resistance in the circuit.", "A second parallel branch lowers the total resistance."),
+         ("The same, because the supply voltage has not changed.", "The total resistance changes, so the current does.")])
+    return ex.build(f"A student sets up the circuit shown. Initially both switches S1 and S2 are open.",
+                    diagram=loop_circuit([comp("switch", "S1"), comp("resistor", f"{ra} Ω"),
+                                          par([comp("resistor", f"{rb} Ω")], [comp("switch", "S2"), comp("resistor", f"{rb} Ω")]), comp("ammeter")],
+                                         supply_label=f"{Vs} V"))
+
+
 def extension_lead(level="N5"):
     ex = _ex(level)
     V = 230
@@ -311,5 +337,6 @@ SCENARIOS = {
     "Car Lights":            car_lights,
     "Thermostat":            thermostat,
     "Series Circuit Investigation": series_investigation,
+    "Two Switches":          two_switches,
     "Extension Lead":        extension_lead,
 }

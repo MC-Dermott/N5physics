@@ -254,6 +254,70 @@ def gen_ec_series_parallel(level="N5"):
     return with_diagram(qobj, loop_circuit([comp("resistor", f"{rs} Ω"), par([comp("resistor", f"{r1} Ω")], [comp("resistor", f"{r2} Ω")])], supply_label=f"{Vs:g} V"))
 
 
+_SERIES_R = [20, 30, 40, 50, 60, 80, 100, 120, 150, 180, 220, 270]
+
+
+def gen_ec_series_current(level="N5"):
+    """Current in a circuit of three resistors in series (SQA 4-mark: total resistance, then V = IR)."""
+    r1, r2, r3 = random.sample(_SERIES_R, 3)
+    Vs = random.choice([6.0, 9.0, 12.0, 15.0, 24.0])
+    rt = r1 + r2 + r3
+    I = Vs / rt
+    text = f"Three resistors of {r1} Ω, {r2} Ω and {r3} Ω are connected in series with a {Vs:g} V supply. Calculate the current in the circuit."
+    work = [_L(rf"R_T = {r1} + {r2} + {r3} = {rt}\ \Omega"), _L(r"V = IR"), _L(rf"{Vs:g} = I \times {rt}"), _L(rf"I = {_ltx(I)}\ \mathrm{{A}}")]
+    rp = 1 / (1 / r1 + 1 / r2 + 1 / r3)
+    opts = [{"value": _sig(I), "mistake": None, "working": work},
+            {"value": _sig(Vs / r1), "mistake": f"Only the {r1} Ω resistor was used — the supply voltage goes with the TOTAL resistance of the circuit.", "working": work},
+            {"value": _sig(Vs / rp), "mistake": "The resistors were combined as if they were in parallel — in series the resistances add.", "working": work},
+            {"value": _sig(Vs * rt), "mistake": "V = IR was not rearranged — I = V ÷ R, not V × R.", "working": work}]
+    scaffold = [{"question": "What is the total resistance of the circuit, in Ω?", "answer": float(rt)},
+                {"question": "What is the current in the circuit, in A?", "answer": _sig(I)}]
+    qobj = _q(text, _sig(I), "A", opts, "Circuit Rules", scaffold, level)
+    return with_diagram(qobj, loop_circuit([comp("ammeter"), comp("resistor", f"{r1} Ω"), comp("resistor", f"{r2} Ω"), comp("resistor", f"{r3} Ω")],
+                                           supply_label=f"{Vs:g} V"))
+
+
+def gen_ec_switch_ammeter(level="N5"):
+    """2023 Paper 2 Q6 style: S1 closed, then S2 closed adds an equal parallel branch (reading, total resistance, justify)."""
+    ra = random.choice([10, 20, 24, 30])
+    rb = random.choice([30, 36, 60, 90])
+    Vs = random.choice([6.0, 10.0, 12.0, 18.0])
+    rp = rb / 2
+    r_s1, r_s2 = ra + rb, ra + rp
+    diagram = loop_circuit([comp("switch", "S1"), comp("resistor", f"{ra} Ω"), par([comp("resistor", f"{rb} Ω")], [comp("switch", "S2"), comp("resistor", f"{rb} Ω")]),
+                            comp("ammeter")], supply_label=f"{Vs:g} V")
+    setup = "In the circuit shown both switches S1 and S2 are initially open. "
+    kind = random.choice(["reading", "total", "justify"])
+    if kind == "reading":
+        I = Vs / r_s1
+        text = setup + "S1 is closed. Determine the reading on the ammeter."
+        work = [_L(rf"R_T = {ra} + {rb} = {r_s1}\ \Omega"), _L(r"V = IR"), _L(rf"{Vs:g} = I \times {r_s1}"), _L(rf"I = {_ltx(I)}\ \mathrm{{A}}")]
+        opts = [{"value": _sig(I), "mistake": None, "working": work},
+                {"value": _sig(Vs / r_s2), "mistake": "S2 is still open — the lower branch carries no current.", "working": work},
+                {"value": _sig(Vs / ra), "mistake": "The resistor in the upper branch of the parallel pair was left out.", "working": work},
+                {"value": _sig(Vs / (ra + 2 * rb)), "mistake": "Both parallel branches were added in series.", "working": work}]
+        scaffold = [{"question": "What is the total resistance with only S1 closed, in Ω?", "answer": float(r_s1)},
+                    {"question": "What is the ammeter reading, in A?", "answer": _sig(I)}]
+        return with_diagram(_q(text, _sig(I), "A", opts, "Circuit Rules", scaffold, level), diagram)
+    if kind == "total":
+        text = setup + "S1 and S2 are both closed. Determine the total resistance of the circuit."
+        work = [_L(rf"\frac{{1}}{{R_P}} = \frac{{1}}{{{rb}}} + \frac{{1}}{{{rb}}} \Rightarrow R_P = {rp:g}\ \Omega"), _L(rf"R_T = {ra} + {rp:g} = {r_s2:g}\ \Omega")]
+        opts = [{"value": _sig(r_s2), "mistake": None, "working": work},
+                {"value": _sig(r_s1), "mistake": "S2 is closed — the second branch is now in parallel with the first.", "working": work},
+                {"value": _sig(ra + 2 * rb), "mistake": "The parallel resistors were added as if in series.", "working": work},
+                {"value": _sig(rp), "mistake": "The series resistor was left out of the total.", "working": work}]
+        scaffold = [{"question": "What is the resistance of the parallel pair, in Ω?", "answer": _sig(rp)},
+                    {"question": "What is the total resistance, in Ω?", "answer": _sig(r_s2)}]
+        return with_diagram(_q(text, _sig(r_s2), "Ω", opts, "Circuit Rules", scaffold, level), diagram)
+    qobj = _choice(setup + "S1 is closed, and then S2 is also closed. What happens to the reading on the ammeter, and why?",
+                   "It increases, because the total resistance of the circuit decreases.",
+                   [("It increases, because the resistance decreases.", "Must make clear it is the TOTAL resistance of the circuit that decreases (course report 2023)."),
+                    ("It decreases, because there is now more resistance in the circuit.", "A second parallel branch lowers the total resistance."),
+                    ("It stays the same, because the supply voltage has not changed.", "The total resistance changes, so the current does.")],
+                   "Circuit Rules", level)
+    return with_diagram(qobj, diagram)
+
+
 _ARRANGEMENTS = ("series", "parallel", "pair_series", "series_pair")
 
 
