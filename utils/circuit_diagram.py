@@ -192,47 +192,49 @@ def _headroom(elements):
 
 
 def loop_circuit(elements, supply="battery", supply_label=""):
-    """Components along the top of a loop, the supply on the bottom wire."""
+    """The supply on the top wire, components along the bottom of the loop (parallel branches hang below)."""
     x0 = 50
-    top = _headroom(elements)
-    chain, chain_end = _chain(elements, x0, top)
-    x_end = max(chain_end, x0 + _U + 40)     # room for the supply on the bottom wire
-    chain += _line(chain_end, top, x_end, top)
+    ts = 50 if supply_label else 30                       # y of the top (supply) wire
+    head = max(_headroom(elements), 70)                   # room above the components for labels / a voltmeter
+    cy = ts + head + 40                                   # y of the component row
+    chain, chain_end = _chain(elements, x0, cy)
+    x_end = max(chain_end, x0 + _U + 40)                  # room for the supply on the top wire
+    chain += _line(chain_end, cy, x_end, cy)
     depth = max([_depth(e) for e in elements] + [0])
-    bottom = top + max(depth + 64, 110)
     cx = (x0 + x_end) / 2
     body = (chain
-            + _wire((x0, top), (x0, bottom), (cx - _U / 2, bottom)) + _wire((cx + _U / 2, bottom), (x_end, bottom), (x_end, top))
-            + _place(supply, cx, bottom))
+            + _wire((x0, cy), (x0, ts), (cx - _U / 2, ts)) + _wire((cx + _U / 2, ts), (x_end, ts), (x_end, cy))
+            + _place(supply, cx, ts))
     if supply_label:
-        body += _text(cx, bottom + 30, supply_label)
-    return _svg(x_end + 50, bottom + (50 if supply_label else 30), body)
+        body += _text(cx, ts - 28, supply_label)
+    return _svg(x_end + 50, cy + depth + 36, body)
 
 
 def ladder(branches, supply="battery", supply_label="", rail=None):
     """A ladder: the branches are horizontal rungs between two vertical rails, the supply on the
-    bottom wire. rail: an optional component (e.g. an ammeter) on the left rail, so it carries the
-    supply current."""
+    top wire. rail: an optional component (e.g. an ammeter) on the left rail, between the supply and
+    the rungs, so it carries the supply current."""
     x0 = 100
-    flat = [c for b in branches for c in b] + ([rail] if rail else [])
-    top = _headroom(flat)
-    ys = [top + i * _GAP_Y for i in range(len(branches))]
+    flat = [c for b in branches for c in b]
+    head = max(_headroom(flat), 70)
+    ts = 50 if supply_label else 30
+    y_am = ts + 60
+    first = (y_am + 40 if rail else ts + 40) + head
+    ys = [first + i * _GAP_Y for i in range(len(branches))]
     xr = x0 + max(len(b) for b in branches) * _U + 70
-    y_am = ys[-1] + 50
-    y_b = ys[-1] + (120 if rail else 90)
     cx = (x0 + xr) / 2
     out = []
     if rail:
-        out.append(_line(x0, ys[0], x0, y_am - _U / 2) + _line(x0, y_am + _U / 2, x0, y_b)
+        out.append(_line(x0, ts, x0, y_am - _U / 2) + _line(x0, y_am + _U / 2, x0, ys[-1])
                    + _place(rail["kind"], x0, y_am, vertical=True))
         if rail["label"]:
             out.append(_text(x0 - 26, y_am, rail["label"], anchor="end"))
     else:
-        out.append(_line(x0, ys[0], x0, y_b))
-    out.append(_line(xr, ys[0], xr, y_b)
-               + _wire((x0, y_b), (cx - _U / 2, y_b)) + _wire((cx + _U / 2, y_b), (xr, y_b)) + _place(supply, cx, y_b))
+        out.append(_line(x0, ts, x0, ys[-1]))
+    out.append(_line(xr, ts, xr, ys[-1])
+               + _wire((x0, ts), (cx - _U / 2, ts)) + _wire((cx + _U / 2, ts), (xr, ts)) + _place(supply, cx, ts))
     if supply_label:
-        out.append(_text(cx, y_b + 30, supply_label))
+        out.append(_text(cx, ts - 28, supply_label))
     for y, branch in zip(ys, branches):
         bw = len(branch) * _U
         bx = x0 + (xr - x0 - bw) / 2
@@ -242,7 +244,7 @@ def ladder(branches, supply="battery", supply_label="", rail=None):
             out.append(_place(c["kind"], ccx, y))
             if c["label"]:
                 out.append(_text(ccx, y - _label_gap(c["kind"]), c["label"]))
-    return _svg(xr + 50, y_b + (50 if supply_label else 30), "".join(out))
+    return _svg(xr + 50, ys[-1] + 36, "".join(out))
 
 
 def network(elements, left="X", right="Y"):
