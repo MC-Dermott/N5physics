@@ -43,7 +43,8 @@ def make_question(question, correct_val, options_data, unit,
         scaffold=[
             # "instruction" steps (e.g. "draw a vector diagram") have no answer to check
             {"prompt": s["question"], "answer": s.get("answer"), "unit": s.get("unit", ""),
-             "instruction": bool(s.get("instruction"))}
+             "instruction": bool(s.get("instruction")),
+             "svg": s.get("svg", "")}
             for s in (scaffold or [])
             if s.get("answer") is not None or s.get("instruction")
         ],

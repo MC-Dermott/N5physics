@@ -27,6 +27,13 @@ from topics.dynamics.weight_calculations_s3 import generate_weight_calculations
 from topics.dynamics.unbalanced_forces_s3   import (
     gen_horizontal_unbalanced_force,
     generate_unbalanced_forces_s3,
+    gen_unknown_force,
+    gen_fma,
+    gen_light_gate_acceleration,
+    gen_experiment_mass,
+    gen_experiment_conclusions,
+    gen_skydiver_calculation,
+    gen_explain_motion,
 )
 from topics.dynamics.forces                import (
     generate_forces,
@@ -281,6 +288,12 @@ QUAL_REGISTRY = {
             "Unbalanced Forces": {
                 "Horizontal (driving vs friction)": gen_horizontal_unbalanced_force,
                 "Vertical (with weight)":           generate_unbalanced_forces_s3,
+                "Unknown Force (friction or driving)": gen_unknown_force,
+                "F = ma":                           gen_fma,
+                "Investigating — Calculations":     lambda level="S3": random.choice([gen_experiment_mass, gen_light_gate_acceleration])(level=level),
+                "Investigating — Conclusions":      gen_experiment_conclusions,
+                "Skydiver Calculations":            gen_skydiver_calculation,
+                "Explain Motion":                   gen_explain_motion,
             },
             "Definitions": s3_forces_definitions,
         },

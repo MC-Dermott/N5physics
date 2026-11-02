@@ -178,6 +178,21 @@ $$W = mg$$
 > find the unbalanced force — the applied force alone is not the answer. If the applied
 > force and weight are equal, the unbalanced force is zero and the object does not
 > accelerate.
+
+**Free body diagrams:** draw the object as a box and each force as an arrow starting on the
+box, pointing the way the force acts, labelled with its size. Bigger forces get longer arrows.
+
+**Investigating F, m and a:** with the mass kept constant, doubling the unbalanced force
+doubles the acceleration. With the unbalanced force kept constant, doubling the mass halves
+the acceleration ($a = F \\div m$). Light gates give the speeds $u$ and $v$ and the time $t$, so
+$a = \\frac{v - u}{t}$. Friction reduces the unbalanced force, so the measured acceleration
+is smaller than expected.
+
+**Skydivers:** at first the weight is bigger than the air resistance, so the skydiver
+accelerates downwards. Air resistance grows with speed until it equals the weight: the forces
+are balanced and the skydiver falls at a constant speed (**terminal velocity**). Opening the
+parachute makes the air resistance bigger than the weight, so the skydiver slows down until the
+air resistance again equals the weight, at a new, lower terminal velocity.
 """,
 
     "weight_calculations_s3": """

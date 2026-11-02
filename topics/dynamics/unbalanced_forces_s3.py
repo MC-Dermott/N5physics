@@ -98,6 +98,7 @@ def gen_vertical_unbalanced_force(level="S3"):
         {"question": "What is the weight of the object?", "answer": weight},
         {"question": "What is the unbalanced force?", "answer": unbalanced},
     ]
+    scaffold.insert(1, _fbd_step_vertical(applied, weight, label))
     return _with_fbd_widget(make_question(question, unbalanced, options_data, "N", scaffold=scaffold,
                          notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
                          question_type="Unbalanced Forces", level=level))
@@ -134,6 +135,7 @@ def gen_vertical_acceleration(level="S3"):
         {"question": "What is the unbalanced force?", "answer": unbalanced},
         {"question": "What is the acceleration?", "answer": accel},
     ]
+    scaffold.insert(1, _fbd_step_vertical(applied, weight, label))
     return _with_fbd_widget(make_question(question, accel, options_data, "m/s²", scaffold=scaffold,
                          notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
                          question_type="Unbalanced Forces", level=level))
@@ -141,3 +143,319 @@ def gen_vertical_acceleration(level="S3"):
 
 def generate_unbalanced_forces_s3(level="S3"):
     return random.choice([gen_vertical_unbalanced_force, gen_vertical_acceleration])(level=level)
+
+
+# ───────────── Added Nov 2026 to match the rebuilt Unbalanced Forces worksheet ─────────────
+from core.models.question_model import PhysicsQuestion
+
+
+def _n(x):
+    """Pupil-facing number: no e-notation, spaces in thousands, trailing zeros trimmed."""
+    x = float(x)
+    if abs(x - round(x)) < 1e-9:
+        v = int(round(x))
+        return f"{v:,}".replace(",", " ") if abs(v) >= 10000 else str(v)
+    return f"{x:.2f}".rstrip("0").rstrip(".")
+
+
+def fbd_svg(forces, obj=""):
+    """Example free body diagram as an SVG string. forces: [(direction, label, relative_length 0-1), ...] with
+    direction one of up / down / left / right. Arrows start on the box and are drawn to a sensible scale."""
+    W, H, cx, cy, half = 300, 300, 150, 150, 28
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">',
+             '<rect width="100%" height="100%" fill="white"/>',
+             f'<rect x="{cx-half}" y="{cy-half}" width="{2*half}" height="{2*half}" fill="#dde6f3" stroke="#1f3b66" stroke-width="2"/>']
+    if obj:
+        parts.append(f'<text x="{cx}" y="{cy+4}" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1f3b66">{obj}</text>')
+    for d, label, rel in forces:
+        ln = 28 + 55 * rel
+        vx, vy = {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}[d]
+        x0, y0 = cx + vx * half, cy + vy * half
+        x1, y1 = x0 + vx * ln, y0 + vy * ln
+        parts.append(f'<line x1="{x0}" y1="{y0}" x2="{x1}" y2="{y1}" stroke="#c0392b" stroke-width="3"/>')
+        px, py = -vy, vx
+        parts.append(f'<polygon points="{x1},{y1} {x1-vx*10+px*6},{y1-vy*10+py*6} {x1-vx*10-px*6},{y1-vy*10-py*6}" fill="#c0392b"/>')
+        tx, ty = x1 + vx * 8 + (0 if vx else 0), y1 + vy * 8
+        anchor = "middle" if vx == 0 else ("start" if vx > 0 else "end")
+        ty = ty + (4 if vy == 0 else (10 if vy > 0 else -4))
+        parts.append(f'<text x="{tx}" y="{ty}" text-anchor="{anchor}" font-family="sans-serif" font-size="13" fill="#333">{label}</text>')
+    parts.append('</svg>')
+    return "".join(parts)
+
+
+def _fbd_step(forces, obj=""):
+    return {"question": "Draw a free body diagram. Show every force as an arrow that starts on the object, labelled with its "
+                        "size, with longer arrows for bigger forces. Check yours against this example:",
+            "instruction": True, "svg": fbd_svg(forces, obj)}
+
+
+def _fbd_step_vertical(applied, weight, label=""):
+    big = max(applied, weight)
+    return _fbd_step([("up", f"{_n(applied)} N", _rel(applied, big)), ("down", f"{_n(weight)} N", _rel(weight, big))])
+
+
+def _rel(a, b):
+    """Relative arrow length of a (0-1) compared with the bigger force b."""
+    return 1.0 if a >= b else max(0.25, a / b)
+
+
+def _numeric(question, correct, wrong, unit, working, scaffold=None, level="S3"):
+    """wrong: list of (value, mistake). Single correct option plus distractors, dedup'd."""
+    options = [{"value": correct, "mistake": None, "working": working}]
+    options += [{"value": v, "mistake": m, "working": working} for v, m in wrong]
+    options = _dedup(options, correct)
+    for v, why in ((correct * 2, "Check your arithmetic — this is double the correct value."),
+                   (round(correct / 2, 3), "Check your arithmetic — this is half the correct value.")):
+        if len(options) < 3 and all(abs(float(o["value"]) - v) > 1e-6 for o in options) and v > 0:
+            options.append({"value": v, "mistake": why, "working": working})
+    return make_question(question, correct, options, unit, scaffold=scaffold,
+                         notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
+                         question_type="Unbalanced Forces", level=level)
+
+
+def _mc(text, correct, wrong, level="S3"):
+    """Multiple-choice (word answers): wrong = [(option, why it's wrong), ...]."""
+    distractors = [{"value": w, "mistake": why, "working": []} for w, why in wrong]
+    options = [correct] + [w for w, _ in wrong]
+    random.shuffle(options)
+    return PhysicsQuestion(question_text=text, correct_answer=correct, unit="", distractors=distractors,
+                           working=[], notes=NOTES["unbalanced_forces_s3"], topic="Dynamics",
+                           question_type="Unbalanced Forces", level=level,
+                           metadata={"type": "classification", "options": options})
+
+
+# (object, masses, friction forces) — masses and forces tied to the object so they are always sensible
+_HORIZ = [
+    ("van", [1200, 1500, 1800, 2000], [400, 600, 800, 1000]),
+    ("cyclist and bike", [80, 90, 100, 110], [40, 60, 80, 100]),
+    ("quad bike", [220, 250, 280], [100, 150, 200]),
+    ("team of huskies pulling a sledge", [150, 180, 200], [60, 80, 100]),
+]
+
+
+def gen_unknown_force(level="S3"):
+    """Find friction (given driving force + unbalanced force) or the driving force (given mass, acceleration, friction)."""
+    obj, masses, fricts = random.choice(_HORIZ)
+    if random.random() < 0.5:
+        m, f = random.choice(masses), random.choice(fricts)
+        a = random.choice([0.5, 1.0, 1.5, 2.0])
+        unb = m * a
+        drive = unb + f
+        working = [{"type": "text", "content": "Find the unbalanced force, then the driving force:"},
+                   {"type": "latex", "content": rf"F = ma = {_n(m)} \times {_n(a)} = {_n(unb)}\ \mathrm{{N}}"},
+                   {"type": "latex", "content": r"F_{\text{unbalanced}} = F_{\text{driving}} - F_{\text{friction}}"},
+                   {"type": "latex", "content": rf"{_n(unb)} = F_{{driving}} - {_n(f)}"},
+                   {"type": "latex", "content": rf"F_{{driving}} = {_n(unb)} + {_n(f)} = {_n(drive)}\ \mathrm{{N}}"}]
+        q = (f"A {obj} of mass {_n(m)} kg is accelerating at {_n(a)} m/s². The friction force on it is {_n(f)} N.\n\n"
+             f"Calculate the driving force.")
+        wrong = [(unb, "That is the unbalanced force. The driving force is bigger — it has to beat the friction too."),
+                 (m * a - f, "You subtracted the friction. Driving force = unbalanced force + friction."),
+                 (drive + f, "You added the friction twice.")]
+        sc = [{"question": "What is the unbalanced force?", "answer": unb},
+              _fbd_step([("right", f"{_n(drive)} N", 1.0), ("left", f"{_n(f)} N", _rel(f, drive))]),
+              {"question": "What is the driving force?", "answer": drive}]
+        return _with_fbd_widget(_numeric(q, drive, [w for w in wrong if w[0] > 0], "N", working, sc, level))
+    f = random.choice(fricts)
+    unb = random.choice([u for u in (100, 200, 250, 300, 400, 500) if u < 2 * f + 300])
+    drive = f + unb
+    working = [{"type": "latex", "content": r"F_{\text{unbalanced}} = F_{\text{driving}} - F_{\text{friction}}"},
+               {"type": "latex", "content": rf"{_n(unb)} = {_n(drive)} - F_{{friction}}"},
+               {"type": "latex", "content": rf"F_{{friction}} = {_n(drive)} - {_n(unb)} = {_n(f)}\ \mathrm{{N}}"}]
+    q = (f"A {obj} is driven forwards with a force of {_n(drive)} N. The unbalanced force on it is {_n(unb)} N forwards.\n\n"
+         f"Calculate the size of the friction force.")
+    wrong = [(drive + unb, "You added the unbalanced force. Friction = driving force − unbalanced force."),
+             (unb, "That is the unbalanced force given in the question."),
+             (drive, "That is the driving force given in the question.")]
+    sc = [_fbd_step([("right", f"{_n(drive)} N", 1.0), ("left", "friction = ?", _rel(f, drive))]),
+          {"question": "What is the friction force?", "answer": f, "unit": "N"}]
+    return _with_fbd_widget(_numeric(q, f, wrong, "N", working, sc, level))
+
+
+_FMA_OBJECTS = [
+    ("crate", [20, 40, 50, 60]), ("trolley", [2, 4, 5]), ("quad bike", [200, 250, 400]),
+    ("motorbike", [200, 250, 400]), ("shopping trolley", [10, 20, 25]), ("small boat", [100, 200, 500]),
+]
+
+
+def gen_fma(level="S3"):
+    """F = ma in all three arrangements, with clean numbers (m × a is always a tidy force)."""
+    obj, masses = random.choice(_FMA_OBJECTS)
+    m = random.choice(masses)
+    a = random.choice([0.5, 1.0, 1.5, 2.0, 2.5, 4.0])
+    F = m * a
+    kind = random.choice(["a", "F", "m"])
+    if kind == "a":
+        q = f"A {obj} of mass {_n(m)} kg has an unbalanced force of {_n(F)} N acting on it.\n\nCalculate its acceleration."
+        ans, unit = a, "m/s²"
+        working = [{"type": "latex", "content": r"F = ma"}, {"type": "latex", "content": rf"{_n(F)} = {_n(m)} \times a"},
+                   {"type": "latex", "content": rf"a = \frac{{{_n(F)}}}{{{_n(m)}}} = {_n(a)}\ \mathrm{{m/s^2}}"}]
+        wrong = [(F * m, "You multiplied force by mass. Rearrange F = ma to a = F ÷ m."),
+                 (m / F, "You divided mass by force — the wrong way up."),
+                 (F - m, "You subtracted. Use a = F ÷ m.")]
+    elif kind == "F":
+        q = f"A {obj} of mass {_n(m)} kg accelerates at {_n(a)} m/s².\n\nCalculate the unbalanced force on it."
+        ans, unit = F, "N"
+        working = [{"type": "latex", "content": r"F = ma"}, {"type": "latex", "content": rf"F = {_n(m)} \times {_n(a)} = {_n(F)}\ \mathrm{{N}}"}]
+        wrong = [(m / a, "You divided mass by acceleration. F = m × a."),
+                 (m + a, "You added. F = m × a."),
+                 (a / m, "You divided acceleration by mass. F = m × a.")]
+    else:
+        q = f"An unbalanced force of {_n(F)} N gives a {obj} an acceleration of {_n(a)} m/s².\n\nCalculate the mass of the {obj}."
+        ans, unit = m, "kg"
+        working = [{"type": "latex", "content": r"F = ma"}, {"type": "latex", "content": rf"{_n(F)} = m \times {_n(a)}"},
+                   {"type": "latex", "content": rf"m = \frac{{{_n(F)}}}{{{_n(a)}}} = {_n(m)}\ \mathrm{{kg}}"}]
+        wrong = [(F * a, "You multiplied. Rearrange F = ma to m = F ÷ a."),
+                 (a / F, "You divided acceleration by force — the wrong way up."),
+                 (F - a, "You subtracted. m = F ÷ a.")]
+    wrong = [w for w in wrong if w[0] > 0]
+    return _numeric(q, ans, wrong, unit, working, None, level)
+
+
+def gen_light_gate_acceleration(level="S3"):
+    """a = Δv ÷ t from two light-gate speeds (Δv = v − u)."""
+    u = random.choice([0.2, 0.4, 0.6, 0.8])
+    a = random.choice([0.5, 1.0, 1.5, 2.0])
+    t = random.choice([0.8, 1.0, 1.6, 2.0])
+    v = round(u + a * t, 2)
+    dv = round(v - u, 2)
+    working = [{"type": "latex", "content": rf"\Delta v = v - u = {_n(v)} - {_n(u)} = {_n(dv)}\ \mathrm{{m/s}}"},
+               {"type": "latex", "content": r"a = \frac{\Delta v}{t}"},
+               {"type": "latex", "content": rf"a = \frac{{{_n(dv)}}}{{{_n(t)}}} = {_n(a)}\ \mathrm{{m/s^2}}"}]
+    q = (f"Two light gates measure the speed of a trolley as {_n(u)} m/s at the first gate and {_n(v)} m/s at the second gate. "
+         f"The time between the gates is {_n(t)} s.\n\nCalculate the acceleration of the trolley.")
+    wrong = [(round(v / t, 2), "You used the final speed instead of the change in speed (v − u)."),
+             (round((v + u) / t, 2), "You added the speeds. The change in speed is v − u."),
+             (dv, "That is the change in speed. Now divide by the time.")]
+    sc = [{"question": "What is the change in speed (v − u)?", "answer": dv, "unit": "m/s"},
+          {"question": "What is the acceleration?", "answer": a, "unit": "m/s²"}]
+    return _numeric(q, a, wrong, "m/s²", working, sc, level)
+
+
+def gen_experiment_mass(level="S3"):
+    """Trolley investigation: use one pair of results with F = ma to find the mass."""
+    m = random.choice([0.5, 1.0, 2.0, 4.0])
+    forces = [1.0, 2.0, 3.0, 4.0]
+    accs = [f / m for f in forces]
+    i = random.randrange(4)
+    row_f = "      ".join(_n(f) for f in forces)
+    row_a = "      ".join(_n(a) for a in accs)
+    q = ("A pupil investigates how the acceleration of a trolley depends on the unbalanced force on it. "
+         "The mass of the trolley is kept constant. Her results are shown.\n\n"
+         f"Unbalanced force (N):    {row_f}\nAcceleration (m/s²):      {row_a}\n\n"
+         f"Use the results for {_n(forces[i])} N to calculate the mass of the trolley.")
+    working = [{"type": "latex", "content": r"F = ma"},
+               {"type": "latex", "content": rf"{_n(forces[i])} = m \times {_n(accs[i])}"},
+               {"type": "latex", "content": rf"m = \frac{{{_n(forces[i])}}}{{{_n(accs[i])}}} = {_n(m)}\ \mathrm{{kg}}"}]
+    wrong = [(round(forces[i] * accs[i], 3), "You multiplied force by acceleration. Rearrange F = ma to m = F ÷ a."),
+             (round(accs[i] / forces[i], 3), "You divided acceleration by force — the wrong way up."),
+             (round(forces[i] - accs[i], 3), "You subtracted. m = F ÷ a.")]
+    return _numeric(q, m, [w for w in wrong if w[0] > 0], "kg", working, None, level)
+
+
+def gen_experiment_conclusions(level="S3"):
+    """Word-answer questions about the force / mass / acceleration investigations."""
+    kind = random.choice(["keep_const_f", "keep_const_m", "double_f", "double_m", "friction", "mass_trend"])
+    if kind == "keep_const_f":
+        return _mc("A pupil investigates how the acceleration of a trolley depends on the unbalanced force on it. "
+                   "Which quantity must be kept the same?", "The mass of the trolley",
+                   [("The unbalanced force", "That is the quantity being changed."),
+                    ("The acceleration", "That is the quantity being measured."),
+                    ("The time between the light gates", "The time is not what is being controlled in this investigation.")], level)
+    if kind == "keep_const_m":
+        return _mc("A pupil investigates how the acceleration of a trolley depends on its mass. "
+                   "Which quantity must be kept the same?", "The unbalanced force",
+                   [("The mass of the trolley", "That is the quantity being changed."),
+                    ("The acceleration", "That is the quantity being measured."),
+                    ("The speed of the trolley", "The speed changes as the trolley accelerates.")], level)
+    if kind == "double_f":
+        return _mc("The mass of a trolley is kept constant. What happens to its acceleration when the unbalanced force is doubled?",
+                   "The acceleration doubles",
+                   [("The acceleration halves", "A bigger force gives a bigger acceleration (a = F ÷ m)."),
+                    ("The acceleration stays the same", "Acceleration depends on the unbalanced force."),
+                    ("The acceleration quadruples", "Doubling the force doubles the acceleration — not four times.")], level)
+    if kind == "double_m":
+        return _mc("The unbalanced force on a trolley is kept constant. What happens to its acceleration when the mass is doubled?",
+                   "The acceleration halves",
+                   [("The acceleration doubles", "A bigger mass is harder to accelerate (a = F ÷ m)."),
+                    ("The acceleration stays the same", "Acceleration depends on the mass."),
+                    ("The acceleration quadruples", "A bigger mass gives a smaller acceleration.")], level)
+    if kind == "friction":
+        return _mc("There is friction between a trolley and the bench. Why does this make the measured acceleration smaller than expected?",
+                   "Friction acts against the motion, so the unbalanced force is smaller",
+                   [("Friction increases the mass of the trolley", "Friction does not change the mass."),
+                    ("Friction increases the pulling force", "Friction acts against the motion, reducing the unbalanced force."),
+                    ("Friction makes the weight of the trolley bigger", "Friction does not change the weight.")], level)
+    return _mc("Pupils measure the acceleration of a trolley with a constant unbalanced force and different masses. "
+               "Which statement describes their results?", "As the mass increases, the acceleration decreases",
+               [("As the mass increases, the acceleration increases", "A bigger mass is harder to accelerate."),
+                ("The acceleration is the same for every mass", "Acceleration depends on the mass (a = F ÷ m)."),
+                ("As the mass increases, the speed stays the same", "That doesn't describe the acceleration.")], level)
+
+
+def gen_skydiver_calculation(level="S3"):
+    """Falling skydiver: weight, then unbalanced force (weight − air resistance), then acceleration."""
+    m = random.choice([60, 70, 80, 90])
+    W = round(m * G, 1)
+    R = random.choice([100, 120, 150, 200, 250])
+    unb = round(W - R, 1)
+    a = round(unb / m, 2)
+    working = [{"type": "latex", "content": rf"W = mg = {m} \times {G} = {_n(W)}\ \mathrm{{N}}"},
+               {"type": "latex", "content": rf"F_{{unbalanced}} = W - F_{{air}} = {_n(W)} - {_n(R)} = {_n(unb)}\ \mathrm{{N}}"},
+               {"type": "latex", "content": r"F = ma"},
+               {"type": "latex", "content": rf"a = \frac{{{_n(unb)}}}{{{m}}} = {_n(a)}\ \mathrm{{m/s^2}}"}]
+    q = (f"A skydiver of mass {m} kg jumps from a plane. Just after leaving the plane the air resistance on the skydiver is {_n(R)} N.\n\n"
+         f"Calculate the acceleration of the skydiver.")
+    wrong = [(round(R / m, 2), "You divided the air resistance by the mass. Use the unbalanced force (weight − air resistance)."),
+             (round(W / m, 2), "You forgot the air resistance — that's just g. Subtract it from the weight first."),
+             (round((W + R) / m, 2), "You added the air resistance. It acts upwards, against the weight, so subtract it.")]
+    sc = [{"question": "What is the weight of the skydiver?", "answer": W, "unit": "N"},
+          _fbd_step([("up", f"{_n(R)} N", _rel(R, W)), ("down", f"{_n(W)} N", 1.0)]),
+          {"question": "What is the unbalanced force?", "answer": unb, "unit": "N"},
+          {"question": "What is the acceleration?", "answer": a, "unit": "m/s²"}]
+    return _with_fbd_widget(_numeric(q, a, wrong, "m/s²", working, sc, level))
+
+
+def gen_explain_motion(level="S3"):
+    """Explain questions: skydivers (terminal speed, parachute), balanced forces, rockets in space."""
+    kind = random.choice(["terminal", "chute", "newspeed", "car_const", "car_accel", "space", "diver_balanced"])
+    if kind == "terminal":
+        return _mc("A skydiver stops speeding up a few seconds after leaving the plane. Which explanation is correct?",
+                   "The air resistance has increased until it equals the weight, so the forces are balanced",
+                   [("The air resistance has increased until it is bigger than the weight", "Then the skydiver would slow down. At terminal speed they are EQUAL."),
+                    ("The weight of the skydiver has decreased", "Weight stays the same (W = mg)."),
+                    ("Gravity stops acting on the skydiver", "Gravity still acts — the air resistance has just grown to match it.")], level)
+    if kind == "chute":
+        return _mc("A skydiver falling at a steady speed opens the parachute. Why does the skydiver slow down?",
+                   "The air resistance becomes bigger than the weight, so there is an unbalanced force upwards",
+                   [("The weight becomes smaller than before", "The weight doesn't change when a parachute opens."),
+                    ("The air resistance becomes equal to the weight", "Equal forces would mean a steady speed — not slowing down."),
+                    ("The parachute stops gravity", "Gravity still acts; the air resistance is just bigger.")], level)
+    if kind == "newspeed":
+        return _mc("After the parachute opens the skydiver slows down and then falls at a new, lower, steady speed. Why?",
+                   "As the skydiver slows the air resistance decreases until it equals the weight again",
+                   [("As the skydiver slows the air resistance increases until it equals the weight", "Slower speed means LESS air resistance."),
+                    ("The weight decreases until it equals the air resistance", "The weight stays the same."),
+                    ("The parachute folds up", "The parachute stays open; the air resistance falls as the speed falls.")], level)
+    if kind == "car_const":
+        return _mc("A car's engine force is 2000 N and the resistive forces total 2000 N. Describe the car's motion.",
+                   "It moves at a constant speed in a straight line, because the forces are balanced",
+                   [("It accelerates, because the engine is on", "Equal forces are balanced — no acceleration."),
+                    ("It slows down, because of the resistive forces", "The engine force cancels them exactly."),
+                    ("It is stationary", "Balanced forces mean constant velocity OR at rest — it is already moving.")], level)
+    if kind == "car_accel":
+        return _mc("A car's engine force is 2000 N and the resistive forces total 700 N. Describe the car's motion.",
+                   "It accelerates forwards, because the forces are unbalanced",
+                   [("It moves at a constant speed, because the engine is on", "The forces are not equal, so they are unbalanced."),
+                    ("It slows down, because the resistive forces are acting", "The engine force is bigger, so the car speeds up."),
+                    ("It accelerates backwards", "The unbalanced force acts in the direction of the bigger force — forwards.")], level)
+    if kind == "space":
+        return _mc("A rocket is travelling at 2000 m/s far from any planet. Its engines are switched off. Describe its motion.",
+                   "It continues at 2000 m/s in a straight line, because there is no unbalanced force",
+                   [("It slows down and stops, because the engines are off", "With no friction or air resistance there is nothing to slow it down."),
+                    ("It speeds up, because there is nothing in the way", "No force means no acceleration."),
+                    ("It drops back towards the Earth", "It is far from any planet, so no force acts on it.")], level)
+    return _mc("A skydiver falls at a steady speed with the parachute closed. What is the size of the air resistance?",
+               "It is equal to the skydiver's weight, because the forces are balanced",
+               [("It is zero", "There is air resistance — it equals the weight."),
+                ("It is bigger than the weight", "Then the skydiver would be slowing down."),
+                ("It is smaller than the weight", "Then the skydiver would still be speeding up.")], level)

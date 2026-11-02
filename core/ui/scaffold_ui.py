@@ -30,6 +30,9 @@ def render_scaffold(question, suffix=""):
         for i, step in enumerate(question.scaffold):
             st.markdown(f"**Step {i + 1}:** {step['prompt']}")
 
+            if step.get("svg"):
+                st.image(step["svg"], width=320)       # e.g. an example free body diagram
+
             if step.get("instruction"):
                 if i < len(question.scaffold) - 1:
                     st.divider()

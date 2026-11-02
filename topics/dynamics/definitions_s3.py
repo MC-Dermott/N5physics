@@ -52,6 +52,9 @@ FORCES_DEFINITIONS = {
     "balanced forces": _d("Balanced and unbalanced forces", "Forces that are equal in size and opposite in direction, so there is no overall (unbalanced) force.",
                           ["unbalanced force"],
                           [("Forces that make an object stop moving.", "Balanced forces mean **constant speed** (or staying still), not stopping.")]),
+    "terminal velocity": _d("Balanced and unbalanced forces", "The constant (steady) speed reached by a falling object when the air resistance equals its weight, so the forces are balanced.",
+                            ["balanced forces", "air resistance"],
+                            [("The fastest speed an object can ever reach.", "It is the **steady** speed where air resistance equals weight — the forces are balanced.")]),
     "unbalanced force": _d("Balanced and unbalanced forces", "The overall force on an object when the forces acting on it do not cancel out; it causes acceleration.",
                            ["balanced forces"]),
 }
@@ -63,6 +66,8 @@ FORCES_STATEMENTS = [
     ("balanced", "When the forces on a moving car are balanced it moves at a constant speed.", True, "Balanced forces — no acceleration."),
     ("balanced", "When the forces on a moving car are balanced it slows down and stops.", False, "Balanced forces mean **constant speed**."),
     ("unbal", "An unbalanced force causes an object to accelerate.", True, "F = ma."),
+    ("terminal", "A skydiver falling at terminal velocity has balanced forces: the air resistance equals the weight.", True, "Balanced forces — no acceleration."),
+    ("terminal", "A skydiver falling at terminal velocity has an unbalanced force downwards.", False, "At terminal velocity the forces are **balanced**."),
     ("friction", "Friction always acts in the opposite direction to the motion.", True, "It opposes motion."),
     ("friction", "Streamlining a car increases air resistance.", False, "Streamlining **reduces** air resistance."),
 ]
