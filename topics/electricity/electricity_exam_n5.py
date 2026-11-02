@@ -219,7 +219,7 @@ def gen_ec_gradient(level="N5"):
 
 def gen_ec_ohm_experiment(level="N5"):
     """Ohm's law experiment and V–I graphs: meter positions, obtaining a range of readings, graph conclusions."""
-    kind = random.choice(["meters", "range", "lamp", "resistor_graph", "warming"])
+    kind = random.choice(["meters", "range", "lamp", "resistor_graph", "warming", "reliable", "anomalous", "zero_error", "better_method"])
     if kind == "meters":
         qobj = _choice("A student finds the resistance of resistor R using a battery, a variable resistor, an ammeter and a voltmeter. How should the meters be connected?",
                        "The ammeter in series with R and the voltmeter in parallel with R.",
@@ -234,6 +234,31 @@ def gen_ec_ohm_experiment(level="N5"):
                         ("Change the voltage of the battery.", "The method uses the variable resistor to change the current and voltage."),
                         ("Change the resistance of R.", "R is the resistor being investigated — its resistance must stay the same.")], "Potential Difference", level)
         return with_diagram(qobj, loop_circuit([comp("variable", "variable resistor"), comp("resistor", "R")], supply_label=""))
+    if kind == "reliable":
+        return _choice("A student repeats an Ohm's law experiment and gets almost identical results each time. What does this show about the results?",
+                       "They are reliable (repeatable).",
+                       [("They are accurate.", "Close agreement between repeats shows the results are reliable; it does not show they are correct."),
+                        ("They are anomalous.", "An anomalous result is one that does NOT fit the pattern."),
+                        ("The resistance of the resistor is constant.", "Repeat readings agreeing says nothing about whether the resistance changes.")], "Potential Difference", level)
+    if kind == "anomalous":
+        return _choice("One pair of readings in an Ohm's law experiment does not fit the pattern of the others. What should the student do?",
+                       "Repeat that measurement.",
+                       [("Leave it out of the results without checking it.", "Check it by repeating the measurement first."),
+                        ("Use it in the calculation as it is.", "An anomalous reading should be repeated, not used unchecked."),
+                        ("Change the resistor and start again.", "Only the doubtful reading needs repeating.")], "Potential Difference", level)
+    if kind == "zero_error":
+        return _choice("The V–I line for a resistor does not pass through the origin. Which is a possible reason?",
+                       "One of the meters has a zero error.",
+                       [("The resistor has no resistance.", "The line has a gradient, so the resistor has a resistance."),
+                        ("The voltage is directly proportional to the current.", "That would give a line through the origin."),
+                        ("The ammeter was connected in parallel.", "That would affect the readings but is not the usual explanation for an offset line.")], "Potential Difference", level)
+    if kind == "better_method":
+        r = random.choice([4.8, 5.0, 10, 12, 22])
+        return _choice(f"Student A finds the resistance of a resistor from one pair of readings. Student B plots a graph of five pairs of readings and uses its gradient to get {r:g} Ω. Which statement is correct?",
+                       "Student B's method is better, because it uses several readings so one inaccurate reading has less effect.",
+                       [("Student A's method is better, because it is quicker.", "Speed does not make a method more accurate."),
+                        ("The methods are equally good, because both use V = IR.", "Using several readings reduces the effect of a single inaccurate reading."),
+                        ("Student B's method is worse, because a graph needs more readings.", "More readings make the result more reliable, not less.")], "Potential Difference", level)
     if kind == "lamp":
         return _choice("The V–I graph for a filament lamp curves so that the gradient increases as the current increases. Which conclusion is correct?",
                        "The resistance of the lamp increases as the current increases.",
