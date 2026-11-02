@@ -102,3 +102,6 @@ CREATE INDEX IF NOT EXISTS test_results_assignment_idx       ON test_results (as
 ALTER TABLE assignments        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE assignment_items   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE assignment_targets ENABLE ROW LEVEL SECURITY;
+
+-- Batches (see migrations/2026-11-02_assignment_batch.sql): assignments from one tracker import share a name.
+ALTER TABLE assignments ADD COLUMN IF NOT EXISTS batch TEXT;
