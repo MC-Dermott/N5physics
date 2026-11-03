@@ -107,6 +107,20 @@ def _with_field_widget(question):
     return question
 
 
+# Linac / cyclotron / synchrotron simulation (Luke's Simulations/Particles and waves/linac_cyclotron_synchrotron.html)
+_ACCEL_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "particle_accelerators_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_accel_widget(question, tab):
+    """Attach the accelerator simulation, opened on the tab ('lin', 'cyc' or 'syn') the question is about."""
+    question.metadata["widget_html"] = _ACCEL_WIDGET_HTML.replace(
+        "</body>", "<script>showTab('%s');</script></body>" % tab)
+    question.metadata["widget_height"] = 1150
+    return question
+
+
 # (particle, charge, mass, p.d. choices (kV))
 _PARTICLES = [("An electron", E, ME, [0.25, 0.60, 1.5, 2.4, 3.0]),
               ("A proton", E, MP, [2.5, 10, 25, 50]),
@@ -152,12 +166,18 @@ def _charged_speed(level):
     return _q(text, _sig(v), "m s⁻¹", opts, "Forces on Charged Particles", scaffold, level)
 
 
+_ACCEL_TAB = {"linac": "lin", "tube": "lin", "vacuum": "lin", "cyclotron": "cyc", "synchrotron": "syn"}
+
+
 def gen_pw_accelerators(level="Higher"):
-    return _with_field_widget(_accelerators(level))
-
-
-def _accelerators(level):
     kind = random.choice(["cyclotron", "linac", "synchrotron", "field", "tube", "vacuum"])
+    question = _accelerators(level, kind)
+    if kind in _ACCEL_TAB:
+        return _with_accel_widget(question, _ACCEL_TAB[kind])
+    return _with_field_widget(question)
+
+
+def _accelerators(level, kind):
     if kind == "cyclotron":
         return _choice("Why is an alternating voltage used in a cyclotron?",
                        "It switches so that the force on the particle is in the correct direction each time it crosses the gap.",
@@ -416,6 +436,10 @@ def _magnet_concept(level):
 
 # ── Linear accelerator: work done across a gap, speed gained ──
 def gen_pw_linac(level="Higher"):
+    return _with_accel_widget(_linac(level), "lin")
+
+
+def _linac(level):
     kv = random.choice([10.0, 15.0, 18.0, 20.0, 25.0, 28.0, 35.0, 40.0])
     V = kv * 1000
     W1 = E * V

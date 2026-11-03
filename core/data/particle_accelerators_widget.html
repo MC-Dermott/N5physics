@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Particle Accelerators: Linac, Cyclotron and Synchrotron</title>
+<style>
+  :root{
+    --bg:#f3f5f9; --card:#fff; --ink:#1b2433; --muted:#5b6678; --line:#d9dfea;
+    --accent:#2457d6; --good:#12844a; --bad:#c62f2f; --warn:#b36b00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px}
+  h1{font-size:1.45rem;margin:0 0 2px}
+  .sub{color:var(--muted);margin:0 0 12px}
+  .tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .tab{border:1px solid var(--line);background:#fff;padding:9px 18px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;color:var(--muted)}
+  .tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+  canvas{display:block;width:100%;border-radius:10px;background:#0b1220}
+  #linCv{aspect-ratio:16/10}
+  .grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px}
+  #synCv,#synCh,#cycCv,#cycCh{aspect-ratio:1/1}
+  @media (max-width:820px){.grid2{grid-template-columns:1fr} #linCv{aspect-ratio:4/3}}
+  .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 18px;align-items:end}
+  .ctl label{display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted);margin-bottom:2px}
+  .ctl label b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .ctl input[type=range]{width:100%}
+  .ctl select{width:100%;padding:6px;border-radius:8px;border:1px solid var(--line);font:inherit}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  button.b{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}
+  button.b.p{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .read{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
+  .rd{background:#f6f8fc;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .rd small{display:block;color:var(--muted);font-size:.75rem}
+  .rd span{font-size:1.1rem;font-weight:700;font-variant-numeric:tabular-nums}
+  .status{margin-top:10px;padding:9px 12px;border-radius:10px;font-weight:600;background:#eef3ff;border:1px solid #cdd9fb}
+  .status.good{background:#e8f6ee;border-color:#b6e2c8;color:#0d6a3b}
+  .status.bad{background:#fdecec;border-color:#f3c0c0;color:#9c2020}
+  .status.warn{background:#fff4e0;border-color:#f2d6a0;color:#8a5200}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:820px){.two{grid-template-columns:1fr}}
+  h2{font-size:1.05rem;margin:0 0 6px}
+  ul{margin:0;padding-left:20px} li{margin:3px 0}
+  details{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:6px 0;background:#fafbfd}
+  summary{cursor:pointer;font-weight:600}
+  .eq{font-family:ui-monospace,Menlo,monospace;background:#eef1f7;border-radius:6px;padding:1px 6px}
+  .note{font-size:.85rem;color:var(--muted);margin:8px 0 0}
+  .hide{display:none}
+  .chk{display:flex;gap:8px;align-items:center;font-size:.92rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Particle accelerators: linac, cyclotron and synchrotron</h1>
+  <p class="sub">Higher Physics &ndash; Particles and waves. Change the settings and watch what the particles do.</p>
+
+  <div class="tabs">
+    <button class="tab on" id="tabLin">Linear accelerator (linac)</button>
+    <button class="tab" id="tabCyc">Cyclotron</button>
+    <button class="tab" id="tabSyn">Synchrotron</button>
+  </div>
+
+  <!-- ================= LINAC ================= -->
+  <section id="secLin">
+    <div class="card">
+      <canvas id="linCv"></canvas>
+      <div class="status" id="l_status">&nbsp;</div>
+      <div class="read">
+        <div class="rd"><small>Kinetic energy (leading proton)</small><span id="l_ke">&ndash;</span></div>
+        <div class="rd"><small>Speed</small><span id="l_v">&ndash;</span></div>
+        <div class="rd"><small>Energy gained at last gap</small><span id="l_gain">&ndash;</span></div>
+        <div class="rd"><small>Gaps crossed</small><span id="l_gaps">&ndash;</span></div>
+        <div class="rd"><small>Energy gain per gap, W = QV</small><span id="l_qv">&ndash;</span></div>
+        <div class="rd"><small>Last proton to reach target</small><span id="l_final">&ndash;</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="controls">
+        <div class="ctl"><label>Voltage across each gap <b id="o_lv"></b></label><input type="range" id="c_lv" min="20" max="100" step="5" value="50"></div>
+        <div class="ctl"><label>AC frequency the linac was built for <b id="o_lf"></b></label><input type="range" id="c_lf" min="5" max="30" step="1" value="10"></div>
+        <div class="ctl"><label>Frequency error (the supply drifts) <b id="o_ld"></b></label><input type="range" id="c_ld" min="-30" max="30" step="1" value="0"></div>
+        <div class="ctl"><label>Slow motion <b id="o_ls"></b></label><input type="range" id="c_ls" min="2" max="200" step="2" value="20"></div>
+        <div class="ctl"><label>Beam</label><select id="c_lm"><option value="cont">Continuous bunches</option><option value="single">Single proton (press Fire)</option></select></div>
+      </div>
+      <div class="btns">
+        <button class="b p" id="l_play">Pause</button>
+        <button class="b" id="l_fire">Fire a proton</button>
+        <button class="b" id="l_reset">Restart</button>
+        <button class="b" id="l_zero">Frequency error = 0</button>
+      </div>
+      <p class="note">Tube lengths (cm): <span id="l_lens"></span></p>
+    </div>
+    <div class="two">
+      <div class="card">
+        <h2>How a linac works</h2>
+        <ul>
+          <li>Charged particles are accelerated along a straight line through a series of <b>hollow metal drift tubes</b> in a vacuum.</li>
+          <li>Alternate tubes are connected to opposite terminals of an <b>alternating (AC) supply</b>, so each gap between tubes has an electric field.</li>
+          <li>The particle gains energy <span class="eq">W = QV</span> every time it crosses a gap while the field points the right way.</li>
+          <li><b>Inside a tube there is no electric field</b>, so the particle drifts at constant speed while the polarity swaps over.</li>
+          <li>The particle spends the same time (half a cycle) in every tube, but it is moving faster, so <b>the tubes get longer</b>: <span class="eq">length = speed &times; time</span>.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Things to try</h2>
+        <ul>
+          <li>Watch the tube polarity and the gap arrows flip as the proton crosses each gap. When does it get its push?</li>
+          <li>Slide <b>Frequency error</b> away from 0. The tubes are fixed, so the protons arrive at the gaps at the wrong moment. What happens to the energy gain?</li>
+          <li>Double the gap voltage and check the energy gain per gap in the readout. Does the proton end up twice as fast, or twice the energy?</li>
+          <li>Change the design frequency. The linac is rebuilt: what happens to the tube lengths and the total length?</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Check your understanding</h2>
+      <details><summary>1. Why must the tubes get longer along the linac?</summary>The particle gets faster each gap. The AC field reverses every half cycle, so the particle needs to take the same time (half a cycle) to cross each tube. Distance = speed &times; time, so a faster particle needs a longer tube.</details>
+      <details><summary>2. Why is the particle not slowed down when the supply reverses?</summary>The particle is inside a metal tube. There is no electric field inside it, so the polarity can change without any force on the particle. It only feels a force in the gaps.</details>
+      <details><summary>3. What goes wrong if the frequency of the supply is too high or too low?</summary>The particle reaches the gap when the field is not pointing in the direction of its motion. It gains less energy, or is even slowed down, so it does not reach the intended energy.</details>
+      <details><summary>4. A proton crosses a 50 kV gap. How much kinetic energy does it gain?</summary>W = QV = 1.6 &times; 10<sup>-19</sup> &times; 50 000 = 8.0 &times; 10<sup>-15</sup> J (50 keV). Every gap gives the same energy gain, but speed does not increase by equal steps because E<sub>k</sub> = &frac12;mv<sup>2</sup>.</details>
+      <details><summary>5. Give one limitation of a linac.</summary>To reach high energy it has to be very long (many tubes), which is expensive. Each particle passes through each gap only once.</details>
+    </div>
+  </section>
+
+  <!-- ================= CYCLOTRON ================= -->
+  <section id="secCyc" class="hide">
+    <div class="card">
+      <div class="grid2">
+        <canvas id="cycCv"></canvas>
+        <canvas id="cycCh"></canvas>
+      </div>
+      <div class="status" id="c_status">&nbsp;</div>
+      <div class="read">
+        <div class="rd"><small>Kinetic energy</small><span id="c_ke">&ndash;</span></div>
+        <div class="rd"><small>Speed</small><span id="c_v">&ndash;</span></div>
+        <div class="rd"><small>Radius of the path</small><span id="c_r">&ndash;</span></div>
+        <div class="rd"><small>Time for one half-circle</small><span id="c_T">&ndash;</span></div>
+        <div class="rd"><small>Energy gained at last gap</small><span id="c_gain">&ndash;</span></div>
+        <div class="rd"><small>Gap crossings</small><span id="c_n">&ndash;</span></div>
+        <div class="rd"><small>Frequency that matches the proton</small><span id="c_fc">&ndash;</span></div>
+        <div class="rd"><small>Energy at the edge of the dees</small><span id="c_kmax">&ndash;</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="controls">
+        <div class="ctl"><label>Magnetic field B <b id="o_cb"></b></label><input type="range" id="c_cb" min="0.5" max="2" step="0.05" value="1"></div>
+        <div class="ctl"><label>Voltage across the gap <b id="o_cv"></b></label><input type="range" id="c_cv" min="10" max="300" step="10" value="100"></div>
+        <div class="ctl"><label>Frequency of the AC supply <b id="o_cf"></b></label><input type="range" id="c_cf" min="5" max="35" step="0.05" value="15.25"></div>
+        <div class="ctl"><label>Animation speed <b id="o_cs"></b></label><input type="range" id="c_cs" min="0.5" max="80" step="0.5" value="3"></div>
+        <div class="ctl"><label class="chk"><input type="checkbox" id="c_crel"> Include the increase of mass at high speed (relativity)</label></div>
+      </div>
+      <div class="btns">
+        <button class="b p" id="c_play">Pause</button>
+        <button class="b" id="c_match">Set frequency to match the proton</button>
+        <button class="b" id="c_reset">Release a new proton</button>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <h2>How a cyclotron works</h2>
+        <ul>
+          <li>Two hollow, D-shaped metal boxes (<b>dees</b>) sit in a vacuum with a small gap between them. A <b>uniform magnetic field</b> acts over both dees.</li>
+          <li>An <b>AC voltage</b> is connected across the dees, so there is an electric field in the gap that reverses direction.</li>
+          <li>The proton is accelerated each time it crosses the gap (<span class="eq">W = QV</span>).</li>
+          <li><b>Inside a dee there is no electric field.</b> The magnetic force is at right angles to the motion, so the proton moves in a semicircle at constant speed and comes back to the gap.</li>
+          <li>Faster protons move in bigger semicircles, so the path is a <b>spiral</b> that ends when the proton reaches the edge of the dees.</li>
+          <li>A faster proton has a bigger circle to travel, so the <b>time for each half-circle stays the same</b> and the AC frequency can stay fixed.</li>
+        </ul>
+        <p class="note">Extension (not needed at Higher): r = mv/qB and T = 2&pi;m/qB. The speed cancels, which is why the time for each half-circle does not depend on the speed.</p>
+      </div>
+      <div class="card">
+        <h2>Things to try</h2>
+        <ul>
+          <li>Watch the graph of time for each half-circle. It stays flat even though the radius and the speed keep increasing.</li>
+          <li>Change the AC frequency away from the matching value. Why does the proton stop gaining energy?</li>
+          <li>Double the gap voltage. Does the final energy change? How many crossings does it take?</li>
+          <li>Increase the magnetic field. What happens to the energy at the edge of the dees?</li>
+          <li>Tick the <b>relativity</b> box: the mass increases at high speed. What happens to the time for each half-circle, and what happens to the energy gain?</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Check your understanding</h2>
+      <details><summary>1. Why can the AC supply keep a fixed frequency even though the proton keeps speeding up?</summary>A faster proton moves in a bigger semicircle. It has further to go but is also moving faster, so the time for each half-circle is the same. The field in the gap therefore reverses at the right moment every time.</details>
+      <details><summary>2. Why is there no electric field inside the dees?</summary>The metal dees shield the inside. The proton only gains energy in the gap. Inside the dee, the magnetic field makes it follow a semicircle at constant speed.</details>
+      <details><summary>3. What is the job of the magnetic field, and does it change the proton's energy?</summary>The force on a moving charge in a magnetic field is at right angles to its velocity. It bends the path into a circle (so the proton comes back to the gap) but does no work, so the kinetic energy does not change in the dees.</details>
+      <details><summary>4. Give one advantage of a cyclotron over a linac.</summary>The proton passes through the same gap many times, so the machine is much more compact than a linac of the same final energy.</details>
+      <details><summary>5. Why can an ordinary cyclotron not reach very high energies?</summary>As the speed gets close to the speed of light the mass of the particle increases, so each half-circle takes longer. The particle arrives at the gap too late, the field no longer matches, and it stops being accelerated. Also, the magnet has to be bigger for higher energy. A synchrotron fixes this by changing the frequency and the magnetic field.</details>
+    </div>
+  </section>
+
+  <!-- ================= SYNCHROTRON ================= -->
+  <section id="secSyn" class="hide">
+    <div class="card">
+      <div class="grid2">
+        <canvas id="synCv"></canvas>
+        <canvas id="synCh"></canvas>
+      </div>
+      <div class="status" id="s_status">&nbsp;</div>
+      <div class="read">
+        <div class="rd"><small>Turns of the ring</small><span id="s_turn">&ndash;</span></div>
+        <div class="rd"><small>Kinetic energy</small><span id="s_ke">&ndash;</span></div>
+        <div class="rd"><small>Speed</small><span id="s_v">&ndash;</span></div>
+        <div class="rd"><small>Energy gained per turn</small><span id="s_gain">&ndash;</span></div>
+        <div class="rd"><small>Magnetic field in the bending magnets</small><span id="s_B">&ndash;</span></div>
+        <div class="rd"><small>Field needed to stay on the ring</small><span id="s_Bn">&ndash;</span></div>
+        <div class="rd"><small>Radius of path in a magnet</small><span id="s_r">&ndash;</span></div>
+        <div class="rd"><small>Time for one turn</small><span id="s_T">&ndash;</span></div>
+        <div class="rd"><small>Frequency of the RF voltage</small><span id="s_f">&ndash;</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="controls">
+        <div class="ctl"><label>Number of RF cavities</label><select id="c_sn"><option value="1">1</option><option value="2">2</option><option value="4" selected>4</option><option value="8">8</option></select></div>
+        <div class="ctl"><label>Voltage across each cavity <b id="o_sv"></b></label><input type="range" id="c_sv" min="0.05" max="2" step="0.05" value="0.5"></div>
+        <div class="ctl"><label>Beam is extracted at <b id="o_se"></b></label><input type="range" id="c_se" min="200" max="2000" step="50" value="1000"></div>
+        <div class="ctl"><label>Animation speed <b id="o_ss"></b></label><input type="range" id="c_ss" min="0.5" max="150" step="0.5" value="4"></div>
+        <div class="ctl"><label>Magnetic field</label><select id="c_sbm"><option value="auto">Increased as the particle speeds up</option><option value="manual">Fixed (you choose)</option></select></div>
+        <div class="ctl"><label>Magnetic field strength <b id="o_sb"></b></label><input type="range" id="c_sb" min="0" max="1.2" step="0.01" value="0.1" disabled></div>
+        <div class="ctl"><label>Frequency of the RF voltage</label><select id="c_sfm"><option value="auto">Increased to match the proton</option><option value="manual">Fixed (you choose)</option></select></div>
+        <div class="ctl"><label>Chosen frequency <b id="o_sf"></b></label><input type="range" id="c_sf" min="1" max="17" step="0.1" value="5" disabled></div>
+      </div>
+      <div class="btns">
+        <button class="b p" id="s_play">Pause</button>
+        <button class="b" id="s_reset">Inject a new proton</button>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <h2>How a synchrotron works</h2>
+        <ul>
+          <li>Particles go round and round a <b>ring of fixed size</b> inside a vacuum pipe.</li>
+          <li><b>Bending magnets</b> in the curved sections give a magnetic field. The force on a moving charge is at right angles to its motion, so the path is bent round the ring but the speed is not changed. There is no magnetic field in the straight sections.</li>
+          <li>In the straight sections, <b>RF cavities</b> give an electric field that accelerates the particle each time it passes through (<span class="eq">W = QV</span>). More cavities mean more energy gained per turn.</li>
+          <li>As the particle gets faster it needs a bigger sideways force to follow the same ring, so <b>the magnetic field is increased</b> in step with its momentum.</li>
+          <li>The particle goes round faster, so <b>the frequency of the accelerating voltage must also increase</b> to stay in step. Every time the particle reaches a cavity the field must be pointing the right way. That is why it is called a <i>synchro</i>tron.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Things to try</h2>
+        <ul>
+          <li>Watch the graphs: B and the frequency both go up as the energy goes up.</li>
+          <li>Change the <b>number of cavities</b> and inject again. What changes: the energy gained per turn, or the field B needed?</li>
+          <li>Look at the speed near the end. It creeps up towards <i>c</i> but never reaches it, yet B still has to keep rising. Why?</li>
+          <li>Set the <b>magnetic field to Fixed</b> and inject again. Why does the proton leave the ring?</li>
+          <li>Set the <b>frequency to Fixed</b> and inject again. Why does the energy gain fall away?</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Check your understanding</h2>
+      <details><summary>1. Why are magnets needed, and what do they do to the particle?</summary>A charged particle moving in a magnetic field experiences a force at right angles to its velocity. This bends its path round the ring but does not change its speed or energy. The electric field in the cavities is what speeds it up.</details>
+      <details><summary>2. Why must the magnetic field get stronger as the particle gains energy?</summary>A faster (higher momentum) particle is harder to turn. To keep it going round the same ring, the sideways force must be bigger, so the magnetic field has to increase. If it did not, the path would curve less than the ring and the particle would hit the wall.</details>
+      <details><summary>3. Why must the frequency of the accelerating voltage change?</summary>As the particle speeds up, it takes less time to go round the ring. The voltage must reverse in step with this, so that the particle arrives at each cavity when the field is in the direction to accelerate it.</details>
+      <details><summary>4. Why does the frequency level off near the end, while the field B keeps rising?</summary>The speed approaches the speed of light but cannot reach it, so the time for one turn hardly changes any more. The particle's energy and momentum still rise, so B has to keep increasing.</details>
+      <details><summary>5. Give one advantage of a synchrotron over a linac, and one over a cyclotron.</summary>Over a linac: the particles pass through the same cavities many times, so very high energies can be reached with much less equipment. Over a cyclotron: the particles stay on a ring of fixed size (only a ring of magnets is needed, not one huge magnet), and the changing frequency and field let it reach energies where the particle's mass has increased a lot.</details>
+    </div>
+  </section>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const E = 1.602176634e-19, MP = 1.67262192e-27, C = 299792458, MPC2 = 938.272; // MPC2 in MeV
+
+function setupCanvas(c){
+  const r = c.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+  c.width = Math.max(10, Math.round(r.width*d)); c.height = Math.max(10, Math.round(r.height*d));
+  const ctx = c.getContext('2d'); ctx.setTransform(d,0,0,d,0,0);
+  return {ctx, W:r.width, H:r.height};
+}
+function fmt(x, dp){ return x.toFixed(dp); }
+function setStatus(el, text, cls){ el.textContent = text; el.className = 'status' + (cls ? ' '+cls : ''); }
+function arrow(ctx, x1, y1, x2, y2, col, w){
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  const a = Math.atan2(y2-y1, x2-x1), h = 5 + w;
+  ctx.beginPath(); ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-h*Math.cos(a-0.45), y2-h*Math.sin(a-0.45));
+  ctx.lineTo(x2-h*Math.cos(a+0.45), y2-h*Math.sin(a+0.45)); ctx.closePath(); ctx.fill();
+}
+function rotP(o, a){ const c = Math.cos(a), s = Math.sin(a), nx = o.px*c - o.py*s, ny = o.px*s + o.py*c; o.px = nx; o.py = ny; }
+function bDot(ctx, x, y, r, alpha){
+  ctx.strokeStyle = 'rgba(200,190,255,'+alpha+')'; ctx.fillStyle = ctx.strokeStyle; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.stroke(); ctx.beginPath(); ctx.arc(x,y,r*0.3,0,7); ctx.fill();
+}
+
+/* Generic stacked strip charts (one line per strip, shared x axis). Points with a non-finite value are skipped. */
+function drawStrips(cv, defs, hist, xmax, xlabel){
+  const {ctx,W,H} = cv; ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#0b1220'; ctx.fillRect(0,0,W,H);
+  const n = defs.length, padL = 46, padR = 14, top = 6, hh = (H-top-26)/n, last = hist[hist.length-1];
+  defs.forEach((d,i)=>{
+    const y0 = top+i*hh+16, y1 = top+(i+1)*hh-8, ymin = d.min||0;
+    const X = t => padL+(W-padL-padR)*t/xmax, Y = v => y1-(y1-y0)*Math.max(-0.02,Math.min(1.05,(v-ymin)/(d.max-ymin)));
+    ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1; ctx.strokeRect(padL, y0, W-padL-padR, y1-y0);
+    ctx.fillStyle = '#c8d3e6'; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(d.name, padL, y0-4);
+    ctx.textAlign = 'right'; ctx.fillStyle = d.col; if(isFinite(last[d.k])) ctx.fillText(fmt(last[d.k], d.dp), W-padR, y0-4);
+    ctx.fillStyle = '#7f8da6'; ctx.fillText(fmt(d.max, d.dpa), padL-4, y0+8); ctx.fillText(fmt(ymin, d.dpa), padL-4, y1);
+    if(d.ref){
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(padL, Y(d.ref)); ctx.lineTo(W-padR, Y(d.ref)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#9fb0cc'; ctx.textAlign = 'left'; ctx.fillText(d.refLab, padL+4, Y(d.ref)-3);
+    }
+    ctx.strokeStyle = d.col; ctx.lineWidth = 2; ctx.beginPath();
+    const stride = Math.max(1, Math.floor(hist.length/600)); let started = false;
+    for(let j=0;j<hist.length;j+=stride){
+      const h = hist[j]; if(!isFinite(h[d.k])) continue;
+      started ? ctx.lineTo(X(h.t),Y(h[d.k])) : ctx.moveTo(X(h.t),Y(h[d.k])); started = true;
+    }
+    if(started && isFinite(last[d.k])) ctx.lineTo(X(last.t), Y(last[d.k]));
+    ctx.stroke();
+  });
+  ctx.fillStyle = '#c8d3e6'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(xlabel+'  (0 – '+fmt(xmax,0)+')', padL+(W-padL-padR)/2, H-6);
+}
+
+/* =====================================================================
+   LINAC
+   Tubes 1..N; gap k sits between tube k and tube k+1 (tube N+1 is the target).
+   Tube potentials: V_k = (-1)^k (Vg/2) sin(psi), so p.d. across gap k, V_k - V_{k+1} = (-1)^k Vg sin(psi).
+   A proton is pushed forward when that is positive.
+   ===================================================================== */
+const lin = {
+  N:8, g:0.02, ke0:50e3, Vg:50e3, f0:10e6, det:0, G:[], vT:[], total:1,
+  bunches:[], psi:0, lastCycle:-1, playing:true, mode:'cont', fire:false, nsPerS:20,
+  finalKE:null, finalCount:0, cv:null
+};
+function linDesign(){
+  const T = 1/lin.f0; lin.G = [0]; lin.vT = [0];
+  for(let k=1;k<=lin.N;k++){
+    const v = Math.sqrt(2*(lin.ke0+(k-1)*lin.Vg)*E/MP);
+    lin.vT[k] = v; lin.G[k] = lin.G[k-1] + v*T/2;
+  }
+  lin.total = lin.G[lin.N];
+  lin.lens = lin.vT.map((v,k)=> k? (v*T/2 - lin.g)*100 : 0).slice(1);
+  $('l_lens').textContent = lin.lens.map((x,i)=>(i+1)+': '+fmt(x,1)).join('   ');
+  linReset();
+}
+function linReset(){
+  lin.bunches = []; lin.psi = 0; lin.lastCycle = -1; lin.fire = false; lin.finalKE = null; lin.finalCount = 0;
+}
+function linStep(h){
+  const f = lin.f0*(1+lin.det);
+  lin.psi += 2*Math.PI*f*h;
+  const cyc = Math.floor((lin.psi - Math.PI/2)/(2*Math.PI));
+  if(cyc > lin.lastCycle){
+    lin.lastCycle = cyc;
+    if(lin.mode==='cont' || lin.fire){
+      lin.bunches.push({x:0, v:Math.sqrt(2*lin.ke0*E/MP), gap:0, keIn:0, gaps:0, gain:null});
+      lin.fire = false;
+    }
+  }
+  const s = Math.sin(lin.psi);
+  for(const b of lin.bunches){
+    // work done by the gap field over the part of this step that lies inside a gap (exact, so the gain is QV sin(psi))
+    const dx = b.v*h, xa = Math.min(b.x, b.x+dx), xb = Math.max(b.x, b.x+dx);
+    let k = 0, ov = 0;
+    for(let j=1;j<=lin.N;j++){
+      const o = Math.min(xb, lin.G[j]+lin.g/2) - Math.max(xa, lin.G[j]-lin.g/2);
+      if(o > 0){ k = j; ov = o; break; }
+    }
+    if(k>0){
+      if(b.gap!==k){ b.gap = k; b.keIn = 0.5*MP*b.v*b.v; }
+      const dV = ((k&1)?-1:1)*lin.Vg*s, sgn = dx>=0 ? 1 : -1;
+      const v2 = b.v*b.v + 2*(E/MP)*dV/lin.g*ov*sgn;
+      b.v = v2>=0 ? Math.sign(b.v||1)*Math.sqrt(v2) : -Math.sign(b.v||1)*Math.sqrt(-v2);
+    } else if(b.gap>0){
+      b.gain = (0.5*MP*b.v*b.v - b.keIn)/E; b.gaps++; b.gap = 0;
+    }
+    b.x += dx;
+  }
+  const end = lin.G[lin.N] + lin.g/2 + 0.002;
+  lin.bunches = lin.bunches.filter(b=>{
+    if(b.x >= end){ lin.finalKE = 0.5*MP*b.v*b.v/E; lin.finalCount++; return false; }
+    if(b.x < -lin.g) return false;
+    return true;
+  });
+}
+function linUpdate(dt){
+  if(!lin.playing) return;
+  const f = lin.f0*(1+lin.det), sdt = 1/(f*400);
+  const sim = lin.nsPerS*1e-9*dt, n = Math.max(1, Math.ceil(sim/sdt)), h = sim/n;
+  for(let i=0;i<n;i++) linStep(h);
+}
+function drawLinac(){
+  const {ctx,W,H} = lin.cv; ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#0b1220'; ctx.fillRect(0,0,W,H);
+  const g = lin.g, padL = 64, padR = 36;
+  const srcW = lin.total*0.07, tgtW = lin.total*0.06;
+  const wl = -srcW-g/2, wr = lin.G[lin.N] + g/2 + tgtW;
+  const sc = (W-padL-padR)/(wr-wl), X = m => padL + (m-wl)*sc;
+  const ym = H*0.38, th = Math.min(46, H*0.1), rT = ym-th/2-Math.min(52,H*0.1), rB = ym+th/2+Math.min(52,H*0.1);
+  const s = Math.sin(lin.psi);
+
+  // AC wave inset
+  const wx = 16, wy = 14, ww = Math.min(210, W*0.3), wh = 52;
+  ctx.fillStyle = 'rgba(255,255,255,.06)'; ctx.fillRect(wx-6, wy-6, ww+12, wh+26);
+  ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(wx, wy+wh/2); ctx.lineTo(wx+ww, wy+wh/2); ctx.stroke();
+  ctx.strokeStyle = '#9ec5ff'; ctx.lineWidth = 2; ctx.beginPath();
+  for(let i=0;i<=ww;i++){ const u = i/ww*4*Math.PI, yy = wy+wh/2-Math.sin(u)*wh/2*0.9; i?ctx.lineTo(wx+i,yy):ctx.moveTo(wx+i,yy); }
+  ctx.stroke();
+  const um = ((lin.psi % (2*Math.PI))+2*Math.PI)%(2*Math.PI);
+  for(const u of [um, um+2*Math.PI]){
+    ctx.fillStyle = '#ffd24a'; ctx.beginPath(); ctx.arc(wx+u/(4*Math.PI)*ww, wy+wh/2-Math.sin(u)*wh/2*0.9, 4, 0, 7); ctx.fill();
+  }
+  ctx.fillStyle = '#c8d3e6'; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('AC supply: '+fmt(lin.f0*(1+lin.det)/1e6,1)+' MHz', wx, wy+wh+14);
+
+  // rails + source
+  const xN = X(lin.G[lin.N]+g/2+tgtW*0.5);
+  ctx.strokeStyle = '#7d8aa3'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(padL-28, rT); ctx.lineTo(xN, rT); ctx.moveTo(padL-28, rB); ctx.lineTo(xN, rB);
+  ctx.moveTo(padL-28, rT); ctx.lineTo(padL-28, ym-12); ctx.moveTo(padL-28, ym+12); ctx.lineTo(padL-28, rB); ctx.stroke();
+  ctx.fillStyle = '#0b1220'; ctx.beginPath(); ctx.arc(padL-28, ym, 12, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#c8d3e6'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('~', padL-28, ym+5);
+
+  // beam line
+  ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.setLineDash([4,5]); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(X(wl), ym); ctx.lineTo(X(wr), ym); ctx.stroke(); ctx.setLineDash([]);
+
+  // electrodes
+  function electrode(xa, xb, k, label, isTarget){
+    const sg = ((k&1)?-1:1)*s, w = xb-xa;
+    ctx.fillStyle = '#7f8da6'; ctx.fillRect(xa, ym-th/2, w, th);
+    ctx.fillStyle = sg>0 ? 'rgba(255,75,55,'+(Math.abs(sg)*0.8)+')' : 'rgba(70,130,255,'+(Math.abs(sg)*0.8)+')';
+    ctx.fillRect(xa, ym-th/2, w, th);
+    if(!isTarget){ ctx.fillStyle = '#0d1424'; ctx.fillRect(xa, ym-7, w, 14); }
+    ctx.strokeStyle = '#c3cde0'; ctx.lineWidth = 1.5; ctx.strokeRect(xa, ym-th/2, w, th);
+    ctx.strokeStyle = '#7d8aa3'; ctx.lineWidth = 2; ctx.beginPath();
+    const xc = (xa+xb)/2;
+    if(k&1){ ctx.moveTo(xc, ym-th/2); ctx.lineTo(xc, rT); } else { ctx.moveTo(xc, ym+th/2); ctx.lineTo(xc, rB); }
+    ctx.stroke();
+    if(Math.abs(sg) > 0.2 && w > 14){
+      ctx.fillStyle = 'rgba(255,255,255,'+Math.min(1,Math.abs(sg))+')'; ctx.font = 'bold 15px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(sg>0?'+':'−', xc, ym-th/2+16);
+    }
+    if(label){ ctx.fillStyle = '#9fb0cc'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(label, xc, ym+th/2+14); }
+  }
+  for(let k=1;k<=lin.N;k++) electrode(X(lin.G[k-1]+g/2), X(lin.G[k]-g/2), k, fmt(lin.lens[k-1],0));
+  electrode(X(lin.G[lin.N]+g/2), X(lin.G[lin.N]+g/2+tgtW), lin.N+1, '', true);
+  ctx.fillStyle = '#4a5a78'; ctx.fillRect(X(-srcW-g/2), ym-th/2, X(-g/2)-X(-srcW-g/2), th);
+  ctx.fillStyle = '#9fb0cc'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('proton source', (X(-srcW-g/2)+X(-g/2))/2, ym+th/2+14);
+  ctx.fillText('target', X(lin.G[lin.N]+g/2+tgtW/2), ym-th/2-7);
+  ctx.textAlign = 'left'; ctx.fillText('numbers = tube length in cm', X(lin.G[1]), ym+th/2+30);
+
+  // gap field arrows
+  for(let k=1;k<=lin.N;k++){
+    const dV = ((k&1)?-1:1)*s, xc = X(lin.G[k]);
+    if(Math.abs(dV) < 0.08) continue;
+    const L = 10 + 14*Math.abs(dV), dir = dV>0 ? 1 : -1;
+    arrow(ctx, xc-dir*L/2, ym-th/2-6, xc+dir*L/2, ym-th/2-6, dV>0 ? '#5dff9a' : '#ff8d8d', 2);
+  }
+  // protons
+  for(const b of lin.bunches){
+    const bx = X(b.x);
+    ctx.save(); ctx.shadowColor = '#ff6b4a'; ctx.shadowBlur = 14;
+    ctx.fillStyle = '#ff6b4a'; ctx.beginPath(); ctx.arc(bx, ym, 6.5, 0, 7); ctx.fill(); ctx.restore();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('+', bx, ym+3.5);
+  }
+
+  // energy graph
+  const gt = H*0.64, gb = H*0.92, kmax = (lin.ke0 + lin.N*lin.Vg)*1.1/1000;
+  const Y = kev => gb - kev/kmax*(gb-gt);
+  ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1; ctx.fillStyle = '#9fb0cc'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+  const stepK = kmax>400 ? 100 : 50;
+  for(let kv=0; kv<=kmax; kv+=stepK){ ctx.beginPath(); ctx.moveTo(padL, Y(kv)); ctx.lineTo(W-padR, Y(kv)); ctx.stroke(); ctx.fillText(kv, padL-6, Y(kv)+4); }
+  ctx.save(); ctx.translate(14, (gt+gb)/2); ctx.rotate(-Math.PI/2); ctx.textAlign = 'center'; ctx.fillText('Kinetic energy (keV)', 0, 0); ctx.restore();
+  ctx.textAlign = 'center'; ctx.fillText('Distance along the linac', (padL+W-padR)/2, gb+16);
+  ctx.strokeStyle = 'rgba(120,200,255,.55)'; ctx.lineWidth = 2; ctx.beginPath();
+  let lvl = lin.ke0/1000; ctx.moveTo(X(0), Y(lvl));
+  for(let k=1;k<=lin.N;k++){ ctx.lineTo(X(lin.G[k]), Y(lvl)); lvl += lin.Vg/1000; ctx.lineTo(X(lin.G[k]), Y(lvl)); }
+  ctx.lineTo(X(wr-tgtW*0.3), Y(lvl)); ctx.stroke();
+  ctx.fillStyle = 'rgba(120,200,255,.8)'; ctx.textAlign = 'left'; ctx.fillText('ideal: energy only changes in the gaps', X(0)+6, gt+4);
+  for(const b of lin.bunches){
+    const ke = 0.5*MP*b.v*b.v/E/1000;
+    ctx.fillStyle = '#ff6b4a'; ctx.beginPath(); ctx.arc(X(b.x), Y(Math.max(0,ke)), 4.5, 0, 7); ctx.fill();
+  }
+}
+function linReadouts(){
+  const lead = lin.bunches.reduce((a,b)=> (!a||b.x>a.x)?b:a, null);
+  $('l_qv').textContent = fmt(lin.Vg/1000,0)+' keV  ('+fmt(lin.Vg*E*1e15,1)+'×10⁻¹⁵ J)';
+  if(lead){
+    const ke = 0.5*MP*lead.v*lead.v/E/1000;
+    $('l_ke').textContent = fmt(ke,0)+' keV';
+    $('l_v').textContent = fmt(lead.v/1e6,2)+'×10⁶ m/s';
+    $('l_gaps').textContent = lead.gaps;
+    $('l_gain').textContent = lead.gain===null ? '–' : (lead.gain>=0?'+':'')+fmt(lead.gain/1000,0)+' keV';
+  }
+  $('l_final').textContent = lin.finalKE===null ? '–' : fmt(lin.finalKE/1000,0)+' keV  (ideal '+fmt((lin.ke0+lin.N*lin.Vg)/1000,0)+')';
+  const ideal = lin.Vg;
+  let st = ['Protons are being accelerated in step with the supply: each gap gives the full energy gain.', 'good'];
+  if(lin.finalKE!==null && lin.det!==0 && Math.abs(lin.finalKE-(lin.ke0+lin.N*lin.Vg)) > 0.05*lin.Vg*lin.N){
+    st = ['Out of step: the supply frequency does not match the tube lengths, so the protons miss the push and end with the wrong energy.', 'bad'];
+  } else if(lead && lead.gain!==null && lead.gain < 0.8*ideal){
+    st = [lead.gain<0 ? 'Out of step: this gap slowed the proton down!' : 'Out of step: the proton arrived when the field was weak, so it gained less than the full energy.', 'bad'];
+  } else if(lin.det!==0){
+    st = ['Frequency error set: watch the protons drift out of step as they travel along the linac.', 'warn'];
+  } else if(lin.mode==='single' && !lead && !lin.finalCount){
+    st = ['Press “Fire a proton” to send a single proton along the linac.', ''];
+  }
+  setStatus($('l_status'), st[0], st[1]);
+}
+
+/* =====================================================================
+   CYCLOTRON
+   Two dees (semicircles of radius Rd) either side of a gap of width gd on the line x = 0.
+   Uniform B (out of the page) everywhere, so a proton circles clockwise. E acts only in the gap:
+   E_x = V0 cos(psi) / gd. The proton starts at the centre; units: metres, seconds, p in MeV/c.
+   ===================================================================== */
+const cyc = {
+  Rd:0.6, gd:0.04, B:1.0, V0:100e3, f:15.25, rel:false, tps:3, playing:true, acc:0, cv:null, ch:null,
+  state:'run'
+};
+const cycFc = B => B*E/(2*Math.PI*MP)/1e6;   // MHz
+function cycKin(p){
+  if(cyc.rel){ const Et = Math.hypot(p, MPC2); return {v:C*p/Et, ke:Et-MPC2, w:cyc.B*C*C/(1e6*Et)}; }
+  return {v:C*p/MPC2, ke:p*p/(2*MPC2), w:cyc.B*C*C/(1e6*MPC2)};
+}
+function cycReset(){
+  const ke0 = 0.1, p = Math.sqrt(2*MPC2*ke0), k = cycKin(p);
+  cyc.dt = 2*Math.PI/(cyc.B*C*C/(1e6*MPC2))/2000;
+  cyc.x = -cyc.gd/2; cyc.y = p*1e6/(C*cyc.B); cyc.px = p; cyc.py = 0;   // start one radius above the axis so the spiral is centred on the dees
+  cyc.psi = -2*Math.PI*cyc.f*1e6*(cyc.gd/2)/k.v;
+  cyc.t = 0; cyc.tHist = []; cyc.n = 0; cyc.state = 'run'; cyc.acc = 0; cyc.steps = 0;
+  cyc.trail = []; cyc.hist = []; cyc.inGap = false; cyc.keIn = 0; cyc.lastGain = null; cyc.finalKE = null;
+  cycPushHist(k, p, NaN);
+}
+function cycPushHist(k, p, T){
+  cyc.hist.push({t:cyc.n, ke:k.ke, beta:k.v/C, r:p*1e6/(C*cyc.B), T:T});
+}
+function cycStep(){
+  const dt = cyc.dt, p0 = Math.hypot(cyc.px, cyc.py), k0 = cycKin(p0), alpha = k0.w*dt;
+  cyc.psi += 2*Math.PI*cyc.f*1e6*dt; cyc.t += dt;
+  const ox = cyc.x;
+  rotP(cyc, -alpha/2);
+  const p2 = Math.hypot(cyc.px, cyc.py), v2 = cycKin(p2).v, half = alpha/2, sinc = Math.sin(half)/half, d = v2*dt*sinc;
+  cyc.x += cyc.px/p2*d; cyc.y += cyc.py/p2*d;
+  rotP(cyc, -alpha/2);
+  const inGap = Math.abs(cyc.x) < cyc.gd/2;
+  if(inGap){
+    if(!cyc.inGap){ cyc.keIn = cycKin(Math.hypot(cyc.px,cyc.py)).ke; }
+    cyc.px += cyc.V0*Math.cos(cyc.psi)/cyc.gd*C*dt/1e6;
+  } else if(cyc.inGap){
+    cyc.lastGain = cycKin(Math.hypot(cyc.px,cyc.py)).ke - cyc.keIn;
+  }
+  cyc.inGap = inGap;
+  if((ox < 0) !== (cyc.x < 0)){            // crossed the middle of the gap
+    cyc.n++;
+    const p = Math.hypot(cyc.px, cyc.py), k = cycKin(p);
+    cyc.tHist.push(cyc.t);
+    const m = cyc.tHist.length;      // average of the last two half-circles (they differ slightly in a wide gap)
+    cycPushHist(k, p, m>=3 ? (cyc.tHist[m-1]-cyc.tHist[m-3])/2*1e9 : NaN);
+  }
+  if(++cyc.steps % 25 === 0){ cyc.trail.push(cyc.x, cyc.y); if(cyc.trail.length > 40000) cyc.trail.splice(0, 2000); }
+  if(Math.hypot(cyc.x, cyc.y) > cyc.Rd){ cyc.state = 'done'; cyc.finalKE = cycKin(Math.hypot(cyc.px,cyc.py)).ke; }
+}
+function cycUpdate(dt){
+  if(!cyc.playing || cyc.state!=='run') return;
+  cyc.acc += cyc.tps*dt*1000;
+  let n = Math.floor(cyc.acc); cyc.acc -= n;
+  while(n-- > 0 && cyc.state==='run') cycStep();
+}
+function drawCyc(){
+  const {ctx,W,H} = cyc.cv; ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#0b1220'; ctx.fillRect(0,0,W,H);
+  const cx = W/2, cy = H/2+6, sc = Math.min(W,H)*0.42/cyc.Rd, gp = cyc.gd/2*sc, Rp = cyc.Rd*sc;
+  const cs = Math.cos(cyc.psi);  // > 0: left dee at the higher potential (field points right)
+  function dee(left){
+    const sgn = left ? 1 : -1;     // potential sign of this dee
+    ctx.beginPath();
+    if(left){ ctx.arc(cx-gp, cy, Rp, Math.PI/2, 3*Math.PI/2); } else { ctx.arc(cx+gp, cy, Rp, -Math.PI/2, Math.PI/2); }
+    ctx.closePath();
+    ctx.fillStyle = '#2b3750'; ctx.fill();
+    const a = Math.abs(cs)*0.55;
+    ctx.fillStyle = sgn*cs>0 ? 'rgba(255,75,55,'+a+')' : 'rgba(70,130,255,'+a+')'; ctx.fill();
+    ctx.strokeStyle = '#8fa0bf'; ctx.lineWidth = 2; ctx.stroke();
+  }
+  dee(true); dee(false);
+  // B symbols
+  const bf = Math.min(1, cyc.B/2);
+  for(let i=-3;i<=3;i++) for(let j=-3;j<=3;j++){
+    const px = cx+i*Rp*0.27, py = cy+j*Rp*0.27;
+    if(Math.hypot(px-cx,py-cy) < Rp*0.9 && Math.abs(px-cx) > gp+8) bDot(ctx, px, py, 4, 0.15+0.25*bf);
+  }
+  // gap field arrows
+  if(Math.abs(cs) > 0.1){
+    for(let j=-2;j<=2;j++){ const L = 6+8*Math.abs(cs), d = cs>0?1:-1; arrow(ctx, cx-d*L, cy+j*Rp*0.3, cx+d*L, cy+j*Rp*0.3, cs>0?'#5dff9a':'#ff8d8d', 2); }
+  }
+  // AC supply
+  const sy = H-26;
+  ctx.strokeStyle = '#7d8aa3'; ctx.lineWidth = 2; ctx.beginPath();
+  ctx.moveTo(cx-Rp*0.5, cy+Rp*0.8); ctx.lineTo(cx-Rp*0.5, sy); ctx.lineTo(cx-14, sy); ctx.moveTo(cx+14, sy); ctx.lineTo(cx+Rp*0.5, sy); ctx.lineTo(cx+Rp*0.5, cy+Rp*0.8); ctx.stroke();
+  ctx.fillStyle = '#0b1220'; ctx.beginPath(); ctx.arc(cx, sy, 13, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#c8d3e6'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('~', cx, sy+5);
+  ctx.font = '11px sans-serif'; ctx.fillStyle = '#9fb0cc';
+  ctx.fillText('AC supply '+fmt(cyc.f,2)+' MHz', cx+Rp*0.5+2, sy-10);
+  ctx.fillText('dee', cx-Rp*0.5, cy-Rp*0.88); ctx.fillText('dee', cx+Rp*0.5, cy-Rp*0.88);
+  ctx.textAlign = 'left'; ctx.fillText('magnetic field B out of the page ⊙ (everywhere)', 8, 16);
+  ctx.fillText('electric field only in the gap (arrows)', 8, 32);
+  // trail
+  ctx.strokeStyle = 'rgba(255,120,90,.55)'; ctx.lineWidth = 1.8; ctx.beginPath();
+  const tr = cyc.trail;
+  for(let i=0;i<tr.length;i+=2){ const a = cx+tr[i]*sc, b = cy-tr[i+1]*sc; i? ctx.lineTo(a,b) : ctx.moveTo(a,b); }
+  ctx.lineTo(cx+cyc.x*sc, cy-cyc.y*sc); ctx.stroke();
+  const px = cx+cyc.x*sc, py = cy-cyc.y*sc;
+  ctx.save(); ctx.shadowColor = '#ff6b4a'; ctx.shadowBlur = 14; ctx.fillStyle = '#ff6b4a';
+  ctx.beginPath(); ctx.arc(px,py,5.5,0,7); ctx.fill(); ctx.restore();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('+', px, py+3);
+  if(cyc.state==='done'){ ctx.fillStyle = '#5dff9a'; ctx.font = 'bold 13px sans-serif'; ctx.fillText('extracted →', px, py-12); }
+}
+function cycKEmaxNR(){ const pc = 299.792458*cyc.B*(cyc.Rd-cyc.gd/2); return pc*pc/(2*MPC2); }   // outermost path has radius Rd - gap/2
+function drawCycCharts(){
+  const kmx = cycKEmaxNR(), T2 = Math.PI*MPC2*1e6/(cyc.B*C*C)*1e9;
+  const defs = [
+    {k:'ke',  name:'Kinetic energy (MeV)', max:kmx*1.1, col:'#6ec1ff', dp:1, dpa:0},
+    {k:'beta',name:'Speed (v / c)', max:Math.sqrt(2*kmx/MPC2)*1.1, col:'#7dffb0', dp:3, dpa:2},
+    {k:'r',   name:'Radius of the path (m)', max:cyc.Rd*1.05, col:'#b9a7ff', dp:3, dpa:2},
+    {k:'T',   name:'Time for each half-circle (ns)', max:T2*2, col:'#ffb454', dp:2, dpa:0, ref:T2, refLab:'starting value'}
+  ];
+  const xmax = Math.max(30, kmx/(cyc.V0/1e6*0.9)*1.1+5, cyc.n*1.05);
+  drawStrips(cyc.ch, defs, cyc.hist, xmax, 'Number of times the proton has crossed the gap');
+}
+function cycReadouts(){
+  const p = Math.hypot(cyc.px, cyc.py), k = cycKin(p), last = cyc.hist[cyc.hist.length-1], fc = cycFc(cyc.B);
+  $('c_ke').textContent = fmt(k.ke, k.ke<1?3:2)+' MeV';
+  $('c_v').textContent = fmt(k.v/C,4)+' c  ('+fmt(k.v/1e6,1)+'×10⁶ m/s)';
+  $('c_r').textContent = fmt(p*1e6/(C*cyc.B),3)+' m';
+  $('c_T').textContent = isFinite(last.T) ? fmt(last.T,2)+' ns' : '–';
+  $('c_gain').textContent = cyc.lastGain===null ? '–' : (cyc.lastGain>=0?'+':'')+fmt(cyc.lastGain*1000,0)+' keV';
+  $('c_n').textContent = cyc.n;
+  $('c_fc').textContent = fmt(fc,2)+' MHz';
+  $('c_kmax').textContent = '≈ '+fmt(cycKEmaxNR(),1)+' MeV';
+  const full = cyc.V0/1e6, detuned = Math.abs(cyc.f-fc)/fc > 0.02;
+  let msg, cls = '';
+  if(cyc.state==='done' && cyc.finalKE < 0.7*cycKEmaxNR()){
+    msg = 'The proton has wandered out of the dees at only '+fmt(cyc.finalKE,1)+' MeV, well short of the '+fmt(cycKEmaxNR(),1)+' MeV it should reach. '+
+          (detuned ? 'The AC frequency does not match the proton, so it kept falling out of step.' : cyc.rel ? 'Its mass increased as it sped up, so it fell out of step with the AC supply.' : 'It fell out of step with the AC supply.');
+    cls = 'bad';
+  }
+  else if(cyc.state==='done'){ msg = 'The proton has spiralled out to the edge of the dees at '+fmt(cyc.finalKE,1)+' MeV and leaves the cyclotron towards the target.'; cls = 'good'; }
+  else if(cyc.lastGain!==null && cyc.lastGain < 0){
+    msg = detuned ? 'Out of step: the AC frequency does not match the time for each half-circle, so the field in the gap is pointing the wrong way and slows the proton down.'
+                  : 'Out of step: at this speed the mass has increased, each half-circle takes longer, and the field in the gap is now slowing the proton down.'; cls = 'bad';
+  } else if(cyc.lastGain!==null && cyc.lastGain < 0.6*full){
+    msg = detuned ? 'Falling out of step: the proton reaches the gap a little late every time, so it gains less each crossing.'
+                  : 'Falling out of step: the mass is increasing, each half-circle takes longer, and the gain is getting smaller.'; cls = 'warn';
+  } else { msg = 'In step: the field in the gap reverses just as the proton arrives, so it gains energy at every crossing and the path spirals outwards.'; cls = 'good'; }
+  setStatus($('c_status'), msg, cls);
+}
+
+/* =====================================================================
+   SYNCHROTRON
+   A ring of 8 straight sections (length Ls, no magnetic field) joined by 8 bending magnets
+   (each turns the beam 45 degrees on a radius rho, uniform B out of the page). The proton is tracked
+   in 2D through that real geometry. RF cavities sit in the straight sections.
+   p in MeV/c, energies in MeV, positions in metres.
+   ===================================================================== */
+const syn = {
+  rho:6, Ls:5, a:1.0, ke0:20, Vmv:0.5, nCav:4, keMax:1000, bMode:'auto', bMan:0.1, fMode:'auto', fMan:5,
+  tps:4, spt:4000, playing:true, state:'run', acc:0, cv:null, ch:null
+};
+const pFromKE = ke => Math.sqrt(ke*ke + 2*ke*MPC2);
+function synGeom(){
+  const t22 = Math.tan(Math.PI/8);
+  syn.d = syn.Ls/(2*t22) + syn.rho;                   // centre to the middle of a straight
+  syn.circ = 8*(syn.Ls + syn.rho*Math.PI/4);          // length of the closed orbit
+  syn.str = []; syn.arc = [];
+  for(let k=0;k<8;k++){
+    const th = Math.PI/2 - k*Math.PI/4, n = [Math.cos(th), Math.sin(th)], t = [Math.sin(th), -Math.cos(th)];
+    const M = [syn.d*n[0], syn.d*n[1]];
+    const A = [M[0]-t[0]*syn.Ls/2, M[1]-t[1]*syn.Ls/2], Bp = [M[0]+t[0]*syn.Ls/2, M[1]+t[1]*syn.Ls/2];
+    syn.str.push({n, t, M, A});
+    syn.arc.push({c:[Bp[0]-n[0]*syn.rho, Bp[1]-n[1]*syn.rho], th1:th, th0:th-Math.PI/4});
+  }
+}
+function synCavs(){ return ({1:[0], 2:[0,4], 4:[0,2,4,6], 8:[0,1,2,3,4,5,6,7]})[syn.nCav]; }
+const BforP = p => p*1e6/(C*syn.rho);
+function inMagnet(x, y){
+  for(const ar of syn.arc){
+    const ex = x-ar.c[0], ey = y-ar.c[1], r = Math.hypot(ex,ey);
+    if(Math.abs(r-syn.rho) > 2*syn.a) continue;
+    const diff = (((Math.atan2(ey,ex)-ar.th0) % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+    if(diff <= Math.PI/4) return true;
+  }
+  return false;
+}
+function distNominal(x, y){
+  let best = 1e9;
+  for(let k=0;k<8;k++){
+    const s = syn.str[k], vx = x-s.A[0], vy = y-s.A[1];
+    const u = Math.max(0, Math.min(syn.Ls, vx*s.t[0]+vy*s.t[1]));
+    best = Math.min(best, Math.hypot(vx-u*s.t[0], vy-u*s.t[1]));
+    const ar = syn.arc[k], ex = x-ar.c[0], ey = y-ar.c[1];
+    const diff = (((Math.atan2(ey,ex)-ar.th0) % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+    if(diff <= Math.PI/4) best = Math.min(best, Math.abs(Math.hypot(ex,ey)-syn.rho));
+  }
+  return best;
+}
+function synReset(){
+  synGeom();
+  const p = pFromKE(syn.ke0), s = syn.str[4];       // inject at the start of the bottom straight, heading left
+  syn.x = s.A[0] + s.t[0]*0.2*syn.Ls; syn.y = s.A[1] + s.t[1]*0.2*syn.Ls;
+  syn.px = p*s.t[0]; syn.py = p*s.t[1];
+  syn.psi = 0; syn.locked = false; syn.t = 0; syn.turns = 0; syn.state = 'run'; syn.acc = 0; syn.steps = 0;
+  syn.trail = []; syn.hist = []; syn.lastPass = null; syn.lastCos = 1; syn.turnGain = 0; syn.turnGainLast = null; syn.lost = null;
+  synPushHist();
+}
+function synState(){
+  const p = Math.hypot(syn.px, syn.py), Et = Math.hypot(p, MPC2), beta = p/Et, v = beta*C;
+  const B = syn.bMode==='auto' ? BforP(p) : syn.bMan;
+  const frev = v/syn.circ;
+  const f = syn.fMode==='auto' ? syn.nCav*frev : syn.fMan*1e6;
+  return {p, Et, ke:Et-MPC2, beta, v, B, frev, f};
+}
+function synPushHist(){ const s = synState(); syn.hist.push({t:syn.turns, ke:s.ke, beta:s.beta, B:s.B, f:s.f/1e6}); }
+function crossed(g, ox, oy){
+  const s0 = (ox-g.M[0])*g.t[0] + (oy-g.M[1])*g.t[1], s1 = (syn.x-g.M[0])*g.t[0] + (syn.y-g.M[1])*g.t[1];
+  if(!(s0 < 0 && s1 >= 0)) return false;
+  return Math.abs((syn.x-g.M[0])*g.n[0] + (syn.y-g.M[1])*g.n[1]) < syn.a;
+}
+function synStep(){
+  const s = synState(), dt = syn.circ/(s.v*syn.spt);
+  syn.psi += 2*Math.PI*s.f*dt; syn.t += dt;
+  const ox = syn.x, oy = syn.y;
+  // what fraction of this step is spent inside a bending magnet? (found exactly, so the bend per magnet is exact)
+  const ex = ox + syn.px/s.p*s.v*dt, ey = oy + syn.py/s.p*s.v*dt, in0 = inMagnet(ox, oy), in1 = inMagnet(ex, ey);
+  let frac = in0 && in1 ? 1 : 0;
+  if(in0 !== in1){
+    let lo = 0, hi = 1;
+    for(let i=0;i<16;i++){ const u = (lo+hi)/2; if(inMagnet(ox+(ex-ox)*u, oy+(ey-oy)*u) === in0) lo = u; else hi = u; }
+    frac = in0 ? (lo+hi)/2 : 1-(lo+hi)/2;
+  }
+  const alpha = s.B*C*C/(1e6*s.Et)*dt*frac;
+  rotP(syn, -alpha/2);
+  const p2 = Math.hypot(syn.px, syn.py), v2 = C*p2/Math.hypot(p2, MPC2), half = alpha/2, sinc = half>1e-9 ? Math.sin(half)/half : 1, d = v2*dt*sinc;
+  syn.x += syn.px/p2*d; syn.y += syn.py/p2*d;
+  rotP(syn, -alpha/2);
+  // RF cavities (an impulse as the proton crosses each one)
+  for(const k of synCavs()){
+    if(!crossed(syn.str[k], ox, oy)) continue;
+    // injection is timed to the RF; with the frequency set to "match", the RF also stays locked to the proton's arrival
+    if(!syn.locked || syn.fMode==='auto'){ syn.psi = 0; syn.locked = true; }
+    const cs = Math.cos(syn.psi), pp = Math.hypot(syn.px, syn.py), Et = Math.hypot(pp, MPC2);
+    const En = Math.max(MPC2*1.0005, Et + syn.Vmv*cs), pn = Math.sqrt(En*En - MPC2*MPC2);
+    syn.px *= pn/pp; syn.py *= pn/pp;
+    syn.lastPass = En-Et; syn.lastCos = cs; syn.turnGain += En-Et;
+  }
+  if(crossed(syn.str[0], ox, oy)){          // one point in the ring counts the turns
+    syn.turns++; syn.turnGainLast = syn.turnGain; syn.turnGain = 0; synPushHist();
+  }
+  if(distNominal(syn.x, syn.y) > syn.a){ syn.state = 'lost'; }
+  if(++syn.steps % 40 === 0){ syn.trail.push([syn.x, syn.y]); if(syn.trail.length > 110) syn.trail.shift(); }
+  if(synState().ke >= syn.keMax && syn.state==='run') syn.state = 'done';
+}
+function synUpdate(dt){
+  if(!syn.playing || syn.state!=='run') return;
+  syn.acc += syn.tps*dt*syn.spt;
+  let n = Math.floor(syn.acc); syn.acc -= n;
+  while(n-- > 0 && syn.state==='run') synStep();
+}
+function drawSyn(){
+  const {ctx,W,H} = syn.cv; ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#0b1220'; ctx.fillRect(0,0,W,H);
+  const cx = W/2, cy = H/2+10, sc = Math.min(W,H)*0.43/(syn.d*1.0824+syn.a);
+  const P = (x,y)=>[cx+x*sc, cy-y*sc];
+  const st = synState(), Bmax = BforP(pFromKE(syn.keMax)), bf = Math.min(1, st.B/Bmax);
+  const wMag = 2*syn.a*sc+16, wPipe = 2*syn.a*sc;
+  ctx.lineCap = 'butt';
+  // bending magnets (arcs) then pipe
+  for(const ar of syn.arc){
+    const [ax,ay] = P(ar.c[0], ar.c[1]);
+    ctx.strokeStyle = 'rgba(130,105,255,'+(0.30+0.62*bf)+')'; ctx.lineWidth = wMag;
+    ctx.beginPath(); ctx.arc(ax, ay, syn.rho*sc, -ar.th1, -ar.th0, false); ctx.stroke();
+  }
+  ctx.strokeStyle = '#1c2640'; ctx.lineWidth = wPipe;
+  for(let k=0;k<8;k++){
+    const s = syn.str[k], ar = syn.arc[k], [x1,y1] = P(s.A[0], s.A[1]), [x2,y2] = P(s.A[0]+s.t[0]*syn.Ls, s.A[1]+s.t[1]*syn.Ls), [ax,ay] = P(ar.c[0], ar.c[1]);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ax, ay, syn.rho*sc, -ar.th1, -ar.th0, false); ctx.stroke();
+  }
+  // ideal orbit
+  ctx.strokeStyle = 'rgba(255,255,255,.2)'; ctx.setLineDash([5,6]); ctx.lineWidth = 1;
+  for(let k=0;k<8;k++){
+    const s = syn.str[k], ar = syn.arc[k], [x1,y1] = P(s.A[0], s.A[1]), [x2,y2] = P(s.A[0]+s.t[0]*syn.Ls, s.A[1]+s.t[1]*syn.Ls), [ax,ay] = P(ar.c[0], ar.c[1]);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.arc(ax, ay, syn.rho*sc, -ar.th1, -ar.th0, false); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  // B symbols on the magnets
+  for(const ar of syn.arc){ const am = (ar.th0+ar.th1)/2, [bx,by] = P(ar.c[0]+Math.cos(am)*syn.rho, ar.c[1]+Math.sin(am)*syn.rho); bDot(ctx, bx, by, 5.5, 0.35+0.6*bf); }
+  // injection stub
+  const s4 = syn.str[4], [i0x,i0y] = P(s4.A[0]+s4.t[0]*0.2*syn.Ls, s4.A[1]+s4.t[1]*0.2*syn.Ls);
+  ctx.fillStyle = '#1c2640'; ctx.fillRect(i0x-wPipe/4, i0y, wPipe/2, 26);
+  ctx.fillStyle = '#9fb0cc'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('protons injected from a linac', i0x, i0y+40);
+
+  // RF cavities
+  const cs = Math.cos(syn.psi);
+  for(const k of synCavs()){
+    const g = syn.str[k], [mx,my] = P(g.M[0], g.M[1]), w = 26, h = wPipe+22;
+    ctx.save(); ctx.translate(mx,my); ctx.rotate(Math.atan2(-g.t[1], g.t[0]));
+    ctx.fillStyle = '#6a5a1a'; ctx.fillRect(-w/2, -h/2, w, h);
+    ctx.fillStyle = cs>0 ? 'rgba(255,75,55,'+Math.abs(cs)*0.85+')' : 'rgba(70,130,255,'+Math.abs(cs)*0.85+')'; ctx.fillRect(-w/2, -h/2, 7, h);
+    ctx.fillStyle = cs>0 ? 'rgba(70,130,255,'+Math.abs(cs)*0.85+')' : 'rgba(255,75,55,'+Math.abs(cs)*0.85+')'; ctx.fillRect(w/2-7, -h/2, 7, h);
+    ctx.strokeStyle = '#e9c94a'; ctx.lineWidth = 1.5; ctx.strokeRect(-w/2, -h/2, w, h);
+    if(Math.abs(cs) > 0.08){ const L = 3+6*Math.abs(cs), dd = cs>0?1:-1; arrow(ctx, -dd*L, 0, dd*L, 0, cs>0?'#5dff9a':'#ff8d8d', 2); }
+    ctx.restore();
+  }
+  // legend
+  ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillStyle = 'rgba(130,105,255,.9)'; ctx.fillRect(8, 8, 12, 12); ctx.fillStyle = '#c8d3e6'; ctx.fillText('bending magnet: B out of the page ⊙', 26, 18);
+  ctx.fillStyle = '#e9c94a'; ctx.fillRect(8, 26, 12, 12); ctx.fillStyle = '#c8d3e6'; ctx.fillText('RF cavity: electric field, no B', 26, 36);
+  ctx.fillStyle = '#1c2640'; ctx.fillRect(8, 44, 12, 12); ctx.strokeStyle = '#4a5a78'; ctx.strokeRect(8,44,12,12); ctx.fillStyle = '#c8d3e6'; ctx.fillText('straight pipe: no B', 26, 54);
+
+  // trail + particle
+  for(let i=1;i<syn.trail.length;i++){
+    const [a,b] = P(...syn.trail[i-1]), [c,d] = P(...syn.trail[i]);
+    ctx.strokeStyle = 'rgba(255,120,90,'+(i/syn.trail.length*0.6)+')'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(a,b); ctx.lineTo(c,d); ctx.stroke();
+  }
+  const [px,py] = P(syn.x, syn.y);
+  if(syn.state==='lost'){
+    ctx.strokeStyle = '#ff5a5a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(px-8,py-8); ctx.lineTo(px+8,py+8); ctx.moveTo(px+8,py-8); ctx.lineTo(px-8,py+8); ctx.stroke();
+  } else {
+    ctx.save(); ctx.shadowColor = '#ff6b4a'; ctx.shadowBlur = 14; ctx.fillStyle = '#ff6b4a';
+    ctx.beginPath(); ctx.arc(px,py,6,0,7); ctx.fill(); ctx.restore();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('+', px, py+3.5);
+  }
+  ctx.textAlign = 'center'; ctx.fillStyle = '#9fb0cc'; ctx.font = '12px sans-serif'; ctx.fillText('kinetic energy', cx, cy-18);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 26px sans-serif'; ctx.fillText(fmt(st.ke, st.ke<100?1:0)+' MeV', cx, cy+10);
+  ctx.fillStyle = '#9fb0cc'; ctx.font = '13px sans-serif'; ctx.fillText('speed '+fmt(st.beta,4)+' c', cx, cy+30);
+}
+function drawSynCharts(){
+  const cmax = C/syn.circ/1e6*syn.nCav, Bmax = BforP(pFromKE(syn.keMax));
+  const defs = [
+    {k:'ke',  name:'Kinetic energy (MeV)', max:syn.keMax*1.05, col:'#6ec1ff', dp:0, dpa:0},
+    {k:'beta',name:'Speed (v / c)', max:1.05, col:'#7dffb0', dp:4, dpa:1, ref:1, refLab:'c'},
+    {k:'B',   name:'Magnetic field in the bending magnets (T)', max:Math.max(Bmax*1.1, syn.bMode==='manual'?syn.bMan*1.1:0, 0.05), col:'#b9a7ff', dp:3, dpa:2},
+    {k:'f',   name:'Frequency of RF voltage (MHz)', max:Math.max(cmax*1.12, syn.fMode==='manual'?syn.fMan*1.1:0), col:'#ffb454', dp:2, dpa:1, ref:cmax, refLab:'limit set by c'}
+  ];
+  const xmax = Math.max(40, (syn.keMax-syn.ke0)/(syn.Vmv*syn.nCav)*1.1+5, syn.turns*1.05);
+  drawStrips(syn.ch, defs, syn.hist, xmax, 'Number of turns of the ring');
+}
+function synReadouts(){
+  const s = synState(), r = s.B>0 ? s.p*1e6/(C*s.B) : Infinity, Bn = BforP(s.p);
+  $('s_turn').textContent = syn.turns;
+  $('s_ke').textContent = fmt(s.ke, s.ke<100?1:0)+' MeV';
+  $('s_v').textContent = fmt(s.beta,4)+' c';
+  $('s_gain').textContent = syn.turnGainLast===null ? '–' : (syn.turnGainLast>=0?'+':'')+fmt(syn.turnGainLast,2)+' MeV';
+  $('s_B').textContent = fmt(s.B,3)+' T';
+  $('s_Bn').textContent = fmt(Bn,3)+' T';
+  $('s_r').textContent = isFinite(r) ? fmt(r,1)+' m  (ring magnets: '+syn.rho+' m)' : '∞';
+  $('s_T').textContent = fmt(syn.circ/s.v*1e6,3)+' μs';
+  $('s_f').textContent = fmt(s.f/1e6,2)+' MHz';
+  let msg, cls = '';
+  if(syn.state==='lost'){
+    msg = s.B < Bn ? 'Beam lost! The magnetic field is too weak for this momentum, so the proton’s path curves less than the ring and it hits the wall of the pipe.'
+                   : 'Beam lost! The magnetic field is too strong for this momentum, so the proton’s path curves more than the ring and it hits the wall of the pipe.';
+    cls = 'bad';
+  } else if(syn.state==='done'){
+    msg = 'Design energy reached: the beam is extracted towards the target. Press “Inject a new proton” to run again.'; cls = 'good';
+  } else if(syn.fMode==='manual'){
+    const fm = syn.nCav*s.frev;
+    if(Math.abs(s.f-fm)/fm > 0.03){
+      msg = 'Out of step: the RF frequency no longer matches the time between cavity passes, so the proton gains little energy on average (it can even lose energy). The frequency has to increase as the proton speeds up.'; cls = 'bad';
+    } else { msg = 'The fixed frequency happens to match the proton at this energy, but as it speeds up it will fall out of step.'; cls = 'warn'; }
+  } else if(syn.bMode==='manual' && Math.abs(s.B-Bn) > 0.05*Bn){
+    msg = 'The magnetic field is no longer matched to the proton’s momentum: the path is drifting towards the wall.'; cls = 'warn';
+  } else {
+    msg = 'In step: B and the RF frequency both increase as the proton speeds up, so it stays on the ring and gains energy at every cavity.'; cls = 'good';
+  }
+  setStatus($('s_status'), msg, cls);
+}
+
+/* ---------- UI wiring ---------- */
+function bind(id, out, fn, f){ const el = $(id), o = $(out); const upd = ()=>{ o.textContent = f(+el.value); fn(+el.value); }; el.addEventListener('input', upd); upd(); }
+
+bind('c_lv','o_lv', v=>{ lin.Vg = v*1000; linDesign(); }, v=>v+' kV');
+bind('c_lf','o_lf', v=>{ lin.f0 = v*1e6; linDesign(); }, v=>v+' MHz');
+bind('c_ld','o_ld', v=>{ lin.det = v/100; }, v=>(v>0?'+':'')+v+' %');
+bind('c_ls','o_ls', v=>{ lin.nsPerS = v; }, v=>'1 s on screen = '+v+' ns');
+$('c_lm').addEventListener('change', e=>{ lin.mode = e.target.value; linReset(); });
+$('l_play').onclick = e=>{ lin.playing = !lin.playing; e.target.textContent = lin.playing?'Pause':'Play'; };
+$('l_fire').onclick = ()=>{ lin.fire = true; if(lin.mode!=='single'){ $('c_lm').value='single'; lin.mode='single'; } };
+$('l_reset').onclick = linReset;
+$('l_zero').onclick = ()=>{ $('c_ld').value = 0; $('c_ld').dispatchEvent(new Event('input')); };
+
+function cycSetF(f){ cyc.f = f; $('c_cf').value = f; $('o_cf').textContent = fmt(f,2)+' MHz'; }
+bind('c_cb','o_cb', v=>{ cyc.B = v; cycSetF(Math.round(cycFc(v)/0.05)*0.05); cycReset(); }, v=>fmt(v,2)+' T');
+bind('c_cv','o_cv', v=>{ cyc.V0 = v*1000; }, v=>v+' kV');
+bind('c_cf','o_cf', v=>{ cyc.f = v; }, v=>fmt(v,2)+' MHz');
+bind('c_cs','o_cs', v=>{ cyc.tps = v; }, v=>v+' half-circles per second');
+$('c_crel').addEventListener('change', e=>{ cyc.rel = e.target.checked; cycReset(); });
+$('c_play').onclick = e=>{ cyc.playing = !cyc.playing; e.target.textContent = cyc.playing?'Pause':'Play'; };
+$('c_match').onclick = ()=>{ cycSetF(cycFc(cyc.B)); };
+$('c_reset').onclick = cycReset;
+
+bind('c_sv','o_sv', v=>{ syn.Vmv = v; }, v=>fmt(v,2)+' MV');
+bind('c_se','o_se', v=>{ syn.keMax = v; }, v=>v+' MeV');
+bind('c_ss','o_ss', v=>{ syn.tps = v; }, v=>v+' turns per second');
+bind('c_sb','o_sb', v=>{ syn.bMan = v; }, v=>fmt(v,2)+' T');
+bind('c_sf','o_sf', v=>{ syn.fMan = v; }, v=>fmt(v,1)+' MHz');
+$('c_sn').addEventListener('change', e=>{ syn.nCav = +e.target.value; synReset(); if(syn.fMode==='manual') syncFManual(); });
+function syncFManual(){ const f = synState().f; syn.fMan = Math.min(17, Math.max(1, Math.round(f/1e5)/10)); $('c_sf').value = syn.fMan; $('o_sf').textContent = fmt(syn.fMan,1)+' MHz'; }
+$('c_sbm').addEventListener('change', e=>{
+  const Bnow = synState().B;
+  syn.bMode = e.target.value; $('c_sb').disabled = syn.bMode==='auto';
+  if(syn.bMode==='manual'){ syn.bMan = Math.min(1.2, Math.round(Bnow/0.01)*0.01); $('c_sb').value = syn.bMan; $('o_sb').textContent = fmt(syn.bMan,2)+' T'; }
+});
+$('c_sfm').addEventListener('change', e=>{
+  const fnow = synState().f;
+  syn.fMode = e.target.value; $('c_sf').disabled = syn.fMode==='auto';
+  if(syn.fMode==='manual'){ syn.fMan = Math.min(17, Math.max(1, Math.round(fnow/1e5)/10)); $('c_sf').value = syn.fMan; $('o_sf').textContent = fmt(syn.fMan,1)+' MHz'; }
+});
+$('s_play').onclick = e=>{ syn.playing = !syn.playing; e.target.textContent = syn.playing?'Pause':'Play'; };
+$('s_reset').onclick = ()=>{ synReset(); };
+
+let active = 'lin';
+const SECS = {lin:['secLin','tabLin'], cyc:['secCyc','tabCyc'], syn:['secSyn','tabSyn']};
+function resize(){
+  if(active==='lin') lin.cv = setupCanvas($('linCv'));
+  else if(active==='cyc'){ cyc.cv = setupCanvas($('cycCv')); cyc.ch = setupCanvas($('cycCh')); }
+  else { syn.cv = setupCanvas($('synCv')); syn.ch = setupCanvas($('synCh')); }
+}
+function showTab(t){
+  active = t;
+  for(const k in SECS){ $(SECS[k][0]).classList.toggle('hide', k!==t); $(SECS[k][1]).classList.toggle('on', k===t); }
+  resize();
+}
+$('tabLin').onclick = ()=>showTab('lin'); $('tabCyc').onclick = ()=>showTab('cyc'); $('tabSyn').onclick = ()=>showTab('syn');
+window.addEventListener('resize', resize);
+
+lin.cv = setupCanvas($('linCv')); linDesign(); cycReset(); synReset();
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(0.05, (now-last)/1000); last = now;
+  if(active==='lin'){ linUpdate(dt); drawLinac(); linReadouts(); }
+  else if(active==='cyc'){ cycUpdate(dt); drawCyc(); drawCycCharts(); cycReadouts(); }
+  else { synUpdate(dt); drawSyn(); drawSynCharts(); synReadouts(); }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
