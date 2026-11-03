@@ -117,6 +117,9 @@ def _symbol(kind, x, y):
                 + _line(x - 12, y - 16, x - 12, y + 16) + _line(x - 5, y - 8, x - 5, y + 8, 5)
                 + _line(x - 5, y, x + 5, y)
                 + _line(x + 5, y - 16, x + 5, y + 16) + _line(x + 12, y - 8, x + 12, y + 8, 5)), ""
+    if kind == "varsupply":      # variable power supply: a battery with an arrow through it
+        shapes, txt = _symbol("battery", x, y)
+        return shapes + _arrow(x - 18, y + 26, x + 18, y - 26), txt
     raise ValueError(f"unknown component kind {kind!r}")
 
 

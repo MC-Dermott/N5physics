@@ -278,6 +278,46 @@ def series_investigation(level="N5"):
                                          supply_label=f"{Vs} V"))
 
 
+# ════════════════ Ohm's law investigation: experiment → mean → resistance → conclusion → series circuit ════════════════
+
+def ohm_investigation(level="N5"):
+    """2016 P2 Q2 / 2024 P2 Q8 / 2025 P2 Q6 style: an Ohm's law experiment, then the resistor in a series circuit."""
+    ex = _ex(level)
+    R = pick(10, 20, 25, 40, 50)
+    V = pick(2.0, 4.0, 6.0, 8.0)
+    I = V / R
+    d = 0.01 if I < 0.5 else 0.02
+    reads = [sig(I - d), sig(I), sig(I + d)]
+    ex.on("Potential Difference").choice("Describe how the student obtains a range of readings.",
+        "Change the voltage of the variable power supply and record the voltmeter and ammeter readings each time.",
+        [("Change the variable resistor.", "There is no variable resistor — it is the supply voltage that is changed (and with a variable resistor it is its RESISTANCE: course report 2024)."),
+         ("Change the resistance of R.", "R is the resistor being investigated — it stays the same."),
+         ("Change the ammeter for a voltmeter.", "The meters stay where they are.")])
+    ex.on("Potential Difference").num(f"At {V:g} V the student measures the current three times: {fmt(reads[0])} A, {fmt(reads[1])} A and {fmt(reads[2])} A. Calculate the mean current.", I, "A",
+        wrong=[(sum(reads), "Divide the total by the number of readings (3)."), (reads[2], "Use all three readings — the mean, not the largest.")],
+        working=[rf"I = \frac{{{fmt(reads[0])} + {fmt(reads[1])} + {fmt(reads[2])}}}{{3}} = {ltx(I)}\ \text{{A}}"])
+    ex.on("Ohm's Law").num(f"Use the mean current at {V:g} V to calculate the resistance of R.", R, "Ω",
+        wrong=[(I / V, "V = IR, so R = V ÷ I."), (V * I, "Divide the voltage by the current — V × I is power.")],
+        working=[r"V = IR", rf"{V:g} = {ltx(I)} \times R", rf"R = {R}\ \Omega"])
+    ex.on("Potential Difference").choice("The graph of current against voltage is a straight line through the origin. State the conclusion.",
+        "The current in the resistor is directly proportional to the voltage across it.",
+        [("The current gets bigger.", "A conclusion must state the relationship between the quantities."),
+         ("The current is directly proportional to the voltage because the line is straight.", "The line must also pass through the origin."),
+         ("The current is inversely proportional to the voltage.", "The current increases as the voltage increases.")])
+    R2 = pick(20, 30, 40, 60, 100)
+    while R2 == R:
+        R2 = pick(20, 30, 40, 60, 100)
+    Vs = pick(6.0, 9.0, 12.0)
+    I2 = Vs / (R + R2)
+    VR = I2 * R
+    ex.on("Circuit Rules").num(f"The student then connects R in series with a {R2} Ω resistor and a {Vs:g} V supply. Calculate the voltage across R.", VR, "V",
+        wrong=[(Vs, "The supply voltage is shared between the two resistors."), (I2 * R2, f"That is the voltage across the {R2} Ω resistor."), (Vs / R * R, "Use the total resistance to find the current first.")],
+        working=[rf"R_T = {R} + {R2} = {R + R2}\ \Omega", rf"I = \frac{{V}}{{R_T}} = \frac{{{Vs:g}}}{{{R + R2}}} = {ltx(I2)}\ \text{{A}}", rf"V = IR = {ltx(I2)} \times {R} = {ltx(VR)}\ \text{{V}}"],
+        scaffold=[("Total resistance, in Ω?", R + R2, "Ω"), ("Current in the circuit, in A?", I2, "A")])
+    return ex.build("A student investigates how the current in a resistor R depends on the voltage across it, using a variable power supply, an ammeter and a voltmeter.",
+                    diagram=loop_circuit([comp("ammeter"), comp("resistor", "R", voltmeter="V")], supply="varsupply", supply_label="variable power supply"))
+
+
 def two_switches(level="N5"):
     """2023 Paper 2 Q6 style: S1 closed, then S2 adds an equal parallel branch."""
     ex = _ex(level)
@@ -337,6 +377,7 @@ SCENARIOS = {
     "Car Lights":            car_lights,
     "Thermostat":            thermostat,
     "Series Circuit Investigation": series_investigation,
+    "Ohm's Law Investigation": ohm_investigation,
     "Two Switches":          two_switches,
     "Extension Lead":        extension_lead,
 }

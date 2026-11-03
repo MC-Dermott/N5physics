@@ -219,7 +219,42 @@ def gen_ec_gradient(level="N5"):
 
 def gen_ec_ohm_experiment(level="N5"):
     """Ohm's law experiment and V–I graphs: meter positions, obtaining a range of readings, graph conclusions."""
-    kind = random.choice(["meters", "range", "lamp", "resistor_graph", "warming", "reliable", "anomalous", "zero_error", "better_method"])
+    kind = random.choice(["meters", "range", "lamp", "resistor_graph", "warming", "reliable", "anomalous", "zero_error", "better_method",
+                          "supply_range", "mean_current", "table_headings", "conclusion"])
+    if kind == "supply_range":
+        qobj = _choice("A student uses a variable power supply, an ammeter, a voltmeter and a resistor R to find how the current in R depends on the voltage across it. "
+                       "How does the student obtain a range of readings?",
+                       "Change the voltage of the variable power supply, recording the voltmeter and ammeter readings each time.",
+                       [("Change the resistance of R.", "R is the resistor being investigated — it must stay the same."),
+                        ("Change the ammeter to a different range.", "Changing the meter range does not change the current or voltage."),
+                        ("Change the voltmeter so that it is in series with R.", "The voltmeter must stay in parallel with (across) R.")], "Potential Difference", level)
+        return with_diagram(qobj, loop_circuit([comp("ammeter"), comp("resistor", "R", voltmeter="V")], supply="varsupply", supply_label="variable power supply"))
+    if kind == "mean_current":
+        base = random.choice([0.10, 0.20, 0.30, 0.40, 0.50])
+        d = random.choice([0.01, 0.02])
+        reads = [round(base - d, 2), round(base, 2), round(base + d, 2)]
+        V = random.choice([2.0, 4.0, 6.0, 8.0, 10.0])
+        text = (f"A student measures the current in a resistor three times with {V:g} V across it: {reads[0]:g} A, {reads[1]:g} A and {reads[2]:g} A. "
+                f"Calculate the mean current.")
+        work = [_L(rf"I = \frac{{{reads[0]:g} + {reads[1]:g} + {reads[2]:g}}}{{3}} = {base:g}\ \mathrm{{A}}")]
+        opts = [{"value": float(base), "mistake": None, "working": work},
+                {"value": _sig(sum(reads)), "mistake": "The readings were added but not divided by 3.", "working": work},
+                {"value": _sig(reads[2]), "mistake": "The largest reading was used — the mean uses all three readings.", "working": work},
+                {"value": _sig(sum(reads) / 2), "mistake": "Divide by the NUMBER of readings (3), not 2.", "working": work}]
+        scaffold = [{"question": "What is the sum of the three readings, in A?", "answer": _sig(sum(reads))}]
+        return _q(text, float(base), "A", opts, "Potential Difference", scaffold, level)
+    if kind == "table_headings":
+        return _choice("A student presents the results of an Ohm's law experiment in a table. Which is the best way to give the units?",
+                       "In the column headings only, e.g. ‘Voltage (V)’ and ‘Mean current (A)’.",
+                       [("After every reading in the table.", "Units go in the column heading so each reading is just a number."),
+                        ("Not at all — the units are obvious.", "Every column heading needs its unit."),
+                        ("Only in the first row of the table.", "Put the unit in the heading for the whole column.")], "Potential Difference", level)
+    if kind == "conclusion":
+        return _choice("The graph of current against voltage for a resistor is a straight line through the origin. Which is the best conclusion?",
+                       "The current in the resistor is directly proportional to the voltage across it.",
+                       [("The current gets bigger.", "A conclusion must state the relationship between the two quantities."),
+                        ("The current is directly proportional to the voltage because the graph is a straight line.", "It must also pass through the origin to show direct proportionality."),
+                        ("The current is inversely proportional to the voltage.", "The current increases as the voltage increases.")], "Potential Difference", level)
     if kind == "meters":
         qobj = _choice("A student finds the resistance of resistor R using a battery, a variable resistor, an ammeter and a voltmeter. How should the meters be connected?",
                        "The ammeter in series with R and the voltmeter in parallel with R.",
@@ -276,6 +311,62 @@ def gen_ec_ohm_experiment(level="N5"):
                    [("It decreases, so the current increases.", "The resistance of the filament increases with temperature."),
                     ("It stays the same, so the current stays the same.", "The filament is non-ohmic: its resistance changes as it heats."),
                     ("It increases, so the current increases.", "A greater resistance with the same voltage means a smaller current.")], "Potential Difference", level)
+
+
+def gen_ec_non_ohmic(level="N5"):
+    """Direct proportionality, gradient = R, and non-ohmic components (filament lamp and diode)."""
+    kind = random.choice(["diode_dir", "diode_threshold", "obey", "gradient_meaning", "proportional", "steeper", "lamp_resistance", "lamp_resistance"])
+    if kind == "diode_dir":
+        return _choice("Which statement describes how a diode conducts?",
+                       "It conducts in one direction only; in the other direction its resistance is very high.",
+                       [("It conducts equally well in both directions.", "A diode only allows current in one direction."),
+                        ("It conducts in one direction only; in the other direction its resistance is zero.", "In the reverse direction the resistance is very HIGH, so there is no current."),
+                        ("Its resistance is constant for all voltages.", "A diode is non-ohmic — its resistance is not constant.")], "Potential Difference", level)
+    if kind == "diode_threshold":
+        vt = random.choice([0.6, 0.7])
+        return _choice(f"The current–voltage graph of a diode is drawn for forward voltages up to 1.0 V. Which statement describes the graph?",
+                       f"There is almost no current until the voltage reaches about {vt:g} V, then the current increases rapidly.",
+                       [("The current increases steadily from zero in a straight line.", "That is the graph for a resistor — a diode is non-ohmic."),
+                        (f"The current is greatest at low voltages and falls above {vt:g} V.", "The current increases once the diode starts to conduct."),
+                        ("The current is the same at every voltage.", "The current depends strongly on the voltage.")], "Potential Difference", level)
+    if kind == "obey":
+        return _choice("Which of these components obeys Ohm's law at constant temperature?",
+                       "A fixed resistor.", [("A filament lamp.", "Its resistance increases as the filament gets hotter, so the V–I graph is a curve."),
+                                              ("A diode.", "A diode conducts in one direction only and is not a straight line through the origin."),
+                                              ("An LED.", "An LED is a diode — it is non-ohmic.")], "Potential Difference", level)
+    if kind == "gradient_meaning":
+        return _choice("A graph of voltage (y-axis) against current (x-axis) for a resistor is a straight line through the origin. What does the gradient of the line represent?",
+                       "The resistance of the resistor.",
+                       [("The power of the resistor.", "The gradient is ΔV ÷ ΔI, which is V ÷ I."),
+                        ("The charge flowing in the resistor.", "Charge is current × time."),
+                        ("The reciprocal of the resistance (1 ÷ R).", "With voltage on the y-axis the gradient is V ÷ I = R.")], "Potential Difference", level)
+    if kind == "proportional":
+        return _choice("A graph of voltage against current for a component is a straight line through the origin. Which statement is correct?",
+                       "The voltage is directly proportional to the current, because the graph is a straight line through the origin.",
+                       [("The voltage is directly proportional to the current, because the graph is a straight line.", "The line must ALSO pass through the origin."),
+                        ("The voltage is inversely proportional to the current, because the graph is a straight line.", "V rises as I rises, so it is directly proportional."),
+                        ("The voltage is not proportional to the current, because the graph goes through the origin.", "A straight line through the origin IS direct proportionality.")], "Potential Difference", level)
+    if kind == "steeper":
+        a, b = random.sample([10, 20, 30, 40, 50], 2)
+        hi, lo = ("A", "B") if a > b else ("B", "A")
+        return _choice(f"The V–I graphs (voltage on the y-axis) of resistors A and B are straight lines through the origin. At the same current, the voltage across resistor {hi} is greater than the voltage across resistor {lo}. "
+                       f"Which resistor has the greater resistance?",
+                       f"Resistor {hi}, because its graph has the steeper gradient.",
+                       [(f"Resistor {lo}, because its graph has the steeper gradient.", "It is resistor " + hi + " whose line is steeper."),
+                        (f"Resistor {hi}, because it has the smaller gradient.", "A steeper V–I line means a greater resistance."),
+                        ("They have the same resistance, because both lines are straight.", "The gradients are different, so the resistances are different.")], "Potential Difference", level)
+    i1, v1, i2, v2 = random.choice([(0.20, 2.4, 0.40, 8.0), (0.10, 0.5, 0.30, 4.5), (0.20, 1.0, 0.50, 10.0), (0.10, 0.8, 0.40, 8.0)])
+    r1, r2 = v1 / i1, v2 / i2
+    text = (f"The voltage across a filament lamp is {v1:g} V when the current is {i1:g} A and {v2:g} V when the current is {i2:g} A. "
+            f"Calculate the resistance of the lamp when the current is {i2:g} A.")
+    work = [_L(r"V = IR"), _L(rf"{v2:g} = {i2:g} \times R"), _L(rf"R = {_ltx(r2)}\ \Omega")]
+    opts = [{"value": _sig(r2), "mistake": None, "working": work},
+            {"value": _sig(r1), "mistake": f"That is the resistance at {i1:g} A. The question asks for the resistance at {i2:g} A.", "working": work},
+            {"value": _sig((v2 - v1) / (i2 - i1)), "mistake": "The lamp's graph is a curve, so the gradient between two points is not its resistance — use R = V ÷ I at the stated current.", "working": work},
+            {"value": _sig(v2 * i2), "mistake": "V = IR — divide the voltage by the current; V × I is power.", "working": work}]
+    scaffold = [{"question": f"What is the resistance at {i1:g} A, in Ω?", "answer": _sig(r1)},
+                {"question": f"What is the resistance at {i2:g} A, in Ω?", "answer": _sig(r2)}]
+    return _q(text, _sig(r2), "Ω", opts, "Potential Difference", scaffold, level)
 
 
 def gen_ec_voltage_meaning(level="N5"):
@@ -336,6 +427,94 @@ def gen_ec_series_current(level="N5"):
     qobj = _q(text, _sig(I), "A", opts, "Circuit Rules", scaffold, level)
     return with_diagram(qobj, loop_circuit([comp("ammeter"), comp("resistor", f"{r1} Ω"), comp("resistor", f"{r2} Ω"), comp("resistor", f"{r3} Ω")],
                                            supply_label=f"{Vs:g} V"))
+
+
+def gen_ec_current_then_voltage(level="N5"):
+    """Multi-step: find the supply current first, then a voltage (SQA 4-mark style; leads into potential dividers)."""
+    kind = random.choice(["series2", "series3", "series_parallel", "find_r"])
+    if kind == "series2":
+        r1, r2 = random.sample(_SERIES_R, 2)
+        Vs = random.choice([6.0, 9.0, 12.0, 15.0, 24.0])
+        which = random.choice([1, 2])
+        rx, ro = (r1, r2) if which == 1 else (r2, r1)
+        rt = r1 + r2
+        I = Vs / rt
+        Vx = I * rx
+        text = f"A {r1} Ω resistor and a {r2} Ω resistor are connected in series with a {Vs:g} V supply. Calculate the voltage across the {rx} Ω resistor."
+        work = [_L(rf"R_T = {r1} + {r2} = {rt}\ \Omega"), _L(r"V = IR"), _L(rf"{Vs:g} = I \times {rt} \Rightarrow I = {_ltx(I)}\ \mathrm{{A}}"),
+                _L(rf"V = {_ltx(I)} \times {rx} = {_ltx(Vx)}\ \mathrm{{V}}")]
+        opts = [{"value": _sig(Vx), "mistake": None, "working": work},
+                {"value": _sig(Vs), "mistake": "The supply voltage is shared between the resistors — it is not all across one of them.", "working": work},
+                {"value": _sig(I * ro), "mistake": f"That is the voltage across the {ro} Ω resistor.", "working": work},
+                {"value": _sig(Vs / rx * 1.0), "mistake": f"The supply voltage was used with only the {rx} Ω resistor — find the current with the TOTAL resistance first.", "working": work}]
+        scaffold = [{"question": "What is the total resistance, in Ω?", "answer": float(rt)},
+                    {"question": "What is the current in the circuit, in A?", "answer": _sig(I)},
+                    {"question": f"What is the voltage across the {rx} Ω resistor, in V?", "answer": _sig(Vx)}]
+        qobj = _q(text, _sig(Vx), "V", opts, "Circuit Rules", scaffold, level)
+        return with_diagram(qobj, loop_circuit([comp("ammeter"), comp("resistor", f"{r1} Ω"), comp("resistor", f"{r2} Ω")], supply_label=f"{Vs:g} V"))
+    if kind == "series3":
+        r1, r2, r3 = random.sample(_SERIES_R, 3)
+        Vs = random.choice([6.0, 9.0, 12.0, 15.0, 24.0])
+        rt = r1 + r2 + r3
+        I = Vs / rt
+        V2 = I * r2
+        text = f"Three resistors of {r1} Ω, {r2} Ω and {r3} Ω are connected in series with a {Vs:g} V supply. Calculate the voltage across the {r2} Ω resistor."
+        work = [_L(rf"R_T = {r1} + {r2} + {r3} = {rt}\ \Omega"), _L(r"V = IR"), _L(rf"I = {Vs:g} \div {rt} = {_ltx(I)}\ \mathrm{{A}}"),
+                _L(rf"V = {_ltx(I)} \times {r2} = {_ltx(V2)}\ \mathrm{{V}}")]
+        opts = [{"value": _sig(V2), "mistake": None, "working": work},
+                {"value": _sig(Vs / 3), "mistake": "The voltage is shared in proportion to the resistances, not equally.", "working": work},
+                {"value": _sig(Vs * r2 / (r1 + r2)), "mistake": "All three resistors must be included in the total resistance.", "working": work},
+                {"value": _sig(I * rt), "mistake": "I × R_T is the supply voltage, not the voltage across one resistor.", "working": work}]
+        scaffold = [{"question": "What is the total resistance, in Ω?", "answer": float(rt)},
+                    {"question": "What is the current in the circuit, in A?", "answer": _sig(I)},
+                    {"question": f"What is the voltage across the {r2} Ω resistor, in V?", "answer": _sig(V2)}]
+        qobj = _q(text, _sig(V2), "V", opts, "Circuit Rules", scaffold, level)
+        return with_diagram(qobj, loop_circuit([comp("ammeter"), comp("resistor", f"{r1} Ω"), comp("resistor", f"{r2} Ω"), comp("resistor", f"{r3} Ω")], supply_label=f"{Vs:g} V"))
+    if kind == "series_parallel":
+        pairs = [(a, b) for a in _E12 for b in _E12 if a <= b and (a * b) % (a + b) == 0]
+        r1, r2 = random.choice(pairs)
+        rs = random.choice([x for x in (10, 20, 30, 40, 50) if x not in (r1, r2)])
+        Vs = random.choice([6.0, 9.0, 12.0, 24.0])
+        rp = r1 * r2 / (r1 + r2)
+        rt = rp + rs
+        I = Vs / rt
+        Vs_res = I * rs
+        text = (f"A {rs} Ω resistor is connected in series with a {r1} Ω resistor and a {r2} Ω resistor in parallel, across a {Vs:g} V supply. "
+                f"Calculate the voltage across the {rs} Ω resistor.")
+        work = [_L(rf"\frac{{1}}{{R_P}} = \frac{{1}}{{{r1}}} + \frac{{1}}{{{r2}}} \Rightarrow R_P = {rp:g}\ \Omega"), _L(rf"R_T = {rp:g} + {rs} = {rt:g}\ \Omega"),
+                _L(rf"I = {Vs:g} \div {rt:g} = {_ltx(I)}\ \mathrm{{A}}"), _L(rf"V = {_ltx(I)} \times {rs} = {_ltx(Vs_res)}\ \mathrm{{V}}")]
+        opts = [{"value": _sig(Vs_res), "mistake": None, "working": work},
+                {"value": _sig(I * rp), "mistake": f"That is the voltage across the parallel pair, not across the {rs} Ω resistor.", "working": work},
+                {"value": _sig(Vs), "mistake": "The supply voltage is shared between the series resistor and the parallel pair.", "working": work},
+                {"value": _sig(Vs / (r1 + r2 + rs) * rs), "mistake": "The parallel resistors were added as if they were in series.", "working": work}]
+        scaffold = [{"question": "What is the resistance of the parallel pair, in Ω?", "answer": float(rp)},
+                    {"question": "What is the total resistance, in Ω?", "answer": float(rt)},
+                    {"question": "What is the current from the supply, in A?", "answer": _sig(I)},
+                    {"question": f"What is the voltage across the {rs} Ω resistor, in V?", "answer": _sig(Vs_res)}]
+        qobj = _q(text, _sig(Vs_res), "V", opts, "Circuit Rules", scaffold, level)
+        return with_diagram(qobj, loop_circuit([comp("ammeter"), comp("resistor", f"{rs} Ω"), par([comp("resistor", f"{r1} Ω")], [comp("resistor", f"{r2} Ω")])], supply_label=f"{Vs:g} V"))
+    # find_r: potential divider, voltmeter reading across R2 known -> R2
+    while True:
+        R1 = random.choice([60, 80, 100, 120, 150, 200])
+        I = random.choice([0.02, 0.04, 0.05, 0.10])
+        V2 = random.choice([2.0, 3.0, 4.0, 5.0, 6.0])
+        V1 = round(R1 * I, 2)
+        Vs = round(V1 + V2, 2)
+        R2 = round(V2 / I, 1)
+        if Vs <= 24 and R2 != R1 and abs(R2 - R1) > 0.05 * R1:
+            break
+    text = (f"A {R1} Ω resistor and a resistor R are connected in series with a {Vs:g} V supply. The voltmeter across R reads {V2:g} V. Calculate the resistance of R.")
+    work = [_L(rf"V_1 = {Vs:g} - {V2:g} = {V1:g}\ \mathrm{{V}}"), _L(rf"V = IR \Rightarrow {V1:g} = I \times {R1} \Rightarrow I = {_ltx(I)}\ \mathrm{{A}}"),
+            _L(rf"{V2:g} = {_ltx(I)} \times R \Rightarrow R = {_ltx(R2)}\ \Omega")]
+    opts = [{"value": _sig(R2), "mistake": None, "working": work},
+            {"value": _sig(V2 / (Vs / R1)), "mistake": f"The supply voltage was used with the {R1} Ω resistor alone — the voltage across it is the supply voltage minus the voltmeter reading.", "working": work},
+            {"value": _sig(Vs / I), "mistake": "Vs ÷ I is the TOTAL resistance of the circuit, not R.", "working": work},
+            {"value": float(R1), "mistake": f"The resistance of the {R1} Ω resistor — the question asks for R.", "working": work}]
+    scaffold = [{"question": f"What is the voltage across the {R1} Ω resistor, in V?", "answer": _sig(V1)},
+                {"question": "What is the current in the circuit, in A?", "answer": _sig(I)},
+                {"question": "What is the resistance of R, in Ω?", "answer": _sig(R2)}]
+    qobj = _q(text, _sig(R2), "Ω", opts, "Circuit Rules", scaffold, level)
+    return with_diagram(qobj, divider("resistor", f"{R1} Ω", "resistor", "R", supply_label=f"{Vs:g} V", vout_label=f"{V2:g} V"))
 
 
 def gen_ec_switch_ammeter(level="N5"):
