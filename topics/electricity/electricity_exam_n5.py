@@ -815,18 +815,74 @@ def gen_ec_divider_switch(level="N5"):
     return with_diagram(qobj, divider("variable", f"{r1:g} kΩ", "ldr" if sensor == "LDR" else "thermistor", f"{sensor} ({r2:g} kΩ)", f"+{vs:g} V", transistor="npn" if vsw == 0.7 else "mosfet", output_kind="lamp"))
 
 
+def _a(word):
+    return 'An' if word[0] in 'AEIOUL' and word != 'LED' or word == 'LDR' else 'A'
+
+
+def gen_ec_sensor_voltage(level="N5"):
+    """LURVD / TURVD: how the voltages in a sensor potential divider change (MCQ with the circuit drawn)."""
+    sensor = random.choice(["LDR", "thermistor"])
+    quantity = "light level" if sensor == "LDR" else "temperature"
+    up = random.choice([True, False])                      # does the physical quantity increase?
+    sensor_top = random.choice([True, False])
+    about_sensor = random.choice([True, False])
+    r_up = not up                                          # LURVD / TURVD: quantity up -> resistance down
+    sensor_v_up = r_up
+    answer_up = sensor_v_up if about_sensor else not sensor_v_up
+    target = f"the {sensor}" if about_sensor else "the fixed resistor"
+    mn = "LURVD" if sensor == "LDR" else "TURVD"
+    text = (f"{_a(sensor)} {sensor} and a fixed resistor form a potential divider across a 5.0 V supply. {"The light level on the LDR" if sensor == "LDR" else "The temperature of the thermistor"} "
+            f"{'increases' if up else 'decreases'}. What happens to the voltage across {target}?")
+    why = (f"{mn}: when the {quantity} {'increases' if up else 'decreases'} the resistance of the {sensor} {'decreases' if not r_up else 'increases'}, "
+           f"so the voltage across the {sensor} {'decreases' if not sensor_v_up else 'increases'}"
+           + ("." if about_sensor else "; the voltages add up to the supply voltage, so the voltage across the fixed resistor changes the opposite way."))
+    right, wrong = ("It increases.", "It decreases.") if answer_up else ("It decreases.", "It increases.")
+    qobj = _choice(text, right,
+                   [(wrong, why if about_sensor else why + " You may have used the sensor's change for the other component."),
+                    ("It stays the same.", "The supply voltage is shared between the two components, so each voltage changes when a resistance changes.")],
+                   "LEDs and Transistor Switches", level)
+    top, bottom = (("ldr" if sensor == "LDR" else "thermistor", sensor), ("resistor", "fixed resistor")) if sensor_top else \
+                  (("resistor", "fixed resistor"), ("ldr" if sensor == "LDR" else "thermistor", sensor))
+    return with_diagram(qobj, divider(top[0], top[1], bottom[0], bottom[1], "+5.0 V"))
+
+
 def gen_ec_transistor_explain(level="N5"):
-    sensor, factor, condition, device = random.choice(_SENSORS)
-    qobj = _choice(f"A resistor (top) and a {sensor} (bottom) form a potential divider. A MOSFET's gate is connected across the {sensor}, and the MOSFET "
-                   f"switches on {device}. Which explanation of how {device} switches on when {condition} is best?",
-                   f"The {sensor}'s resistance increases, so the voltage across it increases; when it reaches the switching voltage the MOSFET switches on.",
-                   [(f"The {sensor} lets less current through, so more current goes to the MOSFET and it switches on.",
-                     "Transistor circuits must be explained in terms of resistance and VOLTAGE, not current (course reports 2024 and 2025)."),
-                    (f"The {sensor}'s resistance decreases, so the voltage across it increases and the MOSFET switches on.",
-                     f"When {condition}, the {sensor}'s resistance INCREASES."),
-                    (f"The {sensor}'s resistance increases, so {device} switches on.",
-                     "The link through the VOLTAGE across the sensor reaching the switching voltage is missing.")], "LEDs and Transistor Switches", level)
-    return with_diagram(qobj, divider("resistor", "", "ldr" if sensor == "LDR" else "thermistor", sensor, transistor="mosfet", output_kind="lamp" if device == "a lamp" else "heater", output_label=device[2:]))
+    """Four-step explanation (sensor voltage -> voltage across the transistor -> transistor on -> device on), sensor at the top or bottom."""
+    sensor = random.choice(["LDR", "thermistor"])
+    sensor_top = random.choice([True, False])
+    device = random.choice(["a lamp", "a motor", "a heater"] if sensor == "thermistor" else ["a lamp", "a motor"])
+    # the MOSFET is across the BOTTOM component: sensor at the bottom -> on when its resistance rises; at the top -> on when it falls
+    r_up = not sensor_top
+    if sensor == "LDR":
+        condition, quantity, mn = ("it gets dark" if r_up else "it gets light"), "light level", "LURVD"
+        q_dir = "decreases" if r_up else "increases"
+    else:
+        condition, quantity, mn = ("it gets cold" if r_up else "it gets warm"), "temperature", "TURVD"
+        q_dir = "decreases" if r_up else "increases"
+    r_word, r_opp = ("increases", "decreases") if r_up else ("decreases", "increases")
+    sv_word = r_word                                       # voltage across the sensor changes the same way as its resistance
+    gate_comp = "the fixed resistor" if sensor_top else f"the {sensor}"
+    stem = (f"{_a(sensor)} {sensor} ({'top' if sensor_top else 'bottom'}) and a fixed resistor ({'bottom' if sensor_top else 'top'}) form a potential divider. "
+            f"A MOSFET's gate is connected across {gate_comp}, and the MOSFET switches on {device}. Which explanation of how {device} switches on when {condition} is best?")
+    steps = (f"The {quantity} {q_dir}, so the resistance of the {sensor} {r_word} and the voltage across the {sensor} {sv_word} ({mn}). "
+             + (f"The voltage across the fixed resistor, in parallel with the MOSFET, increases. " if sensor_top else f"The {sensor} is in parallel with the MOSFET, so the voltage across the MOSFET increases. ")
+             + f"At the switching voltage the MOSFET switches on, so {device} in series with it switches on.")
+    wrong = [(f"The {sensor} lets less current through, so more current goes to the MOSFET and it switches on {device}.",
+              "Transistor circuits must be explained in terms of resistance and VOLTAGE, not current (course reports 2024 and 2025)."),
+             (f"The {quantity} {q_dir}, so the resistance of the {sensor} {r_opp} and the voltage across the {sensor} {r_opp}. "
+              f"The MOSFET reaches its switching voltage and switches on {device}.",
+              f"When {condition}, the resistance of the {sensor} {r_word.upper()}."),
+             (f"The {quantity} {q_dir}, so the resistance of the {sensor} {r_word}. The MOSFET switches on {device}.",
+              "The link through the VOLTAGES — the voltage across the sensor, then the voltage across the MOSFET reaching its switching voltage — is missing."),
+             (f"The {quantity} {q_dir}, so the resistance of the {sensor} {r_word} and the voltage across the {sensor} {sv_word}. "
+              + (f"The voltage across the fixed resistor also decreases. " if sensor_top else f"The voltage across the fixed resistor increases. ")
+              + f"The MOSFET switches on {device}.",
+              "The voltages in a potential divider change in opposite directions (they add up to the supply voltage); the MOSFET is across "
+              + ("the fixed resistor, whose voltage goes the OPPOSITE way to the sensor's." if sensor_top else f"the {sensor}, so it is the {sensor}'s voltage that matters."))]
+    qobj = _choice(stem, steps, wrong, "LEDs and Transistor Switches", level)
+    top, bottom = (("ldr" if sensor == "LDR" else "thermistor", sensor), ("resistor", "")) if sensor_top else (("resistor", ""), ("ldr" if sensor == "LDR" else "thermistor", sensor))
+    return with_diagram(qobj, divider(top[0], top[1], bottom[0], bottom[1], transistor="mosfet",
+                                      output_kind="lamp" if device == "a lamp" else ("motor" if device == "a motor" else "heater"), output_label=device[2:]))
 
 
 # ════════════════ Power and fuses ════════════════
