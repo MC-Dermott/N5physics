@@ -846,10 +846,11 @@ def gen_ec_sensor_voltage(level="N5"):
     return with_diagram(qobj, divider(top[0], top[1], bottom[0], bottom[1], "+5.0 V"))
 
 
-def gen_ec_transistor_explain(level="N5"):
+def gen_ec_transistor_explain(level="N5", sensor_top=None):
     """Four-step explanation (sensor voltage -> voltage across the transistor -> transistor on -> device on), sensor at the top or bottom."""
     sensor = random.choice(["LDR", "thermistor"])
-    sensor_top = random.choice([True, False])
+    if sensor_top is None:
+        sensor_top = random.choice([True, False])
     device = random.choice(["a lamp", "a motor", "a heater"] if sensor == "thermistor" else ["a lamp", "a motor"])
     # the MOSFET is across the BOTTOM component: sensor at the bottom -> on when its resistance rises; at the top -> on when it falls
     r_up = not sensor_top
@@ -978,3 +979,11 @@ def gen_ec_toaster_statements(level="N5"):
                    [(f"The element transfers {P * 10} J of energy each second.", f"{P / 1000:g} kW = {P} W = {P} J each second (course report 2024)."),
                     ("230 C of charge passes through the element each second.", f"Charge per second is the current: {_txt(I, 2)} A, i.e. {_txt(I, 2)} C each second (course report 2024)."),
                     ("The plug should be fitted with a 3 A fuse.", f"The current is {_txt(I, 2)} A, so it needs a 13 A fuse.")], "Power and Fuses", level)
+
+
+def gen_ec_transistor_explain_bottom(level="N5"):
+    return gen_ec_transistor_explain(level, sensor_top=False)
+
+
+def gen_ec_transistor_explain_top(level="N5"):
+    return gen_ec_transistor_explain(level, sensor_top=True)

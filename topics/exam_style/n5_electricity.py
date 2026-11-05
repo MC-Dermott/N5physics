@@ -48,6 +48,7 @@ Two resistors in series share the supply voltage, and the **same current** is in
 2. $V = IR$ again with that current and the resistor you want the voltage across.
 
 - The larger resistor gets the larger share of the supply voltage.
+- **LED and series resistor** is a potential divider too: $V_R = V_s - V_{LED}$, then $R = V_R \div I$.
 - Thermistor: resistance **decreases** as temperature increases. LDR: resistance **decreases** as light level increases.
 """),
     "Circuits": _notes("Circuits", r"""
@@ -83,6 +84,11 @@ The resistance of a wire depends on its **length**, its **cross-sectional area (
 
 **Transistor switch:** a potential divider (with an LDR or thermistor) sets the voltage across the transistor's input.
 When that voltage reaches the switching value (e.g. 0.7 V for an NPN transistor) the transistor switches **on** and the output device operates.
+"""),
+    "Transistor Switches": _notes("Transistor switches", r"""
+**Transistor switch:** a potential divider (with an LDR or thermistor) sets the voltage across the transistor's input. When that voltage reaches the switching value the transistor switches **on**.
+
+Explain in four steps: sensor resistance changes → voltage across the sensor changes (LURVD / TURVD) → voltage across the transistor reaches the switching voltage → device switches on. The transistor is across the **bottom** component: with the sensor at the bottom it switches on when the sensor's resistance **increases**; with the sensor at the top, when it **decreases**.
 """),
     "Power and Fuses": _notes("Power and fuses", r"""
 $P = IV$ &nbsp; $P = I^2R$ &nbsp; $P = \frac{V^2}{R}$ &nbsp; $E = Pt$. Mains voltage = 230 V.

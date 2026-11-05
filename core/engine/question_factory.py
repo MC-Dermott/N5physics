@@ -183,7 +183,7 @@ from topics.electricity.electricity_exam_n5 import (
     gen_ec_charge, gen_ec_electrons, gen_ec_ac_dc,
     gen_ec_ew_qv, gen_ec_gradient, gen_ec_voltage_meaning,
     gen_ec_series_parallel, gen_ec_parallel_total_current, gen_ec_circuit_changes, gen_ec_three_resistors,
-    gen_ec_led_resistor, gen_ec_divider_switch, gen_ec_transistor_explain, gen_ec_sensor_voltage,
+    gen_ec_led_resistor, gen_ec_divider_switch, gen_ec_transistor_explain, gen_ec_transistor_explain_top, gen_ec_transistor_explain_bottom, gen_ec_sensor_voltage,
     gen_ec_fuse, gen_ec_power_i2r, gen_ec_energy_time, gen_ec_toaster_statements,
     gen_ec_parallel_compare, gen_ec_series_current, gen_ec_switch_ammeter, gen_ec_ohm_experiment, gen_ec_non_ohmic, gen_ec_current_then_voltage, gen_ec_wire_compare, gen_ec_wire_explain,
 )
@@ -404,7 +404,10 @@ QUAL_REGISTRY = {
                 "Complex":  generate_complex,
             },
             "Electrical Power":   generate_power,
-            "Potential Divider":  generate_potential_divider,
+            "Potential Divider": {
+                "1 — Potential Divider Calculations": generate_potential_divider,
+                "2 — LED Series Resistor":            gen_ec_led_resistor,
+            },
             "Circuits":           generate_circuits,
             "Charge Carriers": {
                 "1 — Charge, Current and Time":      gen_ec_charge,
@@ -432,11 +435,11 @@ QUAL_REGISTRY = {
                 "1 — Comparing Wires":               gen_ec_wire_compare,
                 "2 — Explaining Wire Resistance":    gen_ec_wire_explain,
             },
-            "LEDs and Transistor Switches": {
-                "1 — LED Series Resistor":           gen_ec_led_resistor,
-                "2 — Sensor Potential Dividers":     gen_ec_divider_switch,
-                "3 — Explain a Transistor Switch":   gen_ec_transistor_explain,
-                "4 — Sensor Voltage Changes":        gen_ec_sensor_voltage,
+            "Transistor Switches": {
+                "1 — Calculations: Sensor Voltage and Switching": gen_ec_divider_switch,
+                "2 — Explanations: Voltage Changes (LURVD/TURVD)": gen_ec_sensor_voltage,
+                "3 — Explanations: Sensor at the Bottom": gen_ec_transistor_explain_bottom,
+                "4 — Explanations: Sensor at the Top":    gen_ec_transistor_explain_top,
             },
             "Power and Fuses": {
                 "1 — Energy, Power and Time":        gen_ec_energy_time,
