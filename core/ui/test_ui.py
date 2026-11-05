@@ -333,16 +333,20 @@ def render_review(test, only_wrong=False):
             if q_ref.metadata.get("scenario_diagram"):
                 st.markdown(question_diagram_markdown(q_ref.metadata["scenario_diagram"]))
         last_context = context
-        if not context:
+        # a question's own diagram sits directly below its text, ahead of the answer box
+        qline = f"**Q{q_num}:** {q_ref.question_text}  \n"
+        if not context and q_ref.metadata.get("diagram"):
+            st.markdown(qline.rstrip())
             render_diagram(q_ref)
+            qline = ""
 
         correct_str = format_answer(q_ref)
         if correct:
-            st.success(f"**Q{q_num}:** {q_ref.question_text}  \nYour answer: **{answer}** ✅")
+            st.success(f"{qline}Your answer: **{answer}** ✅")
         elif result_type == "wrong_unit":
             with st.container(border=True):
                 st.warning(
-                    f"**Q{q_num}:** {q_ref.question_text}  \n"
+                    f"{qline}"
                     f"Your answer: **{answer}** ⚠️  \n"
                     f"Correct answer: **{correct_str}** — value correct, unit wrong!"
                 )
@@ -352,7 +356,7 @@ def render_review(test, only_wrong=False):
         else:
             with st.container(border=True):
                 st.error(
-                    f"**Q{q_num}:** {q_ref.question_text}  \n"
+                    f"{qline}"
                     f"Your answer: **{answer or '(blank)'}** ❌  \n"
                     f"Correct answer: **{correct_str}**"
                 )
