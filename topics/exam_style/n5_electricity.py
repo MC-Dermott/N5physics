@@ -42,7 +42,10 @@ $P = IV$ &nbsp; $P = I^2R$ &nbsp; $P = \frac{V^2}{R}$ &nbsp; $E = Pt$ — power 
 Choose the form of the power relationship that uses the quantities you know. Time in **seconds**.
 """),
     "Potential Divider": _notes("Potential dividers", r"""
-$\frac{V_1}{V_2} = \frac{R_1}{R_2}$ &nbsp; $V_2 = \left(\frac{R_2}{R_1 + R_2}\right)V_s$
+Two resistors in series share the supply voltage, and the **same current** is in both. Use $V = IR$ **twice**:
+
+1. $R_T = R_1 + R_2$, then $V = IR$ with the supply voltage and $R_T$ to find $I$.
+2. $V = IR$ again with that current and the resistor you want the voltage across.
 
 - The larger resistor gets the larger share of the supply voltage.
 - Thermistor: resistance **decreases** as temperature increases. LDR: resistance **decreases** as light level increases.
@@ -167,10 +170,13 @@ def night_light(level="N5"):
     ex = _ex(level)
     Vs, Rf = pick(5, 6, 9), pick(2200, 4700, 10000)
     Rldr = pick(1000, 1500, 25000, 40000)
-    V_ldr = Rldr / (Rf + Rldr) * Vs
+    I_nl = Vs / (Rf + Rldr)
+    V_ldr = I_nl * Rldr
     ex.on("Potential Divider").num(f"In the current light level the LDR's resistance is {Rldr} Ω. Calculate the voltage across the LDR.", V_ldr, "V",
-        wrong=[(Rf / (Rf + Rldr) * Vs, "That's the voltage across the fixed resistor."), (Rldr / Rf * Vs, "Use R_LDR ÷ (R_LDR + R_fixed).")],
-        working=[rf"V_{{LDR}} = \frac{{R_{{LDR}}}}{{R_{{LDR}} + R_f}} \times V_s = \frac{{{Rldr}}}{{{Rldr} + {Rf}}} \times {Vs} = {ltx(V_ldr)}\ \text{{V}}"])
+        wrong=[(I_nl * Rf, "That's the voltage across the fixed resistor."), (Rldr / Rf * Vs, "Find the current with the TOTAL resistance, then V = IR with the LDR's resistance.")],
+        working=[rf"R_T = {Rf} + {Rldr} = {Rf + Rldr}\ \Omega", rf"V = IR \Rightarrow {Vs} = I \times {Rf + Rldr} \Rightarrow I = {ltx(I_nl)}\ \text{{A}}",
+                 rf"V_{{LDR}} = {ltx(I_nl)} \times {Rldr} = {ltx(V_ldr)}\ \text{{V}}"],
+        scaffold=[("Current in the circuit, in A?", I_nl, "A")])
     on = V_ldr >= 0.7
     ex.on("LEDs and Transistor Switches").choice("The transistor switches on when the voltage across the LDR reaches 0.7 V. Is the LED on or off?",
         "On" if on else "Off", [("Off" if on else "On", f"The LDR voltage is {fmt(V_ldr)} V — {'above' if on else 'below'} 0.7 V.")])
@@ -225,7 +231,7 @@ def car_lights(level="N5"):
 def thermostat(level="N5"):
     ex = _ex(level)
     Rf, Rt, Vs = pick(1000, 2200, 4700), pick(1500, 2000, 3000, 5600), pick(6, 9, 12)
-    Vout = Rf / (Rf + Rt) * Vs
+    Vout = Rf / (Rf + Rt) * Vs  # = I × Rf
     ex.on("Resistors").num(f"At 20 °C the thermistor's resistance is {Rt} Ω. Calculate the total resistance of the divider.", Rf + Rt, "Ω",
         wrong=[(_par(Rf, Rt), "They are in SERIES — add them.")], working=[rf"R_T = {Rf} + {Rt} = {Rf + Rt}\ \Omega"])
     I = Vs / (Rf + Rt)
@@ -233,8 +239,8 @@ def thermostat(level="N5"):
         wrong=[(Vs / Rf, "Use the TOTAL resistance."), ((Rf + Rt) / Vs, "I = V ÷ R.")],
         working=[rf"I = \frac{{{Vs}}}{{{Rf + Rt}}} = {ltx(I)}\ \text{{A}}"])
     ex.on("Potential Divider").num("Calculate the voltage across the fixed resistor.", Vout, "V",
-        wrong=[(Rt / (Rf + Rt) * Vs, "That's across the thermistor."), (Vs / 2, "The voltage divides in the ratio of the resistances.")],
-        working=[rf"V = \frac{{{Rf}}}{{{Rf} + {Rt}}} \times {Vs} = {ltx(Vout)}\ \text{{V}}"])
+        wrong=[(Rt / (Rf + Rt) * Vs, "That's across the thermistor."), (Vs / 2, "The voltage is shared according to the resistances — use V = IR with the current.")],
+        working=[rf"V = IR = {ltx(I)} \times {Rf} = {ltx(Vout)}\ \text{{V}}"])
     ex.on("Potential Divider").choice("The temperature rises. What happens to the voltage across the fixed resistor?",
         "It increases — the thermistor's resistance decreases, so the fixed resistor gets a bigger share of the voltage.",
         [("It decreases — the thermistor's resistance increases.", "A thermistor's resistance DECREASES as temperature rises."),

@@ -799,14 +799,17 @@ def gen_ec_divider_switch(level="N5"):
     text = (f"A {r1:g} kΩ variable resistor (top) and a {sensor} (bottom) form a potential divider across {vs:g} V. A transistor connected across the "
             f"{sensor} switches on at {vsw} V. The {sensor} has a resistance of {r2:g} kΩ. Calculate the voltage across the {sensor} "
             f"(the transistor is {on} at this value).")
-    work = [_L(r"V_2 = \left(\frac{R_2}{R_1 + R_2}\right)V_s"), _L(rf"V_2 = \left(\frac{{{r2:g}}}{{{r1:g} + {r2:g}}}\right) \times {vs:g}"),
-            _L(rf"V_2 = {_ltx(v2)}\ \mathrm{{V}}"), _T(f"{_txt(v2)} V is {'at least' if on == 'ON' else 'less than'} {vsw} V, so the transistor is {on.lower()}.")]
+    i_ma = vs / (r1 + r2)
+    work = [_L(rf"R_T = {r1:g} + {r2:g} = {_ltx(r1 + r2)}\ \mathrm{{k\Omega}}"), _L(r"V = IR"),
+            _L(rf"{vs:g} = I \times {_ltx(r1 + r2)} \Rightarrow I = {_ltx(i_ma)}\ \mathrm{{mA}}"),
+            _L(rf"V_2 = {_ltx(i_ma)} \times {r2:g} = {_ltx(v2)}\ \mathrm{{V}}"), _T(f"{_txt(v2)} V is {'at least' if on == 'ON' else 'less than'} {vsw} V, so the transistor is {on.lower()}.")]
     opts = [{"value": _sig(v2), "mistake": None, "working": work},
-            {"value": _sig(r1 / (r1 + r2) * vs), "mistake": "That's the voltage across the variable resistor — put the sensor's resistance on top.", "working": work},
-            {"value": _sig(r2 / r1 * vs), "mistake": "The bottom of the fraction is the TOTAL resistance R₁ + R₂.", "working": work},
-            {"value": _sig(r2 / (r1 + r2)), "mistake": "You found the fraction of the supply but didn't multiply by the supply voltage.", "working": work},
+            {"value": _sig(r1 / (r1 + r2) * vs), "mistake": "That's the voltage across the variable resistor — the current must be used with the sensor's resistance.", "working": work},
+            {"value": _sig(r2 / r1 * vs), "mistake": "The supply voltage goes with the TOTAL resistance R₁ + R₂ when finding the current.", "working": work},
+            {"value": _sig(vs / (r1 + r2)), "mistake": "That is the current in mA — now use V = IR again with the sensor's resistance to find the voltage.", "working": work},
             {"value": _sig(vs * r2 / (r1 + r2) + vsw), "mistake": "The switching voltage isn't part of the calculation — it's only compared with your answer.", "working": work}]
     scaffold = [{"question": "What is the total resistance, in kΩ?", "answer": _sig(r1 + r2)},
+                {"question": "What is the current in the circuit, in mA?", "answer": _sig(i_ma)},
                 {"question": f"What is the voltage across the {sensor}, in V?", "answer": _sig(v2)}]
     qobj = _q(text, _sig(v2), "V", opts, "LEDs and Transistor Switches", scaffold, level)
     return with_diagram(qobj, divider("variable", f"{r1:g} kΩ", "ldr" if sensor == "LDR" else "thermistor", f"{sensor} ({r2:g} kΩ)", f"+{vs:g} V", transistor="npn" if vsw == 0.7 else "mosfet", output_kind="lamp"))

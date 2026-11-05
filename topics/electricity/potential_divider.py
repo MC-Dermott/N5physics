@@ -72,7 +72,7 @@ def gen_type1(level="N5"):
              "mistake": f"You calculated the voltage across the other resistor. Use V = I × {target[1]}, not the other one.",
              "working": full_working},
             {"value": round(v_supply * r_used / r_total, 2), "summary": "Incorrect.",
-             "mistake": "Check your current calculation: I = V_supply ÷ R_total, then V = I × R_target.",
+             "mistake": "Check your working: use V = IR with the supply voltage and the TOTAL resistance to find I, then V = IR again with the resistor you want.",
              "working": full_working},
         ]
         qobj = make_question(question, correct, options_data, "V", scaffold=scaffold,
@@ -98,7 +98,12 @@ def gen_type2(level="N5"):
         if correct <= 0 or given_voltage <= 0:
             continue
 
-        full_working = _current_working(v_supply, r_total) + _voltage_working(current, r_used, correct)
+        r_given = r1 if given == "R1" else r2
+        full_working = [
+            {"type": "text",  "content": f"The same current is in both resistors. First use V = IR with {given}:"},
+            {"type": "latex", "content": r"I = \frac{V}{R}"},
+            {"type": "latex", "content": rf"I = \frac{{{given_voltage}}}{{{r_given}\ \mathrm{{k\Omega}}}} = {round_sf(given_voltage / r_given)}\ \mathrm{{mA}}"},
+        ] + _voltage_working(round_sf(given_voltage / r_given), r_used, correct)
 
         question = (
             f"A potential divider circuit contains two resistors in series:\n\n"
@@ -108,14 +113,14 @@ def gen_type2(level="N5"):
             f"Calculate the voltage across the other resistor."
         )
         scaffold = [
-            {"question": "Calculate the total supply voltage.", "answer": v_supply, "unit": "V"},
+            {"question": f"Calculate the current in the circuit (in mA) using the voltage across {given}.", "answer": round(given_voltage / r_given, 3), "unit": "mA"},
             {"question": "Calculate the voltage across the other resistor.", "answer": correct, "unit": "V"},
         ]
         options_data = [
             {"value": correct,           "summary": "Correct!",   "mistake": None,
              "working": full_working},
             {"value": given_voltage,     "summary": "Incorrect.",
-             "mistake": "The voltage across each resistor is proportional to its resistance — they aren't necessarily equal.",
+             "mistake": "The voltage across each resistor depends on its resistance — find the current with V = IR, then use it with the other resistor.",
              "working": full_working},
             {"value": v_supply,          "summary": "Incorrect.",
              "mistake": "This is the total supply voltage, not the voltage across the other resistor. The voltages across each resistor must add up to the supply voltage.",
