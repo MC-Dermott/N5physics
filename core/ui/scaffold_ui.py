@@ -21,6 +21,9 @@ def render_widget(question):
         height = question.metadata.get("widget_height", 520)
         with st.expander("🎬 Interactive Visualisation"):
             components.html(widget_html, height=height, scrolling=True)
+    for extra in question.metadata.get("extra_widgets", []):
+        with st.expander("🎬 " + extra["title"]):
+            components.html(extra["html"], height=extra.get("height", 520), scrolling=True)
 
 
 def render_scaffold(question, suffix=""):

@@ -715,6 +715,40 @@ QUAL_REGISTRY = {
 }
 
 
+# ── Newton's Laws simulator ───────────────────────────────────────────────────
+# Attach the Newton's Laws simulator (core/data/newtons_laws_widget.html) to every
+# question that links forces to motion (resultant force, F = ma, balanced/unbalanced
+# forces, towing, lifts, slopes). Entries are (qualification, unit, topic, types or None
+# for every question type in the topic).
+from utils.widgets import with_newton_widget
+
+_NEWTON_TOPICS = [
+    ("S3", "Dynamics Part 2 (Forces)", "Unbalanced Forces", None),
+    ("National 5", "Dynamics", "Forces",
+        ["Explain — Comparing Forces", "Horizontal Forces", "Vertical Forces"]),
+    ("Crash Higher", "Our Dynamic Universe", "Forces", None),
+    ("Higher", "Our Dynamic Universe (Part 1)", "Towing", None),
+    ("Higher", "Our Dynamic Universe (Part 1)", "Components of Vectors",
+        ["Level 2 — Balancing Forces and Force from Acceleration",
+         "Level 4 — Acceleration, Force and Angle on a Slope",
+         "Level 5 — Sliding Up a Slope With Friction"]),
+    ("Higher", "Our Dynamic Universe (Part 1)", "Effective Weight", None),
+]
+
+
+def _attach_newton_widget():
+    for qual, unit, topic, types in _NEWTON_TOPICS:
+        entry = QUAL_REGISTRY[qual][unit][topic]
+        if callable(entry):
+            QUAL_REGISTRY[qual][unit][topic] = with_newton_widget(entry)
+            continue
+        for qtype in (types or list(entry)):
+            entry[qtype] = with_newton_widget(entry[qtype])
+
+
+_attach_newton_widget()
+
+
 # ── Exam Style ────────────────────────────────────────────────────────────────
 # Each N5 and Higher unit has an "Exam Style" topic: multi-part questions in the
 # style of SQA papers that cut across the unit's topics. Each part is tagged with

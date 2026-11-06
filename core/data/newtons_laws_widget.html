@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Newton's Laws Simulator</title>
+<style>
+  :root{
+    --paper:#eef2f5; --panel:#fff; --sunken:#e4eaee; --ink:#16202c; --soft:#55636f; --line:#cfd8de;
+    --accent:#0891b2; --accent-ink:#fff;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --paper:#0f161c; --panel:#161f27; --sunken:#10171d; --ink:#e8eef2; --soft:#93a4b0; --line:#29343d; --accent:#2dd4e6; --accent-ink:#04222a; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:14px 16px 24px}
+  h1{font-size:22px;margin:0 0 10px}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+  canvas{width:100%;height:auto;display:block;border-radius:8px;background:#fff}
+  .seg{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px}
+  .seg button{flex:1;padding:8px 6px;border:0;background:var(--sunken);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+  .lbl{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--soft);margin:6px 0 4px}
+  .sl{margin:8px 0}
+  .sl .row{display:flex;justify-content:space-between;font-size:14px}
+  .sl .row b{font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .btns{display:flex;gap:8px;margin-top:10px}
+  .btns button,.btns select{flex:1;padding:9px;border-radius:8px;border:1px solid var(--line);background:var(--sunken);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+  .btns button.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .read{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+  .read div{background:var(--sunken);border-radius:8px;padding:6px 10px}
+  .read span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--soft);letter-spacing:.04em}
+  .read b{font-size:17px;font-variant-numeric:tabular-nums}
+  .msg{margin-top:10px;padding:10px 12px;border-left:4px solid var(--accent);background:var(--sunken);border-radius:0 8px 8px 0}
+  .msg .big{font-weight:700;margin-bottom:2px}
+  .try{font-size:13px;color:var(--soft);margin:8px 0 0;padding-left:18px}
+  .try li{margin:2px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--soft);margin-top:8px}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Newton's Laws Simulator</h1>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <canvas id="scene" width="800" height="440" aria-label="Simulation scene"></canvas>
+        <div class="read" id="readouts"></div>
+        <div class="msg" id="msg"></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="lbl" style="margin-top:0">Speed–time graph</div>
+        <canvas id="graph" width="800" height="190" aria-label="Speed-time graph"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-top:0">Which law?</div>
+      <div class="seg" id="lawSeg">
+        <button data-law="1">1st Law</button><button data-law="2">2nd Law</button><button data-law="3">3rd Law</button>
+      </div>
+      <div class="lbl">Direction of motion</div>
+      <div class="seg" id="dirSeg">
+        <button data-dir="h">Horizontal</button><button data-dir="v">Vertical</button>
+      </div>
+      <div class="lbl">Forces and settings</div>
+      <div id="sliders"></div>
+      <div class="btns">
+        <button class="go" id="goBtn">Start</button>
+        <button id="resetBtn">Reset</button>
+        <select id="speedSel" aria-label="Playback speed">
+          <option value="0.25">0.25×</option><option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option><option value="2">2×</option>
+        </select>
+      </div>
+      <div class="legend" id="legend"></div>
+      <ul class="try" id="tryList"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var G = 9.8;              // N/kg
+var S = 1.2;              // pixels per newton for arrows
+var C = { blue:"#2563eb", orange:"#c2410c", red:"#dc2626", green:"#15803d", purple:"#7c3aed", grey:"#475569", teal:"#0891b2" };
+var $ = function(id){ return document.getElementById(id); };
+var cv = $("scene"), ctx = cv.getContext("2d");
+var gv = $("graph"), gtx = gv.getContext("2d");
+
+var law = 1, dir = "h", running = false, speed = 1, P = {}, sim = null, last = 0;
+
+var PRESETS = {
+  "1h": {F:20, f:20, m:5, v0:5, h0:0},
+  "1v": {F:49, f:0,  m:5, v0:5, h0:0},
+  "2h": {F:30, f:10, m:5, v0:0, h0:0},
+  "2v": {F:80, f:0,  m:5, v0:0, h0:0},
+  "3":  {F3:40, mA:5, mB:10}
+};
+
+function specs(){
+  if (law === 3) return [
+    {k:"F3", l:"Force pushing A and B apart", min:10, max:100, step:5, u:"N"},
+    {k:"mA", l:"Mass of A", min:1, max:20, step:1, u:"kg"},
+    {k:"mB", l:"Mass of B", min:1, max:20, step:1, u:"kg"}
+  ];
+  if (dir === "h") return [
+    {k:"F", l:"Driving force (forwards)", min:0, max:100, step:1, u:"N"},
+    {k:"f", l:"Friction (backwards)", min:0, max:100, step:1, u:"N"},
+    {k:"m", l:"Mass of trolley", min:1, max:10, step:0.5, u:"kg"},
+    {k:"v0", l:"Starting speed", min:0, max:10, step:0.5, u:"m/s"}
+  ];
+  return [
+    {k:"F", l:"Upward thrust", min:0, max:150, step:1, u:"N"},
+    {k:"f", l:"Air resistance", min:0, max:50, step:1, u:"N"},
+    {k:"m", l:"Mass of rocket", min:1, max:10, step:0.5, u:"kg"},
+    {k:"v0", l:"Starting velocity (up is +)", min:-10, max:10, step:0.5, u:"m/s"},
+    {k:"h0", l:"Starting height", min:0, max:30, step:1, u:"m"}
+  ];
+}
+
+function loadPreset(){
+  var key = law === 3 ? "3" : law + dir;
+  P = JSON.parse(JSON.stringify(PRESETS[key]));
+}
+
+function buildSliders(){
+  var box = $("sliders"); box.innerHTML = "";
+  specs().forEach(function(s){
+    var d = document.createElement("div"); d.className = "sl";
+    d.innerHTML = '<div class="row"><label for="s_'+s.k+'">'+s.l+'</label><b id="o_'+s.k+'"></b></div>' +
+      '<input type="range" id="s_'+s.k+'" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'">';
+    box.appendChild(d);
+    var inp = d.querySelector("input");
+    inp.value = P[s.k];
+    var out = d.querySelector("b");
+    function show(){ out.textContent = P[s.k] + " " + s.u; }
+    show();
+    inp.addEventListener("input", function(){
+      P[s.k] = parseFloat(inp.value); show();
+      if (law === 3 || s.k === "v0" || s.k === "h0") { if (!running || law === 3) reset(); }
+      else if (!running && sim.t === 0) { /* live preview */ }
+      draw(); updateReadouts();
+    });
+  });
+}
+
+function buildLegend(){
+  var L = $("legend"), T = $("tryList");
+  var items, tips;
+  if (law === 3){
+    items = [[C.red,"Action / reaction pair"],[C.blue,"Object A"],[C.orange,"Object B"]];
+    tips = ["Make A and B the same mass. Do they move away equally fast?",
+            "Make B much lighter than A. Which one speeds up more? The forces stay equal.",
+            "Increase the force. What changes and what stays equal?"];
+  } else if (law === 1){
+    items = [[C.blue, dir==="h" ? "Driving force" : "Thrust"],[C.orange, dir==="h" ? "Friction" : "Air resistance"],
+             [C.green,"Weight"],[C.teal,"Reaction (from ground)"],[C.purple,"Resultant force"]];
+    tips = dir==="h"
+      ? ["Set the driving force equal to friction with a starting speed. What happens to the speed?",
+         "Set a starting speed of 0 and balanced forces. Does it move?",
+         "Make friction bigger than the driving force. What happens?"]
+      : ["Set thrust equal to the weight shown. Does the rocket accelerate?",
+         "Set thrust to 0 with a starting height. Add air resistance equal to the weight.",
+         "Try a starting speed with balanced forces."];
+  } else {
+    items = [[C.blue, dir==="h" ? "Driving force" : "Thrust"],[C.orange, dir==="h" ? "Friction" : "Air resistance"],
+             [C.green,"Weight"],[C.teal,"Reaction (from ground)"],[C.purple,"Resultant force"]];
+    tips = ["Keep the resultant force the same and double the mass. What happens to the acceleration?",
+            "Keep the mass the same and double the resultant force.",
+            "Check the readout: does a = F ÷ m every time?"];
+  }
+  L.innerHTML = items.map(function(i){ return '<span><i style="background:'+i[0]+'"></i>'+i[1]+'</span>'; }).join("");
+  T.innerHTML = tips.map(function(t){ return "<li>"+t+"</li>"; }).join("");
+}
+
+/* ---------- simulation state ---------- */
+function reset(){
+  running = false; $("goBtn").textContent = "Start";
+  if (law === 3) sim = {t:0, xa:0, xb:0, va:0, vb:0, h:[]};
+  else sim = {t:0, x:0, y:P.h0 || 0, v:P.v0 || 0, h:[]};
+  if (law !== 3) sim.h.push([0, dir==="h" ? sim.v : sim.v]);
+  else sim.h.push([0,0,0]);
+  draw(); updateReadouts();
+}
+
+/* forces at the current state */
+function forces(){
+  var m = P.m, F = P.F, f = P.f, v = sim.v, o = {};
+  if (dir === "h"){
+    o.W = G*m; o.N = o.W;
+    if (v <= 1e-9 && F <= f){ o.net = 0; o.fr = F; o.static = true; }
+    else { o.net = F - f; o.fr = f; }
+  } else {
+    var W = G*m; o.W = W; o.T = F;
+    if (sim.y <= 0 && v <= 1e-9 && F <= W){ o.net = 0; o.N = W - F; o.drag = 0; }
+    else {
+      o.N = 0;
+      o.drag = v > 1e-9 ? -f : (v < -1e-9 ? f : 0);   // force on rocket (up +)
+      o.net = F - W + o.drag;
+    }
+  }
+  return o;
+}
+
+function stepOnce(dt){
+  if (law === 3){
+    var pushing = sim.t < 1;
+    var aA = pushing ? -P.F3/P.mA : 0, aB = pushing ? P.F3/P.mB : 0;
+    sim.xa += (sim.va + aA*dt/2)*dt; sim.va += aA*dt;
+    sim.xb += (sim.vb + aB*dt/2)*dt; sim.vb += aB*dt;
+    sim.t += dt; return;
+  }
+  var fo = forces(), m = P.m, v = sim.v, vn;
+  if (dir === "h"){
+    vn = v + fo.net/m*dt; if (vn < 0) vn = 0;
+    sim.x += (v+vn)/2*dt; sim.v = vn;
+  } else {
+    vn = v + fo.net/m*dt;
+    if (v*vn < 0 && Math.abs(P.F - fo.W) <= P.f) vn = 0;
+    sim.y += (v+vn)/2*dt;
+    if (sim.y <= 0 && vn <= 0){ sim.y = 0; vn = 0; }
+    sim.v = vn;
+  }
+  sim.t += dt;
+}
+
+var sampleAt = 0;
+function advance(dtReal){
+  var total = Math.min(dtReal, 0.05)*speed, n = Math.max(1, Math.ceil(total/0.005)), dt = total/n;
+  for (var i=0;i<n;i++){
+    stepOnce(dt);
+    if (sim.t >= sampleAt){
+      sampleAt += 0.05;
+      if (law === 3) sim.h.push([sim.t, sim.va, sim.vb]); else sim.h.push([sim.t, sim.v]);
+    }
+  }
+  if (law === 3 && sim.t >= 8){ running = false; $("goBtn").textContent = "Start"; }
+  if (sim.t >= 60){ running = false; $("goBtn").textContent = "Start"; }
+}
+
+function loop(ts){
+  var dt = last ? (ts-last)/1000 : 0; last = ts;
+  if (running) advance(dt);
+  draw(); updateReadouts();
+  requestAnimationFrame(loop);
+}
+
+/* ---------- drawing helpers ---------- */
+function arrow(x1,y1,x2,y2,col,label,lx,ly,align){
+  var dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy);
+  if (len < 3) return;
+  var ux=dx/len, uy=dy/len, hs=Math.min(14, len*0.5);
+  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=5; ctx.lineCap="butt";
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-ux*hs*0.8, y2-uy*hs*0.8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-ux*hs-uy*hs*0.6, y2-uy*hs+ux*hs*0.6);
+  ctx.lineTo(x2-ux*hs+uy*hs*0.6, y2-uy*hs-ux*hs*0.6); ctx.closePath(); ctx.fill();
+  if (label){
+    ctx.font="bold 14px system-ui,Arial"; ctx.textAlign=align||"center"; ctx.fillStyle=col;
+    ctx.fillText(label, lx, ly);
+  }
+}
+function txt(s,x,y,col,size,align){
+  ctx.font=(size||14)+"px system-ui,Arial"; ctx.fillStyle=col||C.grey; ctx.textAlign=align||"left"; ctx.fillText(s,x,y);
+}
+function n1(x){ var s = (Math.round(x*10)/10).toFixed(1); return s==="-0.0" ? "0.0" : s; }
+function nN(x){ return (Math.round(x*10)/10).toString(); }
+
+/* ---------- scenes ---------- */
+function drawHoriz(){
+  var W=800, H=440, GY=330, cx=300, PPM=40, x=sim.x, fo=forces();
+  ctx.fillStyle="#eaf3fb"; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="#cbd5dc"; ctx.fillRect(0,GY,W,H-GY);
+  ctx.fillStyle="#94a3b0"; ctx.fillRect(0,GY,W,3);
+  // ground markers
+  var k0 = Math.floor(x - cx/PPM) - 1, k1 = Math.ceil(x + (W-cx)/PPM) + 1;
+  for (var k=k0;k<=k1;k++){
+    var sx = cx + (k-x)*PPM, major = (((k%5)+5)%5===0);
+    ctx.strokeStyle="#7b8a96"; ctx.lineWidth=major?2:1;
+    ctx.beginPath(); ctx.moveTo(sx,GY+3); ctx.lineTo(sx,GY+(major?16:9)); ctx.stroke();
+    if (major) txt(k+" m", sx, GY+32, "#55636f", 12, "center");
+  }
+  // trolley
+  ctx.fillStyle="#f59e0b"; ctx.strokeStyle="#92400e"; ctx.lineWidth=2;
+  roundRect(cx-60, 254, 120, 52, 6); ctx.fill(); ctx.stroke();
+  [-35,35].forEach(function(dx){ ctx.fillStyle="#334155"; ctx.beginPath(); ctx.arc(cx+dx,318,12,0,7); ctx.fill();
+    ctx.fillStyle="#cbd5dc"; ctx.beginPath(); ctx.arc(cx+dx,318,4,0,7); ctx.fill(); });
+  txt(P.m+" kg", cx, 286, "#451a03", 16, "center");
+  // forces
+  var cy=280;
+  arrow(cx-60, cy, cx-60-fo.fr*S, cy, C.orange, fo.fr>0.05 ? (fo.static?"Friction ":"Friction ")+nN(fo.fr)+" N" : "", cx-60-fo.fr*S, cy-12, "right");
+  arrow(cx+60, cy, cx+60+P.F*S, cy, C.blue, P.F>0.05 ? "Driving force "+nN(P.F)+" N" : "", cx+60+P.F*S, cy-12, "left");
+  arrow(cx, cy, cx, cy+fo.W*S, C.green, "Weight "+nN(fo.W)+" N", cx+10, cy+fo.W*S+4, "left");
+  arrow(cx, cy, cx, cy-fo.N*S, C.teal, "Reaction "+nN(fo.N)+" N", cx+10, cy-fo.N*S+4, "left");
+  // resultant
+  var ry=90;
+  txt("Resultant force", cx, ry-34, C.purple, 14, "center");
+  if (Math.abs(fo.net) > 0.05){
+    arrow(cx, ry, cx+fo.net*S, ry, C.purple, nN(Math.abs(fo.net))+" N "+(fo.net>0?"forwards":"backwards"), cx+fo.net*S+(fo.net>0?8:-8), ry+5, fo.net>0?"left":"right");
+  } else {
+    ctx.fillStyle=C.purple; ctx.beginPath(); ctx.arc(cx,ry,6,0,7); ctx.fill();
+    txt("0 N  (balanced)", cx+14, ry+5, C.purple, 14, "left");
+  }
+}
+
+function drawVert(){
+  var W=800, H=440, cx=400, PPM=30, y=sim.y, fo=forces();
+  var cam = Math.max(0, y-3), gy = 400 + cam*PPM;
+  var g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#bcd8f1"); g.addColorStop(1,"#eaf3fb");
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  if (gy < H){ ctx.fillStyle="#86b87a"; ctx.fillRect(0,gy,W,H-gy); ctx.fillStyle="#5d8f50"; ctx.fillRect(0,gy,W,3); }
+  // height scale on left
+  var h0 = Math.floor(cam)-1, h1 = Math.ceil(cam + H/PPM)+1;
+  for (var h=Math.max(0,h0); h<=h1; h++){
+    var sy = gy - h*PPM, major = (h%5===0);
+    ctx.strokeStyle="#64748b"; ctx.lineWidth=major?2:1;
+    ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(major?18:10,sy); ctx.stroke();
+    if (major) txt(h+" m", 24, sy+4, "#334155", 12, "left");
+  }
+  // rocket
+  var bot = gy - y*PPM, cy = bot - 52;
+  var T = P.F;
+  if (T > 0){ var fl = Math.min(60, 8 + T*0.4);
+    ctx.fillStyle="#fb923c"; ctx.beginPath(); ctx.moveTo(cx-12,bot); ctx.lineTo(cx+12,bot); ctx.lineTo(cx,bot+fl); ctx.fill();
+    ctx.fillStyle="#fde047"; ctx.beginPath(); ctx.moveTo(cx-6,bot); ctx.lineTo(cx+6,bot); ctx.lineTo(cx,bot+fl*0.55); ctx.fill(); }
+  ctx.fillStyle="#cbd5e1"; ctx.strokeStyle="#475569"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(cx-22,bot); ctx.lineTo(cx-22,bot-70); ctx.lineTo(cx,bot-98); ctx.lineTo(cx+22,bot-70); ctx.lineTo(cx+22,bot); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle="#dc2626";
+  ctx.beginPath(); ctx.moveTo(cx-22,bot-12); ctx.lineTo(cx-36,bot); ctx.lineTo(cx-22,bot); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(cx+22,bot-12); ctx.lineTo(cx+36,bot); ctx.lineTo(cx+22,bot); ctx.fill();
+  ctx.fillStyle="#7dd3fc"; ctx.beginPath(); ctx.arc(cx,bot-55,8,0,7); ctx.fill(); ctx.stroke();
+  txt(P.m+" kg", cx, bot-25, "#1e293b", 12, "center");
+  // forces
+  if (T > 0.05) arrow(cx-14, cy, cx-14, cy-T*S, C.blue, "Thrust "+nN(T)+" N", cx-22, cy-T*S+4, "right");
+  arrow(cx, cy, cx, cy+fo.W*S, C.green, "Weight "+nN(fo.W)+" N", cx+10, cy+fo.W*S+4, "left");
+  if (fo.N > 0.05) arrow(cx+14, cy, cx+14, cy-fo.N*S, C.teal, "Reaction "+nN(fo.N)+" N", cx+22, cy-fo.N*S+4, "left");
+  if (Math.abs(fo.drag) > 0.05) arrow(cx+50, cy, cx+50, cy-fo.drag*S, C.orange, "Air resistance "+nN(Math.abs(fo.drag))+" N", cx+60, cy-fo.drag*S+(fo.drag>0?-4:14), "left");
+  // resultant
+  var rx = 190;
+  txt("Resultant force", rx, 40, C.purple, 14, "center");
+  if (Math.abs(fo.net) > 0.05){
+    arrow(rx, 250, rx, 250-fo.net*S, C.purple, nN(Math.abs(fo.net))+" N "+(fo.net>0?"up":"down"), rx, 250-fo.net*S+(fo.net>0?-8:20), "center");
+  } else {
+    ctx.fillStyle=C.purple; ctx.beginPath(); ctx.arc(rx,250,6,0,7); ctx.fill();
+    txt("0 N  (balanced)", rx, 276, C.purple, 14, "center");
+  }
+}
+
+function drawPair(){
+  var W=800, H=440, horiz = (dir==="h");
+  ctx.fillStyle = horiz ? "#eaf3fb" : "#0f1b2d"; ctx.fillRect(0,0,W,H);
+  var sA = 36 + 3*P.mA, sB = 36 + 3*P.mB;
+  var ext = Math.max(1, Math.abs(sim.xa), Math.abs(sim.xb));
+  var sc = Math.min(40, (horiz ? 300 : 150)/ext);
+  var ca, cb, cxy;
+  if (horiz){
+    var fy=300;
+    ctx.fillStyle="#bfe3f5"; ctx.fillRect(0,fy,W,H-fy); ctx.fillStyle="#7fb8d6"; ctx.fillRect(0,fy,W,3);
+    txt("Frictionless ice", 14, 24, "#334155", 14);
+    ca = 400 + sim.xa*sc - sA/2; cb = 400 + sim.xb*sc + sB/2;
+    box(ca-sA/2, fy-sA, sA, sA, C.blue, "A", P.mA);
+    box(cb-sB/2, fy-sB, sB, sB, C.orange, "B", P.mB);
+    if (sim.t < 1){
+      var Fp = P.F3, L = Fp*S, ya=fy-sA/2, yb=fy-sB/2;
+      arrow(ca-sA/2, ya, ca-sA/2-L, ya, C.red, "B pushes A: "+nN(Fp)+" N", ca-sA/2-L, ya-14, "right");
+      arrow(cb+sB/2, yb, cb+sB/2+L, yb, C.red, "A pushes B: "+nN(Fp)+" N", cb+sB/2+L, yb-14, "left");
+    }
+  } else {
+    // stars
+    ctx.fillStyle="#cbd5e1";
+    for (var i=0;i<40;i++){ ctx.fillRect((i*131)%W, (i*97)%H, 2, 2); }
+    txt("Space: no weight, no air resistance", 14, 24, "#cbd5e1", 14);
+    var mid = 220;
+    ca = mid - sim.xa*sc + sA/2; cb = mid - sim.xb*sc - sB/2;   // A below (screen down), B above
+    box(400-sA/2, ca-sA/2, sA, sA, C.blue, "A", P.mA);
+    box(400-sB/2, cb-sB/2, sB, sB, C.orange, "B", P.mB);
+    if (sim.t < 1){
+      var Fq = P.F3, L2 = Fq*S*0.9;
+      arrow(400, ca+sA/2, 400, ca+sA/2+L2, C.red, "", 0, 0);
+      txt("B pushes A: "+nN(Fq)+" N", 414, ca+sA/2+L2-4, "#fca5a5", 14, "left");
+      arrow(400, cb-sB/2, 400, cb-sB/2-L2, C.red, "", 0, 0);
+      txt("A pushes B: "+nN(Fq)+" N", 414, cb-sB/2-L2+14, "#fca5a5", 14, "left");
+    }
+  }
+}
+function box(x,y,w,h,col,name,m){
+  ctx.fillStyle=col; ctx.strokeStyle="rgba(0,0,0,.35)"; ctx.lineWidth=2;
+  roundRect(x,y,w,h,6); ctx.fill(); ctx.stroke();
+  ctx.fillStyle="#fff"; ctx.font="bold 16px system-ui,Arial"; ctx.textAlign="center";
+  ctx.fillText(name, x+w/2, y+h/2-2); ctx.font="12px system-ui,Arial"; ctx.fillText(m+" kg", x+w/2, y+h/2+14);
+}
+function roundRect(x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+
+function drawGraph(){
+  var W=800, H=190, L=60, R=20, T=14, B=36, g=gtx;
+  g.clearRect(0,0,W,H); g.fillStyle="#fff"; g.fillRect(0,0,W,H);
+  var tmax = Math.max(10, sim.t*1.05), vmin=0, vmax=5, i;
+  sim.h.forEach(function(p){ for (i=1;i<p.length;i++){ vmin=Math.min(vmin,p[i]); vmax=Math.max(vmax,p[i]); } });
+  vmax = Math.ceil(vmax*1.1/ (vmax>40?10:vmax>15?5:1))*(vmax>40?10:vmax>15?5:1) || 5;
+  if (vmin < 0) vmin = -Math.ceil(-vmin*1.1);
+  function X(t){ return L + t/tmax*(W-L-R); }
+  function Y(v){ return T + (vmax-v)/(vmax-vmin)*(H-T-B); }
+  g.font="12px system-ui,Arial"; g.strokeStyle="#e2e8f0"; g.fillStyle="#475569"; g.lineWidth=1;
+  var vstep = (vmax-vmin) > 40 ? 10 : (vmax-vmin) > 15 ? 5 : (vmax-vmin) > 6 ? 2 : 1;
+  g.textAlign="right";
+  for (var v=Math.ceil(vmin/vstep)*vstep; v<=vmax; v+=vstep){ g.beginPath(); g.moveTo(L,Y(v)); g.lineTo(W-R,Y(v)); g.stroke(); g.fillText(v, L-6, Y(v)+4); }
+  g.textAlign="center";
+  var tstep = tmax > 30 ? 10 : tmax > 12 ? 5 : tmax > 6 ? 2 : 1;
+  for (var t=0; t<=tmax; t+=tstep){ g.beginPath(); g.moveTo(X(t),T); g.lineTo(X(t),H-B); g.stroke(); g.fillText(t, X(t), H-B+16); }
+  g.strokeStyle="#334155"; g.lineWidth=2; g.beginPath(); g.moveTo(L,T); g.lineTo(L,H-B); g.moveTo(L,Y(0)); g.lineTo(W-R,Y(0)); g.stroke();
+  g.fillStyle="#334155"; g.fillText("time (s)", (L+W-R)/2, H-4);
+  g.save(); g.translate(14,(T+H-B)/2); g.rotate(-Math.PI/2); g.fillText(law===3?"speed (m/s)":(dir==="v"?"velocity, up + (m/s)":"speed (m/s)"),0,0); g.restore();
+  function line(idx,col){
+    g.strokeStyle=col; g.lineWidth=3; g.beginPath();
+    sim.h.forEach(function(p,j){ if (j===0) g.moveTo(X(p[0]),Y(p[idx])); else g.lineTo(X(p[0]),Y(p[idx])); });
+    g.stroke();
+  }
+  if (law===3){
+    // plot speed magnitudes with sign by direction: A negative, B positive
+    line(1,C.blue); line(2,C.orange);
+    g.textAlign="left"; g.fillStyle=C.blue; g.fillText("A", W-R-40, T+14); g.fillStyle=C.orange; g.fillText("B", W-R-20, T+14);
+  } else line(1, C.purple);
+}
+
+function draw(){
+  if (law === 3) drawPair(); else if (dir === "h") drawHoriz(); else drawVert();
+  drawGraph();
+}
+
+/* ---------- readouts and messages ---------- */
+function updateReadouts(){
+  var R = $("readouts"), M = $("msg"), html, msg;
+  function cell(l,v){ return "<div><span>"+l+"</span><b>"+v+"</b></div>"; }
+  if (law === 3){
+    var pushing = sim.t < 1, F = P.F3;
+    html = cell("Force on A", (pushing?nN(F):"0")+" N") + cell("Force on B", (pushing?nN(F):"0")+" N") +
+           cell("Accel. of A", n1(F/P.mA)+" m/s²") + cell("Accel. of B", n1(F/P.mB)+" m/s²") +
+           cell("Speed of A", n1(Math.abs(sim.va))+" m/s") + cell("Speed of B", n1(Math.abs(sim.vb))+" m/s");
+    msg = '<div class="big">Newton\'s 3rd Law: forces come in pairs</div>' +
+      "The force of A on B is "+nN(F)+" N one way, and the force of B on A is "+nN(F)+" N the opposite way. They are equal in size, opposite in direction and act on <b>different objects</b>. " +
+      "They push for 1 s, then the objects drift at a constant speed.<br>" +
+      "a = F ÷ m:  A: "+nN(F)+" ÷ "+P.mA+" = "+n1(F/P.mA)+" m/s²   B: "+nN(F)+" ÷ "+P.mB+" = "+n1(F/P.mB)+" m/s²" +
+      (P.mA===P.mB ? "<br>Equal masses give equal accelerations." : "<br>The lighter object accelerates more, even though the forces are equal.");
+  } else {
+    var fo = forces(), a = fo.net/P.m, unitDir = dir==="h" ? "forwards" : "up";
+    var sp = dir==="h" ? sim.v : sim.v;
+    html = cell("Resultant force", nN(Math.abs(fo.net))+" N" + (Math.abs(fo.net)>0.05 ? " "+(fo.net>0?unitDir:(dir==="h"?"backwards":"down")) : "")) +
+           cell("Acceleration", n1(a)+" m/s²") +
+           cell(dir==="h"?"Speed":"Velocity", n1(sp)+" m/s") +
+           cell(dir==="h"?"Distance":"Height", n1(dir==="h"?sim.x:sim.y)+" m") +
+           cell("Time", n1(sim.t)+" s");
+    var bal = Math.abs(fo.net) < 0.05, moving = Math.abs(sim.v) > 0.01;
+    if (law === 1){
+      msg = '<div class="big">Newton\'s 1st Law: balanced forces mean no change in motion</div>';
+      if (bal && !moving) msg += "The forces are balanced, so the object stays <b>at rest</b>.";
+      else if (bal) msg += "The forces are balanced (resultant = 0 N), so the object keeps moving at a <b>constant speed in a straight line</b>.";
+      else msg += "The forces are <b>unbalanced</b>, so the object's speed is changing ("+(a>0?"speeding up":"slowing down")+").";
+    } else {
+      msg = '<div class="big">Newton\'s 2nd Law: F = m × a</div>';
+      msg += "Resultant force = "+n1(Math.abs(fo.net))+" N, mass = "+P.m+" kg<br>" +
+             "a = F ÷ m = "+n1(Math.abs(fo.net))+" ÷ "+P.m+" = <b>"+n1(Math.abs(a))+" m/s²</b>" +
+             (bal ? "<br>No resultant force, so no acceleration." : "");
+    }
+    if (dir==="v") msg += "<br><small>Weight = m × g = "+P.m+" × "+G+" = "+nN(G*P.m)+" N</small>";
+  }
+  R.innerHTML = html; M.innerHTML = msg;
+}
+
+/* ---------- wiring ---------- */
+function setActive(){
+  [].forEach.call($("lawSeg").children, function(b){ b.setAttribute("aria-pressed", String(+b.dataset.law === law)); });
+  [].forEach.call($("dirSeg").children, function(b){ b.setAttribute("aria-pressed", String(b.dataset.dir === dir)); });
+}
+function rebuild(){
+  loadPreset(); setActive(); buildSliders(); buildLegend(); sampleAt = 0; reset();
+}
+$("lawSeg").addEventListener("click", function(e){ var b=e.target.closest("button"); if(!b) return; law=+b.dataset.law; rebuild(); });
+$("dirSeg").addEventListener("click", function(e){ var b=e.target.closest("button"); if(!b) return; dir=b.dataset.dir; rebuild(); });
+$("goBtn").addEventListener("click", function(){
+  if (law === 3 && sim.t >= 8) { sampleAt = 0; reset(); }
+  running = !running; $("goBtn").textContent = running ? "Pause" : "Resume";
+  if (sim.t === 0 && running) $("goBtn").textContent = "Pause";
+});
+$("resetBtn").addEventListener("click", function(){ sampleAt = 0; reset(); });
+$("speedSel").addEventListener("change", function(e){ speed = parseFloat(e.target.value); });
+
+// slider edits to starting conditions reset the run; make sure the sample clock restarts too
+var origReset = reset;
+reset = function(){ sampleAt = 0; origReset(); };
+
+rebuild();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
