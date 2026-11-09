@@ -18,7 +18,9 @@ def _topic_card(row, key):
         head += f" — {_pct(row['pct'])}"
     with st.expander(head, expanded=False):
         st.caption(label)
-        if row["marks_out"]:
+        if row.get("source") == "class":
+            st.caption("You have few or no marks on this topic yet, so this shows how your class did on it.")
+        elif row["marks_out"]:
             st.progress(min(max(float(row["pct"] or 0) / 100, 0.0), 1.0))
             st.write(f"**{row['marks_got']} / {row['marks_out']}** marks · homework {_pct(row['homework_pct'])}"
                      f" · assessments {_pct(row['assessment_pct'])}")
