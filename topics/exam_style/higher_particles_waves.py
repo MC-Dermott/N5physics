@@ -117,6 +117,72 @@ def fusion_reactor(level="Higher"):
                     "(6.6465 × 10⁻²⁷ kg) and a neutron (1.6749 × 10⁻²⁷ kg).")
 
 
+# ════════════════ Radium decay: nuclear equation → Δm → E → decays per second ════════════════
+
+def radium_decay(level="Higher"):
+    ex = _ex(level)
+    mRa, mRn, mHe = 375.328e-27, 368.675e-27, 6.6465e-27
+    ex.on("Nuclear Reactions").choice("Radium-226 (²²⁶₈₈Ra) decays by alpha emission. Which symbol represents the nucleus formed?",
+        "²²²₈₆Rn", [("²²²₈₈Rn", "An alpha particle (⁴₂He) takes 2 from the atomic number."),
+                     ("²²⁶₈₇Fr", "That would be beta decay of radon-226 — here an alpha particle is emitted."),
+                     ("²²⁶₈₉Ac", "Beta decay raises Z by 1 and leaves A unchanged; this is alpha emission.")])
+    dm = mRa - (mRn + mHe)
+    ex.on("Nuclear Reactions").num("The mass of a radium-226 nucleus is 375.328 × 10⁻²⁷ kg, a radon-222 nucleus 368.675 × 10⁻²⁷ kg and an alpha "
+        "particle 6.6465 × 10⁻²⁷ kg. Calculate the decrease in mass in one decay.", dm, "kg",
+        wrong=[(mRa - mRn, "Subtract the alpha particle's mass from the mass after as well."),
+               (mRa + mRn + mHe, "Mass lost = before − after.")],
+        working=[rf"\Delta m = 375.328\times10^{{-27}} - (368.675\times10^{{-27}} + 6.6465\times10^{{-27}}) = {ltx(dm)}\ \text{{kg}}"])
+    En = sig(dm) * C ** 2
+    ex.on("Nuclear Reactions").num("Calculate the energy released in one decay.", En, "J",
+        wrong=[(sig(dm) * C, "E = mc² — square c."), (sig(dm) / C ** 2, "Multiply by c², not divide.")],
+        working=[rf"E = mc^2 = {ltx(dm)} \times (3.00\times10^8)^2 = {ltx(En)}\ \text{{J}}"])
+    P = pick(2.0e-3, 4.0e-3, 8.0e-3)
+    n = P / sig(En)
+    ex.on("Nuclear Reactions").num(f"A sample releases energy at a rate of {fmt(P)} W. Calculate the number of decays each second.", n, "",
+        wrong=[(P * sig(En), "Number per second = power ÷ energy per decay."), (sig(En) / P, "The fraction is upside down.")],
+        working=[rf"N = \frac{{P}}{{E}} = \frac{{{ltx(P)}}}{{{ltx(En)}}} = {ltx(n)}"])
+    ex.on("Nuclear Reactions").choice("Where does the energy released in each decay come from?",
+        "The total mass after the decay is less than before; the lost mass is converted to energy.",
+        [("The total mass after the decay is greater than before.", "Mass is lost, and E = mc² gives the energy."),
+         ("The alpha particle loses its charge.", "Charge is conserved in the decay."),
+         ("The number of nucleons decreases.", "Nucleon number is conserved; it is the mass that decreases.")])
+    return ex.build("A sample contains radium-226, which decays to radon-222 by emitting an alpha particle.")
+
+
+# ════════════════ Fission reactor: neutrons → E per fission → fuel → fusion comparison ════════════════
+
+def fission_fuel(level="Higher"):
+    ex = _ex(level)
+    ba, x = random.choice([(141, 3), (144, 2), (140, 3), (139, 4), (144, 3)])
+    kr = 236 - ba - x
+    ex.on("Nuclear Reactions").choice(f"In a reactor a uranium-235 nucleus absorbs a neutron: ²³⁵₉₂U + ¹₀n → {ba}₅₆Ba + {kr}₃₆Kr + x ¹₀n. Determine x.".replace(str(ba), str(ba).translate(str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")), 1).replace(f"+ {kr}", "+ " + str(kr).translate(str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹"))),
+        str(x), [(str(x + 1), "Count the absorbed neutron: 235 + 1 = 236."), (str(x - 1), "Balance the mass numbers: the left total is 236."),
+                 (str(x + 2), "Balance the mass numbers: the left total is 236.")])
+    mb, ma = pick((3.9014e-25, 3.8984e-25), (3.9020e-25, 3.8990e-25), (3.9026e-25, 3.8993e-25))
+    dm = mb - ma
+    En = sig(dm) * C ** 2
+    ex.on("Nuclear Reactions").num(f"The total mass before a fission is {fmt(mb)} kg and after is {fmt(ma)} kg. Calculate the energy released.", En, "J",
+        wrong=[(sig(dm) * C, "c must be squared."), (ma * C ** 2, "Use the mass lost (before − after).")],
+        working=[rf"\Delta m = {ltx(mb)} - {ltx(ma)} = {ltx(dm)}\ \text{{kg}}", rf"E = mc^2 = {ltx(dm)} \times (3.00\times10^8)^2 = {ltx(En)}\ \text{{J}}"])
+    P = pick(1.0e9, 1.5e9, 2.0e9)
+    n = P / sig(En)
+    ex.on("Nuclear Reactions").num(f"The reactor has a power output of {fmt(P)} W. Calculate the number of fissions each second.", n, "",
+        wrong=[(P * sig(En), "Number per second = power ÷ energy per fission."), (sig(En) / P, "The fraction is upside down.")],
+        working=[rf"N = \frac{{P}}{{E}} = {ltx(n)}"])
+    m = pick(0.50, 1.0, 2.0)
+    mU = 3.90e-25
+    Etot = m / mU * sig(En)
+    ex.on("Nuclear Reactions").num(f"Each uranium-235 nucleus has a mass of 3.90 × 10⁻²⁵ kg. Calculate the energy released when {m:g} kg of uranium-235 fissions completely.",
+        Etot, "J", wrong=[(m * sig(En), "First find the number of nuclei: mass ÷ mass of one nucleus."), (m * mU * sig(En), "Divide by the mass of one nucleus; do not multiply.")],
+        working=[rf"N = \frac{{{m:g}}}{{3.90\times10^{{-25}}}} = {ltx(m / mU)}", rf"E = N \times {ltx(En)} = {ltx(Etot)}\ \text{{J}}"])
+    ex.on("Nuclear Reactions").choice("Why is it harder to sustain nuclear fusion in a reactor than fission?",
+        "The nuclei repel each other, so very high temperature and pressure are needed to bring them close enough.",
+        [("Fusion releases no energy.", "Fusion does release energy; the problem is sustaining the conditions."),
+         ("Fusion needs a large mass of uranium.", "Fusion uses light nuclei such as hydrogen."),
+         ("Fusion nuclei have no charge.", "The nuclei are positively charged — that is why they repel.")])
+    return ex.build("In a nuclear power station, uranium-235 undergoes induced fission.")
+
+
 # ════════════════ Photocell: inverse square → photons → photoelectrons ════════════════
 
 def photocell(level="Higher"):
@@ -350,6 +416,8 @@ def the_sun(level="Higher"):
 
 SCENARIOS = {
     "Fusion Reactor":       fusion_reactor,
+    "Radium Decay":         radium_decay,
+    "Fission Fuel":         fission_fuel,
     "Photocell":            photocell,
     "Hydrogen Lamp":        hydrogen_lamp,
     "Laser and Optical Fibre": laser_fibre,
