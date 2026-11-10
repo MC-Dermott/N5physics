@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Line Spectra: Emission and Absorption</title>
+<style>
+:root{
+  --bg:#0d1117; --card:#161b24; --card2:#1c2330; --line:#2a3344; --text:#e6e9ef; --muted:#8e98ad;
+  --accent:#5aa9ff; --good:#5fd38d; --warn:#ffb454; --bad:#ff6b6b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{padding:18px 16px 4px;max-width:1280px;margin:0 auto}
+h1{margin:0;font-size:22px}
+header p{margin:4px 0 0;color:var(--muted);max-width:900px}
+main{max-width:1280px;margin:0 auto;padding:12px 16px 40px;display:grid;gap:14px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px}
+@media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.card h2{margin:0 0 8px;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+canvas{display:block;width:100%;border-radius:8px}
+#atom{background:#0a0e15;border:1px solid var(--line)}
+#msg{min-height:44px;margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--card2);border:1px solid var(--line);font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+label{cursor:pointer}
+select,button{font:inherit;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+button{cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#06121f;border-color:var(--accent);font-weight:600}
+button.on{background:#27405f;border-color:var(--accent)}
+.tabs{display:flex;gap:6px;margin:10px 0}
+.tabs button{flex:1;padding:8px}
+.tabs button.active{background:var(--accent);color:#06121f;font-weight:700;border-color:var(--accent)}
+.lbl{font-size:13px;color:var(--muted);margin:8px 0 4px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{padding:5px 9px;font-size:13px}
+.hint{font-size:12.5px;color:var(--muted);margin:6px 0}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.ticks{position:relative;height:26px;margin:0 8px}
+.tick{position:absolute;top:0;transform:translateX(-50%);padding:1px 5px;font-size:11px;border-radius:6px;background:#27405f}
+.small{font-size:13px;color:var(--muted)}
+.hide{display:none!important}
+.box{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px;font-size:13.5px}
+.box h3{margin:0 0 6px;font-size:13.5px;display:flex;gap:8px;align-items:center}
+.eq{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;margin:3px 0;word-break:break-word}
+.sw{display:inline-block;width:14px;height:14px;border-radius:4px;border:1px solid #fff4}
+.cust{display:grid;grid-template-columns:34px 1fr 74px;gap:4px 8px;align-items:center;font-size:13px}
+.cap{font-size:13px;color:var(--muted);min-height:20px;margin:4px 0 12px}
+.strip-title{font-weight:600;margin:6px 0 4px;font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+tr.row-t{cursor:pointer}
+tr.row-t:hover{background:var(--card2)}
+.tbl{overflow-x:auto}
+details summary{cursor:pointer;font-weight:600}
+.key{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Line Spectra: Emission and Absorption</h1>
+  <p>An electron in an atom can only have certain energies. A photon is emitted or absorbed when the electron changes level, and its energy must equal the gap: <b>E₂ − E₁ = hf</b>.</p>
+</header>
+<main>
+<div class="grid">
+  <section class="card">
+    <h2>Energy levels of the atom</h2>
+    <canvas id="atom"></canvas>
+    <div id="msg">Choose a mode, then move the electron.</div>
+  </section>
+
+  <section class="card">
+    <h2>Controls</h2>
+    <div class="row">
+      <select id="atomSel" aria-label="Atom">
+        <option value="hydrogen">Hydrogen</option>
+        <option value="mercury">Mercury (some levels)</option>
+        <option value="custom">Custom atom (edit levels)</option>
+      </select>
+      <span class="chips">
+        <button id="uJ" class="on">Joules</button><button id="ueV">eV</button>
+      </span>
+    </div>
+    <label class="small"><input type="checkbox" id="spread"> Even level spacing (not to scale)</label>
+    <div id="custom" class="cust hide"></div>
+
+    <div class="tabs">
+      <button id="tabEm" class="active">Emission</button>
+      <button id="tabAb">Absorption</button>
+    </div>
+
+    <div id="pEm">
+      <div class="lbl">Move the electron to a level</div>
+      <div id="lvlBtns" class="chips"></div>
+      <p class="hint">Up: energy is supplied (heating, collisions, a voltage). Down: a photon is emitted. You can also click a level in the diagram or a line in the emission spectrum.</p>
+      <label><input type="checkbox" id="auto"> Gas discharge: random excitation and decay</label>
+    </div>
+
+    <div id="pAb" class="hide">
+      <div class="lbl">Photon energy: <b id="abVal"></b></div>
+      <input type="range" id="abSlider" min="0.3" max="14" step="0.01" value="3">
+      <div id="ticks" class="ticks"></div>
+      <div class="small" id="abInfo"></div>
+      <div class="lbl">Snap to a gap from the electron's level</div>
+      <div id="snapBtns" class="chips"></div>
+      <div class="row">
+        <button id="fire" class="primary">Fire photon</button>
+        <button id="white">White light: off</button>
+      </div>
+      <label class="small"><input type="checkbox" id="reemit" checked> Atom re-emits after a moment, in a random direction</label>
+    </div>
+
+    <div class="row">
+      <button id="reset">Reset atom (ground state)</button>
+      <button id="clear">Clear spectra</button>
+    </div>
+
+    <div id="boxAb" class="box hide"></div>
+    <div id="boxEm" class="box"></div>
+  </section>
+</div>
+
+<section class="card">
+  <h2>Spectra</h2>
+  <div class="row">
+    <label><input type="checkbox" id="wide"> Wide range (UV to IR, log scale)</label>
+    <label><input type="checkbox" id="ghost" checked> Show all possible lines (faint)</label>
+  </div>
+  <div class="strip-title">Emission spectrum (bright lines on a dark background)</div>
+  <canvas id="em"></canvas>
+  <div class="cap" id="capEm">Lines appear as electrons make downward jumps. Hover or click a line.</div>
+  <div class="strip-title">Absorption spectrum (dark lines on a continuous spectrum)</div>
+  <canvas id="ab"></canvas>
+  <div class="cap" id="capAb">Dark lines appear where photons are absorbed. Absorption lines match emission lines because the same gaps are involved. A cold gas absorbs only from the ground state, so it shows fewer lines than it can emit.</div>
+</section>
+
+<section class="card">
+  <details>
+    <summary>All possible transitions for this atom</summary>
+    <div class="tbl"><table id="tbl"></table></div>
+  </details>
+</section>
+</main>
+
+<script>
+const h=6.63e-34, c=3.00e8, e=1.60e-19;      // SQA data values
+const TOL=0.015;                              // absorption tolerance (fraction of the gap)
+const ATOMS={
+  hydrogen:{levels:[1,2,3,4,5,6].map(n=>-13.6/(n*n)),hyd:true},
+  mercury:{levels:[-10.44,-5.77,-5.55,-4.98,-3.77,-1.60]},
+  custom:{levels:[-9.0,-5.0,-3.4,-2.4,-1.7]}
+};
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const SUB='₀₁₂₃₄₅₆₇₈₉';
+const $=s=>document.querySelector(s);
+
+/* ---------- formatting ---------- */
+function sci(x,sf=3){
+  if(x===0) return '0';
+  let ex=Math.floor(Math.log10(Math.abs(x))), m=x/Math.pow(10,ex), ms=m.toPrecision(sf);
+  if(Math.abs(parseFloat(ms))>=10){ex++; ms=(x/Math.pow(10,ex)).toPrecision(sf);}
+  if(ex===0) return ms;
+  return ms+' × 10'+String(ex).split('').map(ch=>SUP[ch]).join('');
+}
+let unit='J';
+const fmtE=ev=>unit==='J'?sci(ev*e)+' J':ev.toFixed(2)+' eV';
+const fmtEv=ev=>unit==='J'?sci(ev*e,3)+' J':ev.toFixed(2)+' eV';
+const sub=n=>String(n).split('').map(d=>SUB[+d]).join('');
+const lamOf=ev=>h*c/(ev*e)*1e9;
+const fmtLam=l=>(l>=100?Math.round(l).toLocaleString('en-GB'):l.toFixed(1))+' nm';
+function region(l){
+  if(l<380) return 'ultraviolet';
+  if(l>750) return 'infrared';
+  return l<450?'violet':l<495?'blue':l<570?'green':l<590?'yellow':l<620?'orange':'red';
+}
+function wl2rgb(l,bright){
+  let r=0,g=0,b=0;
+  if(l>=380&&l<440){r=-(l-440)/60;b=1}
+  else if(l<490){g=(l-440)/50;b=1}
+  else if(l<510){g=1;b=-(l-510)/20}
+  else if(l<580){r=(l-510)/70;g=1}
+  else if(l<645){r=1;g=-(l-645)/65}
+  else if(l<=750){r=1}
+  let f=1;
+  if(!bright){ if(l<420)f=.3+.7*(l-380)/40; else if(l>700)f=.3+.7*(750-l)/50; }
+  return [r,g,b].map(v=>Math.round(255*Math.pow(Math.max(0,v*f),.8)));
+}
+function lineCol(l){ if(l<380) return [175,120,255]; if(l>750) return [255,85,85]; return wl2rgb(l,true); }
+function contCol(l){ if(l<380) return [95,60,130]; if(l>750) return [110,45,45]; return wl2rgb(l,false); }
+const rgb=(a,al=1)=>`rgba(${a[0]},${a[1]},${a[2]},${al})`;
+
+/* ---------- state ---------- */
+let atomKey='hydrogen', L=[], N=0, TR=[];
+let cur=0, ionised=false, spread=false, mode='emission';
+let counts={em:{},ab:{}}, markers={em:null,ab:null};
+let lastT=null, flash=0, flashCol=[255,255,255];
+const photons=[]; const el={y:null};
+let decayTimer=null, whiteTimer=null, autoTimer=null, abEV=3, hover=-1;
+
+function rebuild(){
+  N=L.length; TR=[];
+  for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){const ev=L[j]-L[i];TR.push({i,j,ev,lam:lamOf(ev)});}
+}
+const nm=i=>'E'+sub(i+1);
+const key=(i,j)=>i+'-'+j;
+
+/* ---------- atom canvas ---------- */
+const atomCv=$('#atom'), ax=atomCv.getContext('2d'); let AW=0, AH=0;
+function sizeCv(cv,hc){
+  const dpr=window.devicePixelRatio||1, w=cv.parentElement.clientWidth;
+  cv.style.height=hc+'px'; cv.width=Math.round(w*dpr); cv.height=Math.round(hc*dpr);
+  cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0); return w;
+}
+const geom=()=>({lx0:62,lx1:Math.max(230,AW-175),top:36,bot:AH-26});
+function yOf(idx){
+  const g=geom();
+  if(spread){const step=(g.bot-g.top)/N;return g.bot-idx*step;}
+  return g.top+(L[idx]/L[0])*(g.bot-g.top);
+}
+const exOf=()=>{const g=geom();return (g.lx0+g.lx1)/2;};
+
+function spawnEmitted(ev,lam){
+  let a; do{a=Math.random()*Math.PI*2;}while(Math.abs(Math.sin(a))<.25);
+  photons.push({kind:'out',x:exOf(),y:el.y,dx:Math.cos(a),dy:Math.sin(a),v:260,ev,lam,age:0,label:true});
+}
+function firePhoton(ev,label=true){
+  photons.push({kind:'in',x:-30,y:el.y,dx:1,dy:0,v:240,ev,lam:lamOf(ev),age:0,label,resolved:false});
+}
+function drawPhoton(p){
+  const col=lineCol(p.lam), per=Math.min(60,Math.max(6,p.lam*.07)), Ln=p.label?74:54;
+  ax.save(); ax.lineWidth=p.label?2.6:2; ax.strokeStyle=rgb(col); ax.shadowColor=rgb(col); ax.shadowBlur=8;
+  ax.beginPath();
+  for(let s=0;s<=Ln;s+=2){
+    const env=Math.sin(Math.PI*s/Ln), w=Math.sin(s/per*6.283-p.age*14)*9*env;
+    const x=p.x-p.dx*s-p.dy*w, y=p.y-p.dy*s+p.dx*w;
+    s?ax.lineTo(x,y):ax.moveTo(x,y);
+  }
+  ax.stroke(); ax.restore();
+  if(p.label){
+    const t=fmtEv(p.ev); ax.font='12px -apple-system,Segoe UI,sans-serif'; ax.textAlign='center';
+    const tx=Math.min(AW-50,Math.max(50,p.x-p.dx*34)), ty=p.y-p.dy*34-16;
+    ax.lineWidth=3; ax.strokeStyle='#0a0e15'; ax.strokeText(t,tx,ty); ax.fillStyle=rgb(col); ax.fillText(t,tx,ty);
+  }
+}
+function drawAtom(dt){
+  const g=geom(), ex=exOf(), now=performance.now();
+  const tgt=ionised?-40:yOf(cur);
+  if(el.y===null) el.y=tgt; else el.y+=(tgt-el.y)*(1-Math.exp(-dt*10));
+  ax.clearRect(0,0,AW,AH);
+  // energy axis
+  ax.fillStyle='#8e98ad'; ax.strokeStyle='#8e98ad'; ax.lineWidth=1.5;
+  ax.beginPath(); ax.moveTo(26,g.bot+6); ax.lineTo(26,g.top-12); ax.stroke();
+  ax.beginPath(); ax.moveTo(21,g.top-6); ax.lineTo(26,g.top-14); ax.lineTo(31,g.top-6); ax.fill();
+  ax.save(); ax.translate(14,(g.top+g.bot)/2); ax.rotate(-Math.PI/2); ax.textAlign='center'; ax.font='12px sans-serif'; ax.fillText('Energy',0,0); ax.restore();
+  // ionisation
+  ax.setLineDash([6,5]); ax.strokeStyle='#7a6a9a'; ax.lineWidth=1.5;
+  ax.beginPath(); ax.moveTo(g.lx0,g.top); ax.lineTo(g.lx1,g.top); ax.stroke(); ax.setLineDash([]);
+  ax.font='12.5px sans-serif'; ax.textAlign='left'; ax.fillStyle='#a99bc8';
+  ax.fillText('Ionised   E = 0',g.lx1+10,g.top+4);
+  // levels
+  for(let i=0;i<N;i++){
+    const y=yOf(i), act=i===cur&&!ionised, hv=i===hover&&mode==='emission';
+    ax.strokeStyle=act?'#7cc4ff':hv?'#a9c4e8':'#5b6b85'; ax.lineWidth=act?3.5:2.5;
+    ax.beginPath(); ax.moveTo(g.lx0,y); ax.lineTo(g.lx1,y); ax.stroke();
+    ax.fillStyle=act?'#cfe8ff':'#b6c0d4'; ax.font=(act?'600 ':'')+'13px sans-serif';
+    ax.fillText(nm(i)+(ATOMS[atomKey].hyd?' (n='+(i+1)+')':'')+'  '+fmtE(L[i]),g.lx1+10,y+4);
+  }
+  // transition arrow
+  if(lastT){
+    const age=(now-lastT.t0)/1000, a=age<5?1:Math.max(0,1-(age-5)/2);
+    if(a>0){
+      const yi=yOf(lastT.i), yj=yOf(lastT.j), x=g.lx0+(g.lx1-g.lx0)*.82, ev=L[lastT.j]-L[lastT.i];
+      const col=lastT.kind==='excite'?[255,180,84]:lineCol(lamOf(ev));
+      const down=lastT.kind==='emission', y1=down?yj:yi, y2=down?yi:yj, d=down?1:-1;
+      ax.globalAlpha=a; ax.strokeStyle=rgb(col); ax.fillStyle=rgb(col); ax.lineWidth=2.5;
+      ax.beginPath(); ax.moveTo(x,y1); ax.lineTo(x,y2-d*8); ax.stroke();
+      ax.beginPath(); ax.moveTo(x,y2); ax.lineTo(x-6,y2-d*12); ax.lineTo(x+6,y2-d*12); ax.fill();
+      ax.textAlign='right'; ax.font='600 12.5px sans-serif';
+      ax.lineWidth=3; ax.strokeStyle='#0a0e15'; const tx='ΔE = '+fmtEv(ev), ty=(yi+yj)/2+4;
+      ax.strokeText(tx,x-10,ty); ax.fillStyle=rgb(col); ax.fillText(tx,x-10,ty); ax.globalAlpha=1; ax.textAlign='left';
+    }
+  }
+  // electron
+  flash=Math.max(0,flash-dt*1.6);
+  if(flash>0){ax.fillStyle=rgb(flashCol,.45*flash);ax.beginPath();ax.arc(ex,el.y,10+34*flash,0,6.283);ax.fill();}
+  ax.save(); ax.shadowColor='#4aa3ff'; ax.shadowBlur=12; ax.fillStyle='#4aa3ff';
+  ax.beginPath(); ax.arc(ex,el.y,9,0,6.283); ax.fill(); ax.restore();
+  ax.fillStyle='#04111f'; ax.font='700 13px sans-serif'; ax.textAlign='center'; ax.fillText('−',ex,el.y+4.5); ax.textAlign='left';
+  // photons
+  for(const p of photons){
+    p.age+=dt; p.x+=p.dx*p.v*dt; p.y+=p.dy*p.v*dt;
+    if(p.kind==='in'&&!p.resolved&&p.x>=ex-14){p.resolved=true;resolveAbsorb(p);}
+    if(p.x<-120||p.x>AW+120||p.y<-120||p.y>AH+120) p.dead=true;
+  }
+  for(let k=photons.length-1;k>=0;k--) if(photons[k].dead) photons.splice(k,1);
+  photons.forEach(drawPhoton);
+}
+
+/* ---------- events ---------- */
+function msg(t,col){const m=$('#msg');m.innerHTML=t;m.style.borderColor=col||'var(--line)';}
+function note(kind,i,j){ // counts + marker
+  const k=key(i,j), set=kind==='em'?counts.em:counts.ab;
+  set[k]=(set[k]||0)+1; markers[kind]={i,j}; drawSpectra();
+}
+function setLevel(k){cur=k;refreshAbs();refreshLvlBtns();}
+
+function emit(i,j){ // electron falls j -> i
+  const ev=L[j]-L[i], lam=lamOf(ev);
+  spawnEmitted(ev,lam); note('em',i,j);
+  lastT={i,j,kind:'emission',t0:performance.now()}; flash=1; flashCol=lineCol(lam);
+  showTransition('em','emission',i,j);
+  msg(`Electron falls from <b>${nm(j)}</b> to <b>${nm(i)}</b>. A photon of energy <b>${fmtEv(ev)}</b> is emitted (${fmtLam(lam)}, ${region(lam)}).`,rgb(lineCol(lam)));
+}
+function excite(i,j){
+  lastT={i,j,kind:'excite',t0:performance.now()}; flash=1; flashCol=[255,180,84];
+  showTransition('em','excite',i,j);
+  msg(`Energy of <b>${fmtEv(L[j]-L[i])}</b> is supplied. The electron jumps from <b>${nm(i)}</b> up to <b>${nm(j)}</b>.`,'#ffb454');
+}
+function moveTo(k){
+  if(k===cur||ionised) return; const from=cur;
+  setLevel(k);
+  k<from?emit(k,from):excite(from,k);
+}
+function resolveAbsorb(p){
+  const ev=p.ev; let match=-1;
+  for(let j=cur+1;j<N;j++){const d=L[j]-L[cur];if(Math.abs(ev-d)<=TOL*d){match=j;break;}}
+  if(match>=0){
+    p.dead=true; const i=cur; setLevel(match); note('ab',i,match);
+    lastT={i,j:match,kind:'absorption',t0:performance.now()}; flash=1; flashCol=lineCol(p.lam);
+    showTransition('ab','absorption',i,match);
+    msg(`<b>Absorbed.</b> The photon energy ${fmtEv(ev)} matches the gap ${nm(i)} → ${nm(match)}, so the electron jumps up.`,'#5fd38d');
+    scheduleDecay();
+  }else if(ev>=-L[cur]){
+    p.dead=true; ionised=true; flash=1; flashCol=lineCol(p.lam);
+    const k=ev+L[cur];
+    msg(`<b>Atom ionised.</b> The photon energy ${fmtEv(ev)} is more than the ${fmtEv(-L[cur])} needed to free the electron. It leaves with ${fmtEv(k)} of kinetic energy.`,'#ffb454');
+    clearTimeout(decayTimer);
+    setTimeout(()=>{ionised=false;el.y=yOf(0);setLevel(0);},1700);
+  }else if(p.label){
+    let best=null; for(let j=cur+1;j<N;j++){const d=L[j]-L[cur];if(!best||Math.abs(ev-d)<Math.abs(ev-best.d))best={j,d};}
+    msg(`<b>Not absorbed.</b> The photon energy ${fmtEv(ev)} does not match any gap above ${nm(cur)}`+(best?` (nearest: ${nm(cur)} → ${nm(best.j)} = ${fmtEv(best.d)})`:'')+'. It passes straight through.','#ff6b6b');
+  }
+}
+function scheduleDecay(){
+  clearTimeout(decayTimer);
+  if(!$('#reemit').checked||cur===0||mode!=='absorption') return;
+  decayTimer=setTimeout(()=>{
+    if(cur===0||ionised) return;
+    const j=cur, i=Math.floor(Math.random()*cur);
+    setLevel(i); emit(i,j); scheduleDecay();
+  },1400+Math.random()*700);
+}
+function resetAtom(){
+  clearTimeout(decayTimer); ionised=false; photons.length=0; lastT=null; setLevel(0); el.y=yOf(0);
+  msg('Atom reset: electron in the ground state.');
+}
+
+/* ---------- readouts ---------- */
+function showTransition(box,kind,i,j){
+  const lo=L[i], up=L[j], ev=up-lo, J=ev*e, f=J/h, lam=lamOf(ev), col=lineCol(lam);
+  const v=x=>unit==='J'?sci(x*e)+' J':x.toFixed(2)+' eV';
+  const title={emission:'Photon emitted',absorption:'Photon absorbed',excite:'Excitation (energy supplied)'}[kind];
+  let html=`<h3>${title}: ${kind==='emission'?nm(j)+' → '+nm(i):nm(i)+' → '+nm(j)}`+(kind==='excite'?'':` <span class="sw" style="background:${rgb(col)}"></span>`)+'</h3>';
+  html+=`<div class="eq">ΔE = ${nm(j)} − ${nm(i)} = (${v(up)}) − (${v(lo)}) = <b>${v(ev)}</b></div>`;
+  if(unit==='eV') html+=`<div class="eq">ΔE = ${sci(J)} J</div>`;
+  if(kind!=='excite'){
+    html+=`<div class="eq">ΔE = hf, so f = ΔE / h = ${sci(J)} / ${sci(h)} = <b>${sci(f)} Hz</b></div>`;
+    html+=`<div class="eq">λ = c / f = ${sci(c)} / ${sci(f)} = <b>${fmtLam(lam)}</b> (${region(lam)})</div>`;
+  }
+  $(box==='ab'?'#boxAb':'#boxEm').innerHTML=html;
+}
+function emptyBoxes(){
+  $('#boxEm').innerHTML='<h3>Last emission</h3><div class="small">Nothing yet. Move the electron down to a lower level.</div>';
+  $('#boxAb').innerHTML='<h3>Last absorption</h3><div class="small">Nothing yet. Fire a photon at the atom.</div>';
+}
+
+/* ---------- controls ---------- */
+function refreshLvlBtns(){
+  const b=$('#lvlBtns'); b.innerHTML='';
+  for(let i=0;i<N;i++){
+    const x=document.createElement('button'); x.textContent=nm(i); x.className=i===cur?'on':'';
+    x.onclick=()=>moveTo(i); b.appendChild(x);
+  }
+}
+function refreshAbs(){
+  const s=$('#abSlider'), max=Math.ceil((-L[0]+1)*10)/10;
+  s.max=max; if(abEV>max) abEV=max; s.value=abEV;
+  const t=$('#ticks'), sn=$('#snapBtns'); t.innerHTML=''; sn.innerHTML='';
+  for(let j=cur+1;j<N;j++){
+    const d=L[j]-L[cur];
+    const tk=document.createElement('button'); tk.className='tick'; tk.style.left=((d-.3)/(max-.3)*100)+'%';
+    tk.textContent=nm(j); tk.title=`${nm(cur)} → ${nm(j)}: ${fmtEv(d)}`; tk.onclick=()=>setAbEV(d); t.appendChild(tk);
+    const b=document.createElement('button'); b.textContent=`${nm(cur)} → ${nm(j)}  ${fmtEv(d)}`; b.onclick=()=>setAbEV(d); sn.appendChild(b);
+  }
+  if(cur===N-1) sn.innerHTML='<span class="small">Top level: any further photon would ionise the atom.</span>';
+  updAbInfo();
+}
+function setAbEV(v){abEV=v;$('#abSlider').value=v;updAbInfo();}
+function updAbInfo(){
+  const lam=lamOf(abEV), col=lineCol(lam);
+  $('#abVal').innerHTML=fmtEv(abEV);
+  $('#abInfo').innerHTML=`<span class="sw" style="background:${rgb(col)}"></span> f = ${sci(abEV*e/h)} Hz &nbsp; λ = ${fmtLam(lam)} (${region(lam)})`;
+}
+function setMode(m){
+  mode=m; $('#tabEm').classList.toggle('active',m==='emission'); $('#tabAb').classList.toggle('active',m==='absorption');
+  $('#pEm').classList.toggle('hide',m!=='emission'); $('#pAb').classList.toggle('hide',m!=='absorption'); $('#boxAb').classList.toggle('hide',m!=='absorption');
+  if(m==='emission'){stopWhite();clearTimeout(decayTimer);} else {stopAuto();}
+  atomCv.style.cursor='default'; if(m==='absorption'&&cur>0) scheduleDecay();
+}
+function stopWhite(){clearInterval(whiteTimer);whiteTimer=null;$('#white').textContent='White light: off';$('#white').classList.remove('on');}
+function stopAuto(){clearInterval(autoTimer);autoTimer=null;$('#auto').checked=false;}
+function toggleWhite(){
+  if(whiteTimer){stopWhite();return;}
+  $('#white').textContent='White light: on'; $('#white').classList.add('on');
+  whiteTimer=setInterval(()=>{
+    if(ionised) return;
+    let ev;
+    const ups=[]; for(let j=cur+1;j<N;j++) ups.push(L[j]-L[cur]);
+    if(ups.length&&Math.random()<.45) ev=ups[Math.floor(Math.random()*ups.length)];
+    else ev=.8+Math.random()*(-L[0]*.95);
+    firePhoton(ev,false);
+  },330);
+}
+function toggleAuto(on){
+  clearInterval(autoTimer); autoTimer=null; if(!on) return;
+  autoTimer=setInterval(()=>{
+    if(ionised) return;
+    if(cur===0){ moveTo(1+Math.floor(Math.random()*(N-1))); }
+    else moveTo(Math.floor(Math.random()*cur));
+  },1100);
+}
+function buildCustom(){
+  const d=$('#custom'); d.innerHTML='';
+  d.classList.toggle('hide',atomKey!=='custom'); if(atomKey!=='custom') return;
+  L.forEach((v,k)=>{
+    const a=document.createElement('span'); a.textContent=nm(k);
+    const s=document.createElement('input'); s.type='range'; s.min=-14; s.max=-0.3; s.step=.05; s.value=v;
+    const o=document.createElement('span'); o.className='small'; o.textContent=v.toFixed(2)+' eV';
+    s.oninput=()=>{
+      let x=+s.value; const lo=k>0?L[k-1]+.1:-14, hi=k<N-1?L[k+1]-.1:-.3;
+      x=Math.min(hi,Math.max(lo,x)); s.value=x; L[k]=x; o.textContent=x.toFixed(2)+' eV';
+      rebuild(); counts={em:{},ab:{}}; markers={em:null,ab:null}; lastT=null; refreshAbs(); drawSpectra(); buildTable();
+    };
+    d.append(a,s,o);
+  });
+}
+function setAtom(k){
+  atomKey=k; L=ATOMS[k].levels.slice(); rebuild();
+  spread=k==='hydrogen'; $('#spread').checked=spread;
+  counts={em:{},ab:{}}; markers={em:null,ab:null};
+  buildCustom(); stopWhite(); stopAuto(); resetAtom(); emptyBoxes(); refreshLvlBtns(); refreshAbs(); drawSpectra(); buildTable();
+}
+
+/* ---------- spectra ---------- */
+const emCv=$('#em'), abCv=$('#ab'); let SW=0; const SH=100, STRIP=64, PAD=12;
+const hits={em:[],ab:[]};
+const wide=()=>$('#wide').checked;
+function xOf(lam){
+  if(wide()){ if(lam<50||lam>5000) return null; return PAD+(Math.log10(lam)-Math.log10(50))/(Math.log10(5000)-Math.log10(50))*(SW-2*PAD); }
+  if(lam<380||lam>750) return null; return PAD+(lam-380)/370*(SW-2*PAD);
+}
+function lamAt(x){
+  const f=(x-PAD)/(SW-2*PAD);
+  return wide()?Math.pow(10,Math.log10(50)+f*(Math.log10(5000)-Math.log10(50))):380+f*370;
+}
+function drawStrip(kind){
+  const cv=kind==='em'?emCv:abCv, c=cv.getContext('2d'), ghost=$('#ghost').checked;
+  c.clearRect(0,0,SW,SH);
+  if(kind==='em'){c.fillStyle='#000';c.fillRect(0,0,SW,STRIP);}
+  else for(let x=0;x<SW;x++){c.fillStyle=rgb(contCol(lamAt(Math.min(SW-PAD,Math.max(PAD,x)))));c.fillRect(x,0,1,STRIP);}
+  hits[kind]=[]; let off=0;
+  const draw=(tr,pass)=>{
+    const x=xOf(tr.lam); if(x===null){ if(pass===1)off++; return; }
+    const cnt=counts[kind][key(tr.i,tr.j)]||0;
+    if(pass===0){ // ghost
+      if(!ghost||cnt) return; if(kind==='ab'&&tr.i!==0) return;
+      c.fillStyle=kind==='em'?rgb(lineCol(tr.lam),.2):'rgba(0,0,0,.25)'; c.fillRect(x-1,0,2,STRIP);
+    }else if(cnt){
+      const a=Math.min(1,.55+.1*cnt);
+      c.save();
+      if(kind==='em'){c.shadowColor=rgb(lineCol(tr.lam));c.shadowBlur=8;c.fillStyle=rgb(lineCol(tr.lam),a);}
+      else c.fillStyle=`rgba(0,0,0,${a})`;
+      c.fillRect(x-1.5,0,3,STRIP); c.restore();
+    }
+    if(pass===1||(pass===0&&ghost)) hits[kind].push({x,tr});
+  };
+  TR.forEach(t=>draw(t,0)); TR.forEach(t=>draw(t,1));
+  // axis
+  c.fillStyle='#8e98ad'; c.strokeStyle='#8e98ad'; c.font='11.5px sans-serif'; c.textAlign='center'; c.lineWidth=1;
+  const ticks=wide()?[100,200,400,700,1000,2000,4000]:[400,450,500,550,600,650,700,750];
+  ticks.forEach(t=>{const x=xOf(t); if(x===null)return; c.beginPath();c.moveTo(x,STRIP);c.lineTo(x,STRIP+5);c.stroke(); c.fillText(t,x,STRIP+17);});
+  c.textAlign='right'; c.fillText('λ / nm',SW-2,SH-6);
+  if(wide()){ // visible band outline
+    c.strokeStyle='rgba(255,255,255,.35)'; c.strokeRect(xOf(380),0.5,xOf(750)-xOf(380),STRIP-1);
+  }
+  const m=markers[kind];
+  if(m){const x=xOf(lamOf(L[m.j]-L[m.i])); if(x!==null){c.fillStyle='#fff';c.beginPath();c.moveTo(x,STRIP+1);c.lineTo(x-5,STRIP+10);c.lineTo(x+5,STRIP+10);c.fill();}}
+  return off;
+}
+function drawSpectra(){
+  const o1=drawStrip('em'), o2=drawStrip('ab');
+  const w=!wide()&&o1>0?`  (${o1} line${o1>1?'s':''} off the visible scale: tick "Wide range")`:'';
+  if(!$('#capEm').dataset.hv) $('#capEm').textContent='Lines appear as electrons make downward jumps. Hover or click a line.'+w;
+}
+function stripPointer(kind,ev){
+  const r=(kind==='em'?emCv:abCv).getBoundingClientRect(), x=ev.clientX-r.left, y=ev.clientY-r.top;
+  let best=null; if(y<=STRIP+4) for(const hh of hits[kind]) if(Math.abs(hh.x-x)<=6&&(!best||Math.abs(hh.x-x)<Math.abs(best.x-x)))best=hh;
+  return best;
+}
+function capFor(kind,hh){
+  const t=hh.tr; return `${nm(t.j)} ⇄ ${nm(t.i)}:  ΔE = ${fmtEv(t.ev)},  f = ${sci(t.ev*e/h)} Hz,  λ = ${fmtLam(t.lam)} (${region(t.lam)})`;
+}
+['em','ab'].forEach(kind=>{
+  const cv=kind==='em'?emCv:abCv, cap=$(kind==='em'?'#capEm':'#capAb'), dflt=cap.textContent;
+  cv.addEventListener('mousemove',ev=>{const hh=stripPointer(kind,ev); cv.style.cursor=hh?'pointer':'default'; if(hh){cap.dataset.hv=1;cap.textContent=capFor(kind,hh);}else{delete cap.dataset.hv;cap.textContent=dflt;}});
+  cv.addEventListener('mouseleave',()=>{delete cap.dataset.hv;cap.textContent=dflt;});
+  cv.addEventListener('click',ev=>{const hh=stripPointer(kind,ev); if(hh) trigger(kind,hh.tr);});
+});
+function trigger(kind,t){
+  if(kind==='em'){
+    setMode('emission'); clearTimeout(decayTimer); ionised=false;
+    if(cur<t.j){const f=cur;setLevel(t.j);excite(f,t.j);} else setLevel(t.j);
+    setTimeout(()=>{setLevel(t.i);emit(t.i,t.j);},900);
+  }else{
+    setMode('absorption'); stopWhite(); ionised=false;
+    if(cur!==t.i){setLevel(t.i);}
+    setAbEV(t.ev); setTimeout(()=>firePhoton(t.ev),450);
+  }
+}
+function buildTable(){
+  const rows=TR.slice().sort((a,b)=>a.lam-b.lam);
+  let s='<tr><th>Transition</th><th>ΔE (J)</th><th>ΔE (eV)</th><th>f (Hz)</th><th>λ (nm)</th><th>Region</th></tr>';
+  rows.forEach((t,k)=>{s+=`<tr class="row-t" data-k="${k}"><td>${nm(t.j)} ⇄ ${nm(t.i)}</td><td>${sci(t.ev*e)}</td><td>${t.ev.toFixed(2)}</td><td>${sci(t.ev*e/h)}</td><td>${fmtLam(t.lam)}</td><td>${region(t.lam)}</td></tr>`;});
+  $('#tbl').innerHTML=s;
+  $('#tbl').querySelectorAll('.row-t').forEach(r=>r.onclick=()=>trigger(mode==='absorption'?'ab':'em',rows[+r.dataset.k]));
+}
+
+/* ---------- wiring ---------- */
+atomCv.addEventListener('pointermove',ev=>{
+  if(mode!=='emission'){hover=-1;return;}
+  const r=atomCv.getBoundingClientRect(), x=ev.clientX-r.left, y=ev.clientY-r.top, g=geom();
+  hover=-1; let bd=11;
+  if(x>=g.lx0-10&&x<=g.lx1+160) for(let i=0;i<N;i++){const d=Math.abs(yOf(i)-y);if(d<bd){bd=d;hover=i;}}
+  atomCv.style.cursor=hover>=0&&hover!==cur?'pointer':'default';
+});
+atomCv.addEventListener('pointerleave',()=>hover=-1);
+atomCv.addEventListener('click',()=>{if(mode==='emission'&&hover>=0)moveTo(hover);});
+$('#atomSel').onchange=ev=>setAtom(ev.target.value);
+$('#uJ').onclick=()=>setUnit('J'); $('#ueV').onclick=()=>setUnit('eV');
+function setUnit(u){unit=u;$('#uJ').classList.toggle('on',u==='J');$('#ueV').classList.toggle('on',u==='eV');
+  if(lastT)showTransition(lastT.kind==='absorption'?'ab':'em',lastT.kind,lastT.i,lastT.j);
+  refreshAbs();drawSpectra();}
+$('#spread').onchange=ev=>spread=ev.target.checked;
+$('#tabEm').onclick=()=>setMode('emission'); $('#tabAb').onclick=()=>setMode('absorption');
+$('#abSlider').oninput=ev=>{abEV=+ev.target.value;updAbInfo();};
+$('#fire').onclick=()=>{if(!ionised)firePhoton(abEV);};
+$('#white').onclick=toggleWhite;
+$('#reemit').onchange=()=>{$('#reemit').checked?scheduleDecay():clearTimeout(decayTimer);};
+$('#auto').onchange=ev=>toggleAuto(ev.target.checked);
+$('#reset').onclick=()=>{resetAtom();emptyBoxes();};
+$('#clear').onclick=()=>{counts={em:{},ab:{}};markers={em:null,ab:null};drawSpectra();};
+$('#wide').onchange=drawSpectra; $('#ghost').onchange=drawSpectra;
+
+function resizeAll(){
+  AW=sizeCv(atomCv,Math.max(380,Math.min(500,window.innerHeight-260)));AH=parseFloat(atomCv.style.height);
+  SW=sizeCv(emCv,SH); sizeCv(abCv,SH); drawSpectra();
+}
+window.addEventListener('resize',resizeAll);
+let last=performance.now();
+function loop(t){const dt=Math.min(.05,(t-last)/1000);last=t;drawAtom(dt);requestAnimationFrame(loop);}
+
+resizeAll(); setAtom('hydrogen'); setMode('emission'); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

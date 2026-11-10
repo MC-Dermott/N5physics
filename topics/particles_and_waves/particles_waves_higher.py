@@ -771,7 +771,7 @@ _LEVELS = [("E₄", -0.871e-19), ("E₃", -1.36e-19), ("E₂", -2.42e-19), ("E�
 _LV_TXT = ", ".join(f"{n} = {_txt(v, 3)} J" for n, v in _LEVELS)
 
 
-def gen_pw_energy_levels(level="Higher"):
+def _gen_pw_energy_levels(level="Higher"):
     i, j = sorted(random.sample(range(5), 2))
     (nu, Eu), (nl, El) = _LEVELS[i], _LEVELS[j]
     dE = Eu - El
@@ -795,7 +795,7 @@ def gen_pw_energy_levels(level="Higher"):
     return _q(text, _sig(lam), "m", opts, "Spectra", scaffold, level)
 
 
-def gen_pw_spectra_explain(level="Higher"):
+def _gen_pw_spectra_explain(level="Higher"):
     kind = random.choice(["emission", "absorption", "bright", "bohr"])
     if kind == "emission":
         return _choice("How is a line emission spectrum produced?",
@@ -820,6 +820,26 @@ def gen_pw_spectra_explain(level="Higher"):
                    [("The atom is mostly empty space with a dense nucleus.", "That's Rutherford's model (course report 2018)."),
                     ("Electrons are spread through a positive sphere.", "That's the plum-pudding model."),
                     ("Electrons can have any energy.", "In the Bohr model the energies are discrete.")], "Spectra", level)
+
+
+# Line spectra simulation (Luke's Simulations/Particles and waves/line_spectra_emission_absorption.html)
+_SPECTRA_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "line_spectra_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_spectra_widget(question):
+    question.metadata["widget_html"] = _SPECTRA_WIDGET_HTML
+    question.metadata["widget_height"] = 1500
+    return question
+
+
+def gen_pw_energy_levels(level="Higher"):
+    return _with_spectra_widget(_gen_pw_energy_levels(level))
+
+
+def gen_pw_spectra_explain(level="Higher"):
+    return _with_spectra_widget(_gen_pw_spectra_explain(level))
 
 
 # ════════════════ Refraction ════════════════
