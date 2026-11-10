@@ -586,6 +586,84 @@ def gen_pw_reactions_per_second(level="Higher"):
     return _q(text, _sig(n), "reactions per second", opts, "Nuclear Reactions", None, level)
 
 
+_SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
+_ELEM = {86: "Rn", 88: "Ra", 84: "Po", 82: "Pb", 83: "Bi", 87: "Fr", 89: "Ac", 90: "Th", 92: "U", 91: "Pa",
+         53: "I", 54: "Xe", 55: "Cs", 56: "Ba", 51: "Sb", 52: "Te", 27: "Co", 28: "Ni", 6: "C", 7: "N", 8: "O"}
+
+
+def _nuc(A, Z):
+    return f"{str(A).translate(_SUP)}{str(Z).translate(_SUB)}{_ELEM[Z]}"
+
+
+# (A, Z) of parent nuclei with a known daughter symbol for both alpha and beta
+_PARENTS = [(226, 88), (210, 84), (222, 86), (223, 87), (131, 53), (137, 55), (60, 27), (227, 89), (234, 90)]
+
+
+def gen_pw_nuclear_equations(level="Higher"):
+    kind = random.choice(["alpha", "beta", "neutrons", "fusion"])
+    if kind in ("alpha", "beta"):
+        pool = [(A, Z) for A, Z in _PARENTS if (Z - 2 in _ELEM if kind == "alpha" else Z + 1 in _ELEM)]
+        A, Z = random.choice(pool)
+        if kind == "alpha":
+            ans, dA, dZ = (A - 4, Z - 2), "alpha particle", 0
+            wrong = [((A - 4, Z - 1), "An alpha particle is ⁴₂He: the atomic number falls by 2."),
+                     ((A - 2, Z - 2), "An alpha particle has mass number 4, so the mass number falls by 4."),
+                     ((A, Z + 1), "That is beta decay, not alpha.")]
+        else:
+            ans = (A, Z + 1)
+            wrong = [((A - 1, Z), "In beta decay the mass number does NOT change; the atomic number goes UP by 1."),
+                     ((A, Z - 1), "In beta decay a neutron becomes a proton, so Z goes UP by 1."),
+                     ((A - 4, Z - 2), "That is alpha decay, not beta.")]
+        text = f"{_nuc(A, Z)} decays by {'alpha' if kind == 'alpha' else 'beta'} emission. Which symbol represents the nucleus formed?"
+        correct = _nuc(*ans)
+        pairs = [(_nuc(a, z), why) for (a, z), why in wrong if (z in _ELEM)]
+        pairs = [(w, why) for w, why in pairs if w != correct]
+        while len(pairs) < 3:
+            pairs.append((_nuc(A, Z), "That is the original nucleus."))
+            break
+        return _choice(text, correct, pairs[:3], "Nuclear Reactions", level)
+    if kind == "neutrons":
+        x = random.choice([2, 3, 4])
+        ba, kr = 144, 89
+        # 235 + 1 = 144 + 89 + x  with Z 92 = 56 + 36 → adjust Kr mass for x
+        kr = 236 - ba - x
+        text = (f"In the reaction ²³⁵₉₂U + ¹₀n → {str(ba).translate(_SUP)}₅₆Ba + {str(kr).translate(_SUP)}₃₆Kr + x ¹₀n, determine the value of x.")
+        wrong = [(str(x + 1), "Count the neutron absorbed on the left too: 235 + 1 = 236."),
+                 (str(x - 1), "Mass numbers: 235 + 1 on the left."),
+                 (str(x + 2), "Balance the mass numbers: left total 236.")]
+        wrong = [(w, why) for w, why in wrong if int(w) > 0 and w != str(x)]
+        wrong.append((str(x + 3), "Balance the mass numbers: left total 236."))
+        return _choice(text, str(x), wrong[:3], "Nuclear Reactions", level)
+    A1, Z1 = random.choice([(2, 1), (3, 1)])
+    text = "Complete the fusion reaction ²₁H + ³₁H → ⁴₂He + ?"
+    return _choice(text, "¹₀n", [("¹₁H", "Balance the atomic numbers: 1 + 1 = 2 + 0, so no charge."),
+                                 ("²₀n", "Balance the mass numbers: 2 + 3 = 4 + 1."),
+                                 ("⁰₋₁e", "Mass numbers: 5 = 4 + 1, so the particle has mass number 1.")], "Nuclear Reactions", level)
+
+
+def gen_pw_fission_fusion(level="Higher"):
+    kind = random.choice(["describe", "hard", "source", "types"])
+    if kind == "describe":
+        return _choice("Which statement describes nuclear fusion?", "Two small nuclei join to form a larger nucleus, releasing energy.",
+                       [("Two atoms join together.", "Fusion joins NUCLEI, and energy is released (MI)."),
+                        ("A large nucleus splits into two smaller nuclei, releasing energy.", "That is fission."),
+                        ("Two small nuclei join to form a larger nucleus, absorbing energy.", "Energy is RELEASED.")], "Nuclear Reactions", level)
+    if kind == "hard":
+        return _choice("Why are fusion reactions hard to sustain in a reactor?", "The nuclei repel each other, so very high temperature and pressure are needed to bring them close enough.",
+                       [("Fusion needs a very large mass of uranium.", "Fusion uses light nuclei such as hydrogen."),
+                        ("Fusion produces no energy at all in a reactor.", "Energy is released; the problem is sustaining the conditions."),
+                        ("Neutrons are absorbed by control rods.", "That is part of fission reactor control, not why fusion is hard.")], "Nuclear Reactions", level)
+    if kind == "source":
+        return _choice("Where does the energy released in a nuclear reaction come from?", "The total mass after the reaction is less than before; the lost mass is converted to energy.",
+                       [("The total mass after the reaction is greater than before.", "Mass is LOST, and E = mc² gives the energy."),
+                        ("The number of nucleons decreases.", "The nucleon number is conserved; it is the mass that decreases."),
+                        ("The nuclei lose their charge.", "Charge is conserved.")], "Nuclear Reactions", level)
+    return _choice("Which statement about induced fission is correct?", "It is caused by a nucleus absorbing a neutron.",
+                   [("It happens spontaneously with no neutron needed.", "That is spontaneous fission."),
+                    ("It joins two small nuclei.", "That is fusion."),
+                    ("It only happens in the Sun.", "The Sun uses fusion.")], "Nuclear Reactions", level)
+
+
 # ════════════════ Inverse square law ════════════════
 def gen_pw_isl(level="Higher"):
     d1 = random.choice([0.40, 0.50, 0.80, 1.5, 2.0, 3.0, 4.0])

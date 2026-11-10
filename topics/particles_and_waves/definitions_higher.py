@@ -58,6 +58,18 @@ DEFINITIONS = {
         "confusables": ["electric field", "work function"],
     },
 
+    # ── Nuclear reactions ──────────────────────────────────────────────────────
+    "nuclear fission": {
+        "group": "Nuclear reactions",
+        "definition": "A large nucleus splits into two smaller nuclei (with neutrons), releasing energy.",
+        "confusables": ["nuclear fusion"],
+    },
+    "nuclear fusion": {
+        "group": "Nuclear reactions",
+        "definition": "Two small nuclei join to form a larger nucleus, releasing energy.",
+        "confusables": ["nuclear fission"],
+        "traps": [("Two atoms join together.", "Fusion joins **nuclei**, and energy is released.")],
+    },
     # ── Photoelectric effect and spectra ───────────────────────────────────────
     "photon": {
         "group": "Photoelectric effect and spectra",
@@ -168,6 +180,12 @@ OVERLAPS = [
 ]
 
 STATEMENTS = [
+    ("nuclear fusion", "Nuclear fusion is two small nuclei joining to form a larger nucleus, releasing energy.", True,
+     "Fusion joins light nuclei; the mass lost is released as energy (E = mc²)."),
+    ("nuclear fusion", "Nuclear fusion is a large nucleus splitting into smaller nuclei.", False,
+     "That describes **fission**."),
+    ("nuclear fission", "Induced fission is caused by a nucleus absorbing a neutron.", True,
+     "Spontaneous fission needs no neutron; induced fission does."),
     # key, statement, correct?, explanation
     ("baryon", "A proton is a baryon made up of three quarks.", True,
      "A proton is two up quarks and one down quark (uud)."),
