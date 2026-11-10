@@ -556,7 +556,7 @@ _REACTIONS = [
 ]
 
 
-def gen_pw_mass_energy(level="Higher"):
+def _gen_pw_mass_energy(level="Higher"):
     rx, before, after = random.choice(_REACTIONS)
     mb, ma = sum(before), sum(after)
     dm = mb - ma
@@ -599,7 +599,7 @@ def _nuc(A, Z):
 _PARENTS = [(226, 88), (210, 84), (222, 86), (223, 87), (131, 53), (137, 55), (60, 27), (227, 89), (234, 90)]
 
 
-def gen_pw_nuclear_equations(level="Higher"):
+def _gen_pw_nuclear_equations(level="Higher"):
     kind = random.choice(["alpha", "beta", "neutrons", "fusion"])
     if kind in ("alpha", "beta"):
         pool = [(A, Z) for A, Z in _PARENTS if (Z - 2 in _ELEM if kind == "alpha" else Z + 1 in _ELEM)]
@@ -641,7 +641,7 @@ def gen_pw_nuclear_equations(level="Higher"):
                                  ("⁰₋₁e", "Mass numbers: 5 = 4 + 1, so the particle has mass number 1.")], "Nuclear Reactions", level)
 
 
-def gen_pw_fission_fusion(level="Higher"):
+def _gen_pw_fission_fusion(level="Higher"):
     kind = random.choice(["describe", "hard", "source", "types"])
     if kind == "describe":
         return _choice("Which statement describes nuclear fusion?", "Two small nuclei join to form a larger nucleus, releasing energy.",
@@ -662,6 +662,33 @@ def gen_pw_fission_fusion(level="Higher"):
                    [("It happens spontaneously with no neutron needed.", "That is spontaneous fission."),
                     ("It joins two small nuclei.", "That is fusion."),
                     ("It only happens in the Sun.", "The Sun uses fusion.")], "Nuclear Reactions", level)
+
+
+
+# Nuclear reactions simulation (Luke's Simulations/Particles and waves/nuclear_reactions.html)
+_NUCLEAR_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "nuclear_reactions_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_nuclear_widget(question, tab):
+    """Attach the nuclear reactions simulation, opened on the tab ('t1' equations, 't2' fission/fusion, 't3' energy)."""
+    question.metadata["widget_html"] = _NUCLEAR_WIDGET_HTML.replace(
+        "</body>", "<script>document.querySelector('[data-t=%s]').click();</script></body>" % tab)
+    question.metadata["widget_height"] = 1250
+    return question
+
+
+def gen_pw_nuclear_equations(level="Higher"):
+    return _with_nuclear_widget(_gen_pw_nuclear_equations(level), "t1")
+
+
+def gen_pw_fission_fusion(level="Higher"):
+    return _with_nuclear_widget(_gen_pw_fission_fusion(level), "t2")
+
+
+def gen_pw_mass_energy(level="Higher"):
+    return _with_nuclear_widget(_gen_pw_mass_energy(level), "t3")
 
 
 # ════════════════ Inverse square law ════════════════

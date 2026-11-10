@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nuclear Reactions</title>
+<style>
+:root{--bg:#0d1117;--card:#161b24;--card2:#1c2330;--line:#2a3344;--text:#e6e9ef;--muted:#8e98ad;--accent:#5aa9ff;--good:#5fd38d;--warn:#ffb454;--bad:#ff6b6b;--p:#ff6b6b;--n:#8e98ad}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{margin:0;font-size:22px}
+header p{margin:4px 0 0;color:var(--muted)}
+main{max-width:1100px;margin:0 auto;padding:8px 16px 40px}
+.tabs{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}
+.tabs button{flex:1;min-width:140px;padding:9px}
+button,select,input{font:inherit;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+button{cursor:pointer}button:hover{border-color:var(--accent)}
+button.active,button.primary{background:var(--accent);color:#06121f;border-color:var(--accent);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{margin:0 0 8px;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.chips button{padding:5px 9px;font-size:13px}
+.hint{font-size:13px;color:var(--muted);margin:6px 0}
+canvas{display:block;width:100%;border-radius:8px;background:#0a0e15;border:1px solid var(--line)}
+input[type=range]{width:100%;accent-color:var(--accent);padding:0}
+input[type=text]{width:110px}
+.hide{display:none!important}
+.eqn{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:26px;margin:12px 0;min-height:60px}
+.nuc{display:inline-flex;align-items:center;gap:1px}
+.ss{display:inline-flex;flex-direction:column;font-size:.55em;line-height:1.05;text-align:right;margin-right:1px}
+.ar{color:var(--muted)}
+.ledger{border-collapse:collapse;font-size:14px;margin-top:6px}
+.ledger td,.ledger th{padding:4px 12px;border-bottom:1px solid var(--line);text-align:center}
+.ok{color:var(--good);font-weight:700}.no{color:var(--bad);font-weight:700}
+.msg{min-height:44px;padding:8px 10px;border-radius:8px;background:var(--card2);border:1px solid var(--line);font-size:14px;margin-top:8px}
+.warn{border-left:3px solid var(--warn);padding:6px 10px;background:var(--card2);border-radius:6px;font-size:13.5px;margin-top:8px}
+.big{font-size:20px;font-weight:700}
+.res{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px}
+.res .eq{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;margin:3px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.bar{height:22px;border-radius:5px;margin:4px 0;font-size:12px;line-height:22px;padding-left:8px;white-space:nowrap;overflow:hidden}
+label.l{display:flex;gap:6px;align-items:center;font-size:14px;margin:4px 0}
+label.l input{padding:0}
+.stats{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;margin-top:8px}
+.stats b{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+<h1>Nuclear Reactions</h1>
+<p>Higher Physics &mdash; nuclear equations, fission and fusion, and E&nbsp;=&nbsp;mc&sup2;.</p>
+</header>
+<main>
+<div class="tabs" id="tabs">
+  <button data-t="t1" class="active">1 · Nuclear equations</button>
+  <button data-t="t2">2 · Fission &amp; fusion</button>
+  <button data-t="t3">3 · Energy released</button>
+</div>
+
+<!-- ============ TAB 1 ============ -->
+<section id="t1">
+<div class="card">
+  <h2>Decay equations: mass numbers and atomic numbers balance</h2>
+  <div class="row chips" id="presets"></div>
+  <div class="row">
+    <button class="primary" id="decayBtn">Decay!</button>
+    <button id="resetDecay">Reset</button>
+    <button id="quizBtn">Quiz me</button>
+  </div>
+  <canvas id="nucCanvas" width="800" height="240"></canvas>
+  <div class="eqn" id="decayEq"></div>
+  <div id="quizBox" class="hide">
+    <div class="row">Mass number <input type="text" id="qA" placeholder="A"> Atomic number <input type="text" id="qZ" placeholder="Z">
+      <button id="qCheck" class="primary">Check</button></div>
+  </div>
+  <table class="ledger" id="ledger"></table>
+  <div class="msg" id="decayMsg"></div>
+  <div class="warn" id="decayWarn"></div>
+</div>
+</section>
+
+<!-- ============ TAB 2 ============ -->
+<section id="t2" class="hide">
+<div class="card">
+  <h2>Induced fission and a chain reaction</h2>
+  <div class="eqn" id="fissionEq" style="font-size:22px"></div>
+  <canvas id="fisCanvas" width="800" height="340"></canvas>
+  <div class="row">
+    <button class="primary" id="fireN">Fire a neutron</button>
+    <button id="fisReset">Reset fuel</button>
+    <label class="l"><input type="checkbox" id="spont"> Allow spontaneous fission</label>
+  </div>
+  <div class="row" style="flex-wrap:nowrap"><span style="white-space:nowrap">Control rods</span><input type="range" id="rods" min="0" max="100" value="0"><span id="rodsV" style="width:50px">0%</span></div>
+  <div class="stats">Fissions: <b id="sF">0</b> Neutrons in flight: <b id="sN">0</b> Fuel left: <b id="sU">0</b> Energy released: <b id="sE">0</b></div>
+  <div class="msg" id="fisMsg">Fire a neutron at the uranium-235 nuclei. A nucleus that <b>absorbs</b> a neutron splits (<b>induced</b> fission). Tick the box to see occasional <b>spontaneous</b> fission with no neutron needed. Lower the control rods to absorb neutrons.</div>
+</div>
+<div class="card">
+  <h2>Fusion: why it is hard to sustain</h2>
+  <div class="eqn" id="fusionEq" style="font-size:22px"></div>
+  <canvas id="fusCanvas" width="800" height="200"></canvas>
+  <div class="row" style="flex-wrap:nowrap"><span style="white-space:nowrap">Temperature</span><input type="range" id="temp" min="1" max="100" value="30"><span id="tempV" style="width:130px">45 million K</span></div>
+  <div class="row"><button class="primary" id="fuseBtn">Fire the nuclei together</button></div>
+  <div class="stats">Separation: <b id="sD">&ndash;</b> Relative speed: <b id="sV">&ndash;</b></div>
+  <div class="msg" id="fusMsg">Both nuclei are positive, so they repel. Only very fast (very hot) nuclei get close enough for the strong force to join them. Reaching and holding these temperatures is why fusion is hard to sustain.</div>
+  <div class="hint">Temperature scale is a simplified model: the real D&ndash;T temperature is over 100 million K.</div>
+</div>
+</section>
+
+<!-- ============ TAB 3 ============ -->
+<section id="t3" class="hide">
+<div class="card">
+  <h2>Mass lost, energy released: E = mc²</h2>
+  <div class="row chips" id="rxPresets"></div>
+  <div class="eqn" id="rxEq" style="font-size:22px"></div>
+  <div id="massTable"></div>
+  <div class="hint">Zoomed bars (the axis does not start at zero, so you can see the tiny difference):</div>
+  <div id="bars"></div>
+  <div class="row" style="margin-top:12px"><b>Method:</b>
+    <select id="method">
+      <option value="ok">Correct: Δm = before − after, E = Δm c²</option>
+      <option value="after">Mistake: used the mass after instead of Δm</option>
+      <option value="mc">Mistake: E = mc (forgot to square c)</option>
+      <option value="round">Mistake: rounded masses to 3 s.f. before subtracting</option>
+    </select></div>
+  <div class="res" id="rxRes"></div>
+  <div class="warn" id="rxWarn"></div>
+</div>
+<div class="card">
+  <h2>Converting a mass-energy equivalence (eV ⇄ kg)</h2>
+  <div class="grid2">
+    <div>
+      <div class="row">Energy <input type="text" id="cE" value="4.20"> <select id="cU"><option value="1">J</option><option value="1.6e-19">eV</option><option value="1.6e-16">keV</option><option value="1.6e-13">MeV</option><option value="1.6e-10" selected>GeV</option></select></div>
+      <div class="res" id="cRes"></div>
+    </div>
+    <div>
+      <div class="row">Mass <input type="text" id="cM" value="1.67e-27"> kg</div>
+      <div class="res" id="cRes2"></div>
+    </div>
+  </div>
+  <div class="hint">1 eV = 1.60 × 10⁻¹⁹ J. Convert to joules <i>before</i> using E = mc².</div>
+</div>
+</section>
+
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const SYM="H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U".split(" ");
+const NAME="hydrogen helium lithium beryllium boron carbon nitrogen oxygen fluorine neon sodium magnesium aluminium silicon phosphorus sulfur chlorine argon potassium calcium scandium titanium vanadium chromium manganese iron cobalt nickel copper zinc gallium germanium arsenic selenium bromine krypton rubidium strontium yttrium zirconium niobium molybdenum technetium ruthenium rhodium palladium silver cadmium indium tin antimony tellurium iodine xenon caesium barium lanthanum cerium praseodymium neodymium promethium samarium europium gadolinium terbium dysprosium holmium erbium thulium ytterbium lutetium hafnium tantalum tungsten rhenium osmium iridium platinum gold mercury thallium lead bismuth polonium astatine radon francium radium actinium thorium protactinium uranium".split(" ");
+function nuc(A,Z,s){return `<span class="nuc"><span class="ss"><span>${A}</span><span>${Z}</span></span>${s}</span>`}
+function sci(x,sf=3){if(!isFinite(x)||x===0)return '0';const neg=x<0;x=Math.abs(x);let e=Math.floor(Math.log10(x));let m=+(x/Math.pow(10,e)).toPrecision(sf);if(m>=10){m/=10;e++}
+ return (neg?'&minus;':'')+m.toFixed(sf-1)+' × 10<sup>'+(e<0?'&minus;'+(-e):e)+'</sup>'}
+const num=id=>parseFloat($(id).value);
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));
+  ['t1','t2','t3'].forEach(t=>$(t).classList.toggle('hide',t!==b.dataset.t));
+});
+
+/* ---------------- TAB 1: decay ---------------- */
+const DEC=[
+ {A:226,Z:88,t:'a'},{A:223,Z:87,t:'b'},{A:210,Z:84,t:'a'},{A:131,Z:53,t:'b'},
+ {A:238,Z:92,t:'a'},{A:14,Z:6,t:'b'},{A:60,Z:27,t:'b'},{A:222,Z:86,t:'a'}];
+let cur=DEC[0],done=false,quiz=false,anim=null,quizAns=null;
+const PART={a:{A:4,Z:2,s:'He',n:'alpha particle'},b:{A:0,Z:-1,s:'e',n:'beta particle (electron)'}};
+const sy=Z=>SYM[Z-1];
+function daughter(p){return p.t==='a'?{A:p.A-4,Z:p.Z-2}:{A:p.A,Z:p.Z+1}}
+function mkPresets(){const c=$('presets');c.innerHTML='';DEC.forEach((p,i)=>{const b=document.createElement('button');
+  b.innerHTML=`${NAME[p.Z-1]}-${p.A} (${p.t==='a'?'α':'β'})`;b.onclick=()=>{cur=p;done=false;quiz=false;$('quizBox').classList.add('hide');drawNuc();render()};c.appendChild(b)})}
+function render(){
+  const p=cur,d=daughter(p),pt=PART[p.t];
+  const dTxt=(quiz&&!done)?`<span class="big" style="color:var(--warn)">?</span>`:nuc(d.A,d.Z,sy(d.Z));
+  $('decayEq').innerHTML=nuc(p.A,p.Z,sy(p.Z))+' <span class="ar">→</span> '+dTxt+' <span class="ar">+</span> '+nuc(pt.A,pt.Z,pt.s);
+  const show=!(quiz&&!done);
+  $('ledger').innerHTML=show?`<tr><th></th><th>Before</th><th>After</th><th></th></tr>
+   <tr><td>Mass number (top)</td><td>${p.A}</td><td>${d.A} + ${pt.A} = ${d.A+pt.A}</td><td class="ok">✓ balanced</td></tr>
+   <tr><td>Atomic number (bottom)</td><td>${p.Z}</td><td>${d.Z} + (${pt.Z}) = ${d.Z+pt.Z}</td><td class="ok">✓ balanced</td></tr>`:'';
+  $('decayMsg').innerHTML=quiz&&!done?`${NAME[p.Z-1]}-${p.A} decays by <b>${p.t==='a'?'alpha':'beta'}</b> emission. Work out the nucleus formed.`:
+    `${NAME[p.Z-1]}-${p.A} emits a ${pt.n}. The new nucleus has atomic number ${d.Z}, so it is <b>${NAME[d.Z-1]}</b>: ${nuc(d.A,d.Z,sy(d.Z))}.`;
+  $('decayWarn').innerHTML=p.t==='b'?'⚠ In beta decay the mass number does <b>not</b> change and the atomic number goes <b>up</b> by 1 (a neutron becomes a proton).':
+    '⚠ Alpha emission takes away 4 from the mass number and 2 from the atomic number.';
+}
+function drawNuc(prog=0){
+  const c=$('nucCanvas'),g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);
+  const p=cur,d=daughter(p),cx=300,cy=120;
+  const nP=p.Z,nN=p.A-p.Z,R=Math.min(95,6+Math.sqrt(p.A)*5.6),r=Math.max(2.2,R/Math.sqrt(p.A)*0.62);
+  const list=[];for(let i=0;i<p.A;i++)list.push(i);
+  // deterministic pseudo-random shuffle for p/n mix
+  let s=p.A*7+p.Z;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  const types=[];for(let i=0;i<nP;i++)types.push('p');for(let i=0;i<nN;i++)types.push('n');
+  for(let i=types.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[types[i],types[j]]=[types[j],types[i]]}
+  const cols={p:'#ff6b6b',n:'#8e98ad'};
+  // chosen emitters
+  const emit=[];
+  if(p.t==='a'){let pc=0,nc=0;types.forEach((t,i)=>{if(t==='p'&&pc<2){emit.push(i);pc++}else if(t==='n'&&nc<2){emit.push(i);nc++}})}
+  else{const i=types.indexOf('n');emit.push(i)}
+  const out=prog*330;
+  types.forEach((t,i)=>{
+    const rr=R*Math.sqrt((i+.5)/p.A),a=i*2.39996;let x=cx+rr*Math.cos(a),y=cy+rr*Math.sin(a),col=cols[t];
+    const em=emit.indexOf(i)>=0;
+    if(p.t==='b'&&em&&prog>0){col=cols.p}
+    if(p.t==='a'&&em&&prog>0)return; // drawn below as a tight 4-nucleon cluster
+    if(p.t==='b'&&em&&prog>0){/* neutron stays, now proton */}
+    g.fillStyle=col;g.beginPath();g.arc(x,y,r,0,7);g.fill()});
+  if(p.t==='b'&&prog>0){ // electron out
+    g.fillStyle='#5aa9ff';g.beginPath();g.arc(cx+out,cy-8*prog,5,0,7);g.fill();g.fillStyle='#e6e9ef';g.font='13px sans-serif';g.fillText('β⁻ (electron)',cx+out-24,cy-22*prog-8)}
+  if(p.t==='a'&&prog>0){ // alpha = 2 protons + 2 neutrons, tightly bound, same colours as nucleons
+    const rr=Math.max(r*1.6,8),d=rr*0.95,ax=cx+R*0.6+out,ay=cy;
+    [[-d,-d,'p'],[d,-d,'n'],[-d,d,'n'],[d,d,'p']].forEach(([dx,dy,t])=>{g.fillStyle=cols[t];g.beginPath();g.arc(ax+dx,ay+dy,rr,0,7);g.fill()});
+    g.fillStyle='#e6e9ef';g.font='13px sans-serif';g.fillText('α particle',ax-28,ay-d-rr-8)}
+  g.fillStyle='#e6e9ef';g.font='13px sans-serif';
+  g.fillText(prog>0.99?`${NAME[d.Z-1]}-${d.A} left behind`:`${NAME[p.Z-1]}-${p.A}`,cx-50,cy+R+22);
+  g.fillStyle='#ff6b6b';g.fillRect(620,24,10,10);g.fillStyle='#8e98ad';g.fillRect(620,44,10,10);
+  g.fillStyle='#e6e9ef';g.fillText(`protons (${prog>0.99&&p.t==='b'?p.Z+1:prog>0.99?p.Z-2:p.Z})`,636,34);g.fillText(`neutrons (${prog>0.99&&p.t==='b'?nN-1:prog>0.99?nN-2:nN})`,636,54);
+}
+$('decayBtn').onclick=()=>{if(anim)cancelAnimationFrame(anim);let t0=null;done=true;
+  const step=ts=>{if(!t0)t0=ts;const pr=Math.min(1,(ts-t0)/1400);drawNuc(pr);if(pr<1)anim=requestAnimationFrame(step);else{render()}};
+  if(quiz){quiz=false}render();anim=requestAnimationFrame(step)};
+$('resetDecay').onclick=()=>{if(anim)cancelAnimationFrame(anim);done=false;drawNuc(0)};
+$('quizBtn').onclick=()=>{const q=DEC[Math.floor(Math.random()*DEC.length)];cur=q;quiz=true;done=false;$('quizBox').classList.remove('hide');$('qA').value='';$('qZ').value='';drawNuc(0);render()};
+$('qCheck').onclick=()=>{const d=daughter(cur),a=+$('qA').value,z=+$('qZ').value;
+  if(a===d.A&&z===d.Z){quiz=false;done=true;render();$('decayMsg').innerHTML='✅ Correct! '+$('decayMsg').innerHTML}
+  else{let h='❌ Not quite. ';if(cur.t==='b'&&a!==cur.A)h+='In beta decay the mass number stays the same. ';
+    if(cur.t==='b'&&z!==cur.Z+1)h+='A neutron became a proton, so Z goes up by 1. ';
+    if(cur.t==='a'&&a!==cur.A-4)h+='Alpha takes 4 off the mass number. ';if(cur.t==='a'&&z!==cur.Z-2)h+='Alpha takes 2 off the atomic number. ';
+    $('decayMsg').innerHTML=h}};
+mkPresets();drawNuc();render();
+
+/* ---------------- TAB 2: fission ---------------- */
+$('fissionEq').innerHTML=nuc(235,92,'U')+' + '+nuc(1,0,'n')+' <span class="ar">→</span> '+nuc(141,56,'Ba')+' + '+nuc(92,36,'Kr')+' + 3 '+nuc(1,0,'n')+
+ ` <span style="font-size:14px;color:var(--muted)">&nbsp;(236 = 141 + 92 + 3, and 92 = 56 + 36)</span>`;
+$('fusionEq').innerHTML=nuc(2,1,'H')+' + '+nuc(3,1,'H')+' <span class="ar">→</span> '+nuc(4,2,'He')+' + '+nuc(1,0,'n')+
+ ` <span style="font-size:14px;color:var(--muted)">&nbsp;(5 = 4 + 1, and 2 = 2 + 0)</span>`;
+const fc=$('fisCanvas'),fg=fc.getContext('2d'),FW=fc.width,FH=fc.height;
+let nuclei=[],neutrons=[],fissions=0,energy=0,flashes=[];
+const COLS=9,ROWS=4;
+function colX(i){return 50+i*(FW-100)/(COLS-1)}
+function fisInit(){nuclei=[];neutrons=[];fissions=0;energy=0;flashes=[];
+  for(let i=0;i<COLS;i++)for(let j=0;j<ROWS;j++)nuclei.push({x:colX(i)+(Math.random()-.5)*10,y:55+j*(FH-110)/(ROWS-1)+(Math.random()-.5)*10,s:'U',t:0,fr:[]})}
+const rodXs=[1,3,5,7].map(k=>(colX(k)+colX(k+1))/2);
+function fireNeutron(){neutrons.push({x:0,y:30+Math.random()*(FH-60),vx:4,vy:(Math.random()-.5)*.4})}
+function addNeutrons(x,y){for(let k=0;k<3;k++){const a=Math.random()*6.283;neutrons.push({x,y,vx:3.2*Math.cos(a),vy:3.2*Math.sin(a)})}}
+function fisStep(){
+  const depth=$('rods').value/100*FH;
+  for(const n of nuclei){
+    if(n.s==='U'&&$('spont').checked&&Math.random()<1/9000){split(n,'spont')}
+    if(n.s==='U236'){n.t++;if(n.t>28)split(n,'induced')}
+  }
+  for(const nt of neutrons){nt.x+=nt.vx;nt.y+=nt.vy;
+    if(rodXs.some(rx=>Math.abs(nt.x-rx)<5)&&nt.y<depth){nt.dead=true;continue}
+    if(nt.x<-10||nt.x>FW+10||nt.y<-10||nt.y>FH+10){nt.dead=true;continue}
+    for(const n of nuclei){if(n.s==='U'&&Math.hypot(n.x-nt.x,n.y-nt.y)<14){n.s='U236';n.t=0;nt.dead=true;break}}}
+  neutrons=neutrons.filter(n=>!n.dead);flashes=flashes.filter(f=>--f.t>0);
+  $('sF').textContent=fissions;$('sN').textContent=neutrons.length;$('sU').textContent=nuclei.filter(n=>n.s==='U').length;
+  $('sE').innerHTML=fissions?sci(energy,2)+' J':'0 J';
+}
+function split(n,how){n.s='split';n.how=how;fissions++;energy+=3.2e-11;addNeutrons(n.x,n.y);flashes.push({x:n.x,y:n.y,t:18});
+  $('fisMsg').innerHTML=how==='spont'?'<b>Spontaneous fission</b>: the nucleus split by itself, with no neutron absorbed.':
+   '<b>Induced fission</b>: the nucleus absorbed a neutron (U-236), then split into barium-141 and krypton-92, releasing 3 neutrons and energy.'}
+function fisDraw(){fg.clearRect(0,0,FW,FH);
+  const depth=$('rods').value/100*FH;
+  rodXs.forEach(rx=>{fg.fillStyle='#3a4458';fg.fillRect(rx-4,0,8,depth)});
+  for(const n of nuclei){
+    if(n.s==='split'){fg.fillStyle='#5fd38d';fg.beginPath();fg.arc(n.x-6,n.y-4,7,0,7);fg.fill();fg.fillStyle='#b88cff';fg.beginPath();fg.arc(n.x+6,n.y+4,6,0,7);fg.fill();continue}
+    const w=n.s==='U236'?Math.sin(n.t*.9)*1.8:0;
+    fg.fillStyle=n.s==='U236'?'#ffb454':'#5aa9ff';fg.beginPath();fg.arc(n.x,n.y,11+w,0,7);fg.fill();
+    fg.fillStyle='#06121f';fg.font='bold 9px sans-serif';fg.textAlign='center';fg.fillText(n.s==='U'?'U-235':'U-236',n.x,n.y+3)}
+  fg.textAlign='left';
+  for(const f of flashes){fg.strokeStyle=`rgba(255,220,120,${f.t/18})`;fg.lineWidth=3;fg.beginPath();fg.arc(f.x,f.y,(18-f.t)*3+8,0,7);fg.stroke()}
+  fg.fillStyle='#e6e9ef';for(const nt of neutrons){fg.beginPath();fg.arc(nt.x,nt.y,3.5,0,7);fg.fill()}
+  fg.fillStyle='#8e98ad';fg.font='12px sans-serif';
+  fg.fillText('● neutron   ',8,FH-8);fg.fillStyle='#5fd38d';fg.fillText('● Ba-141',90,FH-8);fg.fillStyle='#b88cff';fg.fillText('● Kr-92',150,FH-8);
+}
+$('fireN').onclick=fireNeutron;$('fisReset').onclick=fisInit;
+$('rods').oninput=()=>$('rodsV').textContent=$('rods').value+'%';
+fisInit();
+
+/* ---------------- fusion ---------------- */
+const uc=$('fusCanvas'),ug=uc.getContext('2d'),UW=uc.width,UH=uc.height;
+const K=6e5,R1=14,R2=17,D0=640,DFUSE=R1+R2;
+let fus={on:false,d:D0,v:0,state:'idle',t:0,x:0};
+function tempToV(T){return 40+T*3}
+$('temp').oninput=()=>$('tempV').textContent=Math.round($('temp').value*1.5)+' million K';
+$('tempV').textContent=Math.round($('temp').value*1.5)+' million K';
+$('fuseBtn').onclick=()=>{fus={on:true,d:D0,v:-tempToV(+$('temp').value),state:'run',t:0};$('fusMsg').textContent='The nuclei approach and repel one another…'};
+function fusStep(dt){
+  if(fus.state==='run'){
+    const sub=10;for(let i=0;i<sub;i++){const h=dt/sub;fus.v+=K/(fus.d*fus.d)*h;fus.d+=fus.v*h;
+      if(fus.d<=DFUSE){fus.state='fused';fus.t=0;fus.x=0;
+        $('fusMsg').innerHTML='<b>Fusion!</b> The nuclei got close enough for the strong force to join them: helium-4 and a neutron, releasing about 2.74 × 10<sup>−12</sup> J (E = mc² on the mass lost).';break}
+      if(fus.d>D0&&fus.v>0){fus.state='repelled';
+        $('fusMsg').innerHTML='<b>Repelled.</b> The nuclei did not have enough kinetic energy to overcome the repulsion between their positive charges. Raise the temperature and try again.';break}}
+    $('sD').textContent=Math.round(fus.d)+' units';$('sV').textContent=Math.round(Math.abs(fus.v))+' units/s'}
+  else if(fus.state==='fused'){fus.t+=dt;fus.x+=dt*260}
+}
+function fusDraw(){ug.clearRect(0,0,UW,UH);const cx=UW/2,cy=UH/2;
+  ug.font='bold 11px sans-serif';ug.textAlign='center';
+  if(fus.state==='fused'){const a=Math.max(0,1-fus.t*1.5);ug.fillStyle=`rgba(255,220,120,${a*.6})`;ug.beginPath();ug.arc(cx,cy,30+fus.t*160,0,7);ug.fill();
+    ug.fillStyle='#b88cff';ug.beginPath();ug.arc(cx,cy,22,0,7);ug.fill();ug.fillStyle='#06121f';ug.fillText('He-4',cx,cy+4);
+    ug.fillStyle='#e6e9ef';ug.beginPath();ug.arc(cx+30+fus.x,cy-fus.x*.1,6,0,7);ug.fill();ug.fillText('n',cx+30+fus.x,cy-fus.x*.1-10);ug.textAlign='left';return}
+  const d=fus.state==='idle'?D0:fus.d,m1=cx-d*.5*(UW-100)/D0*1.0,m2=cx+d*.5*(UW-100)/D0*1.0;
+  const sc=(UW-100)/D0;const x1=cx-d*sc/2*(1-0)-0,x2=cx+d*sc/2;
+  ug.fillStyle='#ff6b6b';ug.beginPath();ug.arc(x1,cy,R1,0,7);ug.fill();ug.fillStyle='#06121f';ug.fillText('H-2',x1,cy+4);
+  ug.fillStyle='#ff8f6b';ug.beginPath();ug.arc(x2,cy,R2,0,7);ug.fill();ug.fillStyle='#06121f';ug.fillText('H-3',x2,cy+4);
+  ug.fillStyle='#ff6b6b';ug.font='13px sans-serif';ug.fillText('+',x1,cy-26);ug.fillText('+',x2,cy-26);ug.textAlign='left'}
+/* ---------------- main loop ---------------- */
+let last=0;
+function loop(ts){const dt=Math.min(.05,(ts-last)/1000||0.016);last=ts;
+  if(!$('t2').classList.contains('hide')){fisStep();fisDraw();fusStep(dt);fusDraw()}
+  requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+
+/* ---------------- TAB 3: energy ---------------- */
+const C=3.00e8;
+const RX=[
+ {n:'Fusion: ²H + ³H → ⁴He + n',eq:()=>nuc(2,1,'H')+' + '+nuc(3,1,'H')+' <span class="ar">→</span> '+nuc(4,2,'He')+' + '+nuc(1,0,'n'),
+  b:[['²H','3.3436'],['³H','5.0082']],a:[['⁴He','6.6465'],['n','1.6749']],tot:false},
+ {n:'Fission (totals given)',eq:()=>'Fission reaction',b:[['Total mass before','390.14']],a:[['Total mass after','389.84']],tot:true},
+ {n:'¹²C + ⁴He → ¹⁶O + γ',eq:()=>nuc(12,6,'C')+' + '+nuc(4,2,'He')+' <span class="ar">→</span> '+nuc(16,8,'O')+' + γ',
+  b:[['Total mass before','26.572']],a:[['Total mass after','26.560']],tot:true}];
+let rx=RX[0];
+function mkRx(){const c=$('rxPresets');c.innerHTML='';RX.forEach((r,i)=>{const b=document.createElement('button');b.textContent=r.n;
+  b.onclick=()=>{rx=r;renderRx()};c.appendChild(b)})}
+function s3(x){return +x.toPrecision(3)}
+function renderRx(){
+  $('rxEq').innerHTML=rx.eq();
+  const sb=rx.b.reduce((s,m)=>s+parseFloat(m[1]),0),sa=rx.a.reduce((s,m)=>s+parseFloat(m[1]),0);
+  const row=(l,a)=>l.map(m=>`<tr><td>${m[0]}</td><td>${m[1]} × 10<sup>−27</sup> kg</td></tr>`).join('');
+  $('massTable').innerHTML=`<div class="grid2"><div><b>Before</b><table class="ledger">${row(rx.b)}<tr><td><b>Total</b></td><td><b>${sb.toFixed(4).replace(/0+$/,'').replace(/\.$/,'')} × 10<sup>−27</sup> kg</b></td></tr></table></div>
+   <div><b>After</b><table class="ledger">${row(rx.a)}<tr><td><b>Total</b></td><td><b>${sa.toFixed(4).replace(/0+$/,'').replace(/\.$/,'')} × 10<sup>−27</sup> kg</b></td></tr></table></div></div>`;
+  const dm=(sb-sa)*1e-27,lo=sa-3*(sb-sa),hi=sb+(sb-sa);
+  const w=v=>((v-lo)/(hi-lo)*100).toFixed(1)+'%';
+  $('bars').innerHTML=`<div class="bar" style="width:${w(sb)};background:#2a5d99">before: ${sb.toFixed(4)}</div>
+   <div class="bar" style="width:${w(sa)};background:#3e7a55;position:relative">after: ${sa.toFixed(4)}</div>
+   <div class="bar" style="width:${(((sb-sa)/(hi-lo))*100).toFixed(1)}%;background:#ffb454;color:#06121f;min-width:90px;margin-left:${w(sa)}">Δm → energy</div>`;
+  const m=$('method').value,E=dm*C*C;let h='',res,note='';
+  const rb=s3(sb),ra=s3(sa);
+  if(m==='ok'){h=`<div class="eq">Δm = ${sb.toFixed(4)} − ${sa.toFixed(4)} = ${sci(dm)} kg</div><div class="eq">E = mc² = ${sci(dm)} × (3.00 × 10<sup>8</sup>)²</div><div class="big ok" style="margin-top:6px">E = ${sci(E)} J</div>`;
+    note='✓ Keep <b>all</b> the figures until the end: the difference between two nearly equal masses is tiny.'}
+  else if(m==='after'){const bad=sa*1e-27*C*C;h=`<div class="eq">E = (mass after) × c² = ${sci(sa*1e-27)} × (3.00 × 10<sup>8</sup>)²</div><div class="big no" style="margin-top:6px">E = ${sci(bad)} J</div>`;
+    note=`✗ This is about <b>${Math.round(bad/E)}×</b> too big. The energy comes from the mass <b>lost</b> (Δm), not the mass that is left.`}
+  else if(m==='mc'){const bad=dm*C;h=`<div class="eq">E = mc = ${sci(dm)} × 3.00 × 10<sup>8</sup></div><div class="big no" style="margin-top:6px">E = ${sci(bad)} J</div>`;
+    note=`✗ The equation is E = mc². Forgetting to square c makes the answer wrong by a factor of 3.00 × 10<sup>8</sup>.`}
+  else{const d2=(rb-ra)*1e-27,bad=d2*C*C;h=`<div class="eq">before ≈ ${rb} × 10<sup>−27</sup>, after ≈ ${ra} × 10<sup>−27</sup> kg</div><div class="eq">Δm = ${sci(d2,2)} kg</div><div class="big no" style="margin-top:6px">E = ${sci(bad)} J</div>`;
+    note=`✗ Rounding first gives an answer ${bad>E?'too high':'too low'} by <b>${Math.abs((bad/E-1)*100).toFixed(0)}%</b> (correct: ${sci(E)} J). Rounding before subtracting throws the answer away (MI: truncation error).`}
+  $('rxRes').innerHTML=h;$('rxWarn').innerHTML=note;
+}
+$('method').onchange=renderRx;mkRx();renderRx();
+function conv(){
+  const e=num('cE')*parseFloat($('cU').value);const m=e/(C*C);
+  $('cRes').innerHTML=isFinite(m)?`<div class="eq">E = ${sci(e)} J</div><div class="eq">m = E ÷ c² = ${sci(e)} ÷ (3.00 × 10<sup>8</sup>)²</div><div class="big">m = ${sci(m)} kg</div>`:'Enter a number';
+  const mm=num('cM'),en=mm*C*C;
+  $('cRes2').innerHTML=isFinite(en)?`<div class="eq">E = mc² = ${sci(mm)} × (3.00 × 10<sup>8</sup>)²</div><div class="big">E = ${sci(en)} J</div><div class="eq">= ${sci(en/1.6e-13)} MeV = ${sci(en/1.6e-10)} GeV</div>`:'Enter a number';
+}
+['cE','cU','cM'].forEach(i=>$(i).oninput=conv);conv();
+
+</script>
+</body>
+</html>
