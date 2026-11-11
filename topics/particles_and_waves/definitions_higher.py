@@ -117,15 +117,23 @@ DEFINITIONS = {
     },
     "absorption spectrum": {
         "group": "Photoelectric effect and spectra",
-        "definition": "A continuous spectrum crossed by dark lines, where certain frequencies "
-                      "have been absorbed by a cooler gas.",
+        "definition": "A continuous spectrum crossed by dark lines, where photons of certain "
+                      "energies/frequencies have been absorbed by a cooler gas (e.g. the Sun's outer "
+                      "atmosphere) as electrons move from lower to higher energy levels.",
         "confusables": ["emission line spectrum"],
+        "traps": [("A series of bright lines emitted when electrons fall to lower energy levels.",
+                   "That is an **emission** spectrum — in absorption electrons move **up** (course reports 2023 and 2025)."),
+                  ("Light is absorbed by the atmosphere.",
+                   "Must say **certain** energies/frequencies are absorbed, in the Sun's **upper/outer** atmosphere or gases — “the atmosphere” is too vague (2015/2025 MI).")],
     },
     "emission line spectrum": {
         "group": "Photoelectric effect and spectra",
-        "definition": "A series of bright lines of particular frequencies, emitted when "
-                      "electrons in excited atoms fall to lower energy levels.",
+        "definition": "A series of bright lines of particular frequencies. An electron in an excited "
+                      "state can return to a lower energy level, emitting a photon; different "
+                      "transitions produce different lines/frequencies (of photons).",
         "confusables": ["absorption spectrum"],
+        "traps": [("Electrons absorb photons and move to higher energy levels.",
+                   "That describes **absorption** — scores 0 for emission (2023 MI).")],
     },
 
     # ── Interference ───────────────────────────────────────────────────────────
@@ -218,6 +226,16 @@ STATEMENTS = [
     ("spectra", "Dark lines in the spectrum of a star are caused by certain frequencies being "
      "absorbed in the star's cooler outer atmosphere.", True,
      "This produces an absorption spectrum."),
+    ("spectra", "When an electron in an excited state returns to a lower energy level, it emits a photon.", True,
+     "This is how a line emission spectrum is produced (2023 MI)."),
+    ("spectra", "Different electron transitions between energy levels produce different lines in an emission spectrum.", True,
+     "Each transition releases a photon of a different frequency (2023 MI)."),
+    ("spectra", "Dark lines in an absorption spectrum occur because electrons move from lower to higher energy levels by absorbing photons.", True,
+     "Only photons whose energy matches the gap are absorbed (2024 Paper 1 Q16)."),
+    ("spectra", "In an emission spectrum, a brighter line is produced by photons of greater energy.", False,
+     "A brighter line has **more photons per second** (more electrons making that transition), not more energetic photons."),
+    ("spectra", "A line emission spectrum is produced when electrons absorb photons and move to higher energy levels.", False,
+     "That describes absorption. In emission electrons **fall** to lower levels and emit photons."),
     ("field", "A charged particle placed in an electric field experiences a force.", True,
      "This is what defines an electric field."),
     ("magfield", "A charged particle moving parallel to a magnetic field experiences no force.", True,

@@ -222,6 +222,11 @@ _LEVELS = {1: -21.8e-19, 2: -5.45e-19, 3: -2.42e-19, 4: -1.36e-19}
 
 def hydrogen_lamp(level="Higher"):
     ex = _ex(level)
+    ex.on("Spectra").choice("Which statement explains how the line emission spectrum of the lamp is produced?",
+        "An electron in an excited state returns to a lower energy level and emits a photon; different transitions produce different lines.",
+        [("Electrons absorb photons and move to higher energy levels, leaving dark lines.", "That describes absorption — it scores 0 for emission (2023 MI)."),
+         ("Photons move from a lower to a higher energy level by absorbing electrons.", "It is electrons that move between levels, and they absorb or emit photons."),
+         ("Electrons fall to lower energy levels, but every transition produces the same frequency.", "Different transitions have different energy gaps, so different frequencies.")])
     hi = pick(3, 4)
     dE = _LEVELS[hi] - _LEVELS[2]
     ex.on("Spectra").num(f"An electron falls from E{hi} to E2. Calculate the energy of the photon emitted.", dE, "J",

@@ -904,19 +904,19 @@ def _gen_pw_spectra_explain(level="Higher"):
     kind = random.choice(["emission", "absorption", "bright", "bohr"])
     if kind == "emission":
         return _choice("How is a line emission spectrum produced?",
-                       "Electrons fall from higher to lower energy levels, emitting photons of specific frequencies.",
+                       "An electron in an excited state returns to a lower energy level and emits a photon; different transitions produce different lines/frequencies.",
                        [("Electrons absorb photons and move to higher levels.", "That describes absorption (course report 2023)."),
                         ("Photons move between energy levels.", "It is the ELECTRONS that move between levels."),
                         ("White light passes through a cool gas.", "That produces an absorption spectrum.")], "Spectra", level)
     if kind == "absorption":
         return _choice("Why are there dark lines in the spectrum of sunlight?",
-                       "Certain frequencies are absorbed by gases in the Sun's outer layers as electrons move to higher levels.",
+                       "Photons of certain energies/frequencies are absorbed by gases in the Sun's outer atmosphere, as electrons move from lower to higher energy levels.",
                        [("Light is absorbed by the atmosphere.", "Must say CERTAIN frequencies, in the Sun's outer layers (MI)."),
                         ("Electrons fall to lower levels and emit photons.", "That's emission (course report 2025)."),
                         ("Some colours are not made by the Sun.", "The missing frequencies are absorbed.")], "Spectra", level)
     if kind == "bright":
         return _choice("Why is one line in an emission spectrum brighter than the others?",
-                       "More electrons make that transition per second, so more photons of that frequency are emitted per second.",
+                       "More electrons make that transition (per second), so more photons (per second) of that specific energy are emitted.",
                        [("Its photons have more energy.", "Brightness depends on the NUMBER of photons per second (course reports 2022–2024)."),
                         ("That transition has the largest energy gap.", "A larger gap gives a higher frequency, not a brighter line."),
                         ("Its electrons move faster.", "Brightness is about photons per second.")], "Spectra", level)
