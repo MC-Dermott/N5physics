@@ -45,6 +45,17 @@ label.l{display:flex;gap:6px;align-items:center;font-size:14px;margin:4px 0}
 label.l input{padding:0}
 .stats{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;margin-top:8px}
 .stats b{color:var(--accent)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+@media(max-width:700px){.tiles{grid-template-columns:1fr}}
+.tile{border-radius:12px;padding:12px 14px;border:2px solid var(--line);background:var(--card2)}
+.tile .k{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.tile .v{font-size:30px;font-weight:800;line-height:1.15;margin:4px 0 2px}
+.tile .v small{font-size:16px;font-weight:600}
+.tile .s{font-size:13px;color:var(--muted);min-height:18px}
+.tile.m{border-color:#5aa9ff}.tile.m .v{color:#5aa9ff}
+.tile.b{border-color:#ffb454}.tile.b .v{color:#ffb454}
+.tile.n{border-color:#5fd38d}.tile.n .v{color:#5fd38d}
+.tilehd{font-weight:700;margin:12px 0 0;font-size:15px}
 </style>
 </head>
 <body>
@@ -156,6 +167,7 @@ label.l input{padding:0}
     <button id="splitBtn">Split it (fission)</button>
   </div>
   <canvas id="addCanvas" width="800" height="230"></canvas>
+  <div class="tiles" id="addTiles"></div>
   <div class="eqn" id="addEq" style="font-size:22px;min-height:40px"></div>
   <div class="grid2">
     <div id="addTable"></div>
@@ -178,6 +190,8 @@ label.l input{padding:0}
   <div class="eqn" id="fusEq5" style="font-size:22px"></div>
   <canvas id="fus5Canvas" width="800" height="230"></canvas>
   <div class="row"><button class="primary" id="fuse5">Fuse them</button><button id="fuse5Reset">Reset</button></div>
+  <div class="tilehd">Before fusion (all the nuclei together)</div><div class="tiles" id="fusTilesB"></div>
+  <div class="tilehd">After fusion (all the products together)</div><div class="tiles" id="fusTilesA"></div>
   <div id="fusTable"></div>
   <div class="res" id="fusRes"></div>
   <div class="hint">Bars show the <b>average binding energy per nucleon</b> of all the nucleons taking part, before and after. The nuclei must be very hot (over 10<sup>8</sup> K) to get close enough to fuse.</div>
@@ -490,6 +504,11 @@ function addRender(){
     res=`<div class="eq">Mass of the separate nucleons is <b>more</b> than the mass of the nucleus.</div><div class="eq">Mass defect Δm = ${fix(dm,4)} u. Energy E = Δm c² holds the nucleus together.</div>`;
     warn='Press <b>Add a neutron</b> and watch the mass, binding energy and binding energy per nucleon change.';
   }
+  let sm='',sb='',sn='';
+  if(uPrev){const bp=UBE[uPrev],mp=nMass(92,uPrev-92,bp);sm=`was ${fix(mp,4)} u (+ neutron ${fix(MN,4)} u, less ${fix(MEV_U?(BE-bp)/MEV_U:0,4)} u lost)`;
+    sb=`was ${fix(bp,1)} MeV: <b>up ${fix(BE-bp,1)} MeV</b>`;sn=`was ${fix(bp/uPrev,3)} MeV: <b>${ba<bp/uPrev?'down':'up'} ${fix(Math.abs(ba-bp/uPrev),3)} MeV</b>`}
+  else{sm=sciT(kgOf(m),4)+' kg';sb=sciT(BE*MEV_J,3)+' J';sn='total binding energy ÷ '+A+' nucleons'}
+  $('addTiles').innerHTML=tiles(`${fix(m,4)} <small>u</small>`,`${fix(BE,1)} <small>MeV</small>`,`${fix(ba,3)} <small>MeV</small>`,sm,sb,sn);
   $('addRes').innerHTML=res;$('addWarn').innerHTML=warn;
   $('addN').disabled=A>=239;$('splitBtn').disabled=A!==236;$('splitBtn').title=A!==236?'Add neutrons until you reach uranium-236':'';
   const marks=[],arrows=[];
@@ -500,6 +519,9 @@ function addRender(){
     arrows.push({f:[236,UBE[236]/236],t:[141,BA141/141],col:'#5fd38d'},{f:[236,UBE[236]/236],t:[92,KR92/92],col:'#b88cff'})}
   drawCurve('curveCanvas4',marks,arrows);
 }
+function tiles(m,be,ba,sm,sb,sn){const t=(c,k,v,s)=>`<div class="tile ${c}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s||''}</div></div>`;
+  return t('m','Mass of nucleus',m,sm)+t('b','Binding energy of nucleus',be,sb)+t('n','Binding energy per nucleon',ba,sn)}
+const totl=h=>h.replace('Mass of nucleus','Total mass of nuclei').replace('Binding energy of nucleus','Total binding energy');
 function mkUChips(){const c=$('uChips');c.innerHTML='';[233,234,235,236,237,238].forEach(a=>{const b=document.createElement('button');b.textContent='U-'+a;
   b.onclick=()=>{uA=a;uPrev=null;uProg=1;uSplit=false;$('fisRes4').style.display='none';addRender();addDraw()};c.appendChild(b)})}
 $('addN').onclick=()=>{if(uA>=239)return;uPrev=uA;uA++;uProg=0;uSplit=false;$('fisRes4').style.display='none';addRender();
@@ -535,6 +557,8 @@ function fusRender(){
     <tr><td><b>Total before</b></td><td>${nuc_}</td><td><b>${fix(mB,5)} u</b></td><td><b>${sciT(kgOf(mB))} kg</b></td><td><b>${fix(beB,3)} MeV</b></td><td><b>${fix(beB/nuc_,3)} MeV</b> (average)</td></tr></table>
    <div class="hint"><b>After fusion</b></div><table class="ledger" style="width:100%">${hd}${R.map(row).join('')}
     <tr><td><b>Total after</b></td><td>${nuc_}</td><td><b>${fix(mA,5)} u</b></td><td><b>${sciT(kgOf(mA))} kg</b></td><td><b>${fix(beA,3)} MeV</b></td><td><b>${fix(beA/nuc_,3)} MeV</b> (average)</td></tr></table>`;
+  $('fusTilesB').innerHTML=totl(tiles(`${fix(mB,5)} <small>u</small>`,`${fix(beB,3)} <small>MeV</small>`,`${fix(beB/nuc_,3)} <small>MeV</small>`,sciT(kgOf(mB),4)+' kg',`${nuc_} nucleons in total`,'average over all '+nuc_+' nucleons'));
+  $('fusTilesA').innerHTML=totl(tiles(`${fix(mA,5)} <small>u</small>`,`${fix(beA,3)} <small>MeV</small>`,`${fix(beA/nuc_,3)} <small>MeV</small>`,`<b>${fix(dm,5)} u less</b> than before`,`<b>${fix(Q,2)} MeV more</b> than before`,`<b>${fix(beA/nuc_-beB/nuc_,3)} MeV more</b> per nucleon`));
   const dmkg=kgOf(dm),Ej=dmkg*C*C;
   $('fusRes').innerHTML=`<div class="eq">Mass lost Δm = ${fix(mB,5)} − ${fix(mA,5)} = ${fix(dm,5)} u = ${sciT(dmkg,3)} kg</div>
    <div class="eq">E = Δm c² = ${sciT(dmkg,3)} × (3.00 × 10<sup>8</sup>)² = <b>${sciT(Ej,3)} J</b> (≈ ${fix(Q,2)} MeV)</div>
