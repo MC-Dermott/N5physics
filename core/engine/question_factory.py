@@ -212,6 +212,7 @@ from topics.space.definitions_n5         import GENERATORS as space_n5_definitio
 from topics.waves.wave_speed             import generate_wave_speed
 from topics.waves.period_frequency       import generate_period_frequency
 from topics.waves.combined               import generate_waves_combined
+import topics.waves.waves_s3 as s3w
 from topics.waves.definitions_n5         import GENERATORS as waves_n5_definitions
 from topics.waves.waves_exam_n5          import (
     gen_wv_echo, gen_wv_parameters, gen_wv_behaviour, gen_em_calc, gen_em_bands, gen_rf_explain, gen_rf_calc,
@@ -297,9 +298,37 @@ QUAL_REGISTRY = {
             "Definitions": s3_forces_definitions,
         },
         "Waves": {
-            "Wave Speed":         generate_wave_speed,
-            "Period & Frequency": generate_period_frequency,
-            "Waves Combined":     generate_waves_combined,
+            "Wave Properties": {
+                "Amplitude from Crest to Trough":    s3w.gen_amplitude_from_crest_to_trough,
+                "Crest to Trough from Amplitude":    s3w.gen_crest_to_trough_from_amplitude,
+                "Wavelength from Several Waves":     s3w.gen_wavelength_from_several_waves,
+                "Units of Wave Quantities":          s3w.gen_unit_of_quantity,
+                "Types and Features of Waves":       s3w.gen_wave_facts,
+            },
+            "Period & Frequency": {
+                "Frequency from Number of Waves and Time": s3w.gen_find_frequency,
+                "Number of Waves":                         s3w.gen_find_number_of_waves,
+                "Time for a Number of Waves":              s3w.gen_find_time,
+                "Period from Frequency":                   s3w.gen_find_period,
+                "Frequency from Period":                   s3w.gen_find_frequency_from_period,
+                "Period from Number of Waves and Time":    s3w.gen_period_from_count,
+                "Number of Waves from Period":             s3w.gen_waves_in_time_from_period,
+            },
+            "Wave Speed": {
+                "Speed from Distance and Time":      s3w.gen_speed_from_distance_time,
+                "Distance from Speed and Time":      s3w.gen_distance_from_speed_time,
+                "Time from Distance and Speed":      s3w.gen_time_from_distance_speed,
+                "Speed from Frequency and Wavelength": s3w.gen_speed_from_f_lambda,
+                "Wavelength from Speed and Frequency": s3w.gen_wavelength_from_v_f,
+                "Frequency from Speed and Wavelength": s3w.gen_frequency_from_v_lambda,
+            },
+            "Waves Combined": {
+                "Speed from Number of Waves, Time and Wavelength": s3w.gen_speed_from_count_wavelength,
+                "Speed from Period and Wavelength":                s3w.gen_speed_from_period_wavelength,
+                "Wavelength from Number of Waves, Time and Speed": s3w.gen_wavelength_from_count_speed,
+                "Wavelength from Distance, Time and Frequency":    s3w.gen_wavelength_from_distance_time_frequency,
+                "New Wavelength When Frequency Changes":           s3w.gen_new_wavelength_when_frequency_changes,
+            },
             "Definitions":        s3_waves_definitions,
         },
         "Skills": {

@@ -503,6 +503,32 @@ Then divide that energy by the time.
 > because some energy is converted into heat and sound by friction.
 """,
 
+    "waves_s3": """
+## Wave Characteristics (S3)
+
+**A wave** transfers **energy** from one place to another through **oscillations** (vibrations back and forth around a fixed point). The particles are not carried along.
+
+| Type | Oscillations are… | Examples |
+|---|---|---|
+| Transverse | **perpendicular** to the direction the wave travels | light, water waves, waves on a rope |
+| Longitudinal | **parallel** to the direction the wave travels | sound |
+
+| Quantity | Symbol | Meaning | Unit |
+|---|---|---|---|
+| Wavelength | $\\lambda$ | distance from a point on one wave to the same point on the next | m |
+| Amplitude | A | **half** the vertical distance from a crest to a trough | m |
+| Frequency | f | number of waves each second | Hz |
+| Period | T | time for one complete wave | s |
+| Wave speed | v | distance travelled each second | m/s |
+
+**Equations (relationships sheet):**
+$$f = \\frac{N}{t} \\qquad T = \\frac{1}{f} \\qquad v = \\frac{d}{t} \\qquad v = f\\lambda$$
+
+**Method:** information → formula → substitution → rearrange and answer with units. For two-step questions find the frequency first.
+
+> **Remember:** the speed of a wave in a material stays the same, so if the frequency goes up the wavelength goes down.
+""",
+
     "waves_speed": """
 ## Wave Speed — $v = f\\lambda$
 
