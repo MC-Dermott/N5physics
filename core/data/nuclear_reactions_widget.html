@@ -159,10 +159,13 @@ label.l input{padding:0}
 <!-- ============ TAB 4 ============ -->
 <section id="t4" class="hide">
 <div class="card">
-  <h2>Adding a neutron to a heavy nucleus (uranium)</h2>
+  <h2>Adding and removing nucleons: heavy nuclei</h2>
   <div class="row"><b>Start from:</b> <span class="chips row" id="uChips" style="margin:0"></span></div>
   <div class="row">
     <button class="primary" id="addN">Add a neutron</button>
+    <button class="primary" id="remN">Remove a neutron</button>
+    <button class="primary" id="addP" style="background:#ff6b6b;border-color:#ff6b6b">Add a proton</button>
+    <button class="primary" id="remP" style="background:#ff6b6b;border-color:#ff6b6b">Remove a proton</button>
     <button id="uReset">Reset</button>
     <button id="splitBtn">Split it (fission)</button>
   </div>
@@ -176,12 +179,12 @@ label.l input{padding:0}
   </div>
   </details>
 </div>
+<div class="card" id="fisRes4" style="display:none"></div>
 <div class="card">
   <h2>Binding energy per nucleon curve</h2>
   <div class="row chips" id="zoomChips"><b>View:</b></div>
   <canvas id="curveCanvas4" width="800" height="340"></canvas>
   <div class="hint">Heavy nuclei sit on the right-hand slope: adding nucleons lowers the binding energy per nucleon slightly. Splitting a heavy nucleus gives products higher up the curve, and that increase is released as energy. Data are real measured values (rounded).</div>
-  <div class="msg" id="fisRes4" style="display:none"></div>
 </div>
 </section>
 
@@ -212,8 +215,8 @@ label.l input{padding:0}
 
 <script>
 const $=id=>document.getElementById(id);
-const SYM="H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U".split(" ");
-const NAME="hydrogen helium lithium beryllium boron carbon nitrogen oxygen fluorine neon sodium magnesium aluminium silicon phosphorus sulfur chlorine argon potassium calcium scandium titanium vanadium chromium manganese iron cobalt nickel copper zinc gallium germanium arsenic selenium bromine krypton rubidium strontium yttrium zirconium niobium molybdenum technetium ruthenium rhodium palladium silver cadmium indium tin antimony tellurium iodine xenon caesium barium lanthanum cerium praseodymium neodymium promethium samarium europium gadolinium terbium dysprosium holmium erbium thulium ytterbium lutetium hafnium tantalum tungsten rhenium osmium iridium platinum gold mercury thallium lead bismuth polonium astatine radon francium radium actinium thorium protactinium uranium".split(" ");
+const SYM="H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm".split(" ");
+const NAME="hydrogen helium lithium beryllium boron carbon nitrogen oxygen fluorine neon sodium magnesium aluminium silicon phosphorus sulfur chlorine argon potassium calcium scandium titanium vanadium chromium manganese iron cobalt nickel copper zinc gallium germanium arsenic selenium bromine krypton rubidium strontium yttrium zirconium niobium molybdenum technetium ruthenium rhodium palladium silver cadmium indium tin antimony tellurium iodine xenon caesium barium lanthanum cerium praseodymium neodymium promethium samarium europium gadolinium terbium dysprosium holmium erbium thulium ytterbium lutetium hafnium tantalum tungsten rhenium osmium iridium platinum gold mercury thallium lead bismuth polonium astatine radon francium radium actinium thorium protactinium uranium neptunium plutonium americium curium".split(" ");
 function nuc(A,Z,s){return `<span class="nuc"><span class="ss"><span>${A}</span><span>${Z}</span></span>${s}</span>`}
 function sci(x,sf=3){if(!isFinite(x)||x===0)return '0';const neg=x<0;x=Math.abs(x);let e=Math.floor(Math.log10(x));let m=+(x/Math.pow(10,e)).toPrecision(sf);if(m>=10){m/=10;e++}
  return (neg?'&minus;':'')+m.toFixed(sf-1)+' × 10<sup>'+(e<0?'&minus;'+(-e):e)+'</sup>'}
@@ -432,10 +435,6 @@ const kgOf=u=>u*KG_U;
 const fix=(x,d)=>x.toFixed(d);
 /* real binding energies (MeV, total) */
 const UBE={233:1771.8,234:1778.6,235:1783.9,236:1790.4,237:1795.6,238:1801.7,239:1806.5};
-/* U-240 to U-244 are extrapolated: neutron separation energies follow the odd/even trend (5.9, 4.5, 5.6, 4.2, 5.3 MeV) */
-const UEST=new Set([240,241,242,243,244]);
-[5.9,4.5,5.6,4.2,5.3].forEach((sn,i)=>{UBE[240+i]=UBE[239+i]+sn});
-const UMAX=244;
 const BA141=1174.1,KR92=783.1;
 const CURVE=[[2,1.112,'H-2'],[3,2.827,'H-3'],[4,7.074,'He-4'],[6,5.332,'Li-6'],[9,6.463,'Be-9'],[12,7.680,'C-12'],[16,7.976,'O-16'],[20,8.032,'Ne-20'],
  [40,8.551,'Ca-40'],[56,8.790,'Fe-56'],[92,8.512,'Kr-92'],[120,8.505,'Sn-120'],[141,8.327,'Ba-141'],[208,7.867,'Pb-208'],[235,7.591,'U-235'],[238,7.570,'U-238']];
@@ -455,8 +454,8 @@ function drawCurve(id,marks,arrows,view){
     g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.setLineDash([]);const an=Math.atan2(y2-y1,x2-x1);
     g.fillStyle=a.col||'#ffb454';g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-10*Math.cos(an-.4),y2-10*Math.sin(an-.4));g.lineTo(x2-10*Math.cos(an+.4),y2-10*Math.sin(an+.4));g.fill()});
   (marks||[]).forEach(m=>{g.fillStyle=m.col;g.beginPath();g.arc(X(m.A),Y(m.v),m.r||6,0,7);g.fill();g.fillStyle='#e6e9ef';g.font='12px sans-serif';g.textAlign=m.al||'left';
-    if(!view.iso)g.fillText(m.lab,X(m.A)+(m.dx===undefined?9:m.dx),Y(m.v)+(m.dy===undefined?-9:m.dy))});
-  if(view.iso){g.strokeStyle='#b8c4dc';g.lineWidth=1.5;g.beginPath();Object.keys(UBE).forEach((a,i)=>{const x=X(+a),y=Y(UBE[a]/a);i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();Object.keys(UBE).forEach(a=>{const v=UBE[a]/a;g.fillStyle=UEST.has(+a)?'#0a0e15':'#b8c4dc';g.strokeStyle='#b8c4dc';g.lineWidth=1.5;g.beginPath();g.arc(X(+a),Y(v),4,0,7);g.fill();g.stroke();g.fillStyle='#b8c4dc';g.font='11px sans-serif';g.textAlign='center';g.fillText('U-'+a+'  '+v.toFixed(3)+(UEST.has(+a)?'*':''),X(+a),Y(v)+(+a%2?22:-12))})}
+    if(!(view.iso&&m.hideIso))g.fillText(m.lab,X(m.A)+(m.dx===undefined?9:m.dx),Y(m.v)+(m.dy===undefined?-9:m.dy))});
+  if(view.iso){g.strokeStyle='#b8c4dc';g.lineWidth=1.5;g.beginPath();Object.keys(UBE).forEach((a,i)=>{const x=X(+a),y=Y(UBE[a]/a);i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();Object.keys(UBE).forEach(a=>{const v=UBE[a]/a;g.fillStyle='#b8c4dc';g.strokeStyle='#b8c4dc';g.lineWidth=1.5;g.beginPath();g.arc(X(+a),Y(v),4,0,7);g.fill();g.stroke();g.fillStyle='#b8c4dc';g.font='11px sans-serif';g.textAlign='center';g.fillText('U-'+a+'  '+v.toFixed(3)+'',X(+a),Y(v)+(+a%2?22:-12))})}
   g.restore();g.textAlign='left';
 }
 function drawCluster(g,cx,cy,Z,N,r,k,col){ /* nucleons packed in a sunflower pattern */
@@ -466,94 +465,168 @@ function drawCluster(g,cx,cy,Z,N,r,k,col){ /* nucleons packed in a sunflower pat
   types.forEach((t,i)=>{const rr=k*Math.sqrt(i+.5),a=i*2.39996;g.fillStyle=t==='p'?'#ff6b6b':'#8e98ad';g.beginPath();g.arc(cx+rr*Math.cos(a),cy+rr*Math.sin(a),r,0,7);g.fill()});
 }
 
-/* ================= TAB 4: adding a nucleon to uranium ================= */
+/* ================= TAB 4: adding and removing nucleons (heavy nuclei) ================= */
 const ac=$('addCanvas'),ag=ac.getContext('2d');
-let uA=235,uPrev=null,uProg=1,uAnim=null,uSplit=false;
-// slots: 92 protons among the first 233 slots, neutrons everywhere else, so slot i keeps its type as nucleons are added
-const SLOT=[];(function(){let s=4242;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;const idx=[...Array(233).keys()];
-  for(let i=idx.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}
-  const P=new Set(idx.slice(0,92));for(let i=0;i<UMAX;i++)SLOT.push(P.has(i)?'p':'n')})();
 const SLK=4.7,SLR=3.5,SCX=360,SCY=115;
 function slotPos(i){const rr=SLK*Math.sqrt(i+.5),a=i*2.39996;return[SCX+rr*Math.cos(a),SCY+rr*Math.sin(a)]}
-function addDraw(){
+/* semi-empirical mass formula, shifted by a constant so it agrees with the measured U-233 to U-239 values (and Th, Np, Pu to about 1 MeV) */
+function semf(Z,N){const A=Z+N,aV=15.75,aS=17.8,aC=0.711,aA=23.7,aP=11.18;let d=0;
+  if(Z%2===0&&N%2===0)d=aP/Math.sqrt(A);else if(Z%2===1&&N%2===1)d=-aP/Math.sqrt(A);
+  return aV*A-aS*Math.pow(A,2/3)-aC*Z*(Z-1)/Math.cbrt(A)-aA*(N-Z)*(N-Z)/A+d}
+const SEMF_OFF=-12.73;
+function BEof(Z,N){const A=Z+N;if(Z===92&&UBE[A])return{be:UBE[A],real:true};return{be:semf(Z,N)+SEMF_OFF,real:false}}
+const lab4=(Z,A)=>`${SYM[Z-1]}-${A}`;
+const ZMIN=88,ZMAX=96,NMIN=130,NMAX=156;
+function makeTypes(Z,N){const t=[];for(let i=0;i<Z;i++)t.push('p');for(let i=0;i<N;i++)t.push('n');
+  let s=Z*131+N*17+9;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  for(let i=t.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[t[i],t[j]]=[t[j],t[i]]}return t}
+let cn4={Z:92,N:143},types=makeTypes(92,143),prev=null,an4=null,uProg=1,uAnim=null,uSplit=false,sProg=0,sAnim=null,sCache=null;
+const colOf=t=>t==='p'?'#ff6b6b':'#8e98ad';
+function buildSplit(tp,Zk,K){
+  const A=tp.length,emit=new Set(),frag={},tgt={};
+  for(let i=A-1;i>=0&&emit.size<3;i--)if(tp[i]==='n')emit.add(i);
+  const rest=[...Array(A).keys()].filter(i=>!emit.has(i));
+  const byX=l=>l.slice().sort((a,b)=>slotPos(a)[0]-slotPos(b)[0]);
+  const pr=byX(rest.filter(i=>tp[i]==='p')),ne=byX(rest.filter(i=>tp[i]==='n'));
+  pr.forEach((i,k)=>frag[i]=k<Zk?'K':'B');ne.forEach((i,k)=>frag[i]=k<K-Zk?'K':'B');
+  ['K','B'].forEach(f=>{let r=0;rest.filter(i=>frag[i]===f).forEach(i=>{const rr=SLK*Math.sqrt(r+.5),a=r*2.39996;tgt[i]=[rr*Math.cos(a),rr*Math.sin(a)];r++})});
+  return{emit,frag,tgt,tp}}
+function splitDraw(){
+  const f=uSplit,S=sCache,A=S.tp.length,t=sProg;
+  const ease=x=>x<0?0:x>1?1:x*x*(3-2*x),st=ease(t/0.35),sep=ease((t-0.35)/0.65);
   ag.clearRect(0,0,ac.width,ac.height);
-  const showN=uPrev&&uProg<1?uPrev:uA;
-  for(let i=0;i<showN;i++){const p=slotPos(i);ag.fillStyle=SLOT[i]==='p'?'#ff6b6b':'#8e98ad';ag.beginPath();ag.arc(p[0],p[1],SLR,0,7);ag.fill()}
-  if(uPrev){ // the newly added neutron (slot uPrev) flies in, then keeps a highlight ring
-    const t=Math.min(1,uProg),e=1-Math.pow(1-t,3),tp=slotPos(uA-1),x=40+(tp[0]-40)*e,y=SCY-60+(tp[1]-(SCY-60))*e;
-    ag.fillStyle='#e6e9ef';ag.beginPath();ag.arc(x,y,SLR+1,0,7);ag.fill();
+  const dirs=[[-1,-.75],[1,-.8],[.35,.8]],fcx={K:SCX-175,B:SCX+175};let ei=0;
+  if(t>0.33&&t<0.7){const q=(t-0.33)/0.37;ag.fillStyle=`rgba(255,220,120,${.55*(1-q)})`;ag.beginPath();ag.arc(SCX,SCY,30+q*190,0,7);ag.fill()}
+  for(let i=0;i<A;i++){
+    const b=slotPos(i);let x,y,col=colOf(S.tp[i]),r=SLR;
+    if(S.emit.has(i)){const d=dirs[ei++],n=Math.hypot(d[0],d[1]);
+      x=SCX+(b[0]-SCX)*(1+.35*st*(1-sep))+d[0]/n*sep*250;y=SCY+(b[1]-SCY)*(1-.12*st*(1-sep))+d[1]/n*sep*95;col='#e6e9ef';r=SLR+1.5}
+    else{const q=S.frag[i],tg=S.tgt[i],x0=SCX+(b[0]-SCX)*(1+.35*st),y0=SCY+(b[1]-SCY)*(1-.12*st),j=(1-sep)*st*2.4;
+      x=x0*(1-sep)+(fcx[q]+tg[0])*sep+j*Math.sin(i*12.9+t*60);y=y0*(1-sep)+(SCY+tg[1])*sep+j*Math.cos(i*7.7+t*55)}
+    ag.fillStyle=col;ag.beginPath();ag.arc(x,y,r,0,7);ag.fill()}
+  ag.fillStyle='#e6e9ef';ag.font='14px sans-serif';ag.textAlign='center';
+  if(sep<.2)ag.fillText(lab4(f.Z,f.A)+(t>.05?' (splitting…)':''),SCX,SCY+88);
+  if(sep>.85){ag.fillText(`${lab4(f.Zk,f.K)}  (${f.Zk} protons, ${f.K-f.Zk} neutrons)`,fcx.K,SCY+88);ag.fillText('Ba-141  (56 protons, 85 neutrons)',fcx.B,SCY+88);
+    ag.fillStyle='#ffd27a';ag.fillText('3 neutrons + energy released',SCX,22)}
+  ag.textAlign='left';ag.fillStyle='#ff6b6b';ag.fillRect(690,24,10,10);ag.fillStyle='#8e98ad';ag.fillRect(690,44,10,10);ag.fillStyle='#e6e9ef';ag.font='13px sans-serif';ag.fillText('proton',706,34);ag.fillText('neutron',706,54);
+}
+function addDraw(){
+  if(uSplit&&sProg>0){splitDraw();return}
+  ag.clearRect(0,0,ac.width,ac.height);
+  const inAnim=an4&&uProg<1,isAdd=an4&&an4.kind.startsWith('add');
+  let list=types,mv=-1;
+  if(an4){if(isAdd)mv=an4.idx;else if(inAnim){list=an4.old;mv=an4.idx}}
+  for(let i=0;i<list.length;i++){if(i===mv)continue;const p=slotPos(i);ag.fillStyle=colOf(list[i]);ag.beginPath();ag.arc(p[0],p[1],SLR,0,7);ag.fill()}
+  if(mv>=0&&(isAdd||inAnim)){
+    const e=1-Math.pow(1-Math.min(1,uProg),3),slot=slotPos(mv),far=[40,SCY-60],f=isAdd?e:1-e,x=far[0]+(slot[0]-far[0])*f,y=far[1]+(slot[1]-far[1])*f;
+    ag.fillStyle=colOf(an4.t);ag.beginPath();ag.arc(x,y,SLR+1.5,0,7);ag.fill();
     ag.strokeStyle='#ffb454';ag.lineWidth=2;ag.beginPath();ag.arc(x,y,SLR+5,0,7);ag.stroke();
-    ag.fillStyle='#ffb454';ag.font='12px sans-serif';ag.textAlign='left';ag.fillText('added neutron',x+10,y-8);
-  }
-  ag.fillStyle='#e6e9ef';ag.font='14px sans-serif';ag.textAlign='center';ag.fillText(`${NAME[91]}-${uA}`,SCX,SCY+88);
+    ag.fillStyle='#ffb454';ag.font='12px sans-serif';ag.textAlign='left';ag.fillText((isAdd?'added ':'removed ')+(an4.t==='p'?'proton':'neutron'),x+10,y-8)}
+  ag.fillStyle='#e6e9ef';ag.font='14px sans-serif';ag.textAlign='center';ag.fillText(`${NAME[cn4.Z-1]}-${cn4.Z+cn4.N}`,SCX,SCY+88);
   ag.textAlign='left';ag.fillStyle='#ff6b6b';ag.fillRect(630,24,10,10);ag.fillStyle='#8e98ad';ag.fillRect(630,44,10,10);
-  ag.fillStyle='#e6e9ef';ag.font='13px sans-serif';ag.fillText('protons (92)',646,34);ag.fillText(`neutrons (${uA-92})`,646,54);
+  ag.fillStyle='#e6e9ef';ag.font='13px sans-serif';ag.fillText(`protons (${cn4.Z})`,646,34);ag.fillText(`neutrons (${cn4.N})`,646,54);
 }
 function addRender(){
-  const A=uA,N=A-92,BE=UBE[A],m=nMass(92,N,BE),sep=92*MP+N*MN,dm=sep-m,ba=BE/A;
-  $('addEq').innerHTML=uPrev?nuc(uPrev,92,'U')+' + '+nuc(1,0,'n')+' <span class="ar">→</span> '+nuc(A,92,'U'):nuc(A,92,'U');
-  let tb=`<table class="ledger" style="width:100%"><tr><th colspan="2">${NAME[91]}-${A} nucleus</th></tr>
-   <tr><td>Nucleons (A)</td><td>${A} (92 protons + ${N} neutrons)</td></tr>
-   <tr><td>Mass of the 92 + ${N} separate nucleons</td><td>${fix(sep,4)} u</td></tr>
+  const Z=cn4.Z,N=cn4.N,A=Z+N,b=BEof(Z,N),BE=b.be,real=b.real,m=nMass(Z,N,BE),sep=Z*MP+N*MN,dm=sep-m,ba=BE/A,sym=SYM[Z-1],nmz=lab4(Z,A);
+  const est=real?'':' <i>(model estimate)</i>';
+  let eq=nuc(A,Z,sym),res='',warn='',sm='',sb='',sn='';
+  const part=prev?(prev.kind.endsWith('n')?{s:'n',Z:0,w:'neutron',m:MN}:{s:'p',Z:1,w:'proton',m:MP}):null;
+  if(prev){
+    const pA=prev.Z+prev.N,pb=BEof(prev.Z,prev.N),bp=pb.be,mp=nMass(prev.Z,prev.N,bp),add=prev.kind.startsWith('add'),d=BE-bp,ob=bp/pA;
+    const pn=nuc(1,part.Z,part.s==='n'?'n':'p');
+    eq=add?nuc(pA,prev.Z,SYM[prev.Z-1])+' + '+pn+' <span class="ar">→</span> '+nuc(A,Z,sym):nuc(pA,prev.Z,SYM[prev.Z-1])+' <span class="ar">→</span> '+nuc(A,Z,sym)+' + '+pn;
+    const dmn=Math.abs(d)/MEV_U;
+    if(add)res=`<div class="eq">Mass before: ${fix(mp,4)} u (nucleus) + ${fix(part.m,4)} u (${part.w}) = ${fix(mp+part.m,4)} u</div><div class="eq">Mass after: ${fix(m,4)} u</div>
+      <div class="eq">Mass ${d>=0?'lost':'gained'}: ${fix(dmn,4)} u = ${sciT(kgOf(dmn),3)} kg</div>
+      <div class="eq">${d>=0?'Energy released':'Energy that must be supplied'} = Δm c² = <b>${fix(Math.abs(d),2)} MeV</b> (${sciT(Math.abs(d)*MEV_J,3)} J)</div>`;
+    else res=`<div class="eq">Mass before: ${fix(mp,4)} u (nucleus)</div><div class="eq">Mass after: ${fix(m,4)} u (nucleus) + ${fix(part.m,4)} u (${part.w}) = ${fix(m+part.m,4)} u</div>
+      <div class="eq">Mass ${d<=0?'gained':'lost'}: ${fix(dmn,4)} u = ${sciT(kgOf(dmn),3)} kg</div>
+      <div class="eq">${d<=0?'Energy that must be supplied':'Energy released'} = Δm c² = <b>${fix(Math.abs(d),2)} MeV</b> (${sciT(Math.abs(d)*MEV_J,3)} J)</div>`;
+    res+=`<div class="eq">Binding energy per nucleon: ${fix(ob,3)} → ${fix(ba,3)} MeV (${ba<ob?'falls':'rises'} by ${fix(Math.abs(ba-ob),3)})</div>`;
+    const cnt=part.s==='n'?N:Z,even=cnt%2===0;
+    if(add)warn=`Total binding energy <b>${d>=0?'rises':'falls'}</b> by ${fix(Math.abs(d),1)} MeV and is now shared between one more nucleon, so the binding energy <b>per nucleon ${ba<ob?'falls':'rises'}</b>. `+
+      (even?`The new ${part.w} pairs up with another ${part.w}, which makes the nucleus more stable.`:`The new ${part.w} is unpaired, so less energy is released.`)+(part.s==='p'?' Adding a proton also adds electrical repulsion between protons.':'');
+    else warn=`Removing a ${part.w} takes <b>${fix(Math.abs(d),1)} MeV</b> of energy: the total binding energy <b>falls</b>, and the binding energy per nucleon ${ba<ob?'falls':'rises'}. `+
+      (even?`The nucleus is left with a paired ${part.w} count, but the ${part.w} that left was part of a pair, which is why it takes more energy.`:`The ${part.w} that left was unpaired, so less energy is needed.`);
+    sm=add?`was ${fix(mp,4)} u (+ ${part.w} ${fix(part.m,4)} u, ${fix(dmn,4)} u ${d>=0?'lost':'gained'})`:`was ${fix(mp,4)} u (a ${part.w} of ${fix(part.m,4)} u removed)`;
+    sb=`was ${fix(bp,1)} MeV: <b>${d>=0?'up':'down'} ${fix(Math.abs(d),1)} MeV</b>`;sn=`was ${fix(ob,3)} MeV: <b>${ba<ob?'down':'up'} ${fix(Math.abs(ba-ob),3)} MeV</b>`;
+  }else{
+    res=`<div class="eq">Mass of the separate nucleons is <b>more</b> than the mass of the nucleus.</div><div class="eq">Mass defect Δm = ${fix(dm,4)} u. Energy E = Δm c² holds the nucleus together.</div>`;
+    warn='Use the buttons to add or remove a neutron or a proton and watch the mass, binding energy and binding energy per nucleon change.';
+    sm=sciT(kgOf(m),4)+' kg';sb=sciT(BE*MEV_J,3)+' J';sn='total binding energy ÷ '+A+' nucleons'}
+  if(!real){warn+=' <br><i>Binding energies for nuclei other than U-233 to U-239 are from the semi-empirical mass formula (within about 1 MeV of measured values).</i>';sb+=' · model estimate'}
+  $('addEq').innerHTML=eq;
+  $('addTable').innerHTML=`<table class="ledger" style="width:100%"><tr><th colspan="2">${NAME[Z-1]}-${A} nucleus${est}</th></tr>
+   <tr><td>Nucleons (A)</td><td>${A} (${Z} protons + ${N} neutrons)</td></tr>
+   <tr><td>Mass of the ${Z} + ${N} separate nucleons</td><td>${fix(sep,4)} u</td></tr>
    <tr><td><b>Mass of the nucleus</b></td><td><b>${fix(m,4)} u = ${sciT(kgOf(m))} kg</b></td></tr>
    <tr><td>Mass defect Δm</td><td>${fix(dm,4)} u = ${sciT(kgOf(dm))} kg</td></tr>
    <tr><td><b>Total binding energy</b> (Δm c²)</td><td><b>${fix(BE,1)} MeV</b> = ${sciT(BE*MEV_J,3)} J</td></tr>
    <tr><td><b>Binding energy per nucleon</b></td><td><b>${fix(ba,3)} MeV</b></td></tr></table>`;
-  $('addTable').innerHTML=tb;
-  let res='',warn='';
-  if(uPrev){
-    const bp=UBE[uPrev],ob=bp/uPrev,Sn=BE-bp,dmn=Sn/MEV_U,mp=nMass(92,uPrev-92,bp);
-    res=`<div class="eq">Mass before: ${fix(mp,4)} u (nucleus) + ${fix(MN,4)} u (neutron) = ${fix(mp+MN,4)} u</div>
-     <div class="eq">Mass after: ${fix(m,4)} u</div>
-     <div class="eq">Mass lost: ${fix(dmn,4)} u = ${sciT(kgOf(dmn),3)} kg</div>
-     <div class="eq">Energy released = Δm c² = <b>${fix(Sn,2)} MeV</b> (${sciT(Sn*MEV_J,3)} J)</div>
-     <div class="eq">Binding energy per nucleon: ${fix(ob,3)} → ${fix(ba,3)} MeV (${ba<ob?'falls':'rises'} by ${fix(Math.abs(ba-ob),3)})</div>`;
-    warn=`Total binding energy <b>rises</b> by ${fix(Sn,1)} MeV, but it is now shared between one more nucleon, so the binding energy <b>per nucleon falls</b> slightly. `+
-     (N%2===0?`The new neutron pairs up with another neutron, so the nucleus gains extra stability and more energy is released (${fix(Sn,1)} MeV).`:`The new neutron is unpaired, so less energy is released (${fix(Sn,1)} MeV).`);
-  }else{
-    res=`<div class="eq">Mass of the separate nucleons is <b>more</b> than the mass of the nucleus.</div><div class="eq">Mass defect Δm = ${fix(dm,4)} u. Energy E = Δm c² holds the nucleus together.</div>`;
-    warn='Press <b>Add a neutron</b> and watch the mass, binding energy and binding energy per nucleon change.';
-  }
-  let sm='',sb='',sn='';
-  if(uPrev){const bp=UBE[uPrev],mp=nMass(92,uPrev-92,bp);sm=`was ${fix(mp,4)} u (+ neutron ${fix(MN,4)} u, less ${fix(MEV_U?(BE-bp)/MEV_U:0,4)} u lost)`;
-    sb=`was ${fix(bp,1)} MeV: <b>up ${fix(BE-bp,1)} MeV</b>`;sn=`was ${fix(bp/uPrev,3)} MeV: <b>${ba<bp/uPrev?'down':'up'} ${fix(Math.abs(ba-bp/uPrev),3)} MeV</b>`}
-  else{sm=sciT(kgOf(m),4)+' kg';sb=sciT(BE*MEV_J,3)+' J';sn='total binding energy ÷ '+A+' nucleons'}
   $('addTiles').innerHTML=tiles(`${fix(m,4)} <small>u</small>`,`${fix(BE,1)} <small>MeV</small>`,`${fix(ba,3)} <small>MeV</small>`,sm,sb,sn);
-  if(A>239)warn+=' <br><i>* U-240 to U-244 are estimated (extrapolated from the U-233 to U-239 trend), not measured values.</i>';
   $('addRes').innerHTML=res;$('addWarn').innerHTML=warn;
-  $('addN').disabled=A>=UMAX;$('splitBtn').textContent=`Split U-${A} (fission)`;
+  $('addN').disabled=N>=NMAX;$('remN').disabled=N<=NMIN;$('addP').disabled=Z>=ZMAX;$('remP').disabled=Z<=ZMIN;
+  $('splitBtn').textContent=`Split ${nmz} (fission)`;
   const marks=[],arrows=[];
-  if(uPrev)marks.push({A:uPrev,v:UBE[uPrev]/uPrev,col:'#8e98ad',lab:`U-${uPrev}`,al:'right',dx:-9,dy:18,r:5});
-  marks.push({A:A,v:ba,col:'#ffb454',lab:`U-${A}  ${fix(ba,2)} MeV`,al:'left',dx:-130,dy:-14});
-  if(uPrev)arrows.push({f:[uPrev,UBE[uPrev]/uPrev],t:[A,ba]});
-  if(uSplit&&uSplit.A===A){const f=uSplit;marks.push({A:141,v:BA141/141,col:'#5fd38d',lab:`Ba-141  ${fix(BA141/141,2)}`,dy:-14,dx:-20,al:'center'},{A:f.K,v:f.BEK/f.K,col:'#b88cff',lab:`Kr-${f.K}  ${fix(f.BEK/f.K,2)}`,dy:-14,dx:-4,al:'center'});
+  if(prev){const pA=prev.Z+prev.N,pv=BEof(prev.Z,prev.N);marks.push({A:pA,v:pv.be/pA,col:'#8e98ad',lab:lab4(prev.Z,pA),al:'right',dx:-9,dy:18,r:5,hideIso:pv.real});arrows.push({f:[pA,pv.be/pA],t:[A,ba]})}
+  marks.push({A:A,v:ba,col:'#ffb454',lab:`${nmz}  ${fix(ba,2)} MeV`,al:'left',dx:-130,dy:-14,hideIso:real});
+  if(uSplit&&uSplit.A===A&&uSplit.Z===Z){const f=uSplit;marks.push({A:141,v:BA141/141,col:'#5fd38d',lab:`Ba-141  ${fix(BA141/141,2)}`,dy:-14,dx:-20,al:'center'},{A:f.K,v:f.BEK/f.K,col:'#b88cff',lab:`${lab4(f.Zk,f.K)}  ${fix(f.BEK/f.K,2)}`,dy:-14,dx:-4,al:'center'});
     arrows.push({f:[A,ba],t:[141,BA141/141],col:'#5fd38d'},{f:[A,ba],t:[f.K,f.BEK/f.K],col:'#b88cff'})}
-  const V=VIEWS[curView4];
+  let V=VIEWS[curView4];
+  if(V.follow){let yc=ba,hy=0.06;if(prev){const pb=BEof(prev.Z,prev.N).be/(prev.Z+prev.N);yc=(ba+pb)/2;hy=Math.max(0.06,Math.abs(ba-pb)*0.8+0.03)}
+    V=Object.assign({},V,{x0:A-7,x1:A+7,y0:yc-hy,y1:yc+hy,dx:2,dy:hy>0.3?0.1:hy>0.12?0.05:0.02,dec:0,ydec:2})}
   drawCurve('curveCanvas4',marks,arrows,V);
 }
 function tiles(m,be,ba,sm,sb,sn){const t=(c,k,v,s)=>`<div class="tile ${c}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s||''}</div></div>`;
   return t('m','Mass of nucleus',m,sm)+t('b','Binding energy of nucleus',be,sb)+t('n','Binding energy per nucleon',ba,sn)}
 const totl=h=>h.replace('Mass of nucleus','Total mass of nuclei').replace('Binding energy of nucleus','Total binding energy');
-const VIEWS=[{n:'Whole curve',x0:0,x1:240,y0:0,y1:9.5,dx:40,dy:1,dec:0,ydec:0},
- {n:'Zoom: heavy nuclei (A 80 to 245)',x0:80,x1:245,y0:7.3,y1:8.9,dx:20,dy:0.2,dec:0,ydec:1},
- {n:'Close-up: uranium isotopes',x0:231.5,x1:245.5,y0:7.5,y1:7.62,dx:1,dy:0.02,dec:0,ydec:2,iso:true}];
+const VIEWS=[{n:'Whole curve',x0:0,x1:255,y0:0,y1:9.5,dx:40,dy:1,dec:0,ydec:0},
+ {n:'Zoom: heavy nuclei (A 80 to 255)',x0:80,x1:255,y0:7.2,y1:8.9,dx:20,dy:0.2,dec:0,ydec:1},
+ {n:'Close-up: uranium isotopes',x0:231.5,x1:240.5,y0:7.54,y1:7.62,dx:1,dy:0.02,dec:0,ydec:2,iso:true},
+ {n:'Close-up: follow this nucleus',follow:true,iso:true}];
 let curView4=0;
 function mkZoom(){const c=$('zoomChips');c.querySelectorAll('button').forEach(b=>b.remove());VIEWS.forEach((v,i)=>{const b=document.createElement('button');b.textContent=v.n;
   b.className=i===curView4?'active':'';b.onclick=()=>{curView4=i;mkZoom();addRender()};c.appendChild(b)})}
-function mkUChips(){const c=$('uChips');c.innerHTML='';[233,234,235,236,237,238,239].forEach(a=>{const b=document.createElement('button');b.textContent='U-'+a;
-  b.onclick=()=>{uA=a;uPrev=null;uProg=1;uSplit=false;$('fisRes4').style.display='none';addRender();addDraw()};c.appendChild(b)})}
-$('addN').onclick=()=>{if(uA>=UMAX)return;uPrev=uA;uA++;uProg=0;uSplit=false;$('fisRes4').style.display='none';addRender();
-  if(uAnim)cancelAnimationFrame(uAnim);let t0=null;const st=ts=>{if(!t0)t0=ts;uProg=Math.min(1,(ts-t0)/900);addDraw();if(uProg<1)uAnim=requestAnimationFrame(st)};uAnim=requestAnimationFrame(st)};
-$('uReset').onclick=()=>{if(uAnim)cancelAnimationFrame(uAnim);uA=235;uPrev=null;uProg=1;uSplit=false;$('fisRes4').style.display='none';addRender();addDraw()};
+function startNuc(Z,N){if(uAnim)cancelAnimationFrame(uAnim);if(sAnim)cancelAnimationFrame(sAnim);cn4={Z,N};types=makeTypes(Z,N);prev=null;an4=null;uProg=1;uSplit=false;sProg=0;$('fisRes4').style.display='none';addRender();addDraw()}
+function mkUChips(){const c=$('uChips');c.innerHTML='';[[90,142],[92,141],[92,142],[92,143],[92,144],[92,145],[92,146],[92,147],[93,144],[94,145]].forEach(([Z,N])=>{const b=document.createElement('button');b.textContent=lab4(Z,Z+N);
+  b.onclick=()=>startNuc(Z,N);c.appendChild(b)})}
+function change(kind){
+  const t=kind.endsWith('n')?'n':'p',add=kind.startsWith('add'),nZ=cn4.Z+(t==='p'?(add?1:-1):0),nN=cn4.N+(t==='n'?(add?1:-1):0);
+  if(nZ<ZMIN||nZ>ZMAX||nN<NMIN||nN>NMAX)return;
+  if(sAnim)cancelAnimationFrame(sAnim);
+  prev={Z:cn4.Z,N:cn4.N,kind};const old=types.slice();let idx;
+  if(add){types.push(t);idx=types.length-1}else{idx=types.lastIndexOf(t);types.splice(idx,1)}
+  cn4={Z:nZ,N:nN};an4={kind,t,idx,old};uSplit=false;sProg=0;$('fisRes4').style.display='none';uProg=0;addRender();
+  if(uAnim)cancelAnimationFrame(uAnim);let t0=null;const st=ts=>{if(!t0)t0=ts;uProg=Math.min(1,(ts-t0)/900);addDraw();if(uProg<1)uAnim=requestAnimationFrame(st)};uAnim=requestAnimationFrame(st)}
+$('addN').onclick=()=>change('addn');$('remN').onclick=()=>change('remn');$('addP').onclick=()=>change('addp');$('remP').onclick=()=>change('remp');
+$('uReset').onclick=()=>startNuc(92,143);
 $('splitBtn').onclick=()=>{
-  const A=uA,BE=UBE[A],K=A-144,BEK=KR92+7.0*(K-92),mU=nMass(92,A-92,BE),mB=nMass(56,85,BA141),mK=nMass(36,K-36,BEK),Q=BA141+BEK-BE;
-  uSplit={A,K,BEK};const mAfter=mB+mK+3*MN,dm=mU-mAfter,approx=K!==92;
+  const Z=cn4.Z,N=cn4.N,A=Z+N,BE=BEof(Z,N).be,Zk=Z-56,K=A-144,BEK=KR92+semf(Zk,K-Zk)-semf(36,56),mU=nMass(Z,N,BE),mB=nMass(56,85,BA141),mK=nMass(Zk,K-Zk,BEK),Q=BA141+BEK-BE;
+  uSplit={A,Z,K,Zk,BEK};const mAfter=mB+mK+3*MN,dm=mU-mAfter,approx=!(Z===92&&A===236),nmz=lab4(Z,A);
+  sCache=buildSplit(types.slice(),Zk,K);
+  const row=(l,n,mu,be,ba)=>`<tr><td>${l}</td><td>${n}</td><td>${fix(mu,5)} u</td><td>${sciT(kgOf(mu))} kg</td><td>${be?fix(be,3)+' MeV':'0 (free)'}</td><td>${ba?fix(ba,3)+' MeV':'0'}</td></tr>`;
+  const hd='<tr><th>Particle</th><th>Nucleons</th><th>Mass</th><th>Mass (kg)</th><th>Total binding energy</th><th>Binding energy per nucleon</th></tr>';
+  const pb=BE,beA=BA141+BEK,bpn=BE/A,apn=beA/A,dmkg=kgOf(dm),Ej=dmkg*C*C;
+  const mx=Math.max(bpn,apn)*1.1,bw=v=>(v/mx*100).toFixed(1)+'%';
   $('fisRes4').style.display='block';
-  $('fisRes4').innerHTML=`<b>Fission of U-${A}:</b> ${nuc(A,92,'U')} <span class="ar">→</span> ${nuc(141,56,'Ba')} + ${nuc(K,36,'Kr')} + 3 ${nuc(1,0,'n')}<br>
-   Binding energy per nucleon: U-${A} ${fix(BE/A,2)} MeV → Ba-141 ${fix(BA141/141,2)} MeV and Kr-${K} ${fix(BEK/K,2)} MeV (higher: more tightly bound).<br>
-   Mass of U-${A} nucleus ${fix(mU,3)} u. Mass of Ba-141 + Kr-${K} + 3 neutrons ${fix(mAfter,3)} u. Mass lost Δm = ${fix(dm,4)} u = ${sciT(kgOf(dm),3)} kg.<br>
-   Energy released = Δm c² ≈ <b>${fix(Q,0)} MeV</b> = ${sciT(Q*MEV_J,3)} J per fission.`+(approx?`<br><i>Ba-141 is a measured value; the Kr-${K} binding energy is estimated, so this energy is approximate. The measured U-236 case (${nuc(236,92,'U')} → Ba-141 + Kr-92 + 3n) is the one used in the course.</i>`:'');
-  addRender();$('fisRes4').scrollIntoView({behavior:'smooth',block:'nearest'})};
+  $('fisRes4').innerHTML=`<h2>Fission of ${nmz}: before and after</h2>
+   <div class="eqn" style="font-size:22px">${nuc(A,Z,SYM[Z-1])} <span class="ar">→</span> ${nuc(141,56,'Ba')} + ${nuc(K,Zk,SYM[Zk-1])} + 3 ${nuc(1,0,'n')}</div>
+   <div class="tilehd">Before fission (the nucleus)</div><div class="tiles">${tiles(`${fix(mU,5)} <small>u</small>`,`${fix(BE,3)} <small>MeV</small>`,`${fix(bpn,3)} <small>MeV</small>`,sciT(kgOf(mU),4)+' kg',`${A} nucleons in total`,'average over all '+A+' nucleons')}</div>
+   <div class="tilehd">After fission (all the products together)</div><div class="tiles">${totl(tiles(`${fix(mAfter,5)} <small>u</small>`,`${fix(beA,3)} <small>MeV</small>`,`${fix(apn,3)} <small>MeV</small>`,`<b>${fix(dm,5)} u less</b> than before`,`<b>${fix(Q,1)} MeV more</b> than before`,`<b>${fix(apn-bpn,3)} MeV more</b> per nucleon`))}</div>
+   <div class="hint" style="margin-top:10px"><b>Before fission</b></div><table class="ledger" style="width:100%">${hd}${row(nuc(A,Z,SYM[Z-1])+' ('+nmz+')',A,mU,BE,bpn)}
+    <tr><td><b>Total before</b></td><td>${A}</td><td><b>${fix(mU,5)} u</b></td><td><b>${sciT(kgOf(mU))} kg</b></td><td><b>${fix(BE,3)} MeV</b></td><td><b>${fix(bpn,3)} MeV</b></td></tr></table>
+   <div class="hint"><b>After fission</b></div><table class="ledger" style="width:100%">${hd}${row(nuc(141,56,'Ba')+' (Ba-141)',141,mB,BA141,BA141/141)}${row(nuc(K,Zk,SYM[Zk-1])+' ('+lab4(Zk,K)+')',K,mK,BEK,BEK/K)}${row('3 × '+nuc(1,0,'n')+' (neutrons)',3,3*MN,0,0)}
+    <tr><td><b>Total after</b></td><td>${A}</td><td><b>${fix(mAfter,5)} u</b></td><td><b>${sciT(kgOf(mAfter))} kg</b></td><td><b>${fix(beA,3)} MeV</b></td><td><b>${fix(apn,3)} MeV</b> (average)</td></tr></table>
+   <div class="res"><div class="eq">Mass lost Δm = ${fix(mU,5)} − ${fix(mAfter,5)} = ${fix(dm,5)} u = ${sciT(dmkg,3)} kg</div>
+    <div class="eq">E = Δm c² = ${sciT(dmkg,3)} × (3.00 × 10<sup>8</sup>)² = <b>${sciT(Ej,3)} J</b> (≈ ${fix(Q,0)} MeV)</div>
+    <div class="eq">Binding energy gained = ${fix(beA,3)} − ${fix(BE,3)} = ${fix(Q,1)} MeV, the same energy that appears as mass lost</div>
+    <div class="eq">Energy released per nucleon = ${fix(Q/A,2)} MeV</div></div>
+   <div class="hint">Bars show the <b>average binding energy per nucleon</b> of all the nucleons, before and after.</div>
+   <div class="bar" style="width:${bw(bpn)};background:#2a5d99;min-width:150px">before: ${fix(bpn,2)} MeV per nucleon</div>
+   <div class="bar" style="width:${bw(apn)};background:#3e7a55;min-width:150px">after: ${fix(apn,2)} MeV per nucleon</div>
+   <div class="warn">After fission the nucleons are held <b>more tightly</b> (higher binding energy per nucleon), the products have <b>less mass</b> than the original nucleus, and the missing mass is released as energy (about ${fix(Q,0)} MeV per fission).`+(approx?`<br><i>Ba-141 is a measured value; the ${lab4(Zk,K)} binding energy${BEof(Z,N).real?'':' and the parent\'s'} are model estimates, so these values are approximate. The measured U-236 case (${nuc(236,92,'U')} → Ba-141 + Kr-92 + 3n) is the one used in the course.</i>`:'')+`</div>`;
+  sProg=0;prev=null;an4=null;uProg=1;addRender();addDraw();$('addCanvas').scrollIntoView({behavior:'smooth',block:'center'});
+  if(sAnim)cancelAnimationFrame(sAnim);let t0=null;const st=ts=>{if(!t0)t0=ts;sProg=Math.max(0.0001,Math.min(1,(ts-t0)/3400));addDraw();if(sProg<1)sAnim=requestAnimationFrame(st)};sAnim=requestAnimationFrame(st)};
 mkUChips();mkZoom();addRender();addDraw();
 
 /* ================= TAB 5: fusion with masses and binding energy ================= */
