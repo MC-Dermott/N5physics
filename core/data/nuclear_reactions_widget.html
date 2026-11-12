@@ -168,15 +168,18 @@ label.l input{padding:0}
   </div>
   <canvas id="addCanvas" width="800" height="230"></canvas>
   <div class="tiles" id="addTiles"></div>
+  <details id="addDetails" style="margin-top:6px"><summary style="cursor:pointer;font-weight:600;padding:6px 0">Show the equation, working and explanation</summary>
   <div class="eqn" id="addEq" style="font-size:22px;min-height:40px"></div>
   <div class="grid2">
     <div id="addTable"></div>
     <div><div class="res" id="addRes"></div><div class="warn" id="addWarn"></div></div>
   </div>
+  </details>
 </div>
 <div class="card">
   <h2>Binding energy per nucleon curve</h2>
-  <canvas id="curveCanvas4" width="800" height="300"></canvas>
+  <div class="row chips" id="zoomChips"><b>View:</b></div>
+  <canvas id="curveCanvas4" width="800" height="340"></canvas>
   <div class="hint">Heavy nuclei sit on the right-hand slope: adding nucleons lowers the binding energy per nucleon slightly. Splitting a heavy nucleus gives products higher up the curve, and that increase is released as energy. Data are real measured values (rounded).</div>
   <div class="msg" id="fisRes4" style="display:none"></div>
 </div>
@@ -432,22 +435,25 @@ const UBE={233:1771.8,234:1778.6,235:1783.9,236:1790.4,237:1795.6,238:1801.7,239
 const BA141=1174.1,KR92=783.1;
 const CURVE=[[2,1.112,'H-2'],[3,2.827,'H-3'],[4,7.074,'He-4'],[6,5.332,'Li-6'],[9,6.463,'Be-9'],[12,7.680,'C-12'],[16,7.976,'O-16'],[20,8.032,'Ne-20'],
  [40,8.551,'Ca-40'],[56,8.790,'Fe-56'],[92,8.512,'Kr-92'],[120,8.505,'Sn-120'],[141,8.327,'Ba-141'],[208,7.867,'Pb-208'],[235,7.591,'U-235'],[238,7.570,'U-238']];
-function drawCurve(id,marks,arrows){
-  const c=$(id),g=c.getContext('2d'),W=c.width,H=c.height,L=54,R=18,T=14,B=38,AX=240,AY=9.5;
-  const X=a=>L+a/AX*(W-L-R),Y=v=>H-B-v/AY*(H-T-B);
+function drawCurve(id,marks,arrows,view){
+  view=view||{x0:0,x1:240,y0:0,y1:9.5,dx:40,dy:1,dec:0,ydec:0};
+  const c=$(id),g=c.getContext('2d'),W=c.width,H=c.height,L=62,R=18,T=14,B=38;
+  const X=a=>L+(a-view.x0)/(view.x1-view.x0)*(W-L-R),Y=v=>H-B-(v-view.y0)/(view.y1-view.y0)*(H-T-B);
   g.clearRect(0,0,W,H);g.strokeStyle='#2a3344';g.fillStyle='#8e98ad';g.font='12px sans-serif';g.lineWidth=1;
-  for(let v=0;v<=9;v+=1){g.beginPath();g.moveTo(L,Y(v));g.lineTo(W-R,Y(v));g.stroke();g.textAlign='right';g.fillText(v,L-6,Y(v)+4)}
-  for(let a=0;a<=240;a+=40){g.textAlign='center';g.fillText(a,X(a),H-B+16)}
-  g.fillStyle='#e6e9ef';g.textAlign='center';g.fillText('mass number A (number of nucleons)',(L+W-R)/2,H-6);
-  g.save();g.translate(14,(T+H-B)/2);g.rotate(-Math.PI/2);g.fillText('binding energy per nucleon (MeV)',0,0);g.restore();
-  g.strokeStyle='#5aa9ff';g.lineWidth=2;g.beginPath();CURVE.forEach((p,i)=>i?g.lineTo(X(p[0]),Y(p[1])):g.moveTo(X(p[0]),Y(p[1])));g.stroke();
-  g.fillStyle='#5aa9ff';CURVE.forEach(p=>{g.beginPath();g.arc(X(p[0]),Y(p[1]),3,0,7);g.fill()});
+  for(let v=Math.ceil(view.y0/view.dy-1e-9)*view.dy;v<=view.y1+1e-9;v+=view.dy){g.beginPath();g.moveTo(L,Y(v));g.lineTo(W-R,Y(v));g.stroke();g.textAlign='right';g.fillText(v.toFixed(view.ydec),L-6,Y(v)+4)}
+  for(let a=Math.ceil(view.x0/view.dx-1e-9)*view.dx;a<=view.x1+1e-9;a+=view.dx){g.textAlign='center';g.fillText(a.toFixed(view.dec),X(a),H-B+16)}
+  g.save();g.beginPath();g.rect(L,T-4,W-L-R,H-T-B+8);g.clip();
+  g.restore();g.save();g.fillStyle='#e6e9ef';g.textAlign='center';g.fillText('mass number A (number of nucleons)',(L+W-R)/2,H-6);
+  g.translate(14,(T+H-B)/2);g.rotate(-Math.PI/2);g.fillText('binding energy per nucleon (MeV)',0,0);g.restore();g.save();g.beginPath();g.rect(L,T-4,W-L-R,H-T-B+8);g.clip();
+  if(!view.iso){g.strokeStyle='#5aa9ff';g.lineWidth=2;g.beginPath();CURVE.forEach((p,i)=>i?g.lineTo(X(p[0]),Y(p[1])):g.moveTo(X(p[0]),Y(p[1])));g.stroke();
+  g.fillStyle='#5aa9ff';CURVE.forEach(p=>{g.beginPath();g.arc(X(p[0]),Y(p[1]),3,0,7);g.fill()})}
   (arrows||[]).forEach(a=>{const x1=X(a.f[0]),y1=Y(a.f[1]),x2=X(a.t[0]),y2=Y(a.t[1]);g.strokeStyle=a.col||'#ffb454';g.lineWidth=2.5;g.setLineDash([6,4]);
     g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.setLineDash([]);const an=Math.atan2(y2-y1,x2-x1);
     g.fillStyle=a.col||'#ffb454';g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-10*Math.cos(an-.4),y2-10*Math.sin(an-.4));g.lineTo(x2-10*Math.cos(an+.4),y2-10*Math.sin(an+.4));g.fill()});
   (marks||[]).forEach(m=>{g.fillStyle=m.col;g.beginPath();g.arc(X(m.A),Y(m.v),m.r||6,0,7);g.fill();g.fillStyle='#e6e9ef';g.font='12px sans-serif';g.textAlign=m.al||'left';
-    g.fillText(m.lab,X(m.A)+(m.dx===undefined?9:m.dx),Y(m.v)+(m.dy===undefined?-9:m.dy))});
-  g.textAlign='left';
+    if(!view.iso)g.fillText(m.lab,X(m.A)+(m.dx===undefined?9:m.dx),Y(m.v)+(m.dy===undefined?-9:m.dy))});
+  if(view.iso){g.strokeStyle='#b8c4dc';g.lineWidth=1.5;g.beginPath();Object.keys(UBE).forEach((a,i)=>{const x=X(+a),y=Y(UBE[a]/a);i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();Object.keys(UBE).forEach(a=>{const v=UBE[a]/a;g.fillStyle='#b8c4dc';g.beginPath();g.arc(X(+a),Y(v),4,0,7);g.fill();g.font='11px sans-serif';g.textAlign='center';g.fillText('U-'+a+'  '+v.toFixed(3),X(+a),Y(v)+(+a%2?22:-12))})}
+  g.restore();g.textAlign='left';
 }
 function drawCluster(g,cx,cy,Z,N,r,k,col){ /* nucleons packed in a sunflower pattern */
   const tot=Z+N,types=[];let s=Z*31+N*7+5;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
@@ -517,11 +523,18 @@ function addRender(){
   if(uPrev)arrows.push({f:[uPrev,UBE[uPrev]/uPrev],t:[A,ba]});
   if(uSplit){marks.push({A:141,v:BA141/141,col:'#5fd38d',lab:`Ba-141  ${fix(BA141/141,2)}`,dy:-14,dx:-20,al:'center'},{A:92,v:KR92/92,col:'#b88cff',lab:`Kr-92  ${fix(KR92/92,2)}`,dy:-14,dx:-4,al:'center'});
     arrows.push({f:[236,UBE[236]/236],t:[141,BA141/141],col:'#5fd38d'},{f:[236,UBE[236]/236],t:[92,KR92/92],col:'#b88cff'})}
-  drawCurve('curveCanvas4',marks,arrows);
+  const V=VIEWS[curView4];
+  drawCurve('curveCanvas4',marks,arrows,V);
 }
 function tiles(m,be,ba,sm,sb,sn){const t=(c,k,v,s)=>`<div class="tile ${c}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s||''}</div></div>`;
   return t('m','Mass of nucleus',m,sm)+t('b','Binding energy of nucleus',be,sb)+t('n','Binding energy per nucleon',ba,sn)}
 const totl=h=>h.replace('Mass of nucleus','Total mass of nuclei').replace('Binding energy of nucleus','Total binding energy');
+const VIEWS=[{n:'Whole curve',x0:0,x1:240,y0:0,y1:9.5,dx:40,dy:1,dec:0,ydec:0},
+ {n:'Zoom: heavy nuclei (A 80 to 245)',x0:80,x1:245,y0:7.3,y1:8.9,dx:20,dy:0.2,dec:0,ydec:1},
+ {n:'Close-up: uranium isotopes',x0:231.5,x1:240.5,y0:7.54,y1:7.62,dx:1,dy:0.01,dec:0,ydec:2,iso:true}];
+let curView4=0;
+function mkZoom(){const c=$('zoomChips');c.querySelectorAll('button').forEach(b=>b.remove());VIEWS.forEach((v,i)=>{const b=document.createElement('button');b.textContent=v.n;
+  b.className=i===curView4?'active':'';b.onclick=()=>{curView4=i;mkZoom();addRender()};c.appendChild(b)})}
 function mkUChips(){const c=$('uChips');c.innerHTML='';[233,234,235,236,237,238].forEach(a=>{const b=document.createElement('button');b.textContent='U-'+a;
   b.onclick=()=>{uA=a;uPrev=null;uProg=1;uSplit=false;$('fisRes4').style.display='none';addRender();addDraw()};c.appendChild(b)})}
 $('addN').onclick=()=>{if(uA>=239)return;uPrev=uA;uA++;uProg=0;uSplit=false;$('fisRes4').style.display='none';addRender();
@@ -536,7 +549,7 @@ $('splitBtn').onclick=()=>{ if(uA!==236)return;uSplit=true;
    Mass of U-236 nucleus ${fix(mU,3)} u. Mass of Ba-141 + Kr-92 + 3 neutrons ${fix(mAfter,3)} u. Mass lost Δm = ${fix(dm,4)} u = ${sciT(kgOf(dm),3)} kg.<br>
    Energy released = Δm c² ≈ <b>${fix(Q,0)} MeV</b> = ${sciT(Q*MEV_J,3)} J per fission.`;
   addRender()};
-mkUChips();addRender();addDraw();
+mkUChips();mkZoom();addRender();addDraw();
 
 /* ================= TAB 5: fusion with masses and binding energy ================= */
 const PT={p:{A:1,Z:1,BE:0,s:'H',lab:'p'},n:{A:1,Z:0,BE:0,s:'n',lab:'n'},H2:{A:2,Z:1,BE:2.224,s:'H',lab:'H-2'},H3:{A:3,Z:1,BE:8.482,s:'H',lab:'H-3'},
