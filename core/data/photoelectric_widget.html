@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photoelectric Effect</title>
+<style>
+  :root { --bg:#f5f7fa; --card:#fff; --ink:#1d2733; --mute:#5d6b7a; --line:#d5dce4; --acc:#1f6feb; --warn:#c2410c; --ok:#15803d; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:12px; background:var(--bg); color:var(--ink); font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  h1 { font-size:20px; margin:0 0 2px; }
+  .sub { color:var(--mute); margin:0 0 10px; font-size:13px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; }
+  canvas { width:100%; height:auto; display:block; border-radius:8px; background:#fbfcfe; border:1px solid var(--line); }
+  .grid { display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+  @media (max-width:820px){ .grid{ grid-template-columns:1fr; } }
+  label { display:block; font-weight:600; font-size:13px; margin:8px 0 2px; }
+  .row { display:flex; align-items:center; gap:10px; }
+  .row input[type=range]{ flex:1; }
+  .val { min-width:96px; text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+  select, button { font:inherit; padding:6px 10px; border-radius:7px; border:1px solid var(--line); background:#fff; color:var(--ink); }
+  button { cursor:pointer; } button:hover { border-color:var(--acc); }
+  button.primary { background:var(--acc); color:#fff; border-color:var(--acc); }
+  .btns { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .eq { font-family:"Cambria Math",Georgia,serif; font-size:15px; background:#f1f5fa; border-radius:7px; padding:6px 10px; margin:6px 0; }
+  .eq b { color:var(--acc); }
+  .status { margin-top:8px; padding:8px 10px; border-radius:7px; font-weight:600; }
+  .status.no { background:#fff1e8; color:var(--warn); } .status.yes { background:#e8f7ee; color:var(--ok); }
+  table { border-collapse:collapse; width:100%; font-size:13px; margin-top:6px; }
+  th, td { border:1px solid var(--line); padding:3px 6px; text-align:center; } th { background:#f1f5fa; }
+  .note { font-size:12px; color:var(--mute); margin-top:6px; }
+  details { margin-top:12px; } summary { cursor:pointer; font-weight:600; }
+</style>
+</head>
+<body>
+<h1>Photoelectric Effect</h1>
+<p class="sub">Shine light of different frequency and irradiance onto a metal and see when photoelectrons are emitted.</p>
+
+<div class="card"><canvas id="scene" width="760" height="340"></canvas></div>
+
+<div class="grid">
+  <div class="card">
+    <label for="metal">Metal</label>
+    <select id="metal"></select>
+
+    <label for="freq">Frequency of radiation, f</label>
+    <div class="row"><input type="range" id="freq" min="1" max="20" step="0.1" value="6"><span class="val" id="freqv"></span></div>
+
+    <label for="irr">Irradiance of radiation</label>
+    <div class="row"><input type="range" id="irr" min="0" max="100" step="1" value="50"><span class="val" id="irrv"></span></div>
+
+    <label for="volt">Collector p.d. (collector made negative)</label>
+    <div class="row"><input type="range" id="volt" min="0" max="8" step="0.1" value="0"><span class="val" id="voltv"></span></div>
+
+    <div class="btns">
+      <button id="pause">Pause</button>
+      <button id="rec" class="primary">Record reading</button>
+      <button id="clr">Clear readings</button>
+    </div>
+    <div class="note">Keep the irradiance and p.d. fixed and change the frequency to see how the <i>maximum</i> kinetic energy changes.</div>
+  </div>
+
+  <div class="card">
+    <div id="status" class="status"></div>
+    <div class="eq">E = hf &nbsp;= <span id="eE"></span></div>
+    <div class="eq">W = hf<sub>0</sub> &nbsp;= <span id="eW"></span></div>
+    <div class="eq">E<sub>k</sub> = hf − hf<sub>0</sub> &nbsp;= <span id="eK"></span></div>
+    <div class="eq">v<sub>max</sub> = √(2E<sub>k</sub>/m) &nbsp;= <span id="eV"></span></div>
+    <div class="eq">Threshold frequency f<sub>0</sub> = <b id="eF0"></b> &nbsp; Wavelength = <b id="eLam"></b></div>
+    <div class="eq">Ammeter reading: <b id="amm">0.00</b> (arb. units) &nbsp; Stopping voltage = <b id="vs">–</b></div>
+    <div class="note">h = 6.63 × 10<sup>−34</sup> J s &nbsp; e = 1.60 × 10<sup>−19</sup> C &nbsp; m<sub>e</sub> = 9.11 × 10<sup>−31</sup> kg</div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <b>Maximum kinetic energy against frequency</b>
+    <canvas id="graph" width="520" height="330"></canvas>
+    <div class="note">Dashed line: the equation E<sub>k</sub> = hf − hf<sub>0</sub> extended back. Its gradient is h, its x-intercept is f<sub>0</sub> and its y-intercept is −W. Orange dots are your recorded readings.</div>
+  </div>
+  <div class="card">
+    <b>Recorded readings</b>
+    <table id="tbl"><thead><tr><th>Metal</th><th>f (×10<sup>14</sup> Hz)</th><th>Irradiance (%)</th><th>E<sub>k</sub> (×10<sup>−19</sup> J)</th></tr></thead><tbody></tbody></table>
+    <div class="note">If no photoelectrons are emitted the reading is recorded as 0.</div>
+  </div>
+</div>
+
+<details class="card">
+  <summary>Things to investigate</summary>
+  <ol>
+    <li>Choose a metal and slowly increase the frequency from the lowest value. At what frequency do electrons first appear? What is this called?</li>
+    <li>Below the threshold frequency, increase the irradiance to maximum. Are any electrons emitted? Explain using photons.</li>
+    <li>Above the threshold, change the irradiance. What changes: the number of electrons per second or their maximum kinetic energy?</li>
+    <li>Record E<sub>k</sub> for five frequencies and plot the points. Find h from the gradient and W from the y-intercept.</li>
+    <li>Change the metal. Does the gradient change? What changes?</li>
+    <li>Raise the collector p.d. until the ammeter reads zero. Compare eV with E<sub>k</sub>.</li>
+  </ol>
+</details>
+
+<script>
+const h = 6.63e-34, e = 1.60e-19, me = 9.11e-31, c = 3.00e8;
+// threshold frequencies in Hz
+const METALS = [
+  {name:"Caesium", f0:4.6e14},
+  {name:"Sodium", f0:5.5e14},
+  {name:"Zinc", f0:1.0e15},
+  {name:"Copper", f0:1.1e15},
+  {name:"Platinum", f0:1.5e15}
+];
+const $ = id => document.getElementById(id);
+const sel = $("metal");
+METALS.forEach((m,i)=>{ const o=document.createElement("option"); o.value=i; o.textContent=m.name+" (f₀ = "+(m.f0/1e14).toFixed(1)+" × 10¹⁴ Hz)"; sel.appendChild(o); });
+
+function sci(x, dp=2){
+  if (x===0) return "0";
+  let ex = Math.floor(Math.log10(Math.abs(x))), m = x/Math.pow(10,ex);
+  if (Math.abs(m).toFixed(dp) === "10."+"0".repeat(dp)) { m/=10; ex+=1; }
+  return m.toFixed(dp)+" × 10<sup>"+ex+"</sup>";
+}
+function sciUnit(x,u,dp=2){ return sci(x,dp)+" "+u; }
+
+// ---------- state ----------
+let f=6e14, irr=50, V=0, metal=METALS[0], paused=false;
+let photons=[], electrons=[], arrivals=[], spawnAcc=0, flashes=[];
+let records=[];
+
+// ---------- colours ----------
+function wlRGB(nm){
+  let r=0,g=0,b=0;
+  if(nm>=380&&nm<440){r=-(nm-440)/60;b=1;}
+  else if(nm<490){g=(nm-440)/50;b=1;}
+  else if(nm<510){g=1;b=-(nm-510)/20;}
+  else if(nm<580){r=(nm-510)/70;g=1;}
+  else if(nm<645){r=1;g=-(nm-645)/65;}
+  else if(nm<=750){r=1;}
+  let k = nm<420?0.3+0.7*(nm-380)/40 : nm>700?0.3+0.7*(750-nm)/50 : 1;
+  return "rgb("+Math.round(255*r*k)+","+Math.round(255*g*k)+","+Math.round(255*b*k)+")";
+}
+function lightInfo(){
+  const nm = c/f*1e9;
+  if (f<3.8e14) return {col:"#b4412f", region:"Infrared", nm};
+  if (f>7.9e14) return {col:"#8a4fe0", region:"Ultraviolet", nm};
+  return {col:wlRGB(nm), region:"Visible", nm};
+}
+
+// ---------- scene geometry ----------
+const SC = $("scene"), sx = SC.getContext("2d");
+const EX=206, CX=636, TOP=88, BOT=252;   // emitter x, collector x, plate extent
+const LAMP={x:420,y:28};
+
+function emaxJ(){ return Math.max(0, h*f - h*metal.f0); }
+
+function spawnPhoton(){
+  photons.push({ty:TOP+14+Math.random()*(BOT-TOP-28), p:0, off:(Math.random()-.5)*40});
+}
+function stepSim(dt){
+  const rate = irr/100*45;                // photons per second drawn
+  spawnAcc += rate*dt;
+  while (spawnAcc>=1){ spawnAcc-=1; spawnPhoton(); }
+  const emax = emaxJ()/e;                 // eV
+  const dist = Math.hypot(LAMP.x-EX, 0);
+  for (const p of photons){ p.p += dt*0.9; }
+  const keep=[];
+  for (const p of photons){
+    if (p.p<1){ keep.push(p); continue; }
+    const y = p.ty;
+    if (emax>0){
+      const frac = 1-0.8*Math.pow(Math.random(),2);
+      const E = Math.max(0.02, emax*frac);
+      electrons.push({x:0, y, vy:(Math.random()-.5)*26, u:Math.sqrt(2*E), age:0, fast:frac>0.93});
+    } else flashes.push({y, t:0});
+  }
+  photons = keep.length? photons.filter(p=>p.p<1) : [];
+  const s=0.45;
+  const alive=[];
+  for (const el of electrons){
+    el.age+=dt;
+    el.u -= V*s*dt;
+    el.x += s*el.u*dt;
+    el.y += el.vy*dt*Math.max(0.2,Math.min(1,Math.abs(el.u)/2));
+    if (el.x>=1){ arrivals.push(performance.now()); continue; }
+    if (el.x<=0 && el.u<0) continue;
+    if (el.age>18) continue;
+    el.y = Math.max(TOP+4, Math.min(BOT-4, el.y));
+    alive.push(el);
+  }
+  electrons=alive;
+  flashes.forEach(fl=>fl.t+=dt); flashes=flashes.filter(fl=>fl.t<0.4);
+  const now=performance.now(); arrivals=arrivals.filter(t=>now-t<1000);
+}
+
+function draw(){
+  const L=lightInfo();
+  sx.clearRect(0,0,760,340);
+  // tube
+  sx.lineWidth=2; sx.strokeStyle="#8aa0b6"; sx.fillStyle="#eef3f9";
+  rr(sx,EX-34,TOP-30,CX-EX+68,BOT-TOP+60,22); sx.fill(); sx.stroke();
+  sx.fillStyle="#8aa0b6"; sx.font="12px system-ui"; sx.textAlign="center";
+  // beam
+  const a=irr/100*0.22;
+  sx.fillStyle=L.col; sx.globalAlpha=a;
+  sx.beginPath(); sx.moveTo(LAMP.x-10,LAMP.y+12); sx.lineTo(LAMP.x+10,LAMP.y+12); sx.lineTo(EX+3,BOT-8); sx.lineTo(EX+3,TOP+8); sx.closePath(); sx.fill(); sx.globalAlpha=1;
+  // lamp
+  sx.fillStyle="#3b4757"; rr(sx,LAMP.x-26,LAMP.y-18,52,30,6); sx.fill();
+  sx.fillStyle=L.col; sx.globalAlpha=0.35+irr/100*0.65; sx.beginPath(); sx.arc(LAMP.x,LAMP.y+12,11,0,Math.PI); sx.fill(); sx.globalAlpha=1;
+  sx.fillStyle="#1d2733"; sx.textAlign="left"; sx.font="12px system-ui";
+  sx.fillText(L.region+" · "+(c/f*1e9).toFixed(0)+" nm",LAMP.x+34,LAMP.y-2);
+  // emitter and collector plates
+  sx.fillStyle="#b98a3e"; sx.fillRect(EX-8,TOP,10,BOT-TOP);
+  sx.fillStyle="#7a8794"; sx.fillRect(CX,TOP,8,BOT-TOP);
+  sx.fillStyle="#1d2733"; sx.textAlign="center"; sx.font="bold 12px system-ui";
+  sx.fillText(metal.name+" emitter",EX+20,TOP-8); sx.font="12px system-ui";
+  sx.fillText("collector",CX+4,TOP-8);
+  if (V>0){ sx.fillStyle="#b42318"; sx.font="bold 14px system-ui"; sx.fillText("−",CX+4,BOT+16); }
+  // circuit
+  sx.strokeStyle="#4a5766"; sx.lineWidth=1.8; sx.beginPath();
+  sx.moveTo(EX-3,BOT); sx.lineTo(EX-3,300); sx.lineTo(380,300); sx.moveTo(460,300); sx.lineTo(CX+4,300); sx.lineTo(CX+4,BOT); sx.stroke();
+  sx.fillStyle="#fff"; sx.beginPath(); sx.arc(420,300,20,0,7); sx.fill(); sx.stroke();
+  sx.beginPath(); sx.moveTo(400,300); sx.lineTo(380,300); sx.moveTo(440,300); sx.lineTo(460,300); sx.stroke();
+  sx.fillStyle="#1d2733"; sx.font="bold 15px system-ui"; sx.fillText("A",420,305);
+  // photons
+  for (const p of photons){
+    const x = LAMP.x + (EX+4-LAMP.x)*p.p + p.off*(1-p.p);
+    const y = LAMP.y+12 + (p.ty-LAMP.y-12)*p.p;
+    const tx = LAMP.x + (EX+4-LAMP.x)*(p.p-0.04) + p.off*(1-p.p+0.04);
+    const ty = LAMP.y+12 + (p.ty-LAMP.y-12)*(p.p-0.04);
+    sx.strokeStyle=L.col; sx.lineWidth=2; sx.globalAlpha=0.5; sx.beginPath(); sx.moveTo(tx,ty); sx.lineTo(x,y); sx.stroke(); sx.globalAlpha=1;
+    sx.fillStyle=L.col; sx.beginPath(); sx.arc(x,y,4.2,0,7); sx.fill();
+    sx.strokeStyle="rgba(0,0,0,.35)"; sx.lineWidth=.8; sx.stroke();
+  }
+  // no-emission flash
+  for (const fl of flashes){ sx.fillStyle="rgba(194,65,12,"+(0.5*(1-fl.t/0.4))+")"; sx.beginPath(); sx.arc(EX+2,fl.y,7*(1+fl.t*2),0,7); sx.fill(); }
+  // electrons
+  for (const el of electrons){
+    const x = EX+4+el.x*(CX-EX-6);
+    sx.fillStyle="#1f6feb"; sx.beginPath(); sx.arc(x,el.y,4,0,7); sx.fill();
+    if (el.fast){ sx.strokeStyle="#0b3d91"; sx.lineWidth=1.4; sx.stroke(); }
+  }
+  sx.fillStyle="#1f6feb"; sx.font="12px system-ui"; sx.textAlign="left"; sx.fillText("● photoelectron",EX+10,BOT+42);
+  sx.fillStyle=L.col; sx.fillText("● photon",EX+120,BOT+42);
+}
+function rr(c,x,y,w,hh,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+hh,r); c.arcTo(x+w,y+hh,x,y+hh,r); c.arcTo(x,y+hh,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+
+// ---------- graph ----------
+const GC=$("graph"), gx=GC.getContext("2d");
+function drawGraph(){
+  const W=520,H=330,L=54,R=14,T=14,B=38, X0=0,X1=20,Y0=-10,Y1=14;
+  const px=v=>L+(v-X0)/(X1-X0)*(W-L-R), py=v=>T+(Y1-v)/(Y1-Y0)*(H-T-B);
+  gx.clearRect(0,0,W,H); gx.font="12px system-ui"; gx.lineWidth=1;
+  for (let v=Y0; v<=Y1; v+=2){ gx.strokeStyle=v===0?"#4a5766":"#e3e8ee"; gx.beginPath(); gx.moveTo(L,py(v)); gx.lineTo(W-R,py(v)); gx.stroke();
+    gx.fillStyle="#5d6b7a"; gx.textAlign="right"; gx.fillText(v,L-6,py(v)+4); }
+  for (let v=X0; v<=X1; v+=2){ gx.strokeStyle="#e3e8ee"; gx.beginPath(); gx.moveTo(px(v),T); gx.lineTo(px(v),H-B); gx.stroke();
+    gx.fillStyle="#5d6b7a"; gx.textAlign="center"; gx.fillText(v,px(v),H-B+16); }
+  gx.strokeStyle="#4a5766"; gx.beginPath(); gx.moveTo(px(0),T); gx.lineTo(px(0),H-B); gx.stroke();
+  gx.fillStyle="#1d2733"; gx.textAlign="center"; gx.fillText("frequency (×10¹⁴ Hz)",(L+W-R)/2,H-6);
+  gx.save(); gx.translate(13,(T+H-B)/2); gx.rotate(-Math.PI/2); gx.fillText("maximum kinetic energy (×10⁻¹⁹ J)",0,0); gx.restore();
+  // line (in 1e-19 J): Ek = h*f - W
+  const lineY=fv=>(h*fv*1e14 - h*metal.f0)/1e-19;
+  gx.setLineDash([5,4]); gx.strokeStyle="#7aa2e8"; gx.lineWidth=2; gx.beginPath(); gx.moveTo(px(0),py(lineY(0))); gx.lineTo(px(metal.f0/1e14),py(0)); gx.stroke();
+  gx.setLineDash([]); gx.strokeStyle="#1f6feb"; gx.beginPath(); gx.moveTo(px(metal.f0/1e14),py(0)); gx.lineTo(px(X1),py(lineY(X1))); gx.stroke();
+  gx.fillStyle="#1f6feb"; gx.textAlign="left"; gx.fillText("f₀",px(metal.f0/1e14)+4,py(0)-6);
+  // recorded points
+  for (const r of records){ if (r.metal!==metal.name) continue; gx.fillStyle="#e07b00"; gx.beginPath(); gx.arc(px(r.f/1e14),py(r.ek/1e-19),4.5,0,7); gx.fill(); }
+  // live point
+  gx.fillStyle="#d92d20"; gx.strokeStyle="#fff"; gx.lineWidth=1.5; gx.beginPath(); gx.arc(px(f/1e14),py(emaxJ()/1e-19),6,0,7); gx.fill(); gx.stroke();
+}
+
+// ---------- readouts ----------
+function update(){
+  f=+$("freq").value*1e14; irr=+$("irr").value; V=+$("volt").value; metal=METALS[+sel.value];
+  $("freqv").innerHTML=sci(f,1)+" Hz"; $("irrv").textContent=irr+" %"; $("voltv").textContent=V.toFixed(1)+" V";
+  const E=h*f, W=h*metal.f0, K=emaxJ(), Ls=lightInfo();
+  $("eE").innerHTML=sciUnit(E,"J");
+  $("eW").innerHTML=sciUnit(W,"J");
+  $("eK").innerHTML= K>0 ? sciUnit(K,"J") : "0 J (hf &lt; hf₀)";
+  $("eV").innerHTML= K>0 ? sciUnit(Math.sqrt(2*K/me),"m s<sup>−1</sup>") : "–";
+  $("eF0").innerHTML=sciUnit(metal.f0,"Hz",1);
+  $("eLam").textContent=Ls.nm.toFixed(0)+" nm ("+Ls.region+")";
+  $("vs").textContent = K>0 ? (K/e).toFixed(2)+" V" : "–";
+  const st=$("status");
+  if (irr===0){ st.className="status no"; st.textContent="Light is switched off (irradiance 0)."; }
+  else if (K>0){ st.className="status yes"; st.textContent= V>=K/e ? "Photoelectrons are emitted, but the collector p.d. stops every one reaching the collector." : "Each photon has enough energy: photoelectrons are emitted."; }
+  else { st.className="status no"; st.textContent="f < f₀: each photon has less energy than the work function, so no photoelectrons are emitted."; }
+  drawGraph();
+}
+function renderTable(){
+  const tb=document.querySelector("#tbl tbody"); tb.innerHTML="";
+  records.forEach(r=>{ const tr=document.createElement("tr");
+    [r.metal,(r.f/1e14).toFixed(1),r.irr,(r.ek/1e-19).toFixed(2)].forEach(t=>{ const td=document.createElement("td"); td.textContent=t; tr.appendChild(td); }); tb.appendChild(tr); });
+}
+["freq","irr","volt","metal"].forEach(id=>$(id).addEventListener("input",update));
+sel.addEventListener("change",()=>{ photons=[]; electrons=[]; update(); });
+$("pause").onclick=()=>{ paused=!paused; $("pause").textContent=paused?"Resume":"Pause"; };
+$("rec").onclick=()=>{ if (records.length>=14) records.shift(); records.push({metal:metal.name,f,irr,ek:emaxJ()}); renderTable(); drawGraph(); };
+$("clr").onclick=()=>{ records=[]; renderTable(); drawGraph(); };
+
+let last=performance.now();
+function loop(t){
+  const dt=Math.min(0.05,(t-last)/1000); last=t;
+  if (!paused) stepSim(dt);
+  draw();
+  $("amm").textContent=(arrivals.length*0.25).toFixed(2);
+  requestAnimationFrame(loop);
+}
+update(); renderTable(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

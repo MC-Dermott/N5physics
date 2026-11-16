@@ -750,7 +750,7 @@ def gen_pw_irradiance(level="Higher"):
 _METALS = [("potassium", 3.7e-19), ("calcium", 4.6e-19), ("zinc", 5.81e-19), ("aluminium", 6.6e-19), ("copper", 7.5e-19)]
 
 
-def gen_pw_photoelectric(level="Higher"):
+def _gen_pw_photoelectric(level="Higher"):
     metal, wf = random.choice(_METALS)
     lam_nm = random.choice([150, 180, 200, 220, 250])
     f = C / (lam_nm * 1e-9)
@@ -781,7 +781,7 @@ def gen_pw_photoelectric(level="Higher"):
     return _q(text, _sig(v), "m s⁻¹", opts, "The Photoelectric Effect", scaffold, level)
 
 
-def gen_pw_pe_effects(level="Higher"):
+def _gen_pw_pe_effects(level="Higher"):
     kind = random.choice(["irradiance", "frequency_same_I", "closer", "workfunction", "evidence"])
     if kind == "irradiance":
         return _choice("The irradiance of UV on a metal is increased; the frequency is unchanged. What happens?",
@@ -811,6 +811,26 @@ def gen_pw_pe_effects(level="Higher"):
                    [("Light forms interference patterns.", "Interference is evidence for the WAVE model."),
                     ("Brighter light gives faster electrons.", "It doesn't — that's the point."),
                     ("Light travels at 3.00 × 10⁸ m s⁻¹.", "True of both models; not evidence for particles.")], "The Photoelectric Effect", level)
+
+
+# Photoelectric effect simulation (Luke's Simulations/Particles and waves/photoelectric_effect.html)
+_PE_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "photoelectric_widget.html"
+).read_text(encoding="utf-8")
+
+
+def _with_pe_widget(question):
+    question.metadata["widget_html"] = _PE_WIDGET_HTML
+    question.metadata["widget_height"] = 1950
+    return question
+
+
+def gen_pw_photoelectric(level="Higher"):
+    return _with_pe_widget(_gen_pw_photoelectric(level))
+
+
+def gen_pw_pe_effects(level="Higher"):
+    return _with_pe_widget(_gen_pw_pe_effects(level))
 
 
 # ════════════════ Interference ════════════════
