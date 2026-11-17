@@ -547,28 +547,50 @@ def gen_pw_bosons(level="Higher"):
 
 
 # ════════════════ Nuclear reactions ════════════════
-# (reaction text, masses before (kg), masses after (kg))
+# (reaction text, [(name, mass in kg, how many)] before, [...] after) — every particle's mass is given, pupils add them up
 _REACTIONS = [
-    ("²H + ³H → ⁴He + n", [3.3436e-27, 5.0082e-27], [6.6465e-27, 1.6749e-27]),
-    ("²H + ²H → ³He + n", [3.3436e-27, 3.3436e-27], [5.0064e-27, 1.6749e-27]),
-    ("4 ¹H → ⁴He + 2e⁺", [1.6726e-27] * 4, [6.6447e-27]),
-    ("²³⁵U + n → ¹⁴¹Ba + ⁹²Kr + 3n", [390.2997e-27, 1.6749e-27], [233.9719e-27, 152.5997e-27, 3 * 1.6749e-27]),
+    ("²H + ³H → ⁴He + n", [("²H", 3.3436e-27, 1), ("³H", 5.0082e-27, 1)], [("⁴He", 6.6465e-27, 1), ("n", 1.6749e-27, 1)]),
+    ("²H + ²H → ³He + n", [("²H", 3.3436e-27, 2)], [("³He", 5.0064e-27, 1), ("n", 1.6749e-27, 1)]),
+    ("4 ¹H → ⁴He + 2e⁺", [("¹H", 1.6726e-27, 4)], [("⁴He", 6.6447e-27, 1), ("e⁺", 9.11e-31, 2)]),
+    ("²³⁵U + n → ¹⁴¹Ba + ⁹²Kr + 3n", [("²³⁵U", 3.9030e-25, 1), ("n", 1.6749e-27, 1)],
+     [("¹⁴¹Ba", 2.3397e-25, 1), ("⁹²Kr", 1.5260e-25, 1), ("n", 1.6749e-27, 3)]),
 ]
+
+
+def _mass_list(parts):
+    """'²H 3.3436 × 10⁻²⁷ kg and ³H 5.0082 × 10⁻²⁷ kg' — one entry per particle (repeats stated as 'each')."""
+    out = []
+    for name, m, n in parts:
+        mt = _txt(m, 3 if m < 1e-29 else 5)
+        out.append(f"{n} × {name}, each {mt} kg" if n > 1 else f"{name} {mt} kg")
+    return "; ".join(out)
+
+
+def _sum_ltx(parts):
+    return " + ".join((rf"{n}\times{_ltx(m, 5)}" if n > 1 else _ltx(m, 5)) for _, m, n in parts)
 
 
 def _gen_pw_mass_energy(level="Higher"):
     rx, before, after = random.choice(_REACTIONS)
-    mb, ma = sum(before), sum(after)
+    mb, ma = sum(m * n for _, m, n in before), sum(m * n for _, m, n in after)
     dm = mb - ma
     En = dm * C * C
-    text = (f"In the reaction {rx}, the total mass before is {mb * 1e27:.4f} × 10⁻²⁷ kg and the total mass after is "
-            f"{ma * 1e27:.4f} × 10⁻²⁷ kg. Calculate the energy released.")
-    work = [_L(rf"\Delta m = {mb * 1e27:.4f}\times10^{{-27}} - {ma * 1e27:.4f}\times10^{{-27}} = {_ltx(dm)}\ \mathrm{{kg}}"),
+    text = (f"In the reaction {rx}, the particles before the reaction have masses: {_mass_list(before)}. "
+            f"The particles after the reaction have masses: {_mass_list(after)}. Calculate the energy released.")
+    work = [_L(rf"m_\text{{before}} = {_sum_ltx(before)} = {_ltx(mb, 5)}\ \mathrm{{kg}}"),
+            _L(rf"m_\text{{after}} = {_sum_ltx(after)} = {_ltx(ma, 5)}\ \mathrm{{kg}}"),
+            _L(rf"\Delta m = {_ltx(mb, 5)} - {_ltx(ma, 5)} = {_ltx(dm)}\ \mathrm{{kg}}"),
             _L(r"E = mc^2"), _L(rf"E = {_ltx(dm)} \times (3.00\times10^{{8}})^2"), _L(rf"E = {_ltx(En)}\ \mathrm{{J}}")]
+    # common errors: leaving out one of the particles after (or before) the reaction
+    drop_after = dm + after[-1][1] * after[-1][2]
     opts = [{"value": _sig(En), "mistake": None, "working": work},
             {"value": _sig(ma * C * C), "mistake": "Use the mass LOST (before − after), not the mass of the products.", "working": work},
-            {"value": _sig(dm * C), "mistake": "c must be squared.", "working": work}]
-    scaffold = [{"question": "What is the mass lost, in kg?", "answer": _sig(dm)}, {"question": "What is the energy released, in J?", "answer": _sig(En)}]
+            {"value": _sig(dm * C), "mistake": "c must be squared.", "working": work},
+            {"value": _sig(drop_after * C * C), "mistake": f"You left out the {after[-1][0]} when adding up the mass after the reaction — include every particle.", "working": work}]
+    scaffold = [{"question": "What is the total mass before the reaction, in kg?", "answer": _sig(mb, 5)},
+                {"question": "What is the total mass after the reaction, in kg?", "answer": _sig(ma, 5)},
+                {"question": "What is the mass lost, in kg?", "answer": _sig(dm)},
+                {"question": "What is the energy released, in J?", "answer": _sig(En)}]
     return _q(text, _sig(En), "J", opts, "Nuclear Reactions", scaffold, level)
 
 

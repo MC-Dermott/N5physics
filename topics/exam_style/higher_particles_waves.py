@@ -158,12 +158,23 @@ def fission_fuel(level="Higher"):
     ex.on("Nuclear Reactions").choice(f"In a reactor a uranium-235 nucleus absorbs a neutron: ²³⁵₉₂U + ¹₀n → {ba}₅₆Ba + {kr}₃₆Kr + x ¹₀n. Determine x.".replace(str(ba), str(ba).translate(str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")), 1).replace(f"+ {kr}", "+ " + str(kr).translate(str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹"))),
         str(x), [(str(x + 1), "Count the absorbed neutron: 235 + 1 = 236."), (str(x - 1), "Balance the mass numbers: the left total is 236."),
                  (str(x + 2), "Balance the mass numbers: the left total is 236.")])
-    mb, ma = pick((3.9014e-25, 3.8984e-25), (3.9020e-25, 3.8990e-25), (3.9026e-25, 3.8993e-25))
+    mU, mn = 3.9030e-25, 1.6749e-27
+    mBa = sig(ba * 1.6606e-27 * 0.991, 5)
+    dm_target = pick(3.2e-28, 3.4e-28, 3.6e-28)
+    mKr = sig(mU + mn - x * mn - mBa - dm_target, 5)
+    mb = mU + mn
+    ma = mBa + mKr + x * mn
     dm = mb - ma
     En = sig(dm) * C ** 2
-    ex.on("Nuclear Reactions").num(f"The total mass before a fission is {fmt(mb)} kg and after is {fmt(ma)} kg. Calculate the energy released.", En, "J",
-        wrong=[(sig(dm) * C, "c must be squared."), (ma * C ** 2, "Use the mass lost (before − after).")],
-        working=[rf"\Delta m = {ltx(mb)} - {ltx(ma)} = {ltx(dm)}\ \text{{kg}}", rf"E = mc^2 = {ltx(dm)} \times (3.00\times10^8)^2 = {ltx(En)}\ \text{{J}}"])
+    ex.on("Nuclear Reactions").num(f"The masses of the particles in this fission are: uranium-235 {fmt(mU, 5)} kg and the absorbed neutron {fmt(mn, 5)} kg; "
+        f"barium-{ba} {fmt(mBa, 5)} kg, krypton-{kr} {fmt(mKr, 5)} kg and {x} neutrons, each {fmt(mn, 5)} kg. Calculate the energy released.", En, "J",
+        wrong=[(sig(dm) * C, "c must be squared."), (ma * C ** 2, "Use the mass lost (before − after)."),
+               ((mU - mBa - mKr - x * mn) * C ** 2, "Include the absorbed neutron in the mass before."),
+               ((mb - mBa - mKr - (x - 1) * mn) * C ** 2, "Include every neutron produced in the mass after.")],
+        working=[rf"m_\text{{before}} = {ltx(mU, 5)} + {ltx(mn, 5)} = {ltx(mb, 5)}\ \text{{kg}}",
+                 rf"m_\text{{after}} = {ltx(mBa, 5)} + {ltx(mKr, 5)} + {x}\times{ltx(mn, 5)} = {ltx(ma, 5)}\ \text{{kg}}",
+                 rf"\Delta m = {ltx(mb, 5)} - {ltx(ma, 5)} = {ltx(dm)}\ \text{{kg}}",
+                 rf"E = mc^2 = {ltx(dm)} \times (3.00\times10^8)^2 = {ltx(En)}\ \text{{J}}"])
     P = pick(1.0e9, 1.5e9, 2.0e9)
     n = P / sig(En)
     ex.on("Nuclear Reactions").num(f"The reactor has a power output of {fmt(P)} W. Calculate the number of fissions each second.", n, "",
