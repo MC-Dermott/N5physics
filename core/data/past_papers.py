@@ -117,6 +117,43 @@ _STANDARD_MODEL = [
               ["2025_P2_q6_answer_1", "2025_P2_q6_answer_2"]),
 ]
 
+_NUCLEAR_REACTIONS_DIR = "nuclear_reactions"
+
+_NUCLEAR_REACTIONS = [
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2015", "P1", "12", "2015_P1_q12", "D"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2016", "P1", "10", "2016_P1_q10", "D"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2017", "P1", "8", "2017_P1_q8", "A"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2018", "P1", "11", "2018_P1_q11", "B"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "SPQ", "P1", "15", "SPQ_P1_q15", "D"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2019", "P1", "14", "2019_P1_q14", "C"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2020", "P1", "16", "2020_P1_q16", "B"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2022", "P1", "13", "2022_P1_q13", "C"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2022", "P1", "14", "2022_P1_q14", "D"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2023", "P1", "12", "2023_P1_q12", "D"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2024", "P1", "12", "2024_P1_q12", "E"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2024", "P1", "13", "2024_P1_q13", "D"),
+    _mcq(_NUCLEAR_REACTIONS_DIR, "2025", "P1", "12", "2025_P1_q12", "A"),
+
+    _extended(_NUCLEAR_REACTIONS_DIR, "2016", "P2", "8",
+              ["2016_P2_q8_1"], ["2016_P2_q8_answer"]),
+    _extended(_NUCLEAR_REACTIONS_DIR, "2017", "P2", "9",
+              ["2017_P2_q9_1"], ["2017_P2_q9_answer"]),
+    _extended(_NUCLEAR_REACTIONS_DIR, "SPQ", "P2", "7(e)",
+              ["SPQ_P2_q7e_1"], ["SPQ_P2_q7e_answer"]),
+    _extended(_NUCLEAR_REACTIONS_DIR, "SPQ", "P2", "8",
+              ["SPQ_P2_q8_1"], ["SPQ_P2_q8_answer"]),
+    _extended(_NUCLEAR_REACTIONS_DIR, "2019", "P2", "7(d)",
+              ["2019_P2_q7d_1"], ["2019_P2_q7d_answer"]),
+    _extended(_NUCLEAR_REACTIONS_DIR, "2019", "P2", "8",
+              ["2019_P2_q8_1"], ["2019_P2_q8_answer"]),
+    _extended(_NUCLEAR_REACTIONS_DIR, "2020", "P2", "7(d)",
+              ["2020_P2_q7d_1"], ["2020_P2_q7d_answer"]),
+    _extended(_NUCLEAR_REACTIONS_DIR, "2023", "P2", "7(a)",
+              ["2023_P2_q7a_1"], ["2023_P2_q7a_answer"]),
+    _extended(_NUCLEAR_REACTIONS_DIR, "2025", "P2", "6(a)",
+              ["2025_P2_q6a_1"], ["2025_P2_q6a_answer"]),
+]
+
 _MOMENTUM_IMPULSE_DIR = "momentum_impulse"
 
 _MOMENTUM_IMPULSE = [
@@ -633,6 +670,7 @@ PAST_PAPERS = {
     ("Our Dynamic Universe", "Special Relativity"): _SPECIAL_RELATIVITY,
     ("Our Dynamic Universe", "Gravitation"): _GRAVITATION,
     ("Particles and Waves", "Standard Model"): _STANDARD_MODEL,
+    ("Particles and Waves", "Nuclear Reactions"): _NUCLEAR_REACTIONS,
     ("Our Dynamic Universe", "Momentum and Impulse"): _MOMENTUM_IMPULSE,
     ("Our Dynamic Universe", "Energy, Work and Power"): _ENERGY_WORK_POWER,
     ("Our Dynamic Universe", "Equations of Motion"): _EQUATIONS_OF_MOTION,
