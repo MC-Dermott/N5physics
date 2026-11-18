@@ -255,3 +255,61 @@ def gen_pm_kinetic_model(level="N5"):
                    [(f"{b - a + 273} K", "A temperature CHANGE is the same in K and °C — don't add 273."),
                     (f"{b + 273} K", "That's the final temperature, not the rise."),
                     (f"{abs(b + a)} K" if abs(b + a) != b - a else f"{b - a + 546} K", "Subtract the starting temperature from the final one.")], "Gas Laws", level)
+
+
+def gen_pm_gas_experiments(level="N5"):
+    """Gas-law experiment set-ups (SQA Specimen Q8, 2018 Q9, 2022 Q9, 2025 Q10)."""
+    kind = random.choice(["flask", "clamp", "tube", "slow", "graph_boyle", "improve", "constant_pt", "constant_pv", "graph_pt"])
+    if kind == "flask":
+        return _choice("In a pressure–temperature experiment a round flask of gas is heated in a water bath and the temperature of the WATER is measured. Why must the flask be completely under the water?",
+                       "So that all the gas is at the same temperature as the water.",
+                       [("So that the gas cannot escape from the flask.", "The flask is sealed — the point is the temperature of the gas."),
+                        ("So that the pressure of the gas stays constant.", "The pressure is the quantity being measured; it changes as the gas is heated."),
+                        ("So that the volume of the gas increases.", "The volume must stay constant in this experiment.")], "Gas Laws", level)
+    if kind == "clamp":
+        return _choice("In a Boyle's law experiment the syringe is clamped instead of being held in the hand. Why is this better experimental practice?",
+                       "The pupil's hand cannot warm the gas, so its temperature stays constant.",
+                       [("It keeps the mass of gas constant.", "The mass is fixed by the sealed syringe, not by the clamp."),
+                        ("It makes the pressure sensor more sensitive.", "The clamp has no effect on the sensor."),
+                        ("It stops the gas from leaking.", "The clamp is not what seals the gas — it prevents heating from the hand.")], "Gas Laws", level)
+    if kind == "tube":
+        return _choice("A pupil suggests using a longer tube between the syringe and the pressure sensor in a Boyle's law experiment. Why is this a bad idea?",
+                       "The air in the tube is not read from the syringe scale, so the volume of gas is less certain.",
+                       [("The air in a longer tube is at a lower pressure.", "The pressure is the same throughout the connected gas."),
+                        ("A longer tube makes the gas colder.", "Temperature is not the problem — the volume is."),
+                        ("The sensor cannot measure pressure through a long tube.", "It can; the error comes from unmeasured air volume.")], "Gas Laws", level)
+    if kind == "slow":
+        return _choice("In a Boyle's law experiment the piston is pushed in slowly. Why?",
+                       "Compressing the gas heats it; pushing slowly lets the heat escape so the temperature stays constant.",
+                       [("To keep the mass of the gas constant.", "The mass is fixed because the gas is sealed in."),
+                        ("To make the pressure readings smaller.", "The speed of pushing is not about the size of the reading."),
+                        ("To keep the pressure of the gas constant.", "Pressure is the quantity that changes as the volume changes.")], "Gas Laws", level)
+    if kind == "graph_boyle":
+        return _choice("A pupil plots pressure against 1/volume for a fixed mass of gas at constant temperature. Which graph confirms that pressure is inversely proportional to volume?",
+                       "A straight line through the origin.",
+                       [("A straight line that does not pass through the origin.", "Direct proportion needs the line to go through the origin."),
+                        ("A curve that falls as 1/V increases.", "That is the shape of p against V, not p against 1/V."),
+                        ("A horizontal straight line.", "That would mean p does not depend on 1/V.")], "Gas Laws", level)
+    if kind == "improve":
+        return _choice("Which change to a pressure–temperature experiment (a flask of gas in a heated water bath) would give more reliable results?",
+                       "Stir the water and put more of the flask under it, so the gas is at the water's temperature.",
+                       [("Repeat the readings at the same temperature.", "That is not a change to the SET-UP (SQA does not accept it)."),
+                        ("Use a longer connecting tube to the pressure sensor.", "More tube means more gas at a different temperature."),
+                        ("Heat the water more quickly.", "Fast heating makes the gas lag behind the water temperature.")], "Gas Laws", level)
+    if kind == "constant_pt":
+        return _choice("Which two quantities must be kept constant in an experiment to find how the pressure of a gas depends on its temperature?",
+                       "The mass and the volume of the gas.",
+                       [("The mass and the pressure of the gas.", "Pressure is the quantity being measured."),
+                        ("The volume and the temperature of the gas.", "Temperature is the quantity being changed."),
+                        ("The temperature and the pressure of the gas.", "Both of these change in the experiment.")], "Gas Laws", level)
+    if kind == "constant_pv":
+        return _choice("Which two quantities must be kept constant in an experiment to find how the pressure of a gas depends on its volume?",
+                       "The mass and the temperature of the gas.",
+                       [("The mass and the pressure of the gas.", "Pressure is the quantity being measured."),
+                        ("The volume and the temperature of the gas.", "Volume is the quantity being changed."),
+                        ("The temperature and the volume of the gas.", "The mass must also be fixed; the volume is changed in this experiment.")], "Gas Laws", level)
+    return _choice("A pupil heats a fixed mass of gas at constant volume and measures its pressure. Which graph of pressure against KELVIN temperature shows that p is directly proportional to T?",
+                   "A straight line through the origin.",
+                   [("A straight line with a positive intercept on the pressure axis.", "Direct proportion goes through the origin — and only if T is in kelvin."),
+                    ("A curve that gets steeper.", "That is not direct proportion."),
+                    ("A straight line sloping downwards.", "Pressure increases as T increases.")], "Gas Laws", level)

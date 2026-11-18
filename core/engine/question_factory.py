@@ -171,7 +171,7 @@ from topics.skills.definitions_n5 import GENERATORS as skills_n5_definitions
 from topics.dynamics.definitions_higher import CRASH_GENERATORS as crash_odu_definitions
 from topics.properties.properties_exam_n5 import (
     gen_pm_heat_then_boil, gen_pm_latent_power, gen_pm_heating_curve,
-    gen_pm_gas_kelvin, gen_pm_pressure_weight, gen_pm_kinetic_model,
+    gen_pm_gas_kelvin, gen_pm_pressure_weight, gen_pm_kinetic_model, gen_pm_gas_experiments,
 )
 from topics.particles_and_waves.particles_waves_higher import (
     gen_pw_charged_speed, gen_pw_accelerators, gen_pw_magnetic, gen_pw_wire, gen_pw_magnets, gen_pw_linac, gen_pw_hadron_charge, gen_pw_bosons,
@@ -534,6 +534,7 @@ QUAL_REGISTRY = {
                 "Gas Law Calculations":           generate_gas_laws,
                 "Kelvin and the Combined Gas Law": gen_pm_gas_kelvin,
                 "Kinetic Model and Kelvin":       gen_pm_kinetic_model,
+                "Gas Law Experiments":            gen_pm_gas_experiments,
             },
             "Heat": {
                 "Specific Heat Capacity": generate_heat_shc,
