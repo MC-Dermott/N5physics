@@ -4,9 +4,11 @@ Recognised wrong answers follow the N5 marking instructions and course reports: 
 laws, mass used instead of weight for pressure, one contact area used instead of the total, the
 final temperature used for ΔT, fusion and vaporisation swapped, and the two heating stages not added.
 """
+import base64
+import os
 import random
 
-from topics.exam_style.base import Exam, T, fmt, ltx, pick, sig
+from topics.exam_style.base import Exam, L, T, fmt, ltx, pick, sig
 
 G = 9.8
 C_WATER, L_FUS, L_VAP = 4180, 3.34e5, 22.6e5
@@ -133,8 +135,103 @@ def ice_and_steam(level="N5"):
     return ex.build("A freezer makes ice from tap water. (c_water = 4180 J/kg°C, l_fusion = 3.34 × 10⁵ J/kg)")
 
 
+# ════════════════ Gas law experiments (SQA Specimen Q8, 2018 Q9, 2022 Q9, 2025 Q10) ════════════════
+
+def _apparatus_svg(filename):
+    """The drawn apparatus, as an SVG wrapper around the PNG so the scenario-diagram code can show it."""
+    path = os.path.join(os.path.dirname(__file__), "..", "..", "core", "data", filename)
+    with open(path, "rb") as f:
+        data = f.read()
+    w, h = int.from_bytes(data[16:20], "big"), int.from_bytes(data[20:24], "big")
+    uri = "data:image/png;base64," + base64.b64encode(data).decode("ascii")
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {w} {h}" '
+            f'width="{min(w, 620)}"><image width="{w}" height="{h}" xlink:href="{uri}" href="{uri}"/></svg>')
+
+
+def _table(rows_head, rows):
+    out = "| " + " | ".join(rows_head) + " |\n|" + "---|" * len(rows_head) + "\n"
+    for r in rows:
+        out += "| " + " | ".join(str(x) for x in r) + " |\n"
+    return out
+
+
+def boyles_experiment(level="N5"):
+    ex = _ex(level)
+    k, Vs = pick(4800, 6000, 7200), [50, 40, 30, 25]
+    ps = [k // v for v in Vs]
+    ex.on("Gas Laws").choice("Use all the data in the table to establish the relationship between the pressure and the volume of the gas.",
+        "p × V is the same for every reading (constant), so the pressure is inversely proportional to the volume.",
+        [("As the volume decreases the pressure increases.", "That is only a trend — calculate p × V for ALL the readings and show it is constant."),
+         ("p ÷ V is the same for every reading, so the pressure is directly proportional to the volume.", "p ÷ V changes; it is p × V that is constant."),
+         ("p ÷ T is constant, so the pressure is proportional to the temperature.", "The temperature is constant in this experiment — the quantities are p and V.")],
+        working=[T("Work out p × V for every pair of readings:"), L(r"pV = " + r",\ ".join(str(p * v) for p, v in zip(ps, Vs)))])
+    V2 = pick(20, 15, 12)
+    p2 = ps[0] * Vs[0] / V2
+    ex.on("Gas Laws").num(f"The pupil continues to push the piston until the volume is {V2} cm³. Calculate the pressure of the gas at this volume.", p2, "kPa",
+        wrong=[(ps[0] * V2 / Vs[0], "Smaller volume → higher pressure: p₂ = p₁V₁ ÷ V₂."), (ps[0] - (V2 - Vs[0]), "Use p₁V₁ = p₂V₂ — the pressure is not found by adding or subtracting.")],
+        working=[r"p_1V_1 = p_2V_2", rf"p_2 = \frac{{{ps[0]} \times {Vs[0]}}}{{{V2}}} = {ltx(p2)}\ \text{{kPa}}"])
+    ex.on("Gas Laws").choice("The pupil clamps the syringe rather than holding it in their hand. Why is this better experimental practice?",
+        "The pupil's hand cannot warm the gas, so its temperature stays constant.",
+        [("It keeps the mass of gas constant.", "The mass is fixed because the gas is sealed in — the clamp is about temperature."),
+         ("It makes the pressure readings larger.", "The clamp doesn't change the readings; it stops the temperature changing."),
+         ("It stops the volume of gas changing.", "The volume has to change in this experiment.")])
+    ex.on("Gas Laws").choice("A second pupil suggests using a longer tube between the syringe and the pressure sensor to improve the experiment. Why is this suggestion incorrect?",
+        "The air in the tube is not read from the syringe scale, so a longer tube increases the uncertainty in the volume.",
+        [("The air in a longer tube is at a different pressure.", "The pressure is the same throughout the connected gas."),
+         ("A longer tube makes the gas hotter.", "The problem is the extra unmeasured volume, not the temperature."),
+         ("The sensor cannot measure pressure through a long tube.", "It can — the error comes from the unmeasured air volume.")])
+    ex.on("Gas Laws").choice("Use the kinetic model to explain why the pressure of the gas increases as the volume decreases.",
+        "The particles have less space, so they hit the walls more often (at the same speed).",
+        [("The particles move faster.", "The temperature is constant, so their speed is unchanged."),
+         ("The particles hit the walls with less force.", "Same force per collision, but more collisions."), ("The particles get smaller.", "Particles don't change size.")])
+    ctx = ("A pupil investigates how the pressure of a fixed mass of air depends on its volume, using the apparatus shown. The pupil pushes the piston in slowly "
+           "and records the pressure and volume at each position. The temperature of the gas is constant.\n\n"
+           + _table(["Pressure (kPa)"] + [str(p) for p in ps], [["Volume (cm³)"] + [str(v) for v in Vs]]))
+    return ex.build(ctx, diagram=_apparatus_svg("gas_experiment_boyle.png"))
+
+
+def pressure_temperature_experiment(level="N5"):
+    ex = _ex(level)
+    c = pick(0.34, 0.35, 0.36, 0.37)
+    Ts = [293, 313, 333, 353]
+    ps = [round(c * t) for t in Ts]
+    ex.on("Gas Laws").choice("Use all the data in the table to establish the relationship between the pressure and the kelvin temperature of the gas.",
+        "p ÷ T is the same for every reading (constant), so the pressure is directly proportional to the kelvin temperature.",
+        [("As the temperature increases the pressure increases.", "That is only a trend — calculate p ÷ T for ALL the readings and show it is constant."),
+         ("p × T is the same for every reading, so the pressure is inversely proportional to T.", "p × T changes; it is p ÷ T that is constant."),
+         ("p × V is constant, so the pressure is inversely proportional to the volume.", "The volume is constant in this experiment — the quantities are p and T.")],
+        working=[T("Work out p ÷ T for every pair of readings:"), L(r"\frac{p}{T} = " + r",\ ".join(f"{p / t:.3f}" for p, t in zip(ps, Ts)))])
+    T2c = pick(-20, -10, 0, 100)
+    p2 = ps[0] * (T2c + 273) / Ts[0]
+    ex.on("Gas Laws").num(f"The pupil predicts the pressure of the gas at {T2c} °C. Calculate the predicted pressure.", p2, "kPa",
+        wrong=[(ps[0] * Ts[0] / (T2c + 273), "p₂ = p₁ × T₂ ÷ T₁ — the pressure falls as the temperature falls.")]
+              + ([(ps[0] * T2c / 20, "Use kelvin: K = °C + 273.")] if T2c > 0 else []),
+        working=[r"\frac{p_1}{T_1} = \frac{p_2}{T_2}", rf"p_2 = {ps[0]} \times \frac{{{T2c + 273}}}{{{Ts[0]}}} = {ltx(p2)}\ \text{{kPa}}"],
+        scaffold=[("T₂ in K?", T2c + 273, "K")])
+    ex.on("Gas Laws").choice("The thermometer measures the temperature of the water. Why must the round flask be completely under the water?",
+        "So that all the gas is at the same temperature as the water, which the thermometer measures.",
+        [("So that the gas cannot escape from the flask.", "The flask is sealed — the issue is the temperature of the gas."),
+         ("So that the pressure of the gas stays constant.", "The pressure is being measured; it changes as the gas is heated."),
+         ("So that the volume of the gas increases.", "The volume must stay constant.")])
+    ex.on("Gas Laws").choice("State one way the set-up of the experiment could be improved to give more reliable results.",
+        "Stir the water (or put more of the flask under the water) so that the gas is at the temperature of the water.",
+        [("Repeat the experiment.", "SQA asks for a change to the SET-UP — repeating readings is not accepted."),
+         ("Use a longer connecting tube to the pressure sensor.", "More tube holds more gas at a different temperature — a shorter tube is better."),
+         ("Heat the water more quickly.", "Fast heating makes the gas lag behind the water temperature.")])
+    ex.on("Gas Laws").choice("Use the kinetic model to explain why the pressure of the gas increases as its temperature increases.",
+        "The particles gain kinetic energy and move faster, so they hit the walls more often and with greater force.",
+        [("The particles get bigger and push harder.", "Particles don't expand."), ("The particles hit the walls more.", "Too vague — say more OFTEN and with greater FORCE."),
+         ("The particles move faster but hit the walls less often.", "Faster particles hit the walls MORE often.")])
+    ctx = ("A pupil sets up an experiment to investigate how the pressure of a fixed mass of gas depends on its temperature, as shown. "
+           "The water is heated and the pressure and temperature of the gas are recorded. The volume of the gas is constant.\n\n"
+           + _table(["Pressure (kPa)"] + [str(p) for p in ps], [["Temperature (K)"] + [str(t) for t in Ts]]))
+    return ex.build(ctx, diagram=_apparatus_svg("gas_experiment_pressure_temp.png"))
+
+
 SCENARIOS = {
     "Pressure Cooker": pressure_cooker,
     "Bicycle Tyre":    bike_tyre,
     "Ice and Steam":   ice_and_steam,
+    "Boyle's Law Experiment":           boyles_experiment,
+    "Pressure–Temperature Experiment":   pressure_temperature_experiment,
 }
