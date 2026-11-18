@@ -226,6 +226,41 @@ def photocell(level="Higher"):
     return ex.build("A UV lamp shines on a photocell. (h = 6.63 × 10⁻³⁴ J s)")
 
 
+# ════════════════ Photocell graph: Ek against frequency for two metals ════════════════
+
+def photocell_graph(level="Higher"):
+    from topics.particles_and_waves.particles_waves_higher import _pe_graph_svg
+    ex = _ex(level)
+    fa, fb = random.sample([4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5], 2)
+    fq = pick(9, 10, 11, 12)
+    f0 = fa * 1e14
+    wf = H * f0
+    ex.on("The Photoelectric Effect").num("Use the graph to find the threshold frequency of metal P, then calculate its work function.", wf, "J",
+        wrong=[(f0, "That is the threshold frequency — the work function is hf₀."), (H * (fa + 1) * 1e14, "Read f₀ where the line meets the FREQUENCY axis (Ek = 0).")],
+        working=[rf"f_0 = {fa:g}\times10^{{14}}\ \text{{Hz}}", rf"hf_0 = 6.63\times10^{{-34}} \times {ltx(f0)} = {ltx(wf)}\ \text{{J}}"])
+    Ek = H * (fq - fa) * 1e14
+    ex.on("The Photoelectric Effect").num(f"Radiation of frequency {fq} × 10¹⁴ Hz falls on metal P. Calculate the maximum kinetic energy of the photoelectrons.", Ek, "J",
+        wrong=[(H * fq * 1e14, "That is the photon energy — subtract the work function."), (H * (fq + fa) * 1e14, "Ek = hf − hf₀: subtract.")],
+        working=[rf"E_k = hf - hf_0 = {ltx(H * fq * 1e14)} - {ltx(wf)} = {ltx(Ek)}\ \text{{J}}"])
+    v = math.sqrt(2 * sig(Ek) / ME)
+    ex.on("The Photoelectric Effect").num("Calculate the maximum speed of these photoelectrons.", v, "m/s",
+        wrong=[(2 * sig(Ek) / ME, "That is v² — take the square root."), (math.sqrt(sig(Ek) / ME), "Keep the 2: v = √(2Ek/m).")],
+        working=[r"E_k = \tfrac12 mv^2", rf"v = \sqrt{{\frac{{2 \times {ltx(Ek)}}}{{9.11\times10^{{-31}}}}}} = {ltx(v)}\ \text{{m s}}^{{-1}}"])
+    big, small = ("P", "Q") if fa > fb else ("Q", "P")
+    ex.on("The Photoelectric Effect").choice("The line for metal Q is parallel to the line for metal P. Which statement is correct?",
+        f"Metal {big} has the greater work function because its threshold frequency is greater; the gradient of both lines is h.",
+        [(f"Metal {small} has the greater work function because its line is higher on the graph.", "Compare the threshold frequencies, where the lines meet the frequency axis."),
+         ("The metals have the same work function because the lines are parallel.", "Parallel lines mean the same gradient (h); the work functions differ."),
+         ("The lines have different gradients because the metals have different work functions.", "The gradient is Planck's constant for every metal.")])
+    ex.on("The Photoelectric Effect").choice("The irradiance of the radiation falling on metal P is doubled; the frequency is unchanged. What happens to the maximum kinetic energy and to the number of photoelectrons per second?",
+        "The maximum kinetic energy is unchanged and the number of photoelectrons per second doubles.",
+        [("The maximum kinetic energy doubles and the number per second is unchanged.", "Ek depends on frequency only: each electron absorbs one photon."),
+         ("The maximum kinetic energy doubles and the number per second doubles.", "More irradiance means more photons per second, not more energy per photon."),
+         ("Both are unchanged.", "More photons per second release more photoelectrons per second.")])
+    return ex.build("The graph shows how the maximum kinetic energy of photoelectrons varies with the frequency of the radiation for two metals, P and Q. (h = 6.63 × 10⁻³⁴ J s, mₑ = 9.11 × 10⁻³¹ kg)",
+                    diagram=_pe_graph_svg([("P", fa, "#1f5fa8"), ("Q", fb, "#c0392b")]))
+
+
 # ════════════════ Hydrogen lamp: energy levels → wavelength → diffraction grating ════════════════
 
 _LEVELS = {1: -21.8e-19, 2: -5.45e-19, 3: -2.42e-19, 4: -1.36e-19}
@@ -435,6 +470,7 @@ SCENARIOS = {
     "Radium Decay":         radium_decay,
     "Fission Fuel":         fission_fuel,
     "Photocell":            photocell,
+    "Photocell Graph":      photocell_graph,
     "Hydrogen Lamp":        hydrogen_lamp,
     "Laser and Optical Fibre": laser_fibre,
     "Particle Accelerator": particle_accelerator,
