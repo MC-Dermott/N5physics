@@ -176,7 +176,7 @@ from topics.properties.properties_exam_n5 import (
 from topics.particles_and_waves.particles_waves_higher import (
     gen_pw_charged_speed, gen_pw_accelerators, gen_pw_magnetic, gen_pw_wire, gen_pw_magnets, gen_pw_linac, gen_pw_hadron_charge, gen_pw_bosons,
     gen_pw_mass_energy, gen_pw_reactions_per_second, gen_pw_nuclear_equations, gen_pw_fission_fusion, gen_pw_isl, gen_pw_irradiance,
-    gen_pw_photoelectric, gen_pw_pe_effects, gen_pw_grating, gen_pw_path_difference,
+    gen_pw_photoelectric, gen_pw_pe_effects, gen_pw_pe_graph, gen_pw_grating, gen_pw_path_difference,
     gen_pw_energy_levels, gen_pw_spectra_explain, gen_pw_refraction, gen_pw_refraction_explain,
 )
 from topics.electricity.electricity_exam_n5 import (
@@ -665,6 +665,7 @@ QUAL_REGISTRY = {
             "The Photoelectric Effect": {
                 "1 — Ek and Speed of Photoelectrons": gen_pw_photoelectric,
                 "2 — Irradiance, Frequency and Definitions": gen_pw_pe_effects,
+                "3 — Graph of Ek against Frequency": gen_pw_pe_graph,
             },
             "Interference": {
                 "1 — Path Difference":              gen_pw_path_difference,

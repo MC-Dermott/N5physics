@@ -851,6 +851,111 @@ def gen_pw_photoelectric(level="Higher"):
     return _with_pe_widget(_gen_pw_photoelectric(level))
 
 
+# ── Graphs of maximum Ek against frequency (worksheet Type 3; Luke, 2026-11-18) ──
+def _pe_graph_svg(lines, fmax=12, ymin=-5, ymax=6):
+    """Maximum Ek (10⁻¹⁹ J, vertical) against frequency (10¹⁴ Hz): solid line above f₀, dashed back to f = 0.
+    lines = [(label, f0 in 10¹⁴ Hz, colour)]."""
+    W_, H_, L_, R_, T_, B_ = 380, 300, 52, 14, 14, 30
+    px = lambda f: L_ + (W_ - L_ - R_) * f / fmax
+    py = lambda y: T_ + (H_ - T_ - B_) * (ymax - y) / (ymax - ymin)
+    g = H * 1e14 / 1e-19
+    o = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W_} {H_}" width="{W_}" height="{H_}" font-family="sans-serif" font-size="11">',
+         f'<rect width="{W_}" height="{H_}" fill="white"/>']
+    for f in range(0, fmax + 1, 2):
+        o.append(f'<line x1="{px(f):.1f}" y1="{py(ymin):.1f}" x2="{px(f):.1f}" y2="{py(ymax):.1f}" stroke="#ddd"/>')
+        o.append(f'<text x="{px(f):.1f}" y="{py(0) + 13:.1f}" text-anchor="middle" fill="#333">{f}</text>')
+    for y in range(ymin, ymax + 1):
+        o.append(f'<line x1="{px(0):.1f}" y1="{py(y):.1f}" x2="{px(fmax):.1f}" y2="{py(y):.1f}" stroke="#ddd"/>')
+        if y:
+            o.append(f'<text x="{px(0) - 5:.1f}" y="{py(y) + 4:.1f}" text-anchor="end" fill="#333">{y}</text>')
+    o.append(f'<line x1="{px(0):.1f}" y1="{py(ymin):.1f}" x2="{px(0):.1f}" y2="{py(ymax):.1f}" stroke="black" stroke-width="1.4"/>')
+    o.append(f'<line x1="{px(0):.1f}" y1="{py(0):.1f}" x2="{px(fmax):.1f}" y2="{py(0):.1f}" stroke="black" stroke-width="1.4"/>')
+    o.append(f'<text x="{px(fmax):.1f}" y="{py(0) + 28:.1f}" text-anchor="end" fill="#333">frequency / 10¹⁴ Hz</text>')
+    o.append(f'<text transform="translate(12,{(T_ + H_ - B_) / 2:.0f}) rotate(-90)" text-anchor="middle" fill="#333">maximum Ek / 10⁻¹⁹ J</text>')
+    for lab, f0, col in lines:
+        ftop = min(fmax, f0 + ymax / g)
+        o.append(f'<line x1="{px(f0):.1f}" y1="{py(0):.1f}" x2="{px(ftop):.1f}" y2="{py(g * (ftop - f0)):.1f}" stroke="{col}" stroke-width="2.2"/>')
+        o.append(f'<line x1="{px(0):.1f}" y1="{py(-g * f0):.1f}" x2="{px(f0):.1f}" y2="{py(0):.1f}" stroke="{col}" stroke-width="1.6" stroke-dasharray="5,4"/>')
+        if lab:
+            fl = f0 + 3.4
+            o.append(f'<text x="{px(fl) - 6:.1f}" y="{py(g * (fl - f0)) - 4:.1f}" text-anchor="end" fill="{col}" font-weight="bold" font-size="14">{lab}</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def gen_pw_pe_graph(level="Higher"):
+    g = H * 1e14 / 1e-19                       # gradient in 10⁻¹⁹ J per 10¹⁴ Hz (= h)
+    kind = random.choice(["workfunction", "speed", "gradient", "compare_wf", "compare_ek"])
+    unit = "J"
+    if kind in ("workfunction", "speed", "gradient"):
+        f0 = random.choice([4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0])
+        svg = _pe_graph_svg([("", f0, "#1f5fa8")])
+        f0hz, wf = f0 * 1e14, H * f0 * 1e14
+        if kind == "workfunction":
+            text = "The graph shows how the maximum kinetic energy of the photoelectrons from a metal varies with the frequency of the radiation. Calculate the work function of the metal."
+            work = [_T(f"The line meets the frequency axis (Ek = 0) at f₀ = {f0:g} × 10¹⁴ Hz."), _L(r"hf_0 = 6.63\times10^{-34} \times " + _ltx(f0hz)), _L(rf"hf_0 = {_ltx(wf)}\ \mathrm{{J}}")]
+            opts = [{"value": _sig(wf), "mistake": None, "working": work},
+                    {"value": _sig(f0hz), "mistake": "That's the threshold frequency — the work function is hf₀.", "working": work},
+                    {"value": _sig(H * (f0 + 1) * 1e14), "mistake": "Read the threshold frequency where the line meets the FREQUENCY axis (Ek = 0).", "working": work},
+                    {"value": _sig(wf * 1e14 / 1e-19 * 1e-33), "mistake": "Include the × 10¹⁴ from the axis label.", "working": work}]
+            scaffold = [{"question": "What is the threshold frequency, in Hz (where the line meets the frequency axis)?", "answer": _sig(f0hz)},
+                        {"question": "What is the work function hf₀, in J?", "answer": _sig(wf)}]
+            return with_diagram(_q(text, _sig(wf), unit, opts, "The Photoelectric Effect", scaffold, level), svg)
+        if kind == "speed":
+            fq = random.choice([x for x in (8, 9, 10, 11, 12) if x > f0 + 1.5])
+            Ek = g * (fq - f0) * 1e-19
+            v = math.sqrt(2 * Ek / ME)
+            text = (f"The graph shows how the maximum kinetic energy of the photoelectrons from a metal varies with the frequency of the radiation. "
+                    f"Use the graph to find the maximum speed of the photoelectrons when radiation of frequency {fq} × 10¹⁴ Hz is used.")
+            work = [_T(f"From the graph, at {fq} × 10¹⁴ Hz the maximum Ek is {_txt(Ek)} J."), _L(r"E_k = \tfrac12 mv^2"),
+                    _L(rf"{_ltx(Ek)} = \tfrac12 \times 9.11\times10^{{-31}} \times v^2"), _L(rf"v = {_ltx(v)}\ \mathrm{{m\,s^{{-1}}}}")]
+            opts = [{"value": _sig(v), "mistake": None, "working": work},
+                    {"value": _sig(2 * Ek / ME), "mistake": "That's v² — take the square root.", "working": work},
+                    {"value": _sig(math.sqrt(2 * H * fq * 1e14 / ME)), "mistake": "Read Ek from the graph — don't use the photon energy hf.", "working": work},
+                    {"value": _sig(math.sqrt(Ek / ME)), "mistake": "Ek = ½mv² — keep the ½ (so v = √(2Ek/m)).", "working": work}]
+            scaffold = [{"question": "What is the maximum Ek at this frequency, read from the graph, in J?", "answer": _sig(Ek)},
+                        {"question": "What is v², in m² s⁻²?", "answer": _sig(2 * Ek / ME)},
+                        {"question": "What is the maximum speed, in m s⁻¹?", "answer": _sig(v)}]
+            return with_diagram(_q(text, _sig(v), "m s⁻¹", opts, "The Photoelectric Effect", scaffold, level), svg)
+        f2 = random.choice([x for x in (9, 10, 11, 12) if x > f0 + 2])
+        dE = g * (f2 - f0) * 1e-19; df = (f2 - f0) * 1e14
+        text = (f"The graph shows how the maximum kinetic energy of the photoelectrons from a metal varies with the frequency of the radiation. "
+                f"Use two points on the line to calculate its gradient. (Give the answer in J s.)")
+        work = [_T(f"Take (f₁, Ek₁) = ({f0:g} × 10¹⁴ Hz, 0) and (f₂, Ek₂) = ({f2} × 10¹⁴ Hz, {_txt(dE)} J)."),
+                _L(rf"\text{{gradient}} = \frac{{\Delta E_k}}{{\Delta f}} = \frac{{{_ltx(dE)}}}{{{_ltx(df)}}} = {_ltx(H)}\ \mathrm{{J\,s}}"),
+                _T("The gradient is Planck's constant, h.")]
+        opts = [{"value": H, "mistake": None, "working": work},
+                {"value": _sig(df / dE), "mistake": "Gradient = ΔEk ÷ Δf (vertical ÷ horizontal).", "working": work},
+                {"value": _sig(dE / (f2 - f0)), "mistake": "Include the × 10¹⁴ from the frequency axis (and the × 10⁻¹⁹ on Ek).", "working": work},
+                {"value": _sig(dE / (f2 * 1e14)), "mistake": "Use the CHANGE in frequency, f₂ − f₁, not f₂ alone.", "working": work}]
+        scaffold = [{"question": "What is ΔEk between your two points, in J?", "answer": _sig(dE)},
+                    {"question": "What is Δf between your two points, in Hz?", "answer": _sig(df)},
+                    {"question": "What is the gradient, in J s?", "answer": H}]
+        return with_diagram(_q(text, H, "J s", opts, "The Photoelectric Effect", scaffold, level), svg)
+    fa, fb = random.sample([4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5], 2)
+    pa, pb = random.sample("PQRS", 2)
+    svg = _pe_graph_svg([(pa, fa, "#1f5fa8"), (pb, fb, "#c0392b")])
+    if kind == "compare_wf":
+        big = pa if fa > fb else pb; small = pb if big == pa else pa
+        return with_diagram(_choice(
+                f"The graph shows maximum kinetic energy against frequency for photoelectrons from two metals, {pa} and {pb}. Which metal has the greater work function?",
+                f"Metal {big}: it has the greater threshold frequency, so hf₀ is greater.",
+                [(f"Metal {small}: its line is higher on the graph.", "Compare where the lines meet the frequency axis: a larger f₀ means a larger hf₀."),
+                 ("Both the same: the lines are parallel.", "Parallel lines mean the same gradient (h); the work functions differ because f₀ differs."),
+                 ("It cannot be told from the graph.", "The threshold frequency is where each line meets the frequency axis.")],
+                "The Photoelectric Effect", level), svg)
+    fq = random.choice([x for x in (9, 10, 11, 12) if x > max(fa, fb) + 1])
+    best = pa if fa < fb else pb; other = pb if best == pa else pa
+    return with_diagram(_choice(
+        f"The graph shows maximum kinetic energy against frequency for photoelectrons from two metals, {pa} and {pb}. "
+        f"Radiation of frequency {fq} × 10¹⁴ Hz falls on each metal. Which metal emits photoelectrons with the greater maximum kinetic energy?",
+        f"Metal {best}: at this frequency its line is higher (it has the smaller work function).",
+        [(f"Metal {other}: it has the greater work function.", "A larger work function leaves LESS kinetic energy: Ek = hf − hf₀."),
+         ("Both the same: the lines are parallel.", "Parallel lines are the same distance apart in Ek — read the two values off the graph at this frequency."),
+         ("Neither emits photoelectrons.", "The frequency is above both threshold frequencies.")],
+        "The Photoelectric Effect", level), svg)
+
+
 def gen_pw_pe_effects(level="Higher"):
     return _with_pe_widget(_gen_pw_pe_effects(level))
 
