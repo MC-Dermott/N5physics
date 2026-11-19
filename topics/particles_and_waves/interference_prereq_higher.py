@@ -1,10 +1,10 @@
 """Higher Interference prerequisites — question types mirroring the Hphys_Interference_Prerequisites worksheet.
 
-Five generators: wave speed and period (T = 1/f, v = fλ, d = vt then v = fλ), units and grating spacing,
-path difference and phase, waves meeting and diffraction (state/explain as multiple choice), and sine.
-Recognised wrong answers follow the course reports: nm not converted to metres, lines per mm used as d,
-f used as the period, distances added instead of subtracted, in phase and out of phase swapped, a wider
-gap thought to give more diffraction, and the calculator left in radian mode.
+Three generators: wave speed and period (T = 1/f, v = fλ, d = vt then v = fλ), units of wavelength (nm to m,
+then v = fλ), and waves meeting and diffraction (state/explain as multiple choice). Path difference, grating
+spacing and sine were left off the worksheet on 2026-11-19 so they are not here.
+Recognised wrong answers follow the course reports: nm not converted to metres, f used as the period,
+in phase and out of phase swapped, and a wider gap thought to give more diffraction.
 """
 import math
 import random
@@ -80,9 +80,9 @@ def gen_ip_wave_speed(level="Higher"):
     return _q(text, f, "Hz", opts, QT, None, level)
 
 
-# ════════════════ 2 — Units and grating spacing ════════════════
+# ════════════════ 2 — Units of wavelength ════════════════
 def gen_ip_units(level="Higher"):
-    kind = random.choice(["nm", "nm", "spacing", "spacing", "lines", "freq"])
+    kind = random.choice(["nm", "nm", "freq"])
     lam_nm = random.choice([405, 450, 532, 589, 633, 650])
     if kind == "nm":
         ans = lam_nm * 1e-9
@@ -103,75 +103,10 @@ def gen_ip_units(level="Higher"):
                 {"value": C * lam_nm * 1e-9, "mistake": "f = v ÷ λ, not v × λ.", "working": work}]
         scaffold = [{"question": "What is the wavelength in metres?", "answer": _sig(lam_nm * 1e-9)}]
         return _q(text, f, "Hz", opts, QT, scaffold, level)
-    if kind == "spacing":
-        lpm = random.choice([100, 250, 300, 400, 500, 600])
-        d = 1 / (lpm * 1000)
-        text = f"A grating has {lpm} lines per millimetre. Calculate the spacing between neighbouring lines, in metres."
-        work = [_L(rf"{lpm}\ \text{{lines per mm}} = {lpm * 1000}\ \text{{lines per m}}"), _L(rf"d = \frac{{1}}{{{lpm * 1000}}} = {_ltx(d)}\ \mathrm{{m}}")]
-        opts = [{"value": d, "mistake": None, "working": work},
-                {"value": 1 / lpm, "mistake": "Change lines per mm to lines per m (× 1000) first.", "working": work},
-                {"value": float(lpm), "mistake": "The number of lines per mm is not the spacing — d = 1 ÷ lines per metre.", "working": work},
-                {"value": 1 / (lpm * 100), "mistake": "There are 1000 mm in a metre, not 100.", "working": work}]
-        scaffold = [{"question": "How many lines per metre?", "answer": float(lpm * 1000)}]
-        return _q(text, d, "m", opts, QT, scaffold, level)
-    d = random.choice([1.6e-6, 2.0e-6, 2.5e-6, 4.0e-6, 5.0e-6])
-    lpmm = 1e-3 / d
-    text = f"The spacing between neighbouring lines of a grating is {_txt(d)} m. Calculate the number of lines per millimetre."
-    work = [_L(rf"\text{{lines per m}} = \frac{{1}}{{{_ltx(d)}}} = {_ltx(1 / d)}"), _L(rf"\text{{lines per mm}} = {_ltx(lpmm)}")]
-    opts = [{"value": lpmm, "mistake": None, "working": work},
-            {"value": 1 / d, "mistake": "That is lines per METRE — divide by 1000 for lines per mm.", "working": work},
-            {"value": d * 1e3, "mistake": "Lines per metre = 1 ÷ d.", "working": work},
-            {"value": lpmm / 10, "mistake": "There are 1000 mm in a metre.", "working": work}]
-    scaffold = [{"question": "How many lines per metre?", "answer": _sig(1 / d)}]
-    return _q(text, lpmm, "lines per mm", opts, QT, scaffold, level)
+    raise ValueError(kind)
 
 
-# ════════════════ 3 — Path difference and phase ════════════════
-def gen_ip_path_phase(level="Higher"):
-    lam = random.choice([0.20, 0.40, 0.50])   # pd = kλ stays exact at 2 d.p. and v/λ is a whole number
-    k = random.choice([1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0])
-    pd = k * lam
-    d2 = random.choice([1.50, 1.70, 2.00, 2.30, 3.00, 3.20])
-    d1 = d2 + pd
-    kind = random.choice(["pd", "number", "phase", "sound"])
-    base = f"Two sources emit waves of wavelength {_txt(lam)} m. Point P is {_txt(d1, 3)} m from one source and {_txt(d2, 3)} m from the other."
-    if kind == "pd":
-        text = base + " Calculate the path difference at P."
-        work = [_L(rf"{_ltx(d1)} - {_ltx(d2)} = {_ltx(pd)}\ \mathrm{{m}}")]
-        opts = [{"value": pd, "mistake": None, "working": work},
-                {"value": _sig(d1 + d2), "mistake": "The path difference is the DIFFERENCE — subtract, don't add.", "working": work},
-                {"value": _sig(d1 / d2), "mistake": "Subtract the distances; don't divide them.", "working": work}]
-        return _q(text, pd, "m", opts, QT, None, level)
-    if kind == "number":
-        text = base + " Calculate the number of wavelengths in the path difference."
-        work = [_L(rf"\text{{path difference}} = {_ltx(d1)} - {_ltx(d2)} = {_ltx(pd)}\ \mathrm{{m}}"), _L(rf"\frac{{{_ltx(pd)}}}{{{_ltx(lam)}}} = {k:g}")]
-        opts = [{"value": k, "mistake": None, "working": work},
-                {"value": _sig((d1 + d2) / lam), "mistake": "Subtract the distances to get the path difference, then divide by λ.", "working": work},
-                {"value": _sig(lam / pd), "mistake": "Number of wavelengths = path difference ÷ λ (you have it upside down).", "working": work},
-                {"value": _sig(pd * lam), "mistake": "Divide the path difference by λ; don't multiply.", "working": work}]
-        scaffold = [{"question": "What is the path difference, in m?", "answer": _sig(pd)}]
-        return _q(text, k, "wavelengths", opts, QT, scaffold, level)
-    if kind == "sound":
-        v = 340.0
-        f = v / lam
-        text = (f"Two loudspeakers emit sound of frequency {_txt(f)} Hz (speed of sound 340 m/s). A microphone is {_txt(d1, 3)} m from one "
-                f"speaker and {_txt(d2, 3)} m from the other. How many wavelengths are there in the path difference?")
-        work = [_L(rf"\lambda = \frac{{v}}{{f}} = {_ltx(lam)}\ \mathrm{{m}}"), _L(rf"\text{{path difference}} = {_ltx(pd)}\ \mathrm{{m}}"), _L(rf"\frac{{{_ltx(pd)}}}{{{_ltx(lam)}}} = {k:g}")]
-        opts = [{"value": k, "mistake": None, "working": work},
-                {"value": _sig((d1 + d2) / lam), "mistake": "The path difference is the difference of the distances, not their sum.", "working": work},
-                {"value": _sig(pd / (v * f)), "mistake": "Find λ = v ÷ f first, then divide the path difference by λ.", "working": work},
-                {"value": _sig(pd * f / 1.0), "mistake": "Divide the path difference by the wavelength.", "working": work}]
-        scaffold = [{"question": "What is the wavelength, in m?", "answer": _sig(lam)}, {"question": "What is the path difference, in m?", "answer": _sig(pd)}]
-        return _q(text, k, "wavelengths", opts, QT, scaffold, level)
-    inphase = float(k).is_integer()
-    ans = "In phase — a whole number of wavelengths." if inphase else "Out of phase — a whole number + ½ wavelengths."
-    wrong = [("Out of phase — a whole number + ½ wavelengths." if inphase else "In phase — a whole number of wavelengths.", "Whole number of wavelengths → in phase; whole number + ½ → out of phase."),
-             ("In phase — the distances are different so the waves are in step." if not inphase else "Out of phase — the distances are different.", "Compare the path difference with λ; different distances don't by themselves mean out of phase.")]
-    text = base + " State whether the waves arrive at P in phase or out of phase."
-    return _choice(text, ans, wrong, QT, level)
-
-
-# ════════════════ 4 — Waves meeting and diffraction ════════════════
+# ════════════════ 3 — Waves meeting and diffraction ════════════════
 def gen_ip_meeting(level="Higher"):
     A = random.choice([2.0, 3.0, 4.0, 5.0])
     gap = random.choice([2.0, 5.0, 10.0])
@@ -196,42 +131,3 @@ def gen_ip_meeting(level="Higher"):
     ]
     text, ans, wrong = random.choice(bank)
     return _choice(text, ans, wrong, QT, level)
-
-
-# ════════════════ 5 — Sine and angles ════════════════
-def gen_ip_sine(level="Higher"):
-    kind = random.choice(["angle", "opposite", "solve", "solve"])
-    if kind == "angle":
-        th = random.choice([15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 55.0])
-        s = round(math.sin(math.radians(th)), 3)
-        ans = round(math.degrees(math.asin(s)), 1)
-        text = f"In a right-angled triangle sin θ = {s:g}. Calculate the angle θ, in degrees."
-        work = [_L(rf"\theta = \sin^{{-1}}({s:g}) = {ans:g}^\circ")]
-        opts = [{"value": ans, "mistake": None, "working": work},
-                {"value": round(math.asin(s), 3), "mistake": "Your calculator is in radian mode — set it to degrees.", "working": work},
-                {"value": round(math.degrees(math.acos(s)), 1), "mistake": "Use sin⁻¹ (not cos⁻¹).", "working": work},
-                {"value": round(s, 3), "mistake": "That is sin θ — you need the angle: θ = sin⁻¹(sin θ).", "working": work}]
-        return _q(text, ans, "°", opts, QT, None, level)
-    if kind == "opposite":
-        h = random.choice([1.5, 2.0, 2.4, 3.0, 5.0])
-        th = random.choice([20.0, 30.0, 40.0, 50.0])
-        o = h * math.sin(math.radians(th))
-        text = f"In a right-angled triangle the hypotenuse is {h:g} m and the angle θ is {th:g}°. Calculate the length of the side opposite θ."
-        work = [_L(r"\sin\theta = \frac{\text{opposite}}{\text{hypotenuse}}"), _L(rf"\text{{opposite}} = {h:g} \times \sin {th:g}^\circ = {_ltx(o)}\ \mathrm{{m}}")]
-        opts = [{"value": o, "mistake": None, "working": work},
-                {"value": _sig(h / math.sin(math.radians(th))), "mistake": "opposite = hypotenuse × sin θ (multiply).", "working": work},
-                {"value": _sig(h * math.cos(math.radians(th))), "mistake": "Opposite uses sin θ; cos θ gives the adjacent side.", "working": work},
-                {"value": _sig(h * math.sin(th)), "mistake": "Your calculator is in radian mode — set it to degrees.", "working": work}]
-        return _q(text, o, "m", opts, QT, None, level)
-    a = random.choice([2.0, 2.5, 4.0, 5.0])
-    b = round(a * random.choice([0.34, 0.5, 0.64, 0.77]), 1)
-    s = b / a
-    ans = round(math.degrees(math.asin(s)), 1)
-    text = f"Calculate the angle θ in the equation  {_txt(a)} × 10⁻⁶ × sin θ = {_txt(b)} × 10⁻⁶."
-    work = [_L(rf"\sin\theta = \frac{{{b:g}\times10^{{-6}}}}{{{a:g}\times10^{{-6}}}} = {_ltx(s)}"), _L(rf"\theta = {ans:g}^\circ")]
-    opts = [{"value": ans, "mistake": None, "working": work},
-            {"value": round(math.degrees(math.asin(min(1.0, a / b))) if a <= b else round(math.degrees(math.asin(min(1.0, s * s))), 1), 1), "mistake": "sin θ = (right-hand side) ÷ (number multiplying sin θ).", "working": work},
-            {"value": round(math.asin(s), 3), "mistake": "Your calculator is in radian mode — set it to degrees.", "working": work},
-            {"value": round(s, 3), "mistake": "That is sin θ — now take sin⁻¹ to find θ.", "working": work}]
-    scaffold = [{"question": "What is sin θ?", "answer": _sig(s)}]
-    return _q(text, ans, "°", opts, QT, scaffold, level)

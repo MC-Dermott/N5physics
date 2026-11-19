@@ -180,7 +180,7 @@ from topics.particles_and_waves.particles_waves_higher import (
     gen_pw_energy_levels, gen_pw_spectra_explain, gen_pw_refraction, gen_pw_refraction_explain,
 )
 from topics.particles_and_waves.interference_prereq_higher import (
-    gen_ip_wave_speed, gen_ip_units, gen_ip_path_phase, gen_ip_meeting, gen_ip_sine,
+    gen_ip_wave_speed, gen_ip_units, gen_ip_meeting,
 )
 from topics.electricity.electricity_exam_n5 import (
     gen_ec_charge, gen_ec_electrons, gen_ec_ac_dc,
@@ -673,10 +673,8 @@ QUAL_REGISTRY = {
             },
             "Interference Prerequisites": {
                 "1 — Wave Speed and Period":        gen_ip_wave_speed,
-                "2 — Units and Grating Spacing":    gen_ip_units,
-                "3 — Path Difference and Phase":    gen_ip_path_phase,
-                "4 — Waves Meeting and Diffraction": gen_ip_meeting,
-                "5 — Sine and Angles":              gen_ip_sine,
+                "2 — Units of Wavelength":          gen_ip_units,
+                "3 — Waves Meeting and Diffraction": gen_ip_meeting,
             },
             "Interference": {
                 "1 — Path Difference":              gen_pw_path_difference,

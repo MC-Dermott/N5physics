@@ -62,8 +62,6 @@ $E = hf$ &nbsp; $E_k = hf - hf_0$ &nbsp; $v = f\lambda$ — the work function $h
     "Interference Prerequisites": _notes("Interference prerequisites", r"""
 $v = f\lambda$ &nbsp; $T = \frac{1}{f}$ &nbsp; $d = vt$ — wavelengths in **metres** (1 nm = $10^{-9}$ m).
 
-- Path difference = longer distance − shorter distance; number of wavelengths = path difference ÷ λ.
-- Whole number of wavelengths → in phase (maximum); whole number + ½ → out of phase (minimum).
 - Diffraction is greatest when the gap is about the same size as the wavelength.
 """),
     "Interference": _notes("Interference", r"""
@@ -472,34 +470,6 @@ def the_sun(level="Higher"):
     return ex.build("The Sun is powered by nuclear fusion. (h = 6.63 × 10⁻³⁴ J s)")
 
 
-# ════════════════ Loudspeakers: v = fλ → path difference → in/out of phase → maximum ════════════════
-
-def loudspeakers(level="Higher"):
-    ex = _ex(level)
-    lam = pick(0.20, 0.40, 0.50)
-    f = 340 / lam
-    k = pick(1.5, 2.5, 3.5, 2.0, 3.0)
-    d2 = pick(1.50, 2.00, 3.00)
-    pd, d1 = k * lam, d2 + k * lam
-    ex.on("Interference Prerequisites").num("Calculate the wavelength of the sound.", lam, "m",
-        wrong=[(340 * f, "λ = v ÷ f."), (f / 340, "λ = v ÷ f — upside down.")], working=[rf"\lambda = \frac{{v}}{{f}} = \frac{{340}}{{{ltx(f)}}} = {ltx(lam)}\ \text{{m}}"])
-    ex.on("Interference Prerequisites").num("Calculate the path difference at point P.", pd, "m",
-        wrong=[(d1 + d2, "Subtract the distances — it's the DIFFERENCE.")], working=[rf"{ltx(d1)} - {ltx(d2)} = {ltx(pd)}\ \text{{m}}"],
-        scaffold=[("Which distance is the longer, in m?", d1, "m")])
-    ex.on("Interference Prerequisites").num("How many wavelengths are there in the path difference?", k, "wavelengths",
-        wrong=[(pd * lam, "Divide the path difference by λ."), (lam / pd, "Path difference ÷ λ — upside down.")], working=[rf"\frac{{{ltx(pd)}}}{{{ltx(lam)}}} = {k:g}"])
-    if float(k).is_integer():
-        ex.on("Interference").choice("What is heard at P?", "A loud sound (a maximum): the waves arrive in phase.",
-            [("A quiet sound (a minimum): the waves arrive out of phase.", "A whole number of wavelengths means in phase."), ("The sound is the same loudness as from one speaker.", "In phase the amplitudes add.")])
-    else:
-        ex.on("Interference").choice("What is heard at P?", "A quiet sound (a minimum): the waves arrive out of phase.",
-            [("A loud sound (a maximum): the waves arrive in phase.", "A whole number + ½ wavelengths means out of phase."), ("The sound is the same loudness as from one speaker.", "Out of phase the waves cancel.")])
-    m = 2
-    ex.on("Interference").num("Calculate the path difference at the second-order maximum.", m * lam, "m",
-        wrong=[((m + 0.5) * lam, "A maximum is mλ; (m + ½)λ is for a minimum.")], working=[rf"m\lambda = 2 \times {ltx(lam)} = {ltx(m * lam)}\ \text{{m}}"])
-    return ex.build(f"Two loudspeakers connected to the same signal generator emit sound of frequency {fmt(f)} Hz. The speed of sound is 340 m/s. A microphone at point P is {fmt(d1)} m from one loudspeaker and {fmt(d2)} m from the other.")
-
-
 # ════════════════ Ripple tank: d = vt → v = fλ → amplitude → diffraction ════════════════
 
 def ripple_tank(level="Higher"):
@@ -533,6 +503,5 @@ SCENARIOS = {
     "Linear Accelerator":   linear_accelerator,
     "Electron Beam and Wire": beam_and_wire,
     "The Sun":              the_sun,
-    "Loudspeakers":         loudspeakers,
     "Ripple Tank":          ripple_tank,
 }

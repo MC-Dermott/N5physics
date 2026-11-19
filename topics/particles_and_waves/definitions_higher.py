@@ -174,12 +174,6 @@ DEFINITIONS = {
         "confusables": ["constructive interference", "refractive index"],
         "traps": [("The change of direction of a wave when its speed changes.", "That is **refraction**, not diffraction.")],
     },
-    "path difference": {
-        "group": "Interference",
-        "definition": "The difference between the distances travelled by two waves to reach the same point.",
-        "confusables": ["wavelength", "coherent sources"],
-        "traps": [("The total distance travelled by the two waves.", "It is the **difference** of the two distances, not the sum.")],
-    },
 
     # ── Refraction ─────────────────────────────────────────────────────────────
     "refractive index": {
@@ -245,12 +239,6 @@ STATEMENTS = [
      "A gap much wider than the wavelength gives very little diffraction."),
     ("diffraction", "Diffraction is greatest when the gap is much wider than the wavelength.", False,
      "Diffraction is greatest when the gap is **about the same size** as the wavelength."),
-    ("path difference", "The path difference is the difference between the distances from the two sources to the point.", True,
-     "Subtract the two distances (longer − shorter)."),
-    ("pd phase", "Waves arrive in phase when the path difference is a whole number of wavelengths.", True,
-     "mλ gives a maximum; (m + ½)λ gives a minimum."),
-    ("pd phase", "Waves arrive in phase when the path difference is a whole number + ½ wavelengths.", False,
-     "A whole number + ½ wavelengths means **out of phase** (a minimum)."),
     ("tir", "Total internal reflection occurs when the angle of incidence is greater than the "
      "critical angle.", True,
      "All the light is then reflected back into the denser material."),
