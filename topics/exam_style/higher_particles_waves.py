@@ -59,6 +59,13 @@ $E = hf$ &nbsp; $E_k = hf - hf_0$ &nbsp; $v = f\lambda$ — the work function $h
 - Below the **threshold frequency** no photoelectrons are emitted, however great the irradiance.
 - Increasing the irradiance (above $f_0$) increases the **number** of photoelectrons per second, not their maximum Ek.
 """),
+    "Interference Prerequisites": _notes("Interference prerequisites", r"""
+$v = f\lambda$ &nbsp; $T = \frac{1}{f}$ &nbsp; $d = vt$ — wavelengths in **metres** (1 nm = $10^{-9}$ m).
+
+- Path difference = longer distance − shorter distance; number of wavelengths = path difference ÷ λ.
+- Whole number of wavelengths → in phase (maximum); whole number + ½ → out of phase (minimum).
+- Diffraction is greatest when the gap is about the same size as the wavelength.
+"""),
     "Interference": _notes("Interference", r"""
 Path difference $= n\lambda$ → maximum (constructive); $= (n + \frac{1}{2})\lambda$ → minimum (destructive).
 Grating: $d\sin\theta = n\lambda$, with $d = \frac{1}{\text{lines per metre}}$.
@@ -465,6 +472,55 @@ def the_sun(level="Higher"):
     return ex.build("The Sun is powered by nuclear fusion. (h = 6.63 × 10⁻³⁴ J s)")
 
 
+# ════════════════ Loudspeakers: v = fλ → path difference → in/out of phase → maximum ════════════════
+
+def loudspeakers(level="Higher"):
+    ex = _ex(level)
+    lam = pick(0.20, 0.40, 0.50)
+    f = 340 / lam
+    k = pick(1.5, 2.5, 3.5, 2.0, 3.0)
+    d2 = pick(1.50, 2.00, 3.00)
+    pd, d1 = k * lam, d2 + k * lam
+    ex.on("Interference Prerequisites").num("Calculate the wavelength of the sound.", lam, "m",
+        wrong=[(340 * f, "λ = v ÷ f."), (f / 340, "λ = v ÷ f — upside down.")], working=[rf"\lambda = \frac{{v}}{{f}} = \frac{{340}}{{{ltx(f)}}} = {ltx(lam)}\ \text{{m}}"])
+    ex.on("Interference Prerequisites").num("Calculate the path difference at point P.", pd, "m",
+        wrong=[(d1 + d2, "Subtract the distances — it's the DIFFERENCE.")], working=[rf"{ltx(d1)} - {ltx(d2)} = {ltx(pd)}\ \text{{m}}"],
+        scaffold=[("Which distance is the longer, in m?", d1, "m")])
+    ex.on("Interference Prerequisites").num("How many wavelengths are there in the path difference?", k, "wavelengths",
+        wrong=[(pd * lam, "Divide the path difference by λ."), (lam / pd, "Path difference ÷ λ — upside down.")], working=[rf"\frac{{{ltx(pd)}}}{{{ltx(lam)}}} = {k:g}"])
+    if float(k).is_integer():
+        ex.on("Interference").choice("What is heard at P?", "A loud sound (a maximum): the waves arrive in phase.",
+            [("A quiet sound (a minimum): the waves arrive out of phase.", "A whole number of wavelengths means in phase."), ("The sound is the same loudness as from one speaker.", "In phase the amplitudes add.")])
+    else:
+        ex.on("Interference").choice("What is heard at P?", "A quiet sound (a minimum): the waves arrive out of phase.",
+            [("A loud sound (a maximum): the waves arrive in phase.", "A whole number + ½ wavelengths means out of phase."), ("The sound is the same loudness as from one speaker.", "Out of phase the waves cancel.")])
+    m = 2
+    ex.on("Interference").num("Calculate the path difference at the second-order maximum.", m * lam, "m",
+        wrong=[((m + 0.5) * lam, "A maximum is mλ; (m + ½)λ is for a minimum.")], working=[rf"m\lambda = 2 \times {ltx(lam)} = {ltx(m * lam)}\ \text{{m}}"])
+    return ex.build(f"Two loudspeakers connected to the same signal generator emit sound of frequency {fmt(f)} Hz. The speed of sound is 340 m/s. A microphone at point P is {fmt(d1)} m from one loudspeaker and {fmt(d2)} m from the other.")
+
+
+# ════════════════ Ripple tank: d = vt → v = fλ → amplitude → diffraction ════════════════
+
+def ripple_tank(level="Higher"):
+    ex = _ex(level)
+    v, lam, t = pick(0.30, 0.40, 0.50), pick(0.020, 0.025, 0.040), pick(2.0, 4.0, 5.0)
+    d, f = v * t, v / lam
+    A = pick(1.0, 1.5, 2.0)
+    ex.on("Interference Prerequisites").num(f"A ripple travels {fmt(d)} m across the tank in {fmt(t)} s. Calculate the speed of the ripples.", v, "m/s",
+        wrong=[(d * t, "v = d ÷ t.")], working=[rf"d = vt \Rightarrow v = \frac{{{ltx(d)}}}{{{ltx(t)}}} = {ltx(v)}\ \text{{m/s}}"])
+    ex.on("Interference Prerequisites").num(f"The wavelength of the ripples is {fmt(lam * 100)} cm. Calculate the frequency of the dippers.", f, "Hz",
+        wrong=[(v / (lam * 100), "Convert the wavelength from cm to metres first."), (v * lam, "f = v ÷ λ.")],
+        working=[rf"f = \frac{{v}}{{\lambda}} = \frac{{{ltx(v)}}}{{{ltx(lam)}}} = {ltx(f)}\ \text{{Hz}}"], scaffold=[("What is the wavelength in metres?", lam, "m")])
+    ex.on("Interference Prerequisites").num("Calculate the period of the waves.", 1 / f, "s",
+        wrong=[(f, "T = 1/f.")], working=[rf"T = \frac{{1}}{{f}} = {ltx(1 / f)}\ \text{{s}}"])
+    ex.on("Interference Prerequisites").choice(f"Two ripples, each of amplitude {A:g} cm, meet at a point in phase. What is the amplitude there?", f"{2 * A:g} cm",
+        [("0 cm", "In phase the displacements add."), (f"{A:g} cm", "A + A = 2A.")])
+    ex.on("Interference Prerequisites").choice("The ripples reach a barrier with a gap. For which gap width is the diffraction greatest?", "A gap about the same size as the wavelength.",
+        [("A gap much wider than the wavelength.", "Diffraction is greatest when the gap ≈ λ."), ("It is the same for all gap widths.", "It depends on the gap compared with λ.")])
+    return ex.build("Two dippers in a ripple tank produce water waves.")
+
+
 SCENARIOS = {
     "Fusion Reactor":       fusion_reactor,
     "Radium Decay":         radium_decay,
@@ -477,4 +533,6 @@ SCENARIOS = {
     "Linear Accelerator":   linear_accelerator,
     "Electron Beam and Wire": beam_and_wire,
     "The Sun":              the_sun,
+    "Loudspeakers":         loudspeakers,
+    "Ripple Tank":          ripple_tank,
 }

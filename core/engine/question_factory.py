@@ -179,6 +179,9 @@ from topics.particles_and_waves.particles_waves_higher import (
     gen_pw_photoelectric, gen_pw_pe_effects, gen_pw_pe_graph, gen_pw_grating, gen_pw_path_difference,
     gen_pw_energy_levels, gen_pw_spectra_explain, gen_pw_refraction, gen_pw_refraction_explain,
 )
+from topics.particles_and_waves.interference_prereq_higher import (
+    gen_ip_wave_speed, gen_ip_units, gen_ip_path_phase, gen_ip_meeting, gen_ip_sine,
+)
 from topics.electricity.electricity_exam_n5 import (
     gen_ec_charge, gen_ec_electrons, gen_ec_ac_dc,
     gen_ec_ew_qv, gen_ec_gradient, gen_ec_voltage_meaning,
@@ -667,6 +670,13 @@ QUAL_REGISTRY = {
                 "1 — Ek and Speed of Photoelectrons": gen_pw_photoelectric,
                 "2 — Irradiance, Frequency and Definitions": gen_pw_pe_effects,
                 "3 — Graph of Ek against Frequency": gen_pw_pe_graph,
+            },
+            "Interference Prerequisites": {
+                "1 — Wave Speed and Period":        gen_ip_wave_speed,
+                "2 — Units and Grating Spacing":    gen_ip_units,
+                "3 — Path Difference and Phase":    gen_ip_path_phase,
+                "4 — Waves Meeting and Diffraction": gen_ip_meeting,
+                "5 — Sine and Angles":              gen_ip_sine,
             },
             "Interference": {
                 "1 — Path Difference":              gen_pw_path_difference,
