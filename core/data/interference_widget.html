@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interference of Waves – Two-Source Simulation</title>
+<style>
+  :root { --ink:#1b2430; --muted:#5b6675; --line:#d9dee6; --card:#ffffff; --bg:#f3f5f8; --max:#e08600; --min:#1b7f9e; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:940px; margin:0 auto; padding:16px; }
+  h1 { font-size:1.35rem; margin:0 0 2px; }
+  .sub { color:var(--muted); font-size:.9rem; margin-bottom:12px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:12px; }
+  canvas { width:100%; height:auto; display:block; border-radius:8px; background:#04102a; touch-action:none; cursor:crosshair; }
+  .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px 18px; }
+  .ctl label { display:flex; justify-content:space-between; font-size:.88rem; font-weight:600; }
+  .ctl output { font-weight:700; color:var(--min); }
+  .ctl input[type=range] { width:100%; }
+  .row { display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin-top:10px; font-size:.88rem; }
+  .row label { display:inline-flex; gap:5px; align-items:center; }
+  button, select { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:7px; background:#fff; cursor:pointer; }
+  button:hover { background:#eef2f7; }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:.85rem; color:var(--muted); margin-top:8px; }
+  .sw { display:inline-block; width:26px; height:0; border-top:3px solid var(--max); vertical-align:middle; margin-right:5px; }
+  .sw.min { border-top:3px dashed var(--min); }
+  .readout { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:8px 20px; font-size:.95rem; }
+  .readout div b { font-variant-numeric:tabular-nums; }
+  .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-weight:700; font-size:.92rem; }
+  .badge.max { background:#fff0d6; color:#8a4f00; }
+  .badge.min { background:#dff3fa; color:#0b5870; }
+  .badge.mid { background:#eceff3; color:#4a5463; }
+  .note { font-size:.85rem; color:var(--muted); margin:6px 0 0; }
+  .eq { font-family:"Times New Roman",serif; font-size:1.02rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Interference of waves: two coherent sources</h1>
+  <div class="sub">Two sources vibrating in phase (like two dippers in a ripple tank, or two slits lit by the same laser). Drag the point <b>P</b> anywhere in the pattern to measure its path difference.</div>
+
+  <div class="card">
+    <canvas id="cv" width="880" height="560"></canvas>
+    <div class="legend">
+      <span><span class="sw"></span>Maxima: path difference = mλ</span>
+      <span><span class="sw min"></span>Minima: path difference = (m + ½)λ</span>
+      <span>m = 0, 1, 2 … (the central maximum is m = 0; the first minimum is also m = 0)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <div class="ctl"><label for="lam">Wavelength λ <output id="lamO"></output></label><input id="lam" type="range" min="1" max="5" step="0.1" value="2.5"></div>
+      <div class="ctl"><label for="sep">Source separation d <output id="sepO"></output></label><input id="sep" type="range" min="2" max="16" step="0.5" value="8"></div>
+      <div class="ctl"><label for="dist">Distance to screen L <output id="distO"></output></label><input id="dist" type="range" min="20" max="55" step="1" value="45"></div>
+      <div class="ctl"><label for="spd">Animation speed <output id="spdO"></output></label><input id="spd" type="range" min="0" max="2" step="0.1" value="1"></div>
+    </div>
+    <div class="row">
+      <button id="pause">Pause</button>
+      <span>Display:</span>
+      <label><input type="radio" name="mode" value="wave" checked> Moving waves</label>
+      <label><input type="radio" name="mode" value="int"> Intensity (time-averaged)</label>
+      <label><input type="checkbox" id="showMax" checked> Maxima lines</label>
+      <label><input type="checkbox" id="showMin" checked> Minima lines</label>
+      <label><input type="checkbox" id="showLab" checked> Labels</label>
+    </div>
+    <div class="row">
+      <span>Jump P to a point on the screen:</span>
+      <select id="jType"><option value="max">maximum</option><option value="min">minimum</option></select>
+      <label>m = <select id="jM"></select></label>
+      <button id="jGo">Go</button>
+      <span class="note" style="margin:0">(upper half of the screen; only values that fit on the screen are listed)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="readout">
+      <div>S₁P = <b id="r1"></b></div>
+      <div>S₂P = <b id="r2"></b></div>
+      <div>Path difference |S₁P − S₂P| = <b id="rpd"></b></div>
+      <div>In wavelengths = <b id="rn"></b></div>
+      <div style="grid-column:1/-1"><span id="rbadge" class="badge mid"></span> <span id="rtxt"></span></div>
+    </div>
+    <p class="note eq" id="spacing"></p>
+    <p class="note" id="counts"></p>
+  </div>
+</div>
+
+<script>
+(() => {
+  const W = 880, H = 560, PX = 12;        // canvas size, pixels per cm
+  const SX = 70, CY = H / 2;               // x of the sources, y of the centre line
+  const RES = 2, GW = W / RES, GH = H / RES;
+
+  const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  const off = document.createElement('canvas'); off.width = GW; off.height = GH;
+  const octx = off.getContext('2d'), img = octx.createImageData(GW, GH);
+  const A = new Float32Array(GW * GH), B = new Float32Array(GW * GH);
+
+  const $ = id => document.getElementById(id);
+  const st = { lam: 2.5, d: 8, L: 45, speed: 1, paused: false, t: 0, mode: 'wave' };
+  const probe = { x: 0, y: 0 };
+
+  // ---------- geometry ----------
+  const cPx = () => st.d * PX / 2;
+  const dist = (x, y, sy) => Math.hypot(x - SX, y - sy);
+  const nAt = (x, y) => {                  // |path difference| in wavelengths at canvas point
+    const c = cPx();
+    return Math.abs(dist(x, y, CY - c) - dist(x, y, CY + c)) / (st.lam * PX);
+  };
+  const scrX = () => SX + st.L * PX;
+
+  // y offset (px, above centre) on the screen where the path difference = target wavelengths
+  function screenOffset(target) {
+    if (target === 0) return 0;
+    let lo = 0, hi = 20000;
+    for (let i = 0; i < 60; i++) {
+      const mid = (lo + hi) / 2;
+      (nAt(scrX(), CY - mid) < target) ? lo = mid : hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  // ---------- precompute the field ----------
+  function recompute() {
+    const k = 2 * Math.PI / (st.lam * PX), c = cPx();
+    for (let j = 0; j < GH; j++) {
+      const y = (j + 0.5) * RES;
+      for (let i = 0; i < GW; i++) {
+        const x = (i + 0.5) * RES;
+        const r1 = dist(x, y, CY - c), r2 = dist(x, y, CY + c);
+        const idx = j * GW + i;
+        A[idx] = Math.cos(k * (r1 - r2) / 2);
+        B[idx] = k * (r1 + r2) / 2;
+      }
+    }
+  }
+
+  // ---------- drawing ----------
+  function drawField() {
+    const d = img.data, n = GW * GH, ph = st.t * 2 * Math.PI * 0.6;
+    if (st.mode === 'wave') {
+      for (let i = 0, p = 0; i < n; i++, p += 4) {
+        const f = (A[i] * Math.cos(B[i] - ph) + 1) * 0.5;
+        d[p] = 4 + f * 196; d[p + 1] = 12 + f * 218; d[p + 2] = 40 + f * 215; d[p + 3] = 255;
+      }
+    } else {
+      for (let i = 0, p = 0; i < n; i++, p += 4) {
+        const I = A[i] * A[i];
+        d[p] = 8 + I * 247; d[p + 1] = 10 + I * 215; d[p + 2] = 30 + I * 90; d[p + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(off, 0, 0, W, H);
+  }
+
+  function pill(text, x, y, color, align) {
+    ctx.font = 'bold 12px -apple-system,Segoe UI,Arial,sans-serif';
+    const w = ctx.measureText(text).width + 8;
+    const x0 = align === 'right' ? x - w : x;
+    ctx.fillStyle = 'rgba(4,16,42,.82)';
+    ctx.fillRect(x0, y - 8, w, 16);
+    ctx.fillStyle = color; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, x0 + 4, y);
+  }
+
+  function hyperbola(deltaWl, color, dash) {
+    const dPx = deltaWl * st.lam * PX, a = dPx / 2, c = cPx();
+    if (a >= c) return null;
+    ctx.beginPath(); ctx.strokeStyle = color; ctx.setLineDash(dash); ctx.lineWidth = dash.length ? 1.6 : 2;
+    if (a < 1e-6) { ctx.moveTo(0, CY); ctx.lineTo(W, CY); ctx.stroke(); ctx.setLineDash([]); return [0]; }
+    const b = Math.sqrt(c * c - a * a), T = Math.asinh(W / b) + 0.2;
+    [1, -1].forEach(s => {
+      for (let i = 0; i <= 160; i++) {
+        const t = -T + (2 * T * i) / 160;
+        const x = SX + b * Math.sinh(t), y = CY + s * a * Math.cosh(t);
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.stroke(); ctx.beginPath();
+    });
+    ctx.setLineDash([]);
+    const tt = Math.asinh((st.L * PX) / b);
+    return [a * Math.cosh(tt)];
+  }
+
+  function drawLines() {
+    const showMax = $('showMax').checked, showMin = $('showMin').checked, lab = $('showLab').checked;
+    const sx = scrX();
+    for (let m = 0; m * st.lam < st.d; m++) {
+      if (showMax) {
+        const r = hyperbola(m, '#ffa726', []);
+        if (r && lab) {
+          const v = r[0];
+          if (m === 0) pill('m = 0', sx - 6, CY, '#ffcc80', 'right');
+          else [-1, 1].forEach(s => { const y = CY + s * v; if (y > 10 && y < H - 10) pill('m = ' + m, sx - 6, y, '#ffcc80', 'right'); });
+        }
+      }
+      if (showMin && (m + 0.5) * st.lam < st.d) {
+        const r = hyperbola(m + 0.5, '#e8f8ff', [6, 5]);
+        if (r && lab) [-1, 1].forEach(s => { const y = CY + s * r[0]; if (y > 10 && y < H - 10) pill('m = ' + m, sx - 6, y, '#9fe3ff', 'right'); });
+      }
+    }
+  }
+
+  function drawScreen() {
+    const sx = scrX(), c = cPx();
+    // intensity strip and graph
+    const lerp = (a, b, t) => Math.round(a + (b - a) * t);
+    ctx.beginPath(); ctx.moveTo(sx + 12, 0);
+    const pts = [];
+    for (let y = 0; y <= H; y += 2) {
+      const dd = dist(sx, y, CY - c) - dist(sx, y, CY + c);
+      const I = Math.pow(Math.cos(Math.PI * dd / (st.lam * PX)), 2);
+      pts.push([y, I]);
+      ctx.fillStyle = `rgb(${lerp(25, 255, I)},${lerp(25, 235, I)},${lerp(40, 140, I)})`;
+      ctx.fillRect(sx, y, 9, 2);
+    }
+    ctx.fillStyle = 'rgba(255,214,120,.22)'; ctx.strokeStyle = '#ffd36e'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(sx + 12, 0);
+    pts.forEach(([y, I]) => ctx.lineTo(sx + 12 + I * 110, y));
+    ctx.lineTo(sx + 12, H); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    pts.forEach(([y, I], i) => i ? ctx.lineTo(sx + 12 + I * 110, y) : ctx.moveTo(sx + 12 + I * 110, y));
+    ctx.stroke();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, H); ctx.stroke();
+    ctx.fillStyle = '#cfe3ff'; ctx.font = '12px -apple-system,Segoe UI,Arial,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText('Screen', sx + 14, 6); ctx.fillText('Intensity', sx + 14, 22);
+  }
+
+  function drawSources() {
+    const c = cPx();
+    // d dimension line
+    ctx.strokeStyle = '#9db4d6'; ctx.fillStyle = '#9db4d6'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(SX - 30, CY - c); ctx.lineTo(SX - 30, CY + c); ctx.stroke();
+    [[-1, 1], [1, -1]].forEach(([s, dir]) => {
+      ctx.beginPath(); ctx.moveTo(SX - 30, CY + s * c); ctx.lineTo(SX - 34, CY + s * c - dir * 7 * -1); ctx.lineTo(SX - 26, CY + s * c - dir * 7 * -1); ctx.closePath(); ctx.fill();
+    });
+    ctx.font = 'italic 13px Georgia,serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText('d', SX - 38, CY);
+    // L dimension line
+    const sx = scrX(), yb = H - 16;
+    ctx.beginPath(); ctx.moveTo(SX, yb); ctx.lineTo(sx, yb); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(SX, yb - 5); ctx.lineTo(SX, yb + 5); ctx.moveTo(sx, yb - 5); ctx.lineTo(sx, yb + 5); ctx.stroke();
+    ctx.textAlign = 'center'; ctx.fillText('L', (SX + sx) / 2, yb - 9);
+    // sources
+    [['S₁', CY - c], ['S₂', CY + c]].forEach(([n, y]) => {
+      ctx.beginPath(); ctx.arc(SX, y, 6, 0, 7); ctx.fillStyle = '#ff5d5d'; ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 13px -apple-system,Segoe UI,Arial,sans-serif';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(n, SX + 10, y + (n === 'S₁' ? -10 : 10));
+    });
+  }
+
+  function drawProbe() {
+    const c = cPx();
+    ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1.2; ctx.setLineDash([3, 3]);
+    [CY - c, CY + c].forEach(y => { ctx.beginPath(); ctx.moveTo(SX, y); ctx.lineTo(probe.x, probe.y); ctx.stroke(); });
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(probe.x, probe.y, 7, 0, 7);
+    ctx.fillStyle = '#ff3fa4'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 13px -apple-system,Segoe UI,Arial,sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText('P', probe.x + 10, probe.y - 6);
+  }
+
+  function draw() {
+    drawField(); drawLines(); drawScreen(); drawSources(); drawProbe();
+  }
+
+  // ---------- readout ----------
+  const frac = n => { const r = Math.round(n * 2) / 2; return r % 1 === 0 ? String(r) : (Math.floor(r) ? Math.floor(r) : '') + '½'; };
+  function readout() {
+    const c = cPx();
+    const r1 = dist(probe.x, probe.y, CY - c) / PX, r2 = dist(probe.x, probe.y, CY + c) / PX;
+    const pd = Math.abs(r1 - r2), n = pd / st.lam;
+    $('r1').textContent = r1.toFixed(1) + ' cm';
+    $('r2').textContent = r2.toFixed(1) + ' cm';
+    $('rpd').textContent = pd.toFixed(1) + ' cm';
+    $('rn').textContent = n.toFixed(2) + ' λ';
+    const mMax = Math.round(n), dMax = Math.abs(n - mMax);
+    const mMin = Math.max(0, Math.round(n - 0.5)), dMin = Math.abs(n - (mMin + 0.5));
+    const b = $('rbadge'), t = $('rtxt');
+    if (dMax < 0.06) {
+      b.className = 'badge max'; b.textContent = 'Maximum';
+      t.innerHTML = `path difference ≈ mλ with <b>m = ${mMax}</b> (${mMax}λ)${mMax === 0 ? ' — the central maximum' : ''}. Waves arrive in phase: constructive interference.`;
+    } else if (dMin < 0.06) {
+      b.className = 'badge min'; b.textContent = 'Minimum';
+      const wl = mMin === 0 ? '½' : mMin + '½';
+      t.innerHTML = `path difference ≈ (m + ½)λ with <b>m = ${mMin}</b> (${wl}λ). Waves arrive out of phase: destructive interference.`;
+    } else {
+      b.className = 'badge mid'; b.textContent = 'Between';
+      t.innerHTML = `between a maximum and a minimum (nearest maximum m = ${mMax}, nearest minimum m = ${mMin}).`;
+    }
+  }
+
+  function info() {
+    const dx = st.lam * st.L / st.d;
+    $('spacing').innerHTML = `Fringe spacing (small angles): Δx = λL / d = ${st.lam.toFixed(1)} × ${st.L} ÷ ${st.d} = <b>${dx.toFixed(1)} cm</b>`;
+    const mM = Math.ceil(st.d / st.lam - 1e-9) - 1;
+    const nMin = Math.max(0, Math.ceil(st.d / st.lam - 0.5 - 1e-9));
+    $('counts').textContent = `Because the path difference can never exceed d, only m up to ${mM} gives a maximum (${2 * mM + 1} maxima in all) and there are ${2 * nMin} minima.`;
+  }
+
+  // ---------- jump selects ----------
+  function fillM() {
+    const type = $('jType').value, sel = $('jM'), prev = sel.value;
+    sel.innerHTML = '';
+    for (let m = 0; m < 60; m++) {
+      const target = type === 'max' ? m : m + 0.5;
+      if (target * st.lam >= st.d - 1e-9) break;
+      if (screenOffset(target) > CY - 10) break;
+      const o = document.createElement('option'); o.value = m; o.textContent = m; sel.appendChild(o);
+    }
+    if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+  }
+  function jump() {
+    if (!$('jM').options.length) return;
+    const m = +$('jM').value, target = $('jType').value === 'max' ? m : m + 0.5;
+    probe.x = scrX(); probe.y = CY - screenOffset(target);
+    readout();
+  }
+
+  // ---------- controls ----------
+  function sync() {
+    st.lam = +$('lam').value; st.d = +$('sep').value; st.L = +$('dist').value; st.speed = +$('spd').value;
+    $('lamO').textContent = st.lam.toFixed(1) + ' cm'; $('sepO').textContent = st.d.toFixed(1) + ' cm';
+    $('distO').textContent = st.L + ' cm'; $('spdO').textContent = st.speed.toFixed(1) + '×';
+  }
+  ['lam', 'sep', 'dist'].forEach(id => $(id).addEventListener('input', () => {
+    sync(); recompute(); fillM(); info(); readout();
+    // keep P on the screen if it was on it
+    if (Math.abs(probe.x - scrX()) < 1e9 && onScreen) { probe.x = scrX(); readout(); }
+  }));
+  $('spd').addEventListener('input', sync);
+  $('pause').addEventListener('click', () => { st.paused = !st.paused; $('pause').textContent = st.paused ? 'Play' : 'Pause'; });
+  document.querySelectorAll('input[name=mode]').forEach(r => r.addEventListener('change', () => st.mode = r.value));
+  $('jType').addEventListener('change', fillM);
+  $('jGo').addEventListener('click', () => { onScreen = true; jump(); });
+
+  let onScreen = true, dragging = false;
+  function setProbe(e) {
+    const r = cv.getBoundingClientRect();
+    probe.x = Math.min(W - 2, Math.max(2, (e.clientX - r.left) * W / r.width));
+    probe.y = Math.min(H - 2, Math.max(2, (e.clientY - r.top) * H / r.height));
+    onScreen = Math.abs(probe.x - scrX()) < 4;
+    readout();
+  }
+  cv.addEventListener('pointerdown', e => { dragging = true; cv.setPointerCapture(e.pointerId); setProbe(e); });
+  cv.addEventListener('pointermove', e => { if (dragging) setProbe(e); });
+  cv.addEventListener('pointerup', () => dragging = false);
+
+  // ---------- main loop ----------
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    if (!st.paused) st.t += dt * st.speed;
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  sync(); recompute(); fillM(); info();
+  $('jType').value = 'min'; fillM(); $('jM').value = '0'; jump();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

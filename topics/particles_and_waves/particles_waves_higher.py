@@ -991,7 +991,7 @@ def gen_pw_grating(level="Higher"):
     return _q(text, float(total), "maxima", opts, "Interference", None, level)
 
 
-def gen_pw_path_difference(level="Higher"):
+def _gen_pw_path_difference(level="Higher"):
     lam = random.choice([0.20, 0.25, 0.40, 0.50])
     maxmin = random.choice(["maximum", "minimum"])
     m = random.randint(1, 3)
@@ -1016,6 +1016,19 @@ def gen_pw_path_difference(level="Higher"):
                 {"value": _sig(pd / (m + 0.5)), "mistake": f"The {ordinal[m]} minimum has m = {m - 1}, not m = {m}.", "working": work},
                 {"value": _sig(pd * (m - 0.5)), "mistake": "Divide the path difference by (m + ½), don't multiply.", "working": work}]
     return _q(text, lam, "m", opts, "Interference", None, level)
+
+
+# Two-source interference simulation (Luke's Simulations/Waves/interference_path_difference.html)
+_INTERFERENCE_WIDGET_HTML = (
+    pathlib.Path(__file__).parent.parent.parent / "core" / "data" / "interference_widget.html"
+).read_text(encoding="utf-8")
+
+
+def gen_pw_path_difference(level="Higher"):
+    q = _gen_pw_path_difference(level)
+    q.metadata["widget_html"] = _INTERFERENCE_WIDGET_HTML
+    q.metadata["widget_height"] = 1150
+    return q
 
 
 # ════════════════ Spectra ════════════════
