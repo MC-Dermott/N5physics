@@ -966,7 +966,37 @@ def gen_pw_grating(level="Higher"):
     lam_nm = random.choice([405, 450, 532, 589, 633, 650])
     d = 1 / (lpm * 1000)
     mmax = int(d / (lam_nm * 1e-9))
-    kind = random.choice(["angle", "angle", "count"])
+    # Mix follows the SQA Higher grating questions 2015-2025 (and the worksheet's Type 3): angle x5, wavelength x3, slit separation x1, number of maxima x1
+    kind = random.choices(["angle", "wavelength", "slit", "count"], weights=[5, 3, 1, 1])[0]
+    if kind in ("wavelength", "slit"):
+        m = random.randint(1, max(1, min(3, mmax)))
+        th = round(math.degrees(math.asin(m * lam_nm * 1e-9 / d)), 1)
+        sth = math.sin(math.radians(th))
+        ordn = {1: "first", 2: "second", 3: "third"}[m]
+        if kind == "wavelength":
+            lam_ans = _sig(d * sth / m * 1e9)
+            text = (f"Light passes through a grating with {lpm} lines per mm. The {ordn}-order maximum is at an angle of {th:.1f}°. "
+                    f"Calculate the wavelength of the light. (Give the answer in nm.)")
+            work = [_L(rf"d = \frac{{1}}{{{lpm} \times 10^3}} = {_ltx(d)}\ \mathrm{{m}}"), _L(r"d\sin\theta = m\lambda"),
+                    _L(rf"{_ltx(d)} \times \sin {th:.1f}^\circ = {m} \times \lambda"), _L(rf"\lambda = {lam_ans:g}\ \mathrm{{nm}}")]
+            opts = [{"value": lam_ans, "mistake": None, "working": work},
+                    {"value": _sig(d * sth * 1e9), "mistake": "Divide by the order m: d sin θ = mλ." if m != 1 else "Check the arithmetic.", "working": work},
+                    {"value": _sig(lam_ans * 10), "mistake": "d = 1 ÷ lines per METRE — check the conversion.", "working": work},
+                    {"value": _sig(d * math.sin(th) / m * 1e9), "mistake": "Your calculator is in radian mode — set it to degrees.", "working": work}]
+            scaffold = [{"question": "What is the slit separation d, in m?", "answer": _sig(d)}, {"question": "What is sin θ?", "answer": _sig(sth)},
+                        {"question": "What is the wavelength, in nm?", "answer": lam_ans}]
+            return _q(text, lam_ans, "nm", opts, "Interference", scaffold, level)
+        d_ans = _sig(m * lam_nm * 1e-9 / sth * 1e6)
+        text = (f"Light of wavelength {lam_nm} nm gives the {ordn}-order maximum at an angle of {th:.1f}° with a grating. "
+                f"Calculate the slit separation of the grating. (Give the answer in μm.)")
+        work = [_L(r"d\sin\theta = m\lambda"), _L(rf"d \times \sin {th:.1f}^\circ = {m} \times {lam_nm}\times10^{{-9}}"),
+                _L(rf"d = {d_ans:g}\ \mu\mathrm{{m}}")]
+        opts = [{"value": d_ans, "mistake": None, "working": work},
+                {"value": _sig(lam_nm * 1e-9 / sth * 1e6), "mistake": "Include the order m in mλ." if m != 1 else "Check the arithmetic.", "working": work},
+                {"value": _sig(m * lam_nm * 1e-9 * sth * 1e6), "mistake": "Divide by sin θ (d sin θ = mλ), don't multiply.", "working": work},
+                {"value": _sig(m * lam_nm * 1e-9 / math.sin(th) * 1e6), "mistake": "Your calculator is in radian mode — set it to degrees.", "working": work}]
+        scaffold = [{"question": "What is sin θ?", "answer": _sig(sth)}, {"question": "What is d, in μm?", "answer": d_ans}]
+        return _q(text, d_ans, "μm", opts, "Interference", scaffold, level)
     if kind == "angle":
         m = random.randint(1, max(1, min(3, mmax)))
         s = m * lam_nm * 1e-9 / d
