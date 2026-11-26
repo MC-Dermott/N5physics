@@ -2,7 +2,7 @@
 import math
 import random
 
-from topics.rotational_motion.common_ah import L, T, calc, explain_set, ltx, pick_sig, sig, uni
+from topics.rotational_motion.common_ah import L, T, calc, explain_set, fmt, ltx, pick_sig, sig, uni
 
 QT = "Rotational Dynamics"
 
@@ -176,7 +176,7 @@ def gen_rotational_energy(level="AH"):
         m, h, r = uni(0.20, 2.0, 2), uni(0.20, 1.20, 2), uni(0.030, 0.120, 3)
         I = k * m * r**2
         v = math.sqrt(2 * 9.8 * h / (1 + k))
-        return calc(QT, f"A {name} of mass {m:g} kg, radius {r:g} m and moment of inertia {sig(I):g} kg m² starts "
+        return calc(QT, f"A {name} of mass {m:g} kg, radius {r:g} m and moment of inertia {fmt(I)} kg m² starts "
                         f"from rest and rolls without slipping down a slope through a vertical height of {h:g} m. "
                         f"Calculate its speed at the bottom.", v, "m s⁻¹",
                     [r"mgh = \tfrac{1}{2}mv^2 + \tfrac{1}{2}I\omega^2 \qquad \omega = \frac{v}{r}",

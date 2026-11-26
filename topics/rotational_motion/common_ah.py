@@ -43,7 +43,7 @@ def pick_sig(lo, hi, sf=2):
     return sig(random.uniform(lo, hi), sf)
 
 
-def calc(qtype, text, answer, unit, working, wrong=(), scaffold=(), notes="", sf=3):
+def calc(qtype, text, answer, unit, working, wrong=(), scaffold=(), notes="", sf=3, topic=UNIT):
     """working: LaTeX strings or L()/T() dicts. wrong: (value, mistake) pairs from common errors.
     scaffold: (prompt, answer[, unit]) checkpoints."""
     answer = sig(answer, sf)
@@ -59,24 +59,24 @@ def calc(qtype, text, answer, unit, working, wrong=(), scaffold=(), notes="", sf
     steps = [{"question": s[0], "answer": sig(s[1], sf), "unit": s[2] if len(s) > 2 else ""}
              for s in scaffold]
     return make_question(text, answer, options, unit, scaffold=steps, notes=notes,
-                         topic=UNIT, question_type=qtype, level=LEVEL)
+                         topic=topic, question_type=qtype, level=LEVEL)
 
 
-def explain(qtype, text, correct, wrong, why, notes=""):
+def explain(qtype, text, correct, wrong, why, notes="", topic=UNIT):
     """wrong: (option, why it's wrong) pairs. why: the reasoning shown as the worked solution."""
     working = [T(w) for w in ([why] if isinstance(why, str) else why)]
     options = [correct] + [w for w, _ in wrong]
     random.shuffle(options)
     return PhysicsQuestion(
-        question_text=text, correct_answer=correct, unit="", topic=UNIT, question_type=qtype,
+        question_text=text, correct_answer=correct, unit="", topic=topic, question_type=qtype,
         level=LEVEL, notes=notes + EXPLAIN_TIP, working=working,
         distractors=[{"value": w, "mistake": m, "working": working} for w, m in wrong],
         metadata={"type": "classification", "options": options},
     )
 
 
-def explain_set(qtype, bank, notes=""):
+def explain_set(qtype, bank, notes="", topic=UNIT):
     """A generator that picks one (text, correct, wrong, why) item from a bank."""
     def generate(level=LEVEL):
-        return explain(qtype, *random.choice(bank), notes=notes)
+        return explain(qtype, *random.choice(bank), notes=notes, topic=topic)
     return generate
