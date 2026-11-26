@@ -22,6 +22,8 @@
 
 import re
 
+from core.data.past_papers_ah import AH_PAST_PAPERS
+
 
 def _mcq(dir_, year, paper, qnum, page, answer):
     return {"year": year, "paper": paper, "qnum": qnum, "kind": "mcq",
@@ -688,6 +690,9 @@ def _paper_unit(qualification, unit):
     "Refraction of Light"), so Higher's has its own key and never picks up the National 5 questions."""
     unit = canonical_unit(unit)
     return "Higher Waves" if (qualification, unit) == ("Higher", "Waves") else unit
+
+
+PAST_PAPERS.update(AH_PAST_PAPERS)
 
 
 def get_past_paper_entries(topic, question_type, qualification=None):

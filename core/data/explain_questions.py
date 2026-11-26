@@ -1,6 +1,7 @@
 """Real SQA Higher Physics explain and justify questions, for pupils to answer in their own words and then
 mark themselves against the marking instructions. The Particles and Waves questions are here; Our Dynamic
-Universe and Electricity are in explain_questions_odu_electricity.py.
+Universe and Electricity are in explain_questions_odu_electricity.py, and Advanced Higher is in
+explain_questions_ah.py.
 
 Source: the "Higher Physics Past Papers" compilation (Mr Davie / Mr White), September 2026 update,
 2015-2026 and the specimen paper (SPQ). Question wording follows the papers; "context" describes in words
@@ -9,6 +10,7 @@ instructions, one entry per mark.
 
 Key: (unit, topic) — the strings used in question_factory.py.
 """
+from core.data.explain_questions_ah import AH_EXPLAIN
 from core.data.explain_questions_common import _q
 from core.data.explain_questions_odu_electricity import EXPLAIN_QUESTIONS_ODU_ELECTRICITY
 
@@ -421,7 +423,9 @@ EXPLAIN_QUESTIONS = {
 
 
 def get_explain_questions(qualification, unit, topic):
-    """The explain questions for a topic (Higher only for now), oldest paper first."""
+    """The explain questions for a topic (Higher and Advanced Higher)."""
+    if qualification == "Advanced Higher":
+        return AH_EXPLAIN.get((unit, topic), [])
     if qualification != "Higher":
         return []
     return EXPLAIN_QUESTIONS.get((unit, topic), [])

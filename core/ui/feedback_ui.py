@@ -44,6 +44,8 @@ def _unit_factors(unit: str):
 
 
 def _same_unit(a: str, b: str) -> bool:
+    # "degrees" can be typed for the ° symbol
+    a, b = (re.sub(r"(?i)\bdeg(?:rees?)?\b", "°", u) for u in (a, b))
     if _normalize_unit(a) == _normalize_unit(b):
         return True
     fa = _unit_factors(a)

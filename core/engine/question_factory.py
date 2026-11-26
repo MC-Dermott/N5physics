@@ -276,6 +276,16 @@ from topics.rotational_motion import (
 )
 from topics.rotational_motion.definitions_ah import rotational_motion_ah_definitions
 from topics.exam_style import ah_rotational_astro
+from topics.quanta_waves import (
+    interference_ah as ah_int,
+    polarisation_ah as ah_pol,
+    quantum_ah as ah_quant,
+    shm_ah as ah_shm,
+    space_particles_ah as ah_space,
+    waves_ah as ah_waves,
+)
+from topics.quanta_waves.definitions_ah import quanta_waves_ah_definitions
+from topics.exam_style import ah_quanta_waves, ah_topic_exams
 
 QUAL_REGISTRY = {
     "S3": {
@@ -813,6 +823,54 @@ QUAL_REGISTRY = {
             },
             "Definitions": rotational_motion_ah_definitions,
         },
+        "Quanta and Waves": {
+            "Introduction to Quantum Theory": {
+                "1 — Photon Energy (E = hf)":           ah_quant.gen_photon_energy,
+                "2 — The Bohr Model":                   ah_quant.gen_bohr,
+                "3 — de Broglie Wavelength":            ah_quant.gen_de_broglie,
+                "4 — Uncertainty Principle":            ah_quant.gen_uncertainty,
+                "5 — Explain":                          ah_quant.gen_quantum_explain,
+            },
+            "Particles from Space": {
+                "1 — Charged Particles in Magnetic Fields": ah_space.gen_circular_path,
+                "2 — Helical Paths":                        ah_space.gen_helical_path,
+                "3 — Explain":                              ah_space.gen_particles_explain,
+            },
+            "Simple Harmonic Motion": {
+                "1 — Displacement, Acceleration and Frequency": ah_shm.gen_shm_motion,
+                "2 — Velocity and Energy":                      ah_shm.gen_shm_energy,
+                "3 — Mass on a Spring":                         ah_shm.gen_mass_spring,
+                "4 — Explain and Damping":                      ah_shm.gen_shm_explain,
+            },
+            "Waves": {
+                "1 — The Travelling Wave Equation":     ah_waves.gen_travelling_wave,
+                "2 — Phase Difference":                 ah_waves.gen_phase,
+                "3 — Energy and Amplitude":             ah_waves.gen_wave_energy,
+                "4 — Stationary Waves":                 ah_waves.gen_stationary,
+                "5 — Explain":                          ah_waves.gen_waves_explain,
+            },
+            "Interference": {
+                "1 — Optical Path Difference":          ah_int.gen_optical_path,
+                "2 — Thin Films and Coated Lenses":     ah_int.gen_thin_film,
+                "3 — Wedge Fringes":                    ah_int.gen_wedge,
+                "4 — Young's Slits":                    ah_int.gen_young,
+                "5 — Explain":                          ah_int.gen_interference_explain,
+            },
+            "Polarisation": {
+                "1 — Brewster's Angle":                 ah_pol.gen_brewster,
+                "2 — Explain":                          ah_pol.gen_polarisation_explain,
+            },
+            "Definitions": quanta_waves_ah_definitions,
+        },
+        "Skills": {
+            "Scientific Prefixes": {
+                "Name → Power of 10": gen_name_to_power,
+                "Power of 10 → Name": gen_power_to_name,
+                "Symbol → Name":      gen_symbol_to_name,
+                "Name → Symbol":      gen_name_to_symbol,
+            },
+            "Rearranging Relationships": rearranging["AH"],
+        },
     },
 }
 
@@ -873,7 +931,8 @@ _EXAM_STYLE = {
         "Electricity": {**higher_electricity.SCENARIOS, **higher_topic_exams_electricity.TOPIC_SCENARIOS_ELECTRICITY},
     },
     "Advanced Higher": {
-        "Rotational Motion and Astrophysics": ah_rotational_astro.SCENARIOS,
+        "Rotational Motion and Astrophysics": {**ah_rotational_astro.SCENARIOS, **ah_topic_exams.ROTATIONAL},
+        "Quanta and Waves": {**ah_quanta_waves.SCENARIOS, **ah_topic_exams.QUANTA},
     },
 }
 
@@ -1028,7 +1087,8 @@ def build_unit_assessment(qualification, unit):
 
 
 # Units whose topics offer their own exam-style questions.
-_TOPIC_EXAM_UNITS = {("Higher", unit) for unit in _EXAM_STYLE["Higher"]}
+_TOPIC_EXAM_UNITS = {(qualification, unit) for qualification in ("Higher", "Advanced Higher")
+                     for unit in _EXAM_STYLE[qualification]}
 
 
 @functools.lru_cache(maxsize=None)

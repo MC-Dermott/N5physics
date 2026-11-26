@@ -22,6 +22,17 @@ _PREFIXES = [
     {"name": "pico",  "symbol": "p", "power": -12},
 ]
 
+# The AH course also uses femto and peta.
+_AH_EXTRA = [
+    {"name": "femto", "symbol": "f", "power": -15},
+    {"name": "peta",  "symbol": "P", "power": 15},
+]
+
+
+def _prefixes(level):
+    return _PREFIXES + _AH_EXTRA if level == "AH" else _PREFIXES
+
+
 _NOTES = """
 ## Skills: Scientific Prefixes
 
@@ -54,7 +65,7 @@ def _make_classification(question_text, correct, distractors, level="N5"):
         unit="",
         distractors=[{"value": d["value"], "mistake": d["mistake"], "working": []} for d in distractors],
         working=[{"type": "text", "content": f"The correct answer is: **{correct}**"}],
-        notes=_NOTES,
+        notes=_NOTES if level != "AH" else _NOTES + "\n\nAdvanced Higher also uses **femto** (f, ×10⁻¹⁵) and **peta** (P, ×10¹⁵).\n",
         topic="Skills",
         question_type="Scientific Prefixes",
         level=level,
@@ -62,12 +73,12 @@ def _make_classification(question_text, correct, distractors, level="N5"):
     )
 
 
-def _other_prefixes(exclude_name, n=3):
-    return random.sample([p for p in _PREFIXES if p["name"] != exclude_name], n)
+def _other_prefixes(exclude_name, level, n=3):
+    return random.sample([p for p in _prefixes(level) if p["name"] != exclude_name], n)
 
 
 def gen_name_to_power(level="N5"):
-    prefix = random.choice(_PREFIXES)
+    prefix = random.choice(_prefixes(level))
     correct = _fmt_power(prefix["power"])
     distractors = [
         {
@@ -75,7 +86,7 @@ def gen_name_to_power(level="N5"):
             "mistake": f"{_fmt_power(other['power'])} is the value of '{other['name']}', not "
                        f"'{prefix['name']}'. '{prefix['name']}' means ×{correct}.",
         }
-        for other in _other_prefixes(prefix["name"])
+        for other in _other_prefixes(prefix["name"], level)
     ]
     return _make_classification(
         f"Which power of 10 does the prefix **'{prefix['name']}'** ({prefix['symbol']}) represent?",
@@ -84,7 +95,7 @@ def gen_name_to_power(level="N5"):
 
 
 def gen_power_to_name(level="N5"):
-    prefix = random.choice(_PREFIXES)
+    prefix = random.choice(_prefixes(level))
     correct = prefix["name"]
     distractors = [
         {
@@ -93,7 +104,7 @@ def gen_power_to_name(level="N5"):
                        f"×{_fmt_power(prefix['power'])}. The prefix for ×{_fmt_power(prefix['power'])} "
                        f"is '{prefix['name']}'.",
         }
-        for other in _other_prefixes(prefix["name"])
+        for other in _other_prefixes(prefix["name"], level)
     ]
     return _make_classification(
         f"Which prefix represents a value of **×{_fmt_power(prefix['power'])}**?",
@@ -102,7 +113,7 @@ def gen_power_to_name(level="N5"):
 
 
 def gen_symbol_to_name(level="N5"):
-    prefix = random.choice(_PREFIXES)
+    prefix = random.choice(_prefixes(level))
     correct = prefix["name"]
     distractors = [
         {
@@ -110,7 +121,7 @@ def gen_symbol_to_name(level="N5"):
             "mistake": f"'{other['symbol']}' is the symbol for '{other['name']}'. "
                        f"The symbol '{prefix['symbol']}' stands for '{prefix['name']}'.",
         }
-        for other in _other_prefixes(prefix["name"])
+        for other in _other_prefixes(prefix["name"], level)
     ]
     return _make_classification(
         f"In physics units, what does the symbol **'{prefix['symbol']}'** stand for? "
@@ -120,7 +131,7 @@ def gen_symbol_to_name(level="N5"):
 
 
 def gen_name_to_symbol(level="N5"):
-    prefix = random.choice(_PREFIXES)
+    prefix = random.choice(_prefixes(level))
     correct = prefix["symbol"]
     distractors = [
         {
@@ -128,7 +139,7 @@ def gen_name_to_symbol(level="N5"):
             "mistake": f"'{other['symbol']}' is the symbol for '{other['name']}'. "
                        f"The symbol for '{prefix['name']}' is '{prefix['symbol']}'.",
         }
-        for other in _other_prefixes(prefix["name"])
+        for other in _other_prefixes(prefix["name"], level)
     ]
     return _make_classification(
         f"What is the symbol for the prefix **'{prefix['name']}'**?",
