@@ -1,4 +1,4 @@
-"""'My Revision Guide': a pupil's topics ranked weakest first from their homework and assessment marks."""
+"""'My Revision Guide': a pupil's topics ranked weakest first from their unit assessment marks."""
 import streamlit as st
 
 from core.db.revision import fetch_guide
@@ -22,10 +22,7 @@ def _topic_card(row, key):
             st.caption("You have few or no marks on this topic yet, so this shows how your class did on it.")
         elif row["marks_out"]:
             st.progress(min(max(float(row["pct"] or 0) / 100, 0.0), 1.0))
-            st.write(f"**{row['marks_got']} / {row['marks_out']}** marks · homework {_pct(row['homework_pct'])}"
-                     f" · assessments {_pct(row['assessment_pct'])}")
-        if row["weak_areas"]:
-            st.write("**Weakest parts:** " + "; ".join(row["weak_areas"]))
+            st.write(f"**{row['marks_got']} / {row['marks_out']}** marks")
         for i, r in enumerate(row["revise"]):
             st.link_button(f"📄 {r['label']}", r["url"], key=f"{key}_rev{i}")
         for i, p in enumerate(row["practice"]):
@@ -43,10 +40,10 @@ def render_revision_guide(user):
         st.info("Your revision guide isn't switched on yet.")
         return
     if not rows:
-        st.info("Your teacher hasn't made your revision guide yet. It appears once your homework or "
+        st.info("Your teacher hasn't made your revision guide yet. It appears once your "
                 "assessment marks have been entered.")
         return
-    st.caption("Built from your homework and unit assessment marks, weakest topics first. "
+    st.caption("Built from your unit assessment marks, weakest topics first. "
                "Use the summary sheet to revise, then practise in the app.")
     levels = sorted({r["qualification"] for r in rows})
     tabs = st.tabs(levels) if len(levels) > 1 else [st.container()]
