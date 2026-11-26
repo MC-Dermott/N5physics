@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-from core.ui.feedback_ui import _normalize_unit, parse_number
+from core.ui.feedback_ui import _same_unit, parse_number
 
 
 def _is_correct(user_input, expected, tolerance=0.02):
@@ -61,7 +61,7 @@ def render_scaffold(question, suffix=""):
                     if st.button("Check", key=f"scaf_{question.qid}_{suffix}_{i}_btn"):
                         st.session_state[chk_key] = True
                         num_ok = _is_correct(user_val, step["answer"])
-                        unit_ok = _normalize_unit(user_unit) == _normalize_unit(step_unit)
+                        unit_ok = _same_unit(user_unit, step_unit)
                         st.session_state[ok_key] = num_ok and unit_ok
                         st.session_state[unit_wrong_key] = num_ok and not unit_ok
             else:

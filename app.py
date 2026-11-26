@@ -186,7 +186,7 @@ if "qualification" not in st.session_state:
     st.write("Choose your level to get started.")
     st.write("")
 
-    col0, col1, col2, col3, col4 = st.columns(5)
+    col0, col1, col2, col3, col4, col5 = st.columns(6)
     with col0:
         if st.button("S3", use_container_width=True):
             st.session_state.qualification = "S3"
@@ -204,6 +204,10 @@ if "qualification" not in st.session_state:
             st.session_state.qualification = "Higher"
             st.rerun()
     with col4:
+        if st.button("Advanced Higher", use_container_width=True):
+            st.session_state.qualification = "Advanced Higher"
+            st.rerun()
+    with col5:
         if st.button("Crash Higher", use_container_width=True):
             st.session_state.qualification = "Crash Higher"
             st.rerun()
@@ -248,6 +252,8 @@ if qualification == "National 4":
     mode_options = ["Practice", "Test", "Practice Assessment"]
 elif qualification in ("National 5", "Higher"):
     mode_options = ["Practice", "Test", UNIT_ASSESSMENT, "Past Paper Questions", "Past Paper Quiz"]
+elif qualification == "Advanced Higher":
+    mode_options = ["Practice", "Test", UNIT_ASSESSMENT]     # no AH past papers in the app yet
 else:
     mode_options = ["Practice", "Test", "Past Paper Questions"]
 

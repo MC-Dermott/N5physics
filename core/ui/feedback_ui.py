@@ -24,6 +24,31 @@ def _normalize_unit(unit: str) -> str:
 
 
 _SUPERSCRIPTS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹⁻", "0123456789-")
+
+
+def _unit_factors(unit: str):
+    """A unit as {symbol: power}, so that m s⁻¹, m s^-1 and m/s all match. Factors must be separated
+    by a space, a dot or "/". None if it isn't written that way."""
+    text = re.sub(r"([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)", lambda m: "^" + m.group(1).translate(_SUPERSCRIPTS), unit.strip().lower())
+    text = re.sub(r"ohms?", "ω", text)
+    factors, sign = {}, 1
+    for token in re.findall(r"/|[^\s/·.*]+", text):
+        if token == "/":
+            sign = -1
+            continue
+        m = re.fullmatch(r"([a-zω°µ]+)(?:\^(-?\d+))?", token)
+        if not m:
+            return None
+        factors[m.group(1)] = factors.get(m.group(1), 0) + sign * int(m.group(2) or 1)
+    return factors or None
+
+
+def _same_unit(a: str, b: str) -> bool:
+    if _normalize_unit(a) == _normalize_unit(b):
+        return True
+    fa = _unit_factors(a)
+    return fa is not None and fa == _unit_factors(b)
+
 # e.g. 3.2x10^19, 3.2 × 10^-19, 3.2*10^(−19), 3.2 × 10⁻¹⁹
 _SCI = re.compile(r"([+-]?(?:\d+\.?\d*|\.\d+))[x×*]10\^?\(?([+-]?\d+)\)?", re.IGNORECASE)
 
@@ -55,7 +80,7 @@ def check_answer(user_input, question, unit_input=None, tolerance=0.02):
 
     # Number is correct — check unit if one is expected
     if unit_input is not None and question.unit:
-        if _normalize_unit(unit_input) != _normalize_unit(question.unit):
+        if not _same_unit(unit_input, question.unit):
             return "wrong_unit", None
 
     return "correct", None

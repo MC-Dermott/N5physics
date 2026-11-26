@@ -264,6 +264,16 @@ from topics.skills.prefixes import (
     gen_name_to_symbol,
 )
 
+from topics.rotational_motion import (
+    angular_motion_ah as ah_ang,
+    astrophysics_ah as ah_astro,
+    gravitation_ah as ah_grav,
+    kinematics_ah as ah_kin,
+    rotational_dynamics_ah as ah_rot,
+)
+from topics.rotational_motion.definitions_ah import rotational_motion_ah_definitions
+from topics.exam_style import ah_rotational_astro
+
 QUAL_REGISTRY = {
     "S3": {
         "Dynamics Part 1 (Motion)": {
@@ -753,6 +763,48 @@ QUAL_REGISTRY = {
             "Definitions":       electricity_higher_definitions,
         },
     },
+    "Advanced Higher": {
+        "Rotational Motion and Astrophysics": {
+            "Kinematic Relationships": {
+                "1 — Differentiating for v and a":      ah_kin.gen_differentiate,
+                "2 — Integrating from a(t)":            ah_kin.gen_integrate,
+                "3 — Gradients and Areas of Graphs":    ah_kin.gen_graphs,
+            },
+            "Angular Motion": {
+                "1 — Radians and Angular Velocity":     ah_ang.gen_radians_speed,
+                "2 — Angular Equations of Motion":      ah_ang.gen_angular_equations,
+                "3 — Angular and Tangential Motion":    ah_ang.gen_tangential,
+            },
+            "Centripetal Force": {
+                "1 — Centripetal Force and Acceleration": ah_ang.gen_centripetal_calc,
+                "2 — Vertical Circles":                   ah_ang.gen_vertical_circle,
+                "3 — Explain":                            ah_ang.gen_centripetal_explain,
+            },
+            "Rotational Dynamics": {
+                "1 — Moment of Inertia":                ah_rot.gen_moment_of_inertia,
+                "2 — Torque and Angular Acceleration":  ah_rot.gen_torque,
+                "3 — Angular Momentum":                 ah_rot.gen_angular_momentum,
+                "4 — Rotational Kinetic Energy":        ah_rot.gen_rotational_energy,
+                "5 — Explain":                          ah_rot.gen_rotation_explain,
+            },
+            "Gravitation": {
+                "1 — Satellites and Orbits":                 ah_grav.gen_satellites,
+                "2 — Gravitational Potential and Energy":    ah_grav.gen_potential_energy,
+                "3 — Escape Velocity":                       ah_grav.gen_escape_velocity,
+                "4 — Explain":                               ah_grav.gen_gravitation_explain,
+            },
+            "General Relativity": {
+                "1 — Schwarzschild Radius":             ah_astro.gen_schwarzschild,
+                "2 — Explaining General Relativity":    ah_astro.gen_relativity_explain,
+            },
+            "Stellar Physics": {
+                "1 — Apparent Brightness and Distance":  ah_astro.gen_brightness,
+                "2 — Luminosity, Radius and Temperature": ah_astro.gen_luminosity,
+                "3 — Stellar Evolution and the H–R Diagram": ah_astro.gen_stellar_explain,
+            },
+            "Definitions": rotational_motion_ah_definitions,
+        },
+    },
 }
 
 
@@ -810,6 +862,9 @@ _EXAM_STYLE = {
         "Particles and Waves":           higher_particles_waves.SCENARIOS,
         "Electricity":                   higher_electricity.SCENARIOS,
     },
+    "Advanced Higher": {
+        "Rotational Motion and Astrophysics": ah_rotational_astro.SCENARIOS,
+    },
 }
 
 for _qualification, _units in _EXAM_STYLE.items():
@@ -865,7 +920,8 @@ def get_sub_types(qualification, topic, question_type):
     return None
 
 
-_LEVEL_MAP = {"S3": "S3", "National 4": "N4", "National 5": "N5", "Higher": "Higher"}
+_LEVEL_MAP = {"S3": "S3", "National 4": "N4", "National 5": "N5", "Higher": "Higher",
+              "Advanced Higher": "AH"}
 
 
 def is_exam_style_test(qualification, topic, question_type):
