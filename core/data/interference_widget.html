@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Interference of Waves – Two-Source Simulation</title>
+<title>Interference of Waves – Two Sources and Diffraction Grating</title>
 <style>
   :root { --ink:#1b2430; --muted:#5b6675; --line:#d9dee6; --card:#ffffff; --bg:#f3f5f8; --max:#e08600; --min:#1b7f9e; }
   * { box-sizing:border-box; }
@@ -31,11 +31,25 @@
   .badge.min { background:#dff3fa; color:#0b5870; }
   .badge.mid { background:#eceff3; color:#4a5463; }
   .note { font-size:.85rem; color:var(--muted); margin:6px 0 0; }
+  .tabs { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .tabs button { font-weight:700; }
+  .tabs button[aria-pressed=true] { background:var(--ink); color:#fff; border-color:var(--ink); }
+  #gCv, #gScr, #gZoom { cursor:default; touch-action:auto; }
+  .tbl { border-collapse:collapse; font-size:.9rem; margin-top:10px; font-variant-numeric:tabular-nums; }
+  .tbl th, .tbl td { border:1px solid var(--line); padding:3px 12px; text-align:center; }
+  .tbl tr.sel td { background:#fff0d6; font-weight:700; }
+  [hidden] { display:none !important; }
   .eq { font-family:"Times New Roman",serif; font-size:1.02rem; }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="tabs">
+    <button id="tabTwo" aria-pressed="true">Two sources</button>
+    <button id="tabGrating" aria-pressed="false">Diffraction grating</button>
+  </div>
+
+  <div id="twoView">
   <h1>Interference of waves: two coherent sources</h1>
   <div class="sub">Two sources vibrating in phase (like two dippers in a ripple tank, or two slits lit by the same laser). Drag the point <b>P</b> anywhere in the pattern to measure its path difference.</div>
 
@@ -83,6 +97,54 @@
     </div>
     <p class="note eq" id="spacing"></p>
     <p class="note" id="counts"></p>
+  </div>
+  </div>
+
+  <div id="gratingView" hidden>
+  <h1>Interference of light: diffraction grating</h1>
+  <div class="sub">Light passes through many equally spaced slits. Bright maxima appear only at angles where light from neighbouring slits arrives in phase: <b>d sin θ = mλ</b>.</div>
+
+  <div class="card">
+    <canvas id="gCv" width="880" height="560"></canvas>
+    <p class="note">View from above, drawn to scale: the angles and positions on the screen are true. The slits themselves are far too small to draw to scale.</p>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <div class="ctl"><label for="gN">Lines per mm <output id="gNO"></output></label><input id="gN" type="range" min="80" max="1200" step="10" value="300"></div>
+      <div class="ctl" id="gLamCtl"><label for="gLam">Wavelength λ <output id="gLamO"></output></label><input id="gLam" type="range" min="400" max="700" step="1" value="633"></div>
+      <div class="ctl"><label for="gL">Distance to screen <output id="gLO"></output></label><input id="gL" type="range" min="0.5" max="3" step="0.05" value="1.5"></div>
+    </div>
+    <div class="row">
+      <span>Light source:</span>
+      <label><input type="radio" name="src" value="laser" checked> Laser (one wavelength)</label>
+      <label><input type="radio" name="src" value="white"> White light</label>
+      <span>Highlight order m = <select id="gM"></select></span>
+    </div>
+    <div class="row">
+      <span>Gratings:</span>
+      <button data-n="100">100 lines/mm</button><button data-n="300">300 lines/mm</button><button data-n="600">600 lines/mm</button>
+      <span id="gLasers">Lasers: <button data-lam="405">violet 405 nm</button> <button data-lam="532">green 532 nm</button> <button data-lam="633">red 633 nm</button></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <b>Front view of the screen</b>
+    <canvas id="gScr" width="880" height="110" style="margin-top:8px"></canvas>
+  </div>
+
+  <div class="card">
+    <b id="gZoomTitle">Why: two neighbouring slits</b>
+    <canvas id="gZoom" width="880" height="330" style="margin-top:8px"></canvas>
+  </div>
+
+  <div class="card">
+    <p class="eq" id="gSlit" style="margin:0 0 6px"></p>
+    <p class="eq" id="gCalc" style="margin:0 0 6px"></p>
+    <p class="eq" id="gMax" style="margin:0"></p>
+    <div id="gTable"></div>
+    <p class="note" id="gNote"></p>
+  </div>
   </div>
 </div>
 
@@ -353,6 +415,7 @@
   // ---------- main loop ----------
   let last = performance.now();
   function frame(now) {
+    if ($('twoView').hidden) { last = now; requestAnimationFrame(frame); return; }
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
     if (!st.paused) st.t += dt * st.speed;
     draw();
@@ -362,6 +425,226 @@
   sync(); recompute(); fillM(); info();
   $('jType').value = 'min'; fillM(); $('jM').value = '0'; jump();
   requestAnimationFrame(frame);
+})();
+</script>
+
+<script>
+(() => {
+  const START_VIEW = 'two';   // 'two' or 'grating'
+  const $ = id => document.getElementById(id);
+  const W = 880, H = 560, GX = 90, CY = H / 2, PXM = 230;   // PXM = pixels per metre
+  const HALF = (CY - 10) / PXM;                             // screen half-height in metres
+  const cx = $('gCv').getContext('2d'), sc = $('gScr').getContext('2d'), zc = $('gZoom').getContext('2d');
+  const FONT = '-apple-system,Segoe UI,Arial,sans-serif';
+  const g = { N: 300, lam: 633, L: 1.5, white: false, m: 1 };
+
+  // approximate colour of visible light (nm)
+  function rgb(l, a = 1) {
+    let r = 0, gr = 0, b = 0;
+    if (l < 440) { r = (440 - l) / 60; b = 1; }
+    else if (l < 490) { gr = (l - 440) / 50; b = 1; }
+    else if (l < 510) { gr = 1; b = (510 - l) / 20; }
+    else if (l < 580) { r = (l - 510) / 70; gr = 1; }
+    else if (l < 645) { r = 1; gr = (645 - l) / 65; }
+    else r = 1;
+    const f = v => Math.round(255 * Math.pow(v, 0.8));
+    return `rgba(${f(r)},${f(gr)},${f(b)},${a})`;
+  }
+
+  const dM = () => 1e-3 / g.N;                              // slit separation in m
+  const sinT = (m, l) => m * l * 1e-9 / dM();
+  const theta = (m, l) => { const s = sinT(m, l); return s < 1 ? Math.asin(s) : null; };
+  const mMaxFor = l => Math.ceil(dM() / (l * 1e-9) - 1e-9) - 1;
+  const deg = t => (t * 180 / Math.PI).toFixed(1) + '°';
+  const sciHtml = v => { const e = Math.floor(Math.log10(v)); return (v / 10 ** e).toFixed(2) + ' × 10<sup>' + e + '</sup>'; };
+  const waves = () => { if (!g.white) return [g.lam]; const a = []; for (let l = 400; l <= 700; l += 5) a.push(l); return a; };
+
+  // white light: only the first three spectra are drawn, higher ones just pile on top of each other
+  const drawMax = l => g.white ? Math.min(3, mMaxFor(l)) : mMaxFor(l);
+
+  function text(c, t, x, y, color, align = 'left', font = '12px ' + FONT) {
+    c.font = font; c.fillStyle = color; c.textAlign = align; c.textBaseline = 'middle'; c.fillText(t, x, y);
+  }
+  function line(c, x1, y1, x2, y2, color, w = 1, dash = []) {
+    c.beginPath(); c.setLineDash(dash); c.strokeStyle = color; c.lineWidth = w; c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.setLineDash([]);
+  }
+
+  function drawTop() {
+    cx.fillStyle = '#04102a'; cx.fillRect(0, 0, W, H);
+    const sx = GX + g.L * PXM;
+    // incident beam
+    line(cx, 12, CY, GX, CY, g.white ? '#fff' : rgb(g.lam), 4);
+    text(cx, g.white ? 'white light' : 'laser', 14, CY - 14, '#cfe3ff');
+    // diffracted beams
+    const labels = [];
+    for (const l of waves()) {
+      for (let m = 0; m <= drawMax(l); m++) {
+        if (g.white && m === 0) continue;
+        const t = theta(m, l);
+        for (const s of (m === 0 ? [1] : [-1, 1])) {
+          const dx = Math.cos(t), dy = -s * Math.sin(t);
+          const toScreen = (sx - GX) / dx, toEdge = dy ? (CY - 4) / Math.abs(dy) : Infinity;
+          const hits = toScreen * Math.abs(dy) <= HALF * PXM;
+          const len = hits ? toScreen : Math.min(toEdge, (W - 8 - GX) / dx);
+          const x = GX + dx * len, y = CY + dy * len, sel = m === g.m;
+          const col = g.white ? rgb(l, sel ? 0.9 : 0.45) : rgb(l, sel ? 1 : 0.6);
+          line(cx, GX, CY, x, y, col, sel ? (g.white ? 2.2 : 3) : 1.4);
+          if (hits) { cx.beginPath(); cx.arc(sx, y, sel ? 5 : 3.5, 0, 7); cx.fillStyle = rgb(l); cx.fill(); }
+          if (l === (g.white ? 550 : g.lam)) labels.push({ m, x, y, hits, sel });
+        }
+      }
+    }
+    if (g.white) {
+      line(cx, GX, CY, sx, CY, '#fff', 3);
+      cx.beginPath(); cx.arc(sx, CY, 5, 0, 7); cx.fillStyle = '#fff'; cx.fill();
+      labels.push({ m: 0, x: sx, y: CY, hits: true });
+    }
+    // screen
+    line(cx, sx, CY - HALF * PXM, sx, CY + HALF * PXM, 'rgba(255,255,255,.55)', 2);
+    text(cx, 'screen', sx - 6, H - 22, '#cfe3ff', 'right');
+    for (const q of labels) {
+      if (!q.hits && q.y > CY) continue;       // keeps the distance scale at the bottom clear
+      const x = q.hits ? sx + 9 : Math.min(W - 44, q.x + 4);
+      const y = Math.min(H - 10, Math.max(10, q.y));
+      text(cx, 'm = ' + q.m, x, y, q.sel ? '#fff' : '#9db4d6', 'left', (q.sel ? 'bold ' : '') + '12px ' + FONT);
+    }
+    // angle arc for the highlighted order
+    const t = g.white ? null : theta(g.m, g.lam);
+    line(cx, GX, CY, W - 60, CY, 'rgba(255,255,255,.35)', 1, [4, 4]);
+    if (g.m > 0 && t !== null) {
+      cx.beginPath(); cx.strokeStyle = '#fff'; cx.lineWidth = 1.4; cx.arc(GX, CY, 62, -t, 0); cx.stroke();
+      text(cx, 'θ = ' + deg(t), GX + 76 * Math.cos(t / 2), CY - 76 * Math.sin(t / 2), '#fff', 'left', 'bold 13px ' + FONT);
+    }
+    // grating
+    cx.fillStyle = '#dbe6f7';
+    for (let y = CY - 60; y < CY + 60; y += 7) cx.fillRect(GX - 3, y, 6, 4);
+    text(cx, 'grating', GX, CY + 76, '#cfe3ff', 'center');
+    // distance dimension
+    const yb = H - 10;
+    line(cx, GX, yb, sx, yb, '#9db4d6'); line(cx, GX, yb - 5, GX, yb + 5, '#9db4d6'); line(cx, sx, yb - 5, sx, yb + 5, '#9db4d6');
+    text(cx, g.L.toFixed(2) + ' m', (GX + sx) / 2, yb - 10, '#9db4d6', 'center');
+  }
+
+  function drawFront() {
+    sc.fillStyle = '#04102a'; sc.fillRect(0, 0, 880, 110);
+    const X = y => 440 + y / HALF * 420;
+    line(sc, 20, 82, 860, 82, '#9db4d6');
+    for (let v = -1; v <= 1.001; v += 0.5) { line(sc, X(v), 78, X(v), 86, '#9db4d6'); text(sc, v.toFixed(1) + ' m', X(v), 97, '#9db4d6', 'center'); }
+    // each order is painted on its own layer, then layers are added so that overlapping spectra mix
+    const layer = document.createElement('canvas'); layer.width = 880; layer.height = 110;
+    const lc = layer.getContext('2d');
+    for (let m = 0; m <= drawMax(g.white ? 400 : g.lam); m++) {
+      if (g.white && m === 0) continue;
+      for (const side of (m === 0 ? [1] : [-1, 1])) {
+        lc.clearRect(0, 0, 880, 110);
+        for (const l of waves()) {
+          if (m > mMaxFor(l)) continue;
+          const y = g.L * Math.tan(theta(m, l));
+          if (y > HALF) continue;
+          const next = g.white ? theta(m, l + 5) : null;
+          const w = !g.white ? 6 : Math.max(3, next === null ? 3 : X(g.L * Math.tan(next)) - X(y) + 1);
+          lc.fillStyle = rgb(l); lc.fillRect(X(side * y) - w / 2, 30, w, 36);
+        }
+        sc.globalCompositeOperation = 'lighter'; sc.drawImage(layer, 0, 0);
+      }
+    }
+    sc.globalCompositeOperation = 'source-over';
+    if (g.white) { sc.fillStyle = '#fff'; sc.fillRect(437, 30, 6, 36); }
+    const l = g.white ? 550 : g.lam;
+    for (let m = 0; m <= drawMax(l); m++) {
+      const y = g.L * Math.tan(theta(m, l));
+      if (y <= HALF) (m ? [-1, 1] : [1]).forEach(s => text(sc, String(m), X(s * y), 17, m === g.m ? '#fff' : '#9db4d6', 'center', (m === g.m ? 'bold ' : '') + '12px ' + FONT));
+    }
+    text(sc, 'order m', 8, 17, '#9db4d6');
+  }
+
+  function drawZoom() {
+    zc.fillStyle = '#04102a'; zc.fillRect(0, 0, 880, 330);
+    const l = g.white ? 550 : g.lam, t = theta(g.m, l);
+    $('gZoomTitle').textContent = 'Why: two neighbouring slits' + (g.white ? ' (shown for 550 nm light)' : '');
+    if (t === null) { text(zc, 'This order does not exist for this grating and wavelength.', 440, 165, '#fff', 'center'); return; }
+    const x = 200, y1 = 100, D = 170, y2 = y1 + D;       // upper slit, lower slit
+    const ux = Math.cos(t), uy = -Math.sin(t), col = rgb(l);
+    // grating with two openings
+    zc.fillStyle = '#dbe6f7';
+    [[30, y1 - 8], [y1 + 8, y2 - 8], [y2 + 8, 315]].forEach(([a, b]) => zc.fillRect(x - 4, a, 8, b - a));
+    // incoming plane wave
+    [y1, y2].forEach(y => line(zc, 60, y, x, y, col, 2));
+    // parallel rays towards the maximum
+    const R = 260;
+    [y1, y2].forEach(y => { line(zc, x, y, x + R * ux, y + R * uy, col, 2.5); line(zc, x, y, x + 120, y, 'rgba(255,255,255,.35)', 1, [4, 4]); });
+    // perpendicular from the upper slit to the lower ray
+    const pd = D * Math.sin(t), fx = x + pd * ux, fy = y2 + pd * uy;
+    if (g.m > 0) {
+      line(zc, x, y1, fx, fy, '#fff', 1.4, [5, 4]);
+      line(zc, x, y2, fx, fy, '#ff3fa4', 5);
+      zc.beginPath(); zc.strokeStyle = '#fff'; zc.lineWidth = 1.2; zc.arc(x, y2, 40, -t, 0); zc.stroke();
+      zc.beginPath(); zc.arc(x, y1, 40, Math.PI / 2 - t, Math.PI / 2); zc.stroke();
+      text(zc, 'θ', x + 52 * Math.cos(t / 2), y2 - 52 * Math.sin(t / 2), '#fff', 'center', 'italic 15px Georgia,serif');
+      text(zc, 'θ', x + Math.max(14, 53 * Math.sin(t / 2)), y1 + 53 * Math.cos(t / 2), '#fff', 'center', 'italic 15px Georgia,serif');
+    }
+    // d dimension
+    line(zc, x - 40, y1, x - 40, y2, '#9db4d6'); line(zc, x - 46, y1, x - 34, y1, '#9db4d6'); line(zc, x - 46, y2, x - 34, y2, '#9db4d6');
+    text(zc, 'd', x - 54, (y1 + y2) / 2, '#cfe3ff', 'center', 'italic 16px Georgia,serif');
+    const tx = 520;
+    text(zc, 'Extra distance travelled by the lower ray', tx, 100, '#ff8cc8', 'left', 'bold 14px ' + FONT);
+    text(zc, 'path difference = d sin θ', tx, 128, '#fff', 'left', '15px ' + FONT);
+    text(zc, 'Maximum when the waves arrive in phase:', tx, 170, '#cfe3ff', 'left', '14px ' + FONT);
+    text(zc, 'd sin θ = mλ', tx, 198, '#fff', 'left', 'bold 17px ' + FONT);
+    text(zc, g.m === 0 ? 'm = 0: path difference is zero (central maximum).' : `Here m = ${g.m}: path difference = ${g.m}λ`, tx, 232, '#cfe3ff', 'left', '14px ' + FONT);
+  }
+
+  function info() {
+    const d = dM();
+    $('gSlit').innerHTML = `Slit separation: d = 1 × 10<sup>−3</sup> ÷ ${g.N} = <b>${sciHtml(d)} m</b>`;
+    if (!g.white) {
+      const t = theta(g.m, g.lam), mm = mMaxFor(g.lam), ratio = d / (g.lam * 1e-9);
+      $('gCalc').innerHTML = `d sin θ = mλ &nbsp;→&nbsp; ${sciHtml(d)} × sin θ = ${g.m} × ${g.lam} × 10<sup>−9</sup> &nbsp;→&nbsp; <b>θ = ${deg(t)}</b>`;
+      $('gMax').innerHTML = `Highest order: sin θ cannot be more than 1, so m ≤ d / λ = ${ratio.toFixed(2)}. Highest m = <b>${mm}</b>, giving <b>${2 * mm + 1} maxima</b> in total.`;
+      let rows = '';
+      for (let m = 0; m <= mm; m++) {
+        const y = g.L * Math.tan(theta(m, g.lam));
+        rows += `<tr class="${m === g.m ? 'sel' : ''}"><td>${m}</td><td>${deg(theta(m, g.lam))}</td><td>${y <= HALF ? y.toFixed(2) + ' m' : 'misses this screen'}</td></tr>`;
+      }
+      $('gTable').innerHTML = `<table class="tbl"><tr><th>Order m</th><th>Angle θ</th><th>Distance from central maximum</th></tr>${rows}</table>`;
+      $('gNote').textContent = 'Try it: more lines per mm (smaller d) or a longer wavelength spreads the maxima further apart. Moving the screen changes the spacing on the screen but not the angles.';
+    } else {
+      const m = g.m, tv = theta(m, 400), tr = theta(m, 700);
+      $('gCalc').innerHTML = m === 0
+        ? 'Central maximum (m = 0): the path difference is zero for <b>every</b> wavelength, so all colours overlap and it is <b>white</b>.'
+        : `Order ${m}: violet (400 nm) θ = <b>${deg(tv)}</b>; red (700 nm) θ = <b>${tr === null ? 'does not appear' : deg(tr)}</b>.`;
+      $('gMax').innerHTML = 'Since sin θ = mλ / d, a longer wavelength gives a larger angle: in each spectrum <b>violet is nearest the centre and red is furthest out</b>.';
+      $('gTable').innerHTML = '';
+      $('gNote').textContent = (mMaxFor(400) >= 3 ? 'The second and third order spectra overlap, because 3 × 400 nm is less than 2 × 700 nm. ' : '') + (mMaxFor(400) > 3 ? 'Only the first three orders are drawn. ' : '') + 'A prism is the other way round in two ways: it gives only one spectrum, and red is deviated least.';
+    }
+  }
+
+  function render() {
+    g.N = +$('gN').value; g.lam = +$('gLam').value; g.L = +$('gL').value;
+    g.white = document.querySelector('input[name=src]:checked').value === 'white';
+    $('gNO').textContent = g.N; $('gLamO').textContent = g.lam + ' nm'; $('gLO').textContent = g.L.toFixed(2) + ' m';
+    $('gLamCtl').hidden = $('gLasers').hidden = g.white;
+    const mm = drawMax(g.white ? 400 : g.lam), sel = $('gM');
+    sel.innerHTML = '';
+    for (let m = 0; m <= mm; m++) sel.add(new Option(m, m));
+    g.m = Math.min(g.m, mm); sel.value = g.m;
+    drawTop(); drawFront(); drawZoom(); info();
+  }
+
+  ['gN', 'gLam', 'gL'].forEach(id => $(id).addEventListener('input', render));
+  document.querySelectorAll('input[name=src]').forEach(r => r.addEventListener('change', render));
+  $('gM').addEventListener('change', () => { g.m = +$('gM').value; render(); });
+  document.querySelectorAll('button[data-n]').forEach(b => b.addEventListener('click', () => { $('gN').value = b.dataset.n; render(); }));
+  document.querySelectorAll('button[data-lam]').forEach(b => b.addEventListener('click', () => { $('gLam').value = b.dataset.lam; render(); }));
+
+  function show(v) {
+    const gr = v === 'grating';
+    $('twoView').hidden = gr; $('gratingView').hidden = !gr;
+    $('tabTwo').setAttribute('aria-pressed', !gr); $('tabGrating').setAttribute('aria-pressed', gr);
+  }
+  $('tabTwo').addEventListener('click', () => show('two'));
+  $('tabGrating').addEventListener('click', () => show('grating'));
+  render(); show(START_VIEW);
 })();
 </script>
 </body>

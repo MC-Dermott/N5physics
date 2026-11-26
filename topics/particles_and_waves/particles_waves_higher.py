@@ -961,7 +961,7 @@ def gen_pw_pe_effects(level="Higher"):
 
 
 # ════════════════ Interference ════════════════
-def gen_pw_grating(level="Higher"):
+def _gen_pw_grating(level="Higher"):
     lpm = random.choice([100, 250, 300, 400, 500, 600])
     lam_nm = random.choice([405, 450, 532, 589, 633, 650])
     d = 1 / (lpm * 1000)
@@ -1057,6 +1057,18 @@ _INTERFERENCE_WIDGET_HTML = (
 def gen_pw_path_difference(level="Higher"):
     q = _gen_pw_path_difference(level)
     q.metadata["widget_html"] = _INTERFERENCE_WIDGET_HTML
+    q.metadata["widget_height"] = 1150
+    return q
+
+
+# same simulation, opened on its diffraction grating tab
+_GRATING_WIDGET_HTML = _INTERFERENCE_WIDGET_HTML.replace(
+    "const START_VIEW = 'two';", "const START_VIEW = 'grating';")
+
+
+def gen_pw_grating(level="Higher"):
+    q = _gen_pw_grating(level)
+    q.metadata["widget_html"] = _GRATING_WIDGET_HTML
     q.metadata["widget_height"] = 1150
     return q
 
