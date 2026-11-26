@@ -37,10 +37,11 @@ DEFINITIONS = {
     },
     "conservation of angular momentum": {
         "group": "Rotational motion",
-        "definition": "The total angular momentum is conserved in the absence of external torques.",
+        "definition": "The total angular momentum before an interaction is equal to the total angular momentum after it, in the absence of net external torques.",
         "confusables": [],
-        "traps": [("The total angular momentum of a system is always conserved.",
-                   "The condition is needed: **in the absence of external torques**.")],
+        "traps": [("The total angular momentum before an interaction is equal to the total angular momentum after it.",
+                   "On its own this is insufficient: add **in the absence of net external torques**. "
+                   "'Angular momentum is conserved' scores nothing.")],
     },
     "centripetal force": {
         "group": "Rotational motion",
@@ -65,7 +66,9 @@ DEFINITIONS = {
         "definition": "The work done in moving unit mass from infinity to that point.",
         "confusables": ["gravitational field strength", "escape velocity"],
         "traps": [("The work done in moving unit mass from that point to infinity.",
-                   "The direction matters: **from infinity to the point**.")],
+                   "The direction matters: **from infinity to the point**."),
+                  ("The work done in moving a mass from infinity to that point.",
+                   "It must be **unit mass** (or 1 kg). Course reports say candidates leave this out.")],
     },
     "escape velocity": {
         "group": "Gravitation",
@@ -77,7 +80,7 @@ DEFINITIONS = {
     # ── General relativity ──
     "equivalence principle": {
         "group": "General relativity",
-        "definition": "An observer cannot distinguish between the effects of a uniform gravitational field and a constant acceleration.",
+        "definition": "It is not possible to distinguish between the effects on an observer of a uniform gravitational field and of a constant acceleration.",
         "confusables": ["spacetime"],
         "traps": [("An observer cannot distinguish between a uniform gravitational field and a constant velocity.",
                    "It is a constant **acceleration**.")],
@@ -99,7 +102,7 @@ DEFINITIONS = {
     },
     "geodesic": {
         "group": "General relativity",
-        "definition": "The shortest path between two points in spacetime.",
+        "definition": "The path with the shortest distance between two points in spacetime.",
         "confusables": ["world line", "spacetime"],
     },
     "world line": {
@@ -150,6 +153,10 @@ DEFINITIONS = {
 }
 
 STATEMENTS = [
+    ("conserve", "In the absence of net external torques, the total angular momentum before an interaction equals the total angular momentum after it.", True,
+     "this is the principle of conservation of angular momentum."),
+    ("conserve", "The total angular momentum of a system stays the same even when a net external torque acts on it.", False,
+     "it is only conserved in the absence of net external torques."),
     ("moi", "Moment of inertia depends on the mass of an object and how that mass is distributed about the axis.", True,
      "both the mass and its distribution matter."),
     ("moi", "The moment of inertia of an object is the same about any axis.", False,

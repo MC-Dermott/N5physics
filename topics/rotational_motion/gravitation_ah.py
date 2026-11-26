@@ -141,6 +141,14 @@ _EXPLAIN = [
       ("X's is √2 times Y's.", "The spacecraft's mass does not appear in √(2GM/r)."),
       ("X's is half of Y's.", "The mass cancels.")],
      "½mv² = GMm/r, so m cancels."),
+    ("A space probe leaving the Earth is to travel to a distant asteroid. Why must it be given a speed greater "
+     "than the escape velocity?",
+     "So that it can leave the Earth's gravitational field and still be moving, instead of only just reaching infinity at rest.",
+     [("So that it can escape from the Earth's orbit.",
+       "A common error: escape velocity is about leaving the Earth's **gravitational field**, not an orbit."),
+      ("So that it can overcome air resistance in deep space.", "There is no air resistance in deep space."),
+      ("Because escape velocity only takes an object into a circular orbit.", "That is the orbital speed.")],
+     "At exactly the escape velocity an object reaches infinity with zero kinetic energy."),
     ("A satellite is moved to a circular orbit of larger radius. What happens to its orbital speed and gravitational "
      "potential energy?",
      "Its speed decreases and its potential energy increases (becomes less negative).",

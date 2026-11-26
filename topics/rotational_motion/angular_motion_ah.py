@@ -235,9 +235,27 @@ _EXPLAIN_C = [
      "the same speed?",
      "The maximum friction is less than the central force needed (mv²/r).",
      [("The centrifugal force on the car increases on ice.", "No outward force acts on the car."),
-      ("The central force needed increases because the road is icy.", "mv²/r depends only on m, v and r."),
+      ("The centripetal force overcomes the friction.",
+       "This is a common wrong statement. The centripetal force is not a separate force: friction provides it."),
       ("The car's weight decreases, so it needs more friction.", "The weight does not change.")],
      "Friction provides the central force; if it cannot supply mv²/r the car moves in a path of larger radius."),
+    ("Riders stand against the inside wall of a spinning drum with no floor, held up by friction. As the drum "
+     "slows down they start to slide down the wall. Why?",
+     "The friction from the wall no longer balances the rider's weight.",
+     [("The centripetal force no longer balances the weight.",
+       "The central force is horizontal, so it cannot balance the weight."),
+      ("The centrifugal force pushing them into the wall disappears.", "No outward force acts on the riders."),
+      ("Their weight increases as the drum slows.", "Weight does not change.")],
+     "As ω falls, the central force from the wall (mrω²) falls, so the maximum friction falls below the weight. "
+     "The answer must compare the vertical forces: friction and weight."),
+    ("Two peas rest on a rotating plate, one further from the centre than the other. As the plate speeds up, "
+     "why does the outer pea slide first?",
+     "At the same ω the outer pea needs a greater central force (mrω²), and friction cannot provide it.",
+     [("The centripetal force overcomes the friction on the outer pea.",
+       "Friction provides the central force; it is insufficient for the force required."),
+      ("The outer pea has a greater angular velocity.", "Both have the same angular velocity."),
+      ("There is a greater outward force on the outer pea.", "No outward force acts on the peas.")],
+     "The radius is greater, so the required central force is greater."),
     ("A fairground rider is at the bottom of a vertical loop. How does the reaction force from the seat "
      "compare with the rider's weight?",
      "It is greater than the weight, because the resultant force must point upwards, to the centre.",

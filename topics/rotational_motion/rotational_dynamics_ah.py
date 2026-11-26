@@ -13,7 +13,7 @@ $$I = \sum mr^2 \qquad \tau = Fr \qquad \tau = I\alpha \qquad L = mvr = mr^2\ome
 
 $$E_{k(rotational)} = \tfrac{1}{2}I\omega^2 \qquad E_P = E_{k(translational)} + E_{k(rotational)}$$
 
-| Shape | Moment of inertia (given in the question if needed) |
+| Shape | Moment of inertia (on the relationships sheet) |
 |---|---|
 | Rod about its centre | $I = \frac{1}{12}ml^2$ |
 | Rod about its end | $I = \frac{1}{3}ml^2$ |
@@ -24,8 +24,8 @@ $$E_{k(rotational)} = \tfrac{1}{2}I\omega^2 \qquad E_P = E_{k(translational)} + 
   It depends on the mass **and** how the mass is distributed about the axis.
 - F in τ = Fr is the force **perpendicular** to the radius. With friction, the **unbalanced** torque is
   applied torque − frictional torque.
-- **Conservation of angular momentum:** the total angular momentum is conserved in the absence of
-  external torques.
+- **Conservation of angular momentum:** the total angular momentum before an interaction is equal to the
+  total angular momentum after it, **in the absence of net external torques**.
 """
 
 _SHAPES = [
@@ -216,6 +216,22 @@ _EXPLAIN = [
       ("Pulling in the arms applies an external torque which increases ω.", "The force is internal to the skater."),
       ("The skater's mass decreases, so ω increases.", "The mass is unchanged; its distribution changes.")],
      "State what is conserved, the condition, and the relationship."),
+    ("A small block is dropped vertically on to a freely rotating turntable and sticks to it. A second trial uses "
+     "an identical block placed further from the axis. How does the final angular velocity compare with the first trial?",
+     "It is less, because the moment of inertia of the system is greater and angular momentum is conserved.",
+     [("It is less, because the mass of the system is greater.",
+       "The mass is the same in both trials. The justification must be in terms of moment of inertia."),
+      ("It is greater, because the block has a larger tangential speed.",
+       "The block arrives with no angular momentum about the axis."),
+      ("It is the same, because the same block is used.", "I = mr² depends on the distance from the axis.")],
+     "Same L before. A larger r gives a larger I, so ω is smaller."),
+    ("A force is applied tangentially to a flywheel. The same force is then applied at a greater distance from "
+     "the axis of rotation. Why is the angular acceleration greater?",
+     "The torque is greater (τ = Fr) and the moment of inertia is unchanged, so α = τ/I is greater.",
+     [("The moment of inertia is smaller further from the axis.", "Moving the force does not change the mass distribution."),
+      ("The force is greater further from the axis.", "The force is the same; the torque changes."),
+      ("The tangential speed is greater further from the axis.", "That does not explain the change in angular acceleration.")],
+     "Give the distance from the axis of rotation, τ = Fr, then τ = Iα."),
     ("The same unbalanced torque is applied to two wheels of equal mass. Wheel X has its mass concentrated at the "
      "rim; wheel Y has its mass near the axle. How do their angular accelerations compare?",
      "Y's is greater: its mass is closer to the axis, so I is smaller and α = τ/I is larger.",

@@ -97,8 +97,8 @@ def _spin_drier(level=LEVEL):
     ex.on(_CEN).num(f"At maximum speed, calculate the centripetal force on an item of mass {m:g} kg, {r:g} m from "
                     f"the axis.", F, "N", wrong=[(m * r * ws, "ω must be squared.")],
                     working=[r"F = mr\omega^2", rf"F = {ltx(F)}\ \mathrm{{N}}"])
-    ex.choice("Water leaves the wet clothes through holes in the drum. Why?",
-              "The force on the water is too small to keep it moving in a circle, so it moves off along a tangent.",
+    ex.choice("Water leaves the wet clothes through holes in the drum, but the clothes stay inside. Why?",
+              "The drum exerts a central force on the clothes; at a hole no central force acts on the water, so it moves off along a tangent.",
               [("A centrifugal force throws the water radially outwards.", "No outward force acts on the water."),
                ("The water has no inertia once it leaves the clothes.", "It is its inertia that keeps it moving along the tangent."),
                ("The centripetal force pushes the water out through the holes.", "A centripetal force is towards the centre.")])
@@ -220,7 +220,7 @@ def _moon_probe(level=LEVEL):
            working=[r"\Delta E_P = -\frac{GMm}{r_2} - \left(-\frac{GMm}{r_1}\right)", rf"\Delta E_P = {ltx(dE)}\ \mathrm{{J}}"])
     ex.on(_GR).choice(f"Identical clocks are on the surface of {name} and in the raised probe. Ignoring effects of "
                       f"speed, which clock runs more slowly?",
-                      "The surface clock, because it is lower in the gravitational field.",
+                      "The surface clock, because it is at a lower altitude, where the gravitational field is stronger.",
                       [("The probe clock, because it is higher in the field.", "Time runs more slowly lower in a field."),
                        ("Neither, because the clocks are identical.", "Gravity affects the passage of time."),
                        ("The probe clock, because it has more potential energy.", "Higher clocks run faster.")])
@@ -274,6 +274,11 @@ def _nearby_star(level=LEVEL):
            wrong=[(Ls / (4 * math.pi * ly**2), "Convert light-years to metres.")],
            working=[r"b = \frac{L}{4\pi d^2}", rf"b = {ltx(b)}\ \mathrm{{W\,m^{{-2}}}}"],
            scaffold=[("What is the distance in metres?", d, "m")])
+    ex.choice("What assumption about the star was made in using L = 4πr²σT⁴?",
+              "It behaves as a black body.",
+              [("It is on the main sequence.", "The relationship does not depend on the type of star."),
+               ("Its luminosity equals its apparent brightness.", "These are different quantities."),
+               ("Its surface temperature is increasing.", "A single, uniform surface temperature is assumed.")])
     ex.choice("The star is on the main sequence. What process in its core releases its energy?",
               "Fusion of hydrogen to form helium.",
               [("Fission of helium to form hydrogen.", "Stars release energy by fusion."),
