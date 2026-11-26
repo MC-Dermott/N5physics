@@ -257,7 +257,7 @@ if qualification == "National 4":
 elif qualification in ("National 5", "Higher"):
     mode_options = ["Practice", "Test", UNIT_ASSESSMENT, "Past Paper Questions", "Past Paper Quiz"]
 elif qualification == "Advanced Higher":
-    mode_options = ["Practice", "Test", UNIT_ASSESSMENT]     # no AH past papers in the app yet
+    mode_options = ["Practice", "Test", UNIT_ASSESSMENT, "Past Paper Questions"]     # AH papers have no multiple choice
 else:
     mode_options = ["Practice", "Test", "Past Paper Questions"]
 

@@ -10,6 +10,9 @@ Key: (unit, topic) — the strings used in question_factory.py.
 """
 
 
+from core.data.explain_questions_ah import AH_EXPLAIN
+
+
 def _q(source, context, question, points, avoid=None, gate=False):
     """points: one string per mark. gate: SQA's "look for this statement first" rule — if the first point
     is missing or wrong, no marks are given. avoid: wording the marking instructions reject."""
@@ -425,7 +428,9 @@ EXPLAIN_QUESTIONS = {
 
 
 def get_explain_questions(qualification, unit, topic):
-    """The explain questions for a topic (Higher only for now), oldest paper first."""
+    """The explain questions for a topic (Higher and Advanced Higher)."""
+    if qualification == "Advanced Higher":
+        return AH_EXPLAIN.get((unit, topic), [])
     if qualification != "Higher":
         return []
     return EXPLAIN_QUESTIONS.get((unit, topic), [])

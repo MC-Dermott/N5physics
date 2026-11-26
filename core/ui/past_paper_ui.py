@@ -29,8 +29,10 @@ def render_past_papers(topic, question_type, qualification):
         return
 
     year_label = "Specimen Paper" if entry["year"] == "SPQ" else entry["year"]
-    paper_label = "Paper 1 (Multiple Choice)" if entry["paper"] == "P1" else "Paper 2"
+    paper_label = {"P1": "Paper 1 (Multiple Choice)", "P2": "Paper 2", "AH": "Question Paper"}[entry["paper"]]
     st.caption(f"**{year_label} — {paper_label} — Question {entry['qnum']}**")
+    if entry.get("parts"):
+        st.caption(f"Parts on this topic: {entry['parts']}")
 
     for img in _img_paths(entry, "question_images"):
         st.image(img)
@@ -43,5 +45,7 @@ def render_past_papers(topic, question_type, qualification):
         answer_text = entry.get("answer_text")
         if answer_text:
             st.success(f"Correct answer: **{answer_text}**")
+        if not answer_text and not entry.get("answer_images"):
+            st.info("There are no marking instructions for this open-ended question. Ask your teacher to look at your answer.")
         for img in _img_paths(entry, "answer_images"):
             st.image(img)

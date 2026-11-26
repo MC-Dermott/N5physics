@@ -43,10 +43,20 @@ SYMBOLS = {
     "sinc": (r"\sin\theta_c", "the sine of the critical angle"),
     "Irr": ("I", "irradiance"), "k": ("k", "constant"), "C": ("C", "capacitance"),
     "Ec": ("E", "energy stored"), "Ir": ("r", "internal resistance"), "emf": ("E", "e.m.f."),
+    # Advanced Higher
+    "w": (r"\omega", "angular velocity"), "rad": ("r", "radius"), "at": ("a_t", "tangential acceleration"),
+    "alpha": (r"\alpha", "angular acceleration"), "ar": ("a_r", "radial acceleration"), "tau": (r"\tau", "torque"),
+    "Im": ("I", "moment of inertia"), "Lm": ("L", "angular momentum"), "Ekr": ("E_k", "rotational kinetic energy"),
+    "M": ("M", "mass of the central body"), "rs": (r"r_{Schwarzschild}", "Schwarzschild radius"),
+    "bright": ("b", "apparent brightness"), "Lum": ("L", "luminosity"), "pi": (r"\pi", "pi"),
+    "q": ("q", "charge"), "B": ("B", "magnetic induction"), "amp": ("A", "amplitude"),
+    "dx": (r"\Delta x", "fringe separation"), "Ds": ("D", "slit to screen distance"), "ds": ("d", "slit separation"),
+    "lw": ("l", "length of the wedge"), "dw": ("d", "separation at the open end of the wedge"),
+    "tc": ("d", "coating thickness"),
 }
 
 # Constants are never asked for (nobody makes G the subject of F = Gm₁m₂/r²).
-CONSTANTS = {"G", "cl", "hp"}
+CONSTANTS = {"G", "cl", "hp", "pi"}
 
 
 def _tex(key):
@@ -466,6 +476,27 @@ REL = {
     "E=1/2QV":   (prod("Ec"), prod("Q", "V", coef=HALF)),
     "E=1/2CV2":  (prod("Ec"), prod("C", ("V", 2), coef=HALF)),
     "E=1/2Q2/C": (prod("Ec"), prod(("Q", 2), ("C", -1), coef=HALF)),
+    # Advanced Higher
+    "v=rw":      (prod("v"), prod("rad", "w")),
+    "at=ralpha": (prod("at"), prod("rad", "alpha")),
+    "ar=v2/r":   (prod("ar"), prod(("v", 2), ("rad", -1))),
+    "ar=rw2":    (prod("ar"), prod("rad", ("w", 2))),
+    "F=mrw2":    (prod("F"), prod("m", "rad", ("w", 2))),
+    "F=mv2/r":   (prod("F"), prod("m", ("v", 2), ("rad", -1))),
+    "tau=Fr":    (prod("tau"), prod("F", "rad")),
+    "tau=Ialpha": (prod("tau"), prod("Im", "alpha")),
+    "L=mvr":     (prod("Lm"), prod("m", "v", "rad")),
+    "L=Iw":      (prod("Lm"), prod("Im", "w")),
+    "Ekr=1/2Iw2": (prod("Ekr"), prod("Im", ("w", 2), coef=HALF)),
+    "F=GMm/r2":  (prod("F"), prod("G", "M", "m", ("r", -2))),
+    "rs=2GM/c2": (prod("rs"), prod("G", "M", ("cl", -2), coef=2)),
+    "b=L/4pid2": (prod("bright"), prod("Lum", ("pi", -1), ("dist", -2), coef=Fraction(1, 4))),
+    "lam=h/p":   (prod("lam"), prod("hp", ("mom", -1))),
+    "F=qvB":     (prod("F"), prod("q", "v", "B")),
+    "E=kA2":     (prod("E"), prod("k", ("amp", 2))),
+    "dx=lamD/d": (prod("dx"), prod("lam", "Ds", ("ds", -1))),
+    "dx=laml/2d": (prod("dx"), prod("lam", "lw", ("dw", -1), coef=HALF)),
+    "d=lam/4n":  (prod("tc"), prod("lam", ("n", -1), coef=Fraction(1, 4))),
 }
 
 # Level → group (one question style each) → relationships
@@ -485,6 +516,12 @@ RELATIONSHIPS = {
         "Electricity": ["Q=It", "V=IR", "P=IV", "P=I2R", "P=V2/R", "Ew=QV", "V1/V2=R1/R2"],
         "Properties":  ["Eh=cmdT", "Eh=ml", "p=F/A", "p1V1=p2V2", "p1/T1=p2/T2", "V1/T1=V2/T2"],
         "Waves and Radiation": ["v=f lam", "T=1/f", "f=N/t", "A=N/t", "D=E/m", "H=DwR", "Hdot=H/t"],
+    },
+    "AH": {
+        "Rotational Motion": ["v=u+at", "v2=u2+2as", "v=rw", "at=ralpha", "ar=v2/r", "ar=rw2", "F=mrw2", "F=mv2/r",
+                              "tau=Fr", "tau=Ialpha", "L=mvr", "L=Iw", "Ekr=1/2Iw2"],
+        "Astrophysics":      ["F=GMm/r2", "rs=2GM/c2", "b=L/4pid2"],
+        "Quanta and Waves":  ["E=hf", "lam=h/p", "F=qvB", "E=kA2", "v=f lam", "dx=lamD/d", "dx=laml/2d", "d=lam/4n"],
     },
     "Higher": {
         "Our Dynamic Universe": ["d=vbar t", "v=u+at", "v2=u2+2as", "F=ma", "Ep=mgh", "Ek=1/2mv2",

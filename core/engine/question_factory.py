@@ -284,7 +284,7 @@ from topics.quanta_waves import (
     waves_ah as ah_waves,
 )
 from topics.quanta_waves.definitions_ah import quanta_waves_ah_definitions
-from topics.exam_style import ah_quanta_waves
+from topics.exam_style import ah_quanta_waves, ah_topic_exams
 
 QUAL_REGISTRY = {
     "S3": {
@@ -861,6 +861,15 @@ QUAL_REGISTRY = {
             },
             "Definitions": quanta_waves_ah_definitions,
         },
+        "Skills": {
+            "Scientific Prefixes": {
+                "Name → Power of 10": gen_name_to_power,
+                "Power of 10 → Name": gen_power_to_name,
+                "Symbol → Name":      gen_symbol_to_name,
+                "Name → Symbol":      gen_name_to_symbol,
+            },
+            "Rearranging Relationships": rearranging["AH"],
+        },
     },
 }
 
@@ -921,8 +930,8 @@ _EXAM_STYLE = {
         "Electricity":                   higher_electricity.SCENARIOS,
     },
     "Advanced Higher": {
-        "Rotational Motion and Astrophysics": ah_rotational_astro.SCENARIOS,
-        "Quanta and Waves": ah_quanta_waves.SCENARIOS,
+        "Rotational Motion and Astrophysics": {**ah_rotational_astro.SCENARIOS, **ah_topic_exams.ROTATIONAL},
+        "Quanta and Waves": {**ah_quanta_waves.SCENARIOS, **ah_topic_exams.QUANTA},
     },
 }
 
@@ -1077,7 +1086,8 @@ def build_unit_assessment(qualification, unit):
 
 
 # Units whose topics offer their own exam-style questions.
-_TOPIC_EXAM_UNITS = {("Higher", "Particles"), ("Higher", "Waves")}
+_TOPIC_EXAM_UNITS = {("Higher", "Particles"), ("Higher", "Waves"),
+                     ("Advanced Higher", "Rotational Motion and Astrophysics"), ("Advanced Higher", "Quanta and Waves")}
 
 
 @functools.lru_cache(maxsize=None)
