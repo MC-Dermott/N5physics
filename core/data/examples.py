@@ -465,7 +465,7 @@ $$W_{\parallel} = 82.8\ \mathrm{N}$$
 common mistake.
 """,
 
-    ("Particles and Waves", "Standard Model", "Particle Classification"): r"""
+    ("Particles", "Standard Model", "Particle Classification"): r"""
 **Example:** Classify the electron.
 
 It has half-integer spin, so it is a **fermion**. It does not feel the strong force and is not
@@ -474,7 +474,7 @@ made of quarks, so it is a **lepton** (not a hadron).
 The electron is a **fermion and lepton**.
 """,
 
-    ("Particles and Waves", "Standard Model", "Order of Magnitude"): r"""
+    ("Particles", "Standard Model", "Order of Magnitude"): r"""
 **Example:** The muon has a mass of $1.88 \times 10^{-28}$ kg (order of magnitude −28) and the
 neutron has a mass of $1.67 \times 10^{-27}$ kg (order of magnitude −27).
 

@@ -489,7 +489,8 @@ RELATIONSHIPS = {
     "Higher": {
         "Our Dynamic Universe": ["d=vbar t", "v=u+at", "v2=u2+2as", "F=ma", "Ep=mgh", "Ek=1/2mv2",
                                  "p=mv", "Ft=mv-mu", "F=Gm1m2/r2", "z=v/c", "v=H0d"],
-        "Particles and Waves":  ["W=QV", "E=mc2", "E=hf", "E2-E1=hf", "v=f lam", "dsin=m lam",
+        "Particles":            ["W=QV", "E=mc2"],
+        "Waves":                ["E=hf", "E2-E1=hf", "v=f lam", "dsin=m lam",
                                  "n=sin1/sin2", "sinc=1/n", "I=k/d2", "I=P/A"],
         "Electricity":          ["V=IR", "P=I2R", "P=V2/R", "E=V+Ir", "C=Q/V", "E=1/2QV", "E=1/2CV2", "E=1/2Q2/C"],
     },

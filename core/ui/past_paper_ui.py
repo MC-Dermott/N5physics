@@ -12,8 +12,8 @@ def _img_paths(entry, key):
     return [str(_ASSETS_DIR / p) for p in entry.get(key, [])]
 
 
-def render_past_papers(topic, question_type):
-    entries = get_past_paper_entries(topic, question_type)
+def render_past_papers(topic, question_type, qualification):
+    entries = get_past_paper_entries(topic, question_type, qualification)
     if not entries:
         st.info("No past paper questions added yet for this topic.")
         return

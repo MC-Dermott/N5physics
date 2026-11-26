@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from collections import Counter, defaultdict
+from core.engine.units import unit_names
 from core.db.client import get_supabase
 from core.auth.auth import change_username, reset_password, delete_student
 from core.ui.student_dashboard_ui import render_progress_heatmaps
@@ -39,7 +40,7 @@ def render_student_insight(user_id, qualification, topic, question_type):
             .select("*")
             .eq("user_id", user_id)
             .eq("qualification", qualification)
-            .eq("topic", topic)
+            .in_("topic", unit_names(qualification, topic))
             .eq("question_type", question_type)
             .order("attempted_at", desc=True)
             .limit(30)

@@ -109,11 +109,10 @@ BACKGROUND_VIDEOS = {
 # Crash Higher uses different unit names — map them to the N5 unit names for video lookup.
 _CRASH_HIGHER_UNIT_MAP = {
     "Our Dynamic Universe": "Dynamics",
-    "Particles and Waves":  "Waves",
 }
-# Energy lives under Particles and Waves in Crash Higher but its videos are under Dynamics.
+# Energy lives under Particles in Crash Higher but its videos are under Dynamics.
 _CRASH_HIGHER_OVERRIDES = {
-    ("Particles and Waves", "Energy"): ("Dynamics", "Energy"),
+    ("Particles", "Energy"): ("Dynamics", "Energy"),
 }
 
 

@@ -6,6 +6,8 @@ assignment, so a class of 30 becomes a handful of assignments rather than 30."""
 import csv
 import io
 
+from core.engine.units import current_unit
+
 REQUIRED = ["username", "qualification", "unit", "question_type", "tracker_topic"]
 
 
@@ -18,7 +20,8 @@ def parse(csv_bytes, registry):
     problems, per_user, topics = [], {}, {}
     for row in reader:
         user = (row["username"] or "").strip()
-        item = (row["qualification"], row["unit"], row["question_type"])
+        unit = current_unit(registry, row["qualification"], row["unit"], row["question_type"])
+        item = (row["qualification"], unit, row["question_type"])
         if not user:
             continue
         if item[2] not in registry.get(item[0], {}).get(item[1], {}):

@@ -443,14 +443,11 @@ def beam_and_wire(level="Higher"):
                     diagram=wire_svg("in_plane", 1 if up else -1, points=("P", "Q") if not right else ("Q", "P")))
 
 
-# ════════════════ The Sun: mass–energy → irradiance → spectrum ════════════════
+# ════════════════ The Sun: irradiance → spectrum ════════════════
 
 def the_sun(level="Higher"):
     ex = _ex(level)
     P = 3.8e26
-    ex.on("Nuclear Reactions").num("The Sun's power output is 3.8 × 10²⁶ W. Calculate the mass converted to energy each second.", P / C ** 2, "kg",
-        wrong=[(P / C, "m = E ÷ c² — square c."), (P * C ** 2, "m = E ÷ c².")],
-        working=[rf"m = \frac{{E}}{{c^2}} = \frac{{3.8\times10^{{26}}}}{{(3.00\times10^8)^2}} = {ltx(P / C ** 2)}\ \text{{kg}}"])
     d = pick(1.08e11, 1.50e11, 2.28e11)
     A = 4 * math.pi * d ** 2
     I = P / A
@@ -467,7 +464,7 @@ def the_sun(level="Higher"):
         [("Heavier elements give darker lines.", "It's the positions of the lines that identify the element."),
          ("Every element absorbs all frequencies.", "Each absorbs only specific frequencies."),
          ("The lines show each element's temperature.", "The pattern identifies the element.")])
-    return ex.build("The Sun is powered by nuclear fusion. (h = 6.63 × 10⁻³⁴ J s)")
+    return ex.build("The Sun has a power output of 3.8 × 10²⁶ W. (h = 6.63 × 10⁻³⁴ J s)")
 
 
 # ════════════════ Ripple tank: d = vt → v = fλ → amplitude → diffraction ════════════════
@@ -491,17 +488,20 @@ def ripple_tank(level="Higher"):
     return ex.build("Two dippers in a ripple tank produce water waves.")
 
 
-SCENARIOS = {
+SCENARIOS_PARTICLES = {
     "Fusion Reactor":       fusion_reactor,
     "Radium Decay":         radium_decay,
     "Fission Fuel":         fission_fuel,
+    "Particle Accelerator": particle_accelerator,
+    "Linear Accelerator":   linear_accelerator,
+    "Electron Beam and Wire": beam_and_wire,
+}
+
+SCENARIOS_WAVES = {
     "Photocell":            photocell,
     "Photocell Graph":      photocell_graph,
     "Hydrogen Lamp":        hydrogen_lamp,
     "Laser and Optical Fibre": laser_fibre,
-    "Particle Accelerator": particle_accelerator,
-    "Linear Accelerator":   linear_accelerator,
-    "Electron Beam and Wire": beam_and_wire,
     "The Sun":              the_sun,
     "Ripple Tank":          ripple_tank,
 }

@@ -1,6 +1,6 @@
 from utils.definitions import make_definition_generators
 
-# Definitions needed for Higher Particles and Waves, worded as accepted in SQA
+# Definitions needed for the Higher Particles and Waves units, worded as accepted in SQA
 # marking instructions. See utils/definitions.py for the entry format.
 DEFINITIONS = {
     # ── The standard model ─────────────────────────────────────────────────────
@@ -303,4 +303,16 @@ STATEMENTS = [
      "The metal tube shields the particles — the acceleration happens in the gaps."),
 ]
 
-GENERATORS = make_definition_generators("Particles and Waves", DEFINITIONS, STATEMENTS, OVERLAPS)
+# The Particles unit's term groups and statement ideas; everything else belongs to the Waves unit.
+_PARTICLE_GROUPS = {"The standard model", "Electric fields", "Nuclear reactions"}
+_WAVE_KEYS = {"spectra", "photo", "diffraction", "refr", "coherent", "tir"}
+
+
+def _bank(unit, particles):
+    definitions = {t: e for t, e in DEFINITIONS.items() if (e["group"] in _PARTICLE_GROUPS) == particles}
+    statements = [s for s in STATEMENTS if (s[0] not in _WAVE_KEYS) == particles]
+    return make_definition_generators(unit, definitions, statements, OVERLAPS)
+
+
+PARTICLES_GENERATORS = _bank("Particles", True)
+WAVES_GENERATORS = _bank("Waves", False)

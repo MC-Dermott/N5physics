@@ -669,8 +669,8 @@ N5_PAST_PAPERS_ENTRIES = {
 PAST_PAPERS = {
     ("Our Dynamic Universe", "Special Relativity"): _SPECIAL_RELATIVITY,
     ("Our Dynamic Universe", "Gravitation"): _GRAVITATION,
-    ("Particles and Waves", "Standard Model"): _STANDARD_MODEL,
-    ("Particles and Waves", "Nuclear Reactions"): _NUCLEAR_REACTIONS,
+    ("Particles", "Standard Model"): _STANDARD_MODEL,
+    ("Particles", "Nuclear Reactions"): _NUCLEAR_REACTIONS,
     ("Our Dynamic Universe", "Momentum and Impulse"): _MOMENTUM_IMPULSE,
     ("Our Dynamic Universe", "Energy, Work and Power"): _ENERGY_WORK_POWER,
     ("Our Dynamic Universe", "Equations of Motion"): _EQUATIONS_OF_MOTION,
@@ -683,12 +683,19 @@ PAST_PAPERS = {
 }
 
 
-def get_past_paper_entries(topic, question_type):
-    return PAST_PAPERS.get((canonical_unit(topic), question_type), [])
+def _paper_unit(qualification, unit):
+    """The unit name PAST_PAPERS is keyed by. Higher and National 5 both have a "Waves" unit (and both have
+    "Refraction of Light"), so Higher's has its own key and never picks up the National 5 questions."""
+    unit = canonical_unit(unit)
+    return "Higher Waves" if (qualification, unit) == ("Higher", "Waves") else unit
 
 
-def has_past_papers(topic, question_type):
-    return bool(get_past_paper_entries(topic, question_type))
+def get_past_paper_entries(topic, question_type, qualification=None):
+    return PAST_PAPERS.get((_paper_unit(qualification, topic), question_type), [])
+
+
+def has_past_papers(topic, question_type, qualification=None):
+    return bool(get_past_paper_entries(topic, question_type, qualification))
 
 
 # ── Unit-level MCQ quiz ─────────────────────────────────────────────────────
@@ -698,7 +705,7 @@ def has_past_papers(topic, question_type):
 # Higher.
 
 PAST_PAPER_UNITS = {
-    "Higher": ["Our Dynamic Universe", "Particles and Waves"],
+    "Higher": ["Our Dynamic Universe", "Particles", "Waves"],
     "National 5": ["Dynamics", "Electricity", "Radiation", "Waves", "Properties", "Space"],
 }
 
@@ -723,9 +730,9 @@ def get_unit_mcqs(qualification, unit):
         return []
     mcqs = []
     for (topic, question_type), entries in PAST_PAPERS.items():
-        if topic != canonical:
+        if topic != _paper_unit(qualification, unit):
             continue
         for e in entries:
             if e["kind"] == "mcq":
-                mcqs.append({**e, "topic": topic, "question_type": question_type})
+                mcqs.append({**e, "topic": canonical, "question_type": question_type})
     return mcqs

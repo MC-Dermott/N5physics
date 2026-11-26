@@ -234,7 +234,8 @@ from topics.particles_and_waves.standard_model import (
     generate_standard_model_order_of_magnitude,
 )
 from topics.particles_and_waves.definitions_higher import (
-    GENERATORS as particles_waves_definitions,
+    PARTICLES_GENERATORS as particles_definitions,
+    WAVES_GENERATORS as waves_definitions,
 )
 
 from topics.electricity_and_energy.electrical_power import generate_electrical_power
@@ -249,11 +250,12 @@ from topics.electricity_and_energy.knowledge        import (
 )
 
 from topics.exam_style.base import EXAM_STYLE
+from core.engine.units import unit_entries
 from utils.diagrams import with_diagram
 from utils.light_gate_diagram import light_gate_diagram
 from topics.exam_style import (
     n5_dynamics, n5_electricity, n5_radiation, n5_waves, n5_properties, n5_space,
-    higher_odu, higher_particles_waves, higher_electricity,
+    higher_odu, higher_particles_waves, higher_electricity, higher_topic_exams,
 )
 
 from topics.skills.rearranging import GENERATORS as rearranging
@@ -651,7 +653,7 @@ QUAL_REGISTRY = {
             },
             "Definitions": odu_part2_definitions,
         },
-        "Particles and Waves": {
+        "Particles": {
             "Forces on Charged Particles": {
                 "1 — Speed After Acceleration (W = QV)": gen_pw_charged_speed,
                 "2 — Fields and Accelerators":           gen_pw_accelerators,
@@ -672,6 +674,9 @@ QUAL_REGISTRY = {
                 "1 — Energy Released (E = mc²)":   gen_pw_mass_energy,
                 "2 — Reactions per Second":        gen_pw_reactions_per_second,
             },
+            "Definitions": particles_definitions,
+        },
+        "Waves": {
             "Inverse Square Law": {
                 "1 — Irradiance at a New Distance": gen_pw_isl,
                 "2 — Irradiance, I = P/A":          gen_pw_irradiance,
@@ -698,7 +703,7 @@ QUAL_REGISTRY = {
                 "1 — Refractive Index, Speed and Critical Angle": gen_pw_refraction,
                 "2 — Explaining Refraction":        gen_pw_refraction_explain,
             },
-            "Definitions": particles_waves_definitions,
+            "Definitions": waves_definitions,
         },
         "Electricity": {
             "Monitoring and Measuring AC": {
@@ -742,16 +747,19 @@ QUAL_REGISTRY = {
             "Vectors":                generate_vectors,
             "Definitions":            crash_odu_definitions,
         },
-        "Particles and Waves": {
-            "Wave Speed":         generate_wave_speed,
-            "Period & Frequency": generate_period_frequency,
-            "Waves Combined":     generate_waves_combined,
+        "Particles": {
             "Energy":             generate_energy,
             "Standard Model": {
                 "Particle Classification": generate_standard_model_classification,
                 "Order of Magnitude":     generate_standard_model_order_of_magnitude,
             },
-            "Definitions": particles_waves_definitions,
+            "Definitions": particles_definitions,
+        },
+        "Waves": {
+            "Wave Speed":         generate_wave_speed,
+            "Period & Frequency": generate_period_frequency,
+            "Waves Combined":     generate_waves_combined,
+            "Definitions": waves_definitions,
         },
         "Electricity": {
             "Current":           generate_current,
@@ -859,7 +867,8 @@ _EXAM_STYLE = {
     "Higher": {
         "Our Dynamic Universe (Part 1)": higher_odu.SCENARIOS_PART1,
         "Our Dynamic Universe (Part 2)": higher_odu.SCENARIOS_PART2,
-        "Particles and Waves":           higher_particles_waves.SCENARIOS,
+        "Particles": {**higher_particles_waves.SCENARIOS_PARTICLES, **higher_topic_exams.TOPIC_SCENARIOS_PARTICLES},
+        "Waves":     {**higher_particles_waves.SCENARIOS_WAVES, **higher_topic_exams.TOPIC_SCENARIOS_WAVES},
         "Electricity":                   higher_electricity.SCENARIOS,
     },
     "Advanced Higher": {
@@ -870,6 +879,30 @@ _EXAM_STYLE = {
 for _qualification, _units in _EXAM_STYLE.items():
     for _unit, _scenarios in _units.items():
         QUAL_REGISTRY[_qualification][_unit][EXAM_STYLE] = dict(_scenarios)
+
+# ── Particles / Waves tagging ───────────────────────────────────────────────
+# Some generators are shared by both units, so each question (and its parts) is tagged with the unit it was
+# asked in, which is what results are saved under.
+
+def _in_unit(fn, unit):
+    @functools.wraps(fn)
+    def generate(level="N5"):
+        q = fn(level=level)
+        for item in [q, *q.parts]:
+            item.topic = unit
+        return q
+    return generate
+
+
+for _unit in ("Particles", "Waves"):
+    for _name, _entry in QUAL_REGISTRY["Higher"][_unit].items():
+        QUAL_REGISTRY["Higher"][_unit][_name] = (
+            {k: _in_unit(f, _unit) for k, f in _entry.items()} if isinstance(_entry, dict)
+            else _in_unit(_entry, _unit))
+_standard_model = QUAL_REGISTRY["Crash Higher"]["Particles"]["Standard Model"]
+for _style, _fn in _standard_model.items():
+    _standard_model[_style] = _in_unit(_fn, "Particles")
+
 
 # ── Light-gate set-up diagrams ──────────────────────────────────────────────
 # Any question whose own text mentions a light gate is shown with a diagram of the set-up
@@ -905,16 +938,20 @@ EXAM_TEST_QUESTIONS = 4
 UNIT_ASSESSMENT_MAX_QUESTIONS = 6
 
 
+def _entries(qualification, unit):
+    return unit_entries(QUAL_REGISTRY, qualification, unit)
+
+
 def get_topics(qualification):
     return list(QUAL_REGISTRY.get(qualification, {}).keys())
 
 
 def get_question_types(qualification, topic):
-    return list(QUAL_REGISTRY.get(qualification, {}).get(topic, {}).keys())
+    return list(_entries(qualification, topic).keys())
 
 
 def get_sub_types(qualification, topic, question_type):
-    entry = QUAL_REGISTRY.get(qualification, {}).get(topic, {}).get(question_type)
+    entry = _entries(qualification, topic).get(question_type)
     if isinstance(entry, dict):
         return list(entry.keys())
     return None
@@ -925,7 +962,7 @@ _LEVEL_MAP = {"S3": "S3", "National 4": "N4", "National 5": "N5", "Higher": "Hig
 
 
 def is_exam_style_test(qualification, topic, question_type):
-    return question_type == EXAM_STYLE and EXAM_STYLE in QUAL_REGISTRY.get(qualification, {}).get(topic, {})
+    return question_type == EXAM_STYLE and EXAM_STYLE in _entries(qualification, topic)
 
 
 def test_length(qualification, topic, question_type):
@@ -935,7 +972,7 @@ def test_length(qualification, topic, question_type):
 def make_test_generator(qualification, topic, question_type):
     """A generator for Test mode: deals every question style once (in random
     order) before any repeats, so a test covers the whole topic."""
-    entry = QUAL_REGISTRY[qualification][topic][question_type]
+    entry = _entries(qualification, topic)[question_type]
     if not isinstance(entry, dict):
         return lambda: generate_question(qualification, topic, question_type)
     level = _LEVEL_MAP.get(qualification, "N5")
@@ -969,14 +1006,14 @@ def make_multi_test_generator(qualification, topic, question_types):
 
 
 def has_unit_assessment(qualification, unit):
-    return EXAM_STYLE in QUAL_REGISTRY.get(qualification, {}).get(unit, {})
+    return EXAM_STYLE in _entries(qualification, unit)
 
 
 def build_unit_assessment(qualification, unit):
     """Exam-style questions from across the unit: scenarios are picked (in random order)
     to cover as many of the unit's topics as possible, up to UNIT_ASSESSMENT_MAX_QUESTIONS."""
     level = _LEVEL_MAP.get(qualification, "N5")
-    candidates = [fn(level=level) for fn in QUAL_REGISTRY[qualification][unit][EXAM_STYLE].values()]
+    candidates = [fn(level=level) for fn in _entries(qualification, unit)[EXAM_STYLE].values()]
     random.shuffle(candidates)
     chosen, covered = [], set()
     while candidates and len(chosen) < UNIT_ASSESSMENT_MAX_QUESTIONS:
@@ -989,9 +1026,45 @@ def build_unit_assessment(qualification, unit):
     return chosen
 
 
+# Units whose topics offer their own exam-style questions.
+_TOPIC_EXAM_UNITS = {("Higher", "Particles"), ("Higher", "Waves")}
+
+
+@functools.lru_cache(maxsize=None)
+def _single_topic_scenarios(qualification, unit):
+    """{topic: {name: generator}} for the unit's exam-style scenarios that test only that one topic."""
+    found = {}
+    for name, fn in _entries(qualification, unit)[EXAM_STYLE].items():
+        covers = fn(level=_LEVEL_MAP[qualification]).metadata["covers"]
+        if len(covers) == 1:
+            found.setdefault(covers[0], {})[name] = fn
+    return found
+
+
+def get_topic_exams(qualification, unit, topic):
+    """The exam-style questions on one topic, as {name: generator}; empty where there are none."""
+    if (qualification, unit) not in _TOPIC_EXAM_UNITS:
+        return {}
+    return _single_topic_scenarios(qualification, unit).get(topic, {})
+
+
+def make_topic_exam_generator(qualification, unit, topic):
+    """For Test mode: deals each of the topic's exam-style questions once before any repeats."""
+    scenarios = list(get_topic_exams(qualification, unit, topic).values())
+    level = _LEVEL_MAP.get(qualification, "N5")
+    deck = []
+
+    def generate():
+        if not deck:
+            deck.extend(random.sample(scenarios, len(scenarios)))
+        return deck.pop()(level=level)
+
+    return generate
+
+
 def generate_question(qualification, topic, question_type, sub_type=None):
     level = _LEVEL_MAP.get(qualification, "N5")
-    entry = QUAL_REGISTRY[qualification][topic][question_type]
+    entry = _entries(qualification, topic)[question_type]
     if isinstance(entry, dict):
         fn = entry[sub_type] if sub_type in entry else random.choice(list(entry.values()))
     else:
@@ -1011,7 +1084,7 @@ def generate_exam_question(qualification, unit, topic):
     """One exam-style question for a topic: a random one of the unit's exam-style scenarios that covers the
     topic, or, when none does (or the unit has none), a random question on the topic as a Test would give it.
     "Exam Style" itself gives one random scenario from the unit."""
-    scenarios = QUAL_REGISTRY[qualification][unit].get(EXAM_STYLE)
+    scenarios = _entries(qualification, unit).get(EXAM_STYLE)
     if scenarios and topic == EXAM_STYLE:
         return random.choice(list(scenarios.values()))(level=_LEVEL_MAP.get(qualification, "N5"))
     if scenarios:

@@ -339,11 +339,13 @@ def test_tracker_topic_map_matches_registry():
         return
     spec = importlib.util.spec_from_file_location("topic_map", path); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
     from core.engine.question_factory import QUAL_REGISTRY
+    from core.engine.units import current_unit
     for lvl, units in m.MAP.items():
         for topics in units.values():
             for app_unit, qts in topics.values():
-                for qt in qts:
-                    assert qt in QUAL_REGISTRY[lvl][app_unit], (lvl, app_unit, qt)
+                for qt in qts:     # the map may still use a unit's name from before it was split
+                    unit = current_unit(QUAL_REGISTRY, lvl, app_unit, qt)
+                    assert qt in QUAL_REGISTRY[lvl][unit], (lvl, app_unit, qt)
 
 
 if __name__ == "__main__":

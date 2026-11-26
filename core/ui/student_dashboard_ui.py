@@ -1,7 +1,10 @@
+import re
+
 import streamlit as st
 import pandas as pd
 from core.db.client import get_supabase
 from core.engine.question_factory import QUAL_REGISTRY
+from core.engine.units import unit_names
 
 _GREY = "⚪"
 _RED = "🔴"
@@ -18,6 +21,67 @@ def _fetch_tests(user_id):
         .execute()
         .data or []
     )
+
+
+def _fetch_wrong_with_mistake(user_id):
+    """All of a pupil's wrong test answers, paged because Supabase caps the rows per request."""
+    rows = []
+    while True:
+        batch = (
+            get_supabase()
+            .table("test_question_attempts")
+            .select("*")
+            .eq("user_id", user_id)
+            .eq("correct", False)
+            .order("attempted_at", desc=True)
+            .order("id")
+            .range(len(rows), len(rows) + 999)
+            .execute()
+            .data or []
+        )
+        if not batch:
+            return [r for r in rows if r.get("mistake")]
+        rows += batch
+
+
+def common_mistakes(rows, min_times=2, limit=10):
+    """Repeated mistakes, most frequent first (ties: most recent first). Messages that differ
+    only in their numbers count as the same mistake; the latest wording is the one shown."""
+    groups = {}
+    for r in sorted(rows, key=lambda r: r["attempted_at"], reverse=True):
+        if r.get("correct") or not r.get("mistake"):
+            continue
+        key = (r["qualification"], r["topic"], r["question_type"],
+               re.sub(r"\d+(?:[.,]\d+)*", "#", r["mistake"]))
+        if key not in groups:
+            groups[key] = {**r, "times": 0}
+        groups[key]["times"] += 1
+    repeated = [g for g in groups.values() if g["times"] >= min_times]
+    # Stable sort, so equal counts stay newest first.
+    return sorted(repeated, key=lambda g: g["times"], reverse=True)[:limit]
+
+
+def render_common_mistakes(user_id):
+    st.subheader("My Common Mistakes")
+    try:
+        rows = _fetch_wrong_with_mistake(user_id)
+    except Exception as e:
+        st.error(f"Could not load your mistakes: {e}")
+        return
+
+    mistakes = common_mistakes(rows)
+    if not mistakes:
+        st.info("No repeated mistakes yet. A mistake appears here once the app has spotted it "
+                "at least twice in your tests.")
+        return
+
+    st.caption("Mistakes spotted at least twice in your tests, most frequent first.")
+    for m in mistakes:
+        last = pd.to_datetime(m["attempted_at"]).strftime("%d %b %Y")
+        with st.container(border=True):
+            st.markdown(f"**{m['question_type']}** · {m['qualification']} · {m['topic']}")
+            st.markdown(m["mistake"])
+            st.caption(f"Made {m['times']} times · last on {last}")
 
 
 def _colour_for(pct):
@@ -41,13 +105,8 @@ def render_progress_heatmaps(user_id):
     df = pd.DataFrame(tests)
     if not df.empty:
         df["pct"] = df["score"] / df["total"] * 100
-        summary = (
-            df.groupby(["qualification", "topic", "question_type"])["pct"]
-            .agg(pct="mean", attempts="count")
-        )
         tested_quals = set(df["qualification"].unique())
     else:
-        summary = pd.DataFrame(columns=["pct", "attempts"])
         tested_quals = set()
 
     qualifications = [q for q in QUAL_REGISTRY if q in tested_quals]
@@ -64,11 +123,10 @@ def render_progress_heatmaps(user_id):
     if not question_types:
         st.caption("No topics in this unit yet.")
     for qt in question_types:
-        try:
-            row = summary.loc[(level, unit, qt)]
-            pct, attempts = row["pct"], int(row["attempts"])
-        except KeyError:
-            pct, attempts = None, 0
+        # includes tests saved under the unit's old name, before it was split
+        scores = df.loc[(df["qualification"] == level) & df["topic"].isin(unit_names(level, unit))
+                        & (df["question_type"] == qt), "pct"]
+        pct, attempts = (scores.mean() if len(scores) else None), len(scores)
 
         colour = _colour_for(pct)
         if pct is None:
@@ -107,3 +165,4 @@ def render_student_dashboard(user):
     render_progress_heatmaps(user["id"])
     render_past_paper_quiz_history(user["id"], "Unit Assessment", "Unit Assessments")
     render_past_paper_quiz_history(user["id"])
+    render_common_mistakes(user["id"])

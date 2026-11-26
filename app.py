@@ -5,8 +5,10 @@ from topics.exam_style.base import EXAM_STYLE
 from core.engine.session_manager import initialise_session, reset_test, reset_assessment, reset_past_paper_quiz
 from core.engine.question_factory import (
     generate_question, get_topics, get_question_types, get_sub_types, make_test_generator,
-    is_exam_style_test, test_length, make_multi_test_generator, multi_test_length,
+    is_exam_style_test, test_length, make_multi_test_generator, multi_test_length, QUAL_REGISTRY,
+    get_topic_exams, make_topic_exam_generator,
 )
+from core.engine.units import current_unit
 from core.ui.auth_ui import render_auth, render_change_password
 from core.auth.auth import login_as_admin
 from core.ui.practice_ui import render_practice
@@ -21,6 +23,8 @@ from core.db.assignments import outstanding_count
 from core.ui.student_dashboard_ui import render_student_dashboard
 from core.ui.revision_guide_ui import render_revision_guide
 from core.data.backgrounds import get_background_videos
+from core.data.explain_questions import get_explain_questions
+from core.ui.explain_ui import render_explain
 from core.data.examples import get_examples, get_canonical_question, notes_for, format_example
 from utils.notes import format_math
 
@@ -258,7 +262,10 @@ else:
     mode_options = ["Practice", "Test", "Past Paper Questions"]
 
 goto = st.session_state.pop("revision_goto", None)      # set by the Revision Guide's "Practise" buttons
+if goto:      # a guide made before a unit was split still has the old unit name
+    goto["unit"] = current_unit(QUAL_REGISTRY, qualification, goto["unit"], goto["question_type"])
 if goto and goto["unit"] in get_topics(qualification):
+    st.session_state.pop(f"qset_{qualification}_{goto['unit']}_{goto['question_type']}", None)
     st.session_state[f"mode_{qualification}"] = "Practice"
     st.session_state[f"unit_{qualification}"] = goto["unit"]
     st.session_state[f"qtype_{qualification}_{goto['unit']}"] = goto["question_type"]
@@ -342,7 +349,41 @@ if st.session_state.get("last_question_type") != question_type:
 
 if mode == "Past Paper Questions":
     st.divider()
-    render_past_papers(topic, question_type)
+    render_past_papers(topic, question_type, qualification)
+    st.stop()
+
+# Some topics also offer their own exam-style questions and (in Practice) real explain questions.
+topic_exams = get_topic_exams(qualification, topic, question_type) if not (selected_types and len(selected_types) > 1) else {}
+explain_questions = get_explain_questions(qualification, topic, question_type) if mode == "Practice" else []
+question_sets = ["Standard"] + (["Exam style"] if topic_exams else []) + (["Explain"] if explain_questions else [])
+question_set = "Standard"
+if len(question_sets) > 1:
+    qset_key = f"qset_{qualification}_{topic}_{question_type}" + ("" if mode == "Practice" else "_test")
+    question_set = st.radio("Questions", question_sets, horizontal=True, key=qset_key)
+if st.session_state.get("last_question_set", "Standard") != question_set:
+    reset_test()
+    st.session_state.quiz = {"current_question": None}
+st.session_state.last_question_set = question_set
+
+if question_set == "Explain":
+    st.divider()
+    render_explain(explain_questions, f"{topic}_{question_type}")
+    st.stop()
+
+if question_set == "Exam style":
+    if mode == "Practice":
+        name = st.selectbox("Exam question", list(topic_exams), key=f"exam_{topic}_{question_type}")
+        if st.session_state.get("last_topic_exam") != name:
+            st.session_state.last_topic_exam = name
+            st.session_state.quiz = {"current_question": None}
+        st.divider()
+        render_practice(topic, question_type, qualification,
+                        lambda: topic_exams[name](level=qualification), user_id=user["id"])
+    else:
+        st.divider()
+        render_test(topic, question_type, qualification,
+                    make_topic_exam_generator(qualification, topic, question_type),
+                    user_id=user["id"], num_questions=len(topic_exams))
     st.stop()
 
 sub_types = get_sub_types(qualification, topic, question_type)
