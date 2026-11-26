@@ -1,5 +1,6 @@
-"""Real SQA Higher Physics explain and justify questions for the Particles and Waves units, for pupils to
-answer in their own words and then mark themselves against the marking instructions.
+"""Real SQA Higher Physics explain and justify questions, for pupils to answer in their own words and then
+mark themselves against the marking instructions. The Particles and Waves questions are here; Our Dynamic
+Universe and Electricity are in explain_questions_odu_electricity.py.
 
 Source: the "Higher Physics Past Papers" compilation (Mr Davie / Mr White), September 2026 update,
 2015-2026 and the specimen paper (SPQ). Question wording follows the papers; "context" describes in words
@@ -8,14 +9,8 @@ instructions, one entry per mark.
 
 Key: (unit, topic) — the strings used in question_factory.py.
 """
-
-
-def _q(source, context, question, points, avoid=None, gate=False):
-    """points: one string per mark. gate: SQA's "look for this statement first" rule — if the first point
-    is missing or wrong, no marks are given. avoid: wording the marking instructions reject."""
-    return {"source": source, "context": context, "question": question, "points": points,
-            "avoid": avoid, "gate": gate}
-
+from core.data.explain_questions_common import _q
+from core.data.explain_questions_odu_electricity import EXPLAIN_QUESTIONS_ODU_ELECTRICITY
 
 _SAME_DIRECTION = ("To keep the force on the {p} in the same direction as it crosses each gap, so that it keeps "
                    "accelerating forwards (the electric field is always in the correct direction at each gap).")
@@ -421,6 +416,7 @@ EXPLAIN_QUESTIONS = {
     ("Waves", "Interference"): _INTERFERENCE,
     ("Waves", "Spectra"): _SPECTRA,
     ("Waves", "Refraction of Light"): _REFRACTION,
+    **EXPLAIN_QUESTIONS_ODU_ELECTRICITY,
 }
 
 

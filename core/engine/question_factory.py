@@ -256,6 +256,7 @@ from utils.light_gate_diagram import light_gate_diagram
 from topics.exam_style import (
     n5_dynamics, n5_electricity, n5_radiation, n5_waves, n5_properties, n5_space,
     higher_odu, higher_particles_waves, higher_electricity, higher_topic_exams,
+    higher_topic_exams_odu, higher_topic_exams_electricity,
 )
 
 from topics.skills.rearranging import GENERATORS as rearranging
@@ -865,11 +866,11 @@ _EXAM_STYLE = {
         "Properties":  n5_properties.SCENARIOS,
     },
     "Higher": {
-        "Our Dynamic Universe (Part 1)": higher_odu.SCENARIOS_PART1,
-        "Our Dynamic Universe (Part 2)": higher_odu.SCENARIOS_PART2,
+        "Our Dynamic Universe (Part 1)": {**higher_odu.SCENARIOS_PART1, **higher_topic_exams_odu.TOPIC_SCENARIOS_ODU1},
+        "Our Dynamic Universe (Part 2)": {**higher_odu.SCENARIOS_PART2, **higher_topic_exams_odu.TOPIC_SCENARIOS_ODU2},
         "Particles": {**higher_particles_waves.SCENARIOS_PARTICLES, **higher_topic_exams.TOPIC_SCENARIOS_PARTICLES},
         "Waves":     {**higher_particles_waves.SCENARIOS_WAVES, **higher_topic_exams.TOPIC_SCENARIOS_WAVES},
-        "Electricity":                   higher_electricity.SCENARIOS,
+        "Electricity": {**higher_electricity.SCENARIOS, **higher_topic_exams_electricity.TOPIC_SCENARIOS_ELECTRICITY},
     },
     "Advanced Higher": {
         "Rotational Motion and Astrophysics": ah_rotational_astro.SCENARIOS,
@@ -1027,7 +1028,7 @@ def build_unit_assessment(qualification, unit):
 
 
 # Units whose topics offer their own exam-style questions.
-_TOPIC_EXAM_UNITS = {("Higher", "Particles"), ("Higher", "Waves")}
+_TOPIC_EXAM_UNITS = {("Higher", unit) for unit in _EXAM_STYLE["Higher"]}
 
 
 @functools.lru_cache(maxsize=None)
